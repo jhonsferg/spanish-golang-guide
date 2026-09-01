@@ -2314,3 +2314,15 @@ func main() {
 **Fin del Capítulo 27**
 
 Hemos cubierto completamente el paquete `os` de Go, desde operaciones básicas con archivos hasta manejo avanzado de procesos y señales. Este conocimiento es fundamental para desarrollar herramientas CLI, scripts de deployment y cualquier aplicación que interactúe con el sistema operativo.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/27-os-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/27-os-package):
+
+```bash
+cd examples/27-os-package
+go run .
+```
