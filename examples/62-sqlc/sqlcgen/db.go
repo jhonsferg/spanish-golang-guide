@@ -1,7 +1,7 @@
 // Package sqlcgen reproduce a mano, con fines didácticos, la FORMA del
 // código que `sqlc generate` produciría automáticamente a partir de
 // ../schema.sql y ../query.sql: una struct Queries con un método típado
-// por cada consulta con nombre, sin ORM ni reflection de por medio —
+// por cada consulta con nombre, sin ORM ni reflection de por medio -
 // solo database/sql con Scan explícito. En un proyecto real este
 // archivo NO se escribe a mano, sqlc lo regenera en cada build.
 package sqlcgen
