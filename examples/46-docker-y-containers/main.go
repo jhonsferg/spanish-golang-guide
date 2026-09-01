@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 46: el tipo de servidor HTTP típico que se
-// containeriza — puerto configurable por variable de entorno (el
+// containeriza - puerto configurable por variable de entorno (el
 // contrato usual en Docker/Kubernetes) y endpoint /healthz para
 // healthchecks. Ver Dockerfile en este mismo directorio.
 package main
