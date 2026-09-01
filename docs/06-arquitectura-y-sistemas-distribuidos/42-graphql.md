@@ -3425,3 +3425,15 @@ Total: 1 request
 ---
 
 **Capítulo completado.** Este capítulo ha cubierto GraphQL comprehensivamente: desde conceptos básicos hasta implementación en producción con Go, incluyendo patterns, security y performance optimization.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/42-graphql/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/42-graphql):
+
+```bash
+cd examples/42-graphql
+go run .
+```
