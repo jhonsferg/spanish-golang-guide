@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 38: servidor HTTP con routing por método,
-// middleware encadenado y timeouts — usando solo net/http, sin
+// middleware encadenado y timeouts - usando solo net/http, sin
 // frameworks (ver Parte VIII para Gin/Echo/Fiber/Chi).
 package main
 
