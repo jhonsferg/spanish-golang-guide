@@ -1,5 +1,5 @@
 // Package ginapi implementa la misma API de TODOs que echoapi, fiberapi
-// y chiapi — para comparar la sintaxis de cada framework sobre el
+// y chiapi - para comparar la sintaxis de cada framework sobre el
 // idéntico caso de uso. Ver el mini-proyecto de la Parte VIII.
 package ginapi
 
