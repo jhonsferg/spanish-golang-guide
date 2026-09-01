@@ -1,7 +1,7 @@
 // Ejemplo del Capítulo 54 (versión condensada del proyecto integrado):
 // una API REST de tareas con persistencia real en SQLite, capa de
 // repositorio separada del handler HTTP, y autenticación simple por
-// API key — las piezas mínimas de una API en producción, en un archivo
+// API key - las piezas mínimas de una API en producción, en un archivo
 // para que sea fácil de leer de punta a punta.
 package main
 
