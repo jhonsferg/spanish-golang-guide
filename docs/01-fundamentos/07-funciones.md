@@ -829,3 +829,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/07-funciones/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/07-funciones):
+
+```bash
+cd examples/07-funciones
+go run .
+```
