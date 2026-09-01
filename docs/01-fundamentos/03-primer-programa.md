@@ -1206,3 +1206,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/03-primer-programa/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/03-primer-programa):
+
+```bash
+cd examples/03-primer-programa
+go run .
+```
