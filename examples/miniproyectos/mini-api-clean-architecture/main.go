@@ -1,5 +1,5 @@
 // Mini-proyecto de la Parte VI (Arquitectura y sistemas distribuidos):
-// una API HTTP completa siguiendo Clean Architecture — dominio, casos de
+// una API HTTP completa siguiendo Clean Architecture - dominio, casos de
 // uso y repositorio (en memoria) totalmente desacoplados del transporte
 // HTTP, expandiendo la idea del Capítulo 45 a un CRUD real. Ver
 // Dockerfile en este directorio para el empaquetado de producción.
