@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 42: un schema GraphQL mínimo con
-// github.com/graphql-go/graphql — un solo endpoint que responde
+// github.com/graphql-go/graphql - un solo endpoint que responde
 // exactamente los campos que el cliente pide, a diferencia de REST.
 package main
 
@@ -49,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// El cliente pide solo "titulo" y "autor" — GraphQL no devuelve "anio"
+	// El cliente pide solo "titulo" y "autor" - GraphQL no devuelve "anio"
 	// aunque el resolver lo tenga disponible. Esa es la diferencia clave
 	// frente a un endpoint REST de forma fija.
 	consulta := `{ libros { titulo autor } }`
