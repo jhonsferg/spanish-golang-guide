@@ -3433,3 +3433,15 @@ Real-time analytics              → Raw SQL
 Proyecto pequeño                 → SQLite + GORM
 ```
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/61-gorm-orm/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/61-gorm-orm):
+
+```bash
+cd examples/61-gorm-orm
+go run .
+```
