@@ -2613,3 +2613,15 @@ func main() {
 
 El embedding de Go es un diseño elegante que evita los problemas de herencia clásica mientras proporciona reutilización de código pragmática.
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/14-embedding-y-composicion/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/14-embedding-y-composicion):
+
+```bash
+cd examples/14-embedding-y-composicion
+go run .
+```
