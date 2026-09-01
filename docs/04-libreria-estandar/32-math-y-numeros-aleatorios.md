@@ -2146,3 +2146,15 @@ Go proporciona herramientas robustas para análisis numérico, desde cálculos r
 ---
 
 **Fin del Capítulo 32**
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/32-math-y-numeros-aleatorios/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/32-math-y-numeros-aleatorios):
+
+```bash
+cd examples/32-math-y-numeros-aleatorios
+go run .
+```
