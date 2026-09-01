@@ -19,7 +19,7 @@ type Cuadrado struct{ Lado float64 }
 
 func (s Cuadrado) Area() float64 { return s.Lado * s.Lado }
 
-// describir acepta cualquier tipo que implemente Figura — Circulo y
+// describir acepta cualquier tipo que implemente Figura - Circulo y
 // Cuadrado nunca declaran "implements Figura", simplemente tienen el método.
 func describir(f Figura) string {
 	switch v := f.(type) {
