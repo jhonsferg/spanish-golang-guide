@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 60: Chi — un router ligero y 100% compatible con
+// Ejemplo del Capítulo 60: Chi - un router ligero y 100% compatible con
 // net/http (cada handler sigue siendo un http.HandlerFunc normal), con
 // su fuerte énfasis en composición de middleware por sub-router.
 package main
@@ -38,7 +38,7 @@ func nuevoRouter() http.Handler {
 	autores := map[int]Autor{1: {1, "Rob Pike"}}
 	siguienteID := 2
 
-	// Un sub-router con su PROPIO middleware, montado bajo /api —
+	// Un sub-router con su PROPIO middleware, montado bajo /api -
 	// la composición que hace fuerte a Chi frente a un router plano.
 	api := chi.NewRouter()
 	api.Use(middleware.AllowContentType("application/json"))
