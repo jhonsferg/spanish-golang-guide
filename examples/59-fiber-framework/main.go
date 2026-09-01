@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 59: una API de comentarios con Fiber — la API
+// Ejemplo del Capítulo 59: una API de comentarios con Fiber - la API
 // inspirada en Express.js, construida sobre fasthttp en vez de net/http.
 package main
 
