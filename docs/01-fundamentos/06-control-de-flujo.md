@@ -1051,3 +1051,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/06-control-de-flujo/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/06-control-de-flujo):
+
+```bash
+cd examples/06-control-de-flujo
+go run .
+```
