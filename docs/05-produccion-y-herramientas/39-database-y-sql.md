@@ -2457,3 +2457,15 @@ La clave está en:
 4. Manejar **errores** explícitamente
 5. Aplicar **patterns** como Repository para mejor organización
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/39-database-y-sql/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/39-database-y-sql):
+
+```bash
+cd examples/39-database-y-sql
+go run .
+```
