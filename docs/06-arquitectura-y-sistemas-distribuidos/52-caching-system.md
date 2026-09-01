@@ -3523,3 +3523,15 @@ El caché transforma una aplicación de "lenta y escalable" a "rápida y escalab
 - Google SRE Book: Chapter on Caching
 - Netflix Tech Blog: Cache Architecture
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/52-caching-system/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/52-caching-system):
+
+```bash
+cd examples/52-caching-system
+go run .
+```
