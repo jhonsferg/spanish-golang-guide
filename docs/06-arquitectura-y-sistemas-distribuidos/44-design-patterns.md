@@ -3028,3 +3028,15 @@ Los patrones de diseño son herramientas poderosas cuando se usan apropiadamente
 3. Conocer antipatterns comunes
 4. Entender cuándo aplicar y cuándo no
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/44-design-patterns/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/44-design-patterns):
+
+```bash
+cd examples/44-design-patterns
+go run .
+```
