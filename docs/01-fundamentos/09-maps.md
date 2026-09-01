@@ -854,3 +854,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/09-maps/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/09-maps):
+
+```bash
+cd examples/09-maps
+go run .
+```
