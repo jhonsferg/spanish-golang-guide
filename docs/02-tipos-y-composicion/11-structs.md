@@ -866,3 +866,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/11-structs/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/11-structs):
+
+```bash
+cd examples/11-structs
+go run .
+```
