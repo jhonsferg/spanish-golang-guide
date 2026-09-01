@@ -3804,3 +3804,15 @@ Gin es un framework moderno, rápido y flexible para construir APIs REST en Go. 
 
 Líneas totales: 2,247 | Tamaño: ~52 KB | Secciones: 11 | Subsecciones: 50+ | Ejercicios: 5 | Código: 80+ ejemplos
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/57-gin-framework/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/57-gin-framework):
+
+```bash
+cd examples/57-gin-framework
+go run .
+```
