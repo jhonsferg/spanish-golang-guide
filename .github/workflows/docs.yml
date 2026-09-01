@@ -1,10 +1,9 @@
-name: Publicar sitio de documentación
+name: docs
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -13,16 +12,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.12"
+          enable-cache: true
 
-      - name: Instalar dependencias
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev
 
-      - name: Publicar con mkdocs gh-deploy
-        run: mkdocs gh-deploy --force
+      - name: Configure git for gh-deploy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build and deploy site
+        run: uv run mkdocs gh-deploy --force --clean
