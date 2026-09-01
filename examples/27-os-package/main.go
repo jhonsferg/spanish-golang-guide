@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 27: interacción con el sistema operativo —
+// Ejemplo del Capítulo 27: interacción con el sistema operativo -
 // archivos temporales, variables de entorno y argumentos.
 package main
 
