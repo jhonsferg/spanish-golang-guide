@@ -3012,3 +3012,15 @@ func main() {
 **Fin del Capítulo 22: CHANNELS - COMUNICACIÓN ENTRE GOROUTINES**
 
 *Este capítulo cubre el paradigma CSP de Go, permitiendo escribir programas concurrentes seguros sin race conditions. Los channels son la piedra angular de la filosofía "share memory by communicating" de Go.*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/22-channels/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/22-channels):
+
+```bash
+cd examples/22-channels
+go run .
+```
