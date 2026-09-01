@@ -3076,3 +3076,15 @@ Con su filosofía "Small core, big ecosystem", Chi te proporciona exactamente lo
 *Capítulo 60 - Go: Guía Exhaustiva*  
 *Chi Router: Lightweight & Composable Routing*  
 *Versión 1.0 - Marzo 2024*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/60-chi-router/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/60-chi-router):
+
+```bash
+cd examples/60-chi-router
+go run .
+```
