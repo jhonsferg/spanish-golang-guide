@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 52: una caché LRU (Least Recently Used) desde
-// cero con container/list — el mismo principio detrás de cachés en
+// cero con container/list - el mismo principio detrás de cachés en
 // producción, sin depender de una librería externa.
 package main
 
