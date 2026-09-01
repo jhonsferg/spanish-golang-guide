@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 45: Clean Architecture en miniatura — el caso de
+// Ejemplo del Capítulo 45: Clean Architecture en miniatura - el caso de
 // uso depende de una INTERFAZ de repositorio, no de una implementación
 // concreta. Cambiar de memoria a una base de datos real no toca el
 // dominio ni el caso de uso.
@@ -42,7 +42,7 @@ func (uc DesactivarUsuario) Ejecutar(id int) error {
 }
 
 // --- Adaptador: implementación concreta del puerto, en memoria ---
-// En producción sería un adaptador de PostgreSQL/GORM/sqlc — el caso de
+// En producción sería un adaptador de PostgreSQL/GORM/sqlc - el caso de
 // uso de arriba no cambiaría ni una línea.
 
 type RepoUsuariosEnMemoria struct {
