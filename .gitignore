@@ -1,0 +1,16 @@
+# mkdocs build output
+site/
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Go
+examples/**/*.exe
+examples/**/*.test
+
+# OS / editor
+.DS_Store
+Thumbs.db
