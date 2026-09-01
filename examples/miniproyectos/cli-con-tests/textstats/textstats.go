@@ -1,5 +1,5 @@
 // Package textstats es la lógica de negocio del mini-proyecto de la
-// Parte V (Producción y herramientas) — separada de main.go a propósito,
+// Parte V (Producción y herramientas) - separada de main.go a propósito,
 // para que sea testeable sin tocar entrada/salida de consola.
 package textstats
 
