@@ -2308,3 +2308,15 @@ La interface `error` es simple: solo necesita un método `Error() string`. Todo 
 ---
 
 **Fin del Capítulo 17**
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/17-manejo-de-errores/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/17-manejo-de-errores):
+
+```bash
+cd examples/17-manejo-de-errores
+go run .
+```
