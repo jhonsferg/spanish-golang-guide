@@ -3395,3 +3395,15 @@ CONFIRMADO O ANULADO
 
 Word Count: ~1,950 líneas | Tamaño: ~45 KB
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/64-database-drivers-y-raw-sql/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/64-database-drivers-y-raw-sql):
+
+```bash
+cd examples/64-database-drivers-y-raw-sql
+go run .
+```
