@@ -1,0 +1,38 @@
+# Manifiesto de referencia para el Capítulo 47: usa los endpoints
+# /livez y /readyz implementados en main.go de este mismo directorio.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guia-go-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: guia-go-demo
+  template:
+    metadata:
+      labels:
+        app: guia-go-demo
+    spec:
+      containers:
+        - name: servidor
+          image: guia-go-demo:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 8080
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
