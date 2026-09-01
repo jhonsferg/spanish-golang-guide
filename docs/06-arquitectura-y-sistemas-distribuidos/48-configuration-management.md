@@ -2283,3 +2283,15 @@ import (
 ---
 
 **Fin del Capítulo 48: Configuration Management**
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/48-configuration-management/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/48-configuration-management):
+
+```bash
+cd examples/48-configuration-management
+go run .
+```
