@@ -35,9 +35,9 @@ como un libro de 66 capítulos agrupados en 9 partes.
 
 Además:
 
-- **[Versiones de Go](10-versiones-de-go/index.md)** — qué trajo cada versión
+- **[Versiones de Go](10-versiones-de-go/index.md)** - qué trajo cada versión
   desde Go 1.18 (generics) hasta Go 1.27, la más reciente.
-- **[Recursos](11-recursos/buenas-practicas.md)** — buenas prácticas
+- **[Recursos](11-recursos/buenas-practicas.md)** - buenas prácticas
   consolidadas, glosario y enlaces oficiales curados.
 
 ## Ejemplos ejecutables
@@ -55,7 +55,7 @@ go vet ./...
 ## Por dónde empezar
 
 ¿Primera vez con Go? Empieza por
-[Capítulo 1 — Introducción a Go](01-fundamentos/01-introduccion-a-go.md).
+[Capítulo 1 - Introducción a Go](01-fundamentos/01-introduccion-a-go.md).
 
 ¿Ya conoces lo básico? Salta directo a la parte que necesites en la tabla de
 arriba, o revisa qué trajo [Go 1.27](10-versiones-de-go/go-1-27.md).
