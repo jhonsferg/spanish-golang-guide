@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 44: tres patrones de diseño clásicos, expresados
-// de forma idiomática en Go — con funciones e interfaces pequeñas, sin
+// de forma idiomática en Go - con funciones e interfaces pequeñas, sin
 // imitar jerarquías de clases de otros lenguajes.
 package main
 
