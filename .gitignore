@@ -14,3 +14,6 @@ examples/**/*.test
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Herramientas de IA / coding assistants
+.claude/
