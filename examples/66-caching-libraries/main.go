@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 66: una interfaz Cache pequeña con dos
-// implementaciones — Redis (go-redis) para producción, y en memoria para
+// implementaciones - Redis (go-redis) para producción, y en memoria para
 // tests o para cuando no hay Redis disponible. El resto de la app solo
 // depende de la interfaz, nunca de un cliente concreto.
 package main
