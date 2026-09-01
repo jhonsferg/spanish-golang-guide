@@ -10,7 +10,7 @@ import (
 
 	// Se usa el mismo driver subyacente que gormrepo (glebarez/sqlite lo
 	// envuelve) para que ambos registren el driver "sqlite" una sola vez
-	// al correr en el mismo binario — ver mismo-modelo-tres-orms/main.go.
+	// al correr en el mismo binario - ver mismo-modelo-tres-orms/main.go.
 	_ "github.com/glebarez/go-sqlite"
 )
 
