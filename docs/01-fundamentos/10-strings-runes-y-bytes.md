@@ -743,3 +743,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/10-strings-runes-y-bytes/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/10-strings-runes-y-bytes):
+
+```bash
+cd examples/10-strings-runes-y-bytes
+go run .
+```
