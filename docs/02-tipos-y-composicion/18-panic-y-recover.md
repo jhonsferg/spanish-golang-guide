@@ -2494,3 +2494,15 @@ GO:
 **Fin del Capítulo 18**
 
 *En el siguiente capítulo: CAPÍTULO 19: TESTING AVANZADO - Coverage, Benchmarks, y Fuzzing*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/18-panic-y-recover/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/18-panic-y-recover):
+
+```bash
+cd examples/18-panic-y-recover
+go run .
+```
