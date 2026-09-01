@@ -3017,3 +3017,15 @@ Los Job Queues son esenciales para arquitecturas modernas escalables. Go, con fr
 ---
 
 *Capítulo 53 completado: ~1,450 líneas, 70% teoría + 30% código, 5 ejercicios progresivos, diagramas ASCII, comparaciones cross-language.*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/53-job-queues/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/53-job-queues):
+
+```bash
+cd examples/53-job-queues
+go run .
+```
