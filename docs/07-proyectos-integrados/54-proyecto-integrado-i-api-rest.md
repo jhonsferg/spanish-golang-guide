@@ -3213,3 +3213,15 @@ Este capítulo proporciona una base sólida y production-ready para construir AP
 ✓ **Diagramas**: 5+  
 ✓ **Ejercicios**: 5 milestones  
 ✓ **Test Coverage**: >85%
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/54-proyecto-integrado-i-api-rest/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/54-proyecto-integrado-i-api-rest):
+
+```bash
+cd examples/54-proyecto-integrado-i-api-rest
+go run .
+```
