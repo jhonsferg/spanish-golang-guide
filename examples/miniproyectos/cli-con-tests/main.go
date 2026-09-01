@@ -1,7 +1,7 @@
 // Mini-proyecto de la Parte V (Producción y herramientas): un CLI de
 // estadísticas de texto, con la lógica separada en el paquete
 // textstats/ (ver textstats_test.go para los tests de tabla y el
-// benchmark — corre `go test -bench=. -cpuprofile=cpu.prof` desde este
+// benchmark - corre `go test -bench=. -cpuprofile=cpu.prof` desde este
 // directorio para perfilarlo con pprof).
 package main
 
