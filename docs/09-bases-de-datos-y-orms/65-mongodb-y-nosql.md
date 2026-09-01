@@ -2928,3 +2928,15 @@ func Exercise5() {
 **FIN DEL CAPÍTULO 65**
 
 Tamaño total: ~2,050 líneas | ~46 KB | 70% teoría + 30% código
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/65-mongodb-y-nosql/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/65-mongodb-y-nosql):
+
+```bash
+cd examples/65-mongodb-y-nosql
+go run .
+```
