@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte IV (Librería estándar): un cliente que
 // consume una API JSON, transforma los datos y genera un reporte de
-// texto — combinando net/http, encoding/json, time, strings y os en un
+// texto - combinando net/http, encoding/json, time, strings y os en un
 // flujo real de "obtener datos externos y hacer algo útil con ellos".
 package main
 
