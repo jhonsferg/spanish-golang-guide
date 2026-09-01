@@ -2697,3 +2697,15 @@ Ahora estás preparado para:
 - Evitar problemas comunes como ciclos de dependencia
 - Crear una arquitectura escalable y mantenible
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/20-paquetes/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/20-paquetes):
+
+```bash
+cd examples/20-paquetes
+go run .
+```
