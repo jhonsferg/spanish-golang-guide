@@ -2474,3 +2474,15 @@ El dominio de defer es esencial para escribir código Go robusto, seguro y limpi
 - [Effective Go - Defer, Panic, and Recover](https://golang.org/doc/effective_go#defer)
 - [Go Blog - Defer, Panic, and Recover](https://blog.golang.org/defer-panic-and-recover)
 - [Go Specification - Defer Statement](https://golang.org/ref/spec#Defer_statements)
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/19-defer/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/19-defer):
+
+```bash
+cd examples/19-defer
+go run .
+```
