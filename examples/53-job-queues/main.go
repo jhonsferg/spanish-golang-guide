@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 53: una cola de trabajos en memoria con
-// reintentos automáticos — el patrón detrás de sistemas como Sidekiq o
+// reintentos automáticos - el patrón detrás de sistemas como Sidekiq o
 // Asynq, simplificado a lo esencial con channels.
 package main
 
@@ -22,7 +22,7 @@ type Resultado struct {
 }
 
 // procesar simula un trabajo que falla las dos primeras veces y luego
-// tiene éxito — típico de llamadas a servicios externos poco confiables.
+// tiene éxito - típico de llamadas a servicios externos poco confiables.
 func procesar(t Trabajo) error {
 	if t.Intento < 3 {
 		return errors.New("servicio externo no disponible (simulado)")
