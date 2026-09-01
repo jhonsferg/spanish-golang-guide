@@ -1,0 +1,29 @@
+Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+
+Copyright (c) contribuidores de este repositorio.
+
+Este trabajo (el contenido de la guía en `docs/`, incluyendo texto, diagramas y
+ejemplos de código embebidos en el markdown) está licenciado bajo la licencia
+Creative Commons Atribución-CompartirIgual 4.0 Internacional.
+
+Para ver una copia de esta licencia, visita:
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.es
+
+Resumen (no sustituye a la licencia completa):
+
+Bajo los siguientes términos:
+
+- Atribución — Debes dar crédito de manera adecuada, brindar un enlace a la
+  licencia, e indicar si se han realizado cambios. Puedes hacerlo en cualquier
+  forma razonable, pero no de forma tal que sugiera que el licenciante te
+  respalda a ti o tu uso.
+- CompartirIgual — Si remezclas, transformas o creas a partir del material,
+  debes distribuir tu contribución bajo la misma licencia que el original.
+- No hay restricciones adicionales — No puedes aplicar términos legales ni
+  medidas tecnológicas que restrinjan legalmente a otras a hacer cualquier
+  cosa que la licencia permite.
+
+El código fuente ejecutable de este repositorio (directorio `examples/`) se
+distribuye bajo los mismos términos de atribución; al ser fragmentos con fines
+educativos, puedes reutilizarlo libremente en tus propios proyectos citando la
+fuente.
