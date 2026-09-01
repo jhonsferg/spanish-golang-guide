@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte VIII (Frameworks web): la MISMA API de
-// TODOs (crear, listar, completar, borrar) implementada cuatro veces —
-// una por framework, en ginapi/, echoapi/, fiberapi/ y chiapi/ — para
+// TODOs (crear, listar, completar, borrar) implementada cuatro veces -
+// una por framework, en ginapi/, echoapi/, fiberapi/ y chiapi/ - para
 // comparar directamente la sintaxis de cada uno resolviendo idéntico
 // problema. Este main.go ejecuta la misma secuencia de requests contra
 // las cuatro implementaciones.
