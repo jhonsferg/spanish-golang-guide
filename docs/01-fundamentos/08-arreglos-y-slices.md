@@ -844,3 +844,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/08-arreglos-y-slices/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/08-arreglos-y-slices):
+
+```bash
+cd examples/08-arreglos-y-slices
+go run .
+```
