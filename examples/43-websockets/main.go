@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 43: un servidor y un cliente WebSocket mínimos
-// con github.com/coder/websocket — comunicación bidireccional sobre una
+// con github.com/coder/websocket - comunicación bidireccional sobre una
 // sola conexión persistente, a diferencia del modelo request/response de
 // HTTP normal.
 package main
