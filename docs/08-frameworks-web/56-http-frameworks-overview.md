@@ -2027,3 +2027,15 @@ Para el 90% de nuevos proyectos, elige entre **Gin, Echo o Fiber**. Todos son pr
 
 La elección perfecta no existe; existe la elección perfecta para tu caso específico.
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/56-http-frameworks-overview/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/56-http-frameworks-overview):
+
+```bash
+cd examples/56-http-frameworks-overview
+go run .
+```
