@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 55 (versión condensada del proyecto integrado):
-// un microservicio con apagado ordenado (graceful shutdown) — el patrón
+// un microservicio con apagado ordenado (graceful shutdown) - el patrón
 // que necesita cualquier servicio que corra en Kubernetes/Docker para
 // terminar en curso las requests activas antes de morir, en vez de
 // cortarlas a mitad.
