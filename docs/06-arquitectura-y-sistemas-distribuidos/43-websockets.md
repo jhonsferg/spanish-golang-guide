@@ -2965,3 +2965,15 @@ Go ofrece herramientas excepcionales para construir sistemas WebSocket de tiempo
 - [Redis Pub/Sub Go Client](https://github.com/redis/go-redis)
 - [Performance Testing WebSockets](https://github.com/hashrocket/websocket-bench)
 - [OWASP WebSocket Security](https://owasp.org/www-community/attacks/websocket)
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/43-websockets/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/43-websockets):
+
+```bash
+cd examples/43-websockets
+go run .
+```
