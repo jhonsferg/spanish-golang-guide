@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 39: database/sql con un driver puro-Go de SQLite
-// (modernc.org/sqlite, sin cgo) — placeholders parametrizados, no
+// (modernc.org/sqlite, sin cgo) - placeholders parametrizados, no
 // concatenación de strings, y manejo correcto de sql.ErrNoRows.
 package main
 
