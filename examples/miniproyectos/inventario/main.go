@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte II (Tipos y composición): un sistema de
 // inventario con productos físicos y digitales que comparten
-// comportamiento vía interfaces y embedding — sin ningún framework,
+// comportamiento vía interfaces y embedding - sin ningún framework,
 // solo lo cubierto en los capítulos 11-19.
 package main
 
