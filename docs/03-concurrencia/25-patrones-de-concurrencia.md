@@ -2657,3 +2657,15 @@ Estos patrones son la base de sistemas Go escalables. La clave está en elegir e
 4. Requisitos de recuperación
 
 En producción, considera librerías como `gonum`, `akka`, o mensajería (RabbitMQ, Kafka) para problemas complejos.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/25-patrones-de-concurrencia/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/25-patrones-de-concurrencia):
+
+```bash
+cd examples/25-patrones-de-concurrencia
+go run .
+```
