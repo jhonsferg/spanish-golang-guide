@@ -3505,3 +3505,15 @@ if err != nil {
 *Documento exhaustivo compilado en 2024*
 *Cobertura: 11 secciones, 50+ subsecciones, 56+ ejemplos de código*
 *Para Go developers nivel intermediate+*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/63-ent-orm/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/63-ent-orm):
+
+```bash
+cd examples/63-ent-orm
+go run .
+```
