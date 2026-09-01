@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 37: logging estructurado con log/slog — niveles,
+// Ejemplo del Capítulo 37: logging estructurado con log/slog - niveles,
 // atributos y loggers "hijo" con contexto fijo.
 package main
 
