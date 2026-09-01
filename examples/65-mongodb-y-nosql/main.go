@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 65: el driver oficial de MongoDB — documentos con
+// Ejemplo del Capítulo 65: el driver oficial de MongoDB - documentos con
 // bson, filtros, inserción y consulta. A diferencia de los ejemplos
 // anteriores no hay una versión "en memoria" de MongoDB: si no hay un
 // servidor corriendo en localhost:27017, el ejemplo lo detecta con un
