@@ -2,7 +2,7 @@
 
 Un CLI de estadísticas de texto (palabra más frecuente, longitud
 promedio) con la lógica de negocio separada del `main()` en un paquete
-propio — precisamente para que sea testeable sin tocar entrada/salida de
+propio - precisamente para que sea testeable sin tocar entrada/salida de
 consola, el tema central de la [Parte V](36-testing-package.md).
 
 ## Qué demuestra
@@ -13,7 +13,7 @@ consola, el tema central de la [Parte V](36-testing-package.md).
 - **Tests de tabla** (`TestContarPalabras`) cubriendo texto normal, texto
   vacío y texto con números.
 - **Casos límite explícitos**: `TestPalabraMasFrecuente_MapaVacio` prueba
-  qué pasa con un mapa vacío — el tipo de caso que se olvida si no se
+  qué pasa con un mapa vacío - el tipo de caso que se olvida si no se
   escribe a propósito.
 - **Benchmark con `b.Loop()`** (Go 1.24+) para medir `ContarPalabras`
   sobre un texto repetido.
@@ -27,7 +27,7 @@ go tool pprof cpu.prof
 ```
 
 Dentro de `pprof`, el comando `top` muestra qué funciones consumen más
-CPU — en este caso, casi todo el tiempo debería estar en `strings.FieldsFunc`.
+CPU - en este caso, casi todo el tiempo debería estar en `strings.FieldsFunc`.
 
 ## Ejecutarlo
 
