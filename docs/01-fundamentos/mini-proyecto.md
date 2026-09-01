@@ -2,7 +2,7 @@
 
 Un CLI que convierte entre unidades de longitud, peso y temperatura,
 usando **únicamente** lo cubierto en los capítulos 1-10: variables,
-funciones, control de flujo, `strings` y `strconv` — sin structs ni
+funciones, control de flujo, `strings` y `strconv` - sin structs ni
 interfaces todavía (eso llega en la [Parte II](../02-tipos-y-composicion/mini-proyecto.md)).
 
 ## Qué demuestra
