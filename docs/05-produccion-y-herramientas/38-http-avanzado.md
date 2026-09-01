@@ -2196,3 +2196,15 @@ Este capítulo construye sobre:
 **Fin del Capítulo 38**
 
 *Este capítulo proporciona el conocimiento profundo para construir servidores HTTP production-ready en Go, desde conceptos básicos hasta patrones avanzados de escalabilidad y seguridad.*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/38-http-avanzado/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/38-http-avanzado):
+
+```bash
+cd examples/38-http-avanzado
+go run .
+```
