@@ -1,7 +1,7 @@
 # Mini-proyecto: cliente HTTP que transforma JSON en un reporte
 
 Un programa que consume una API JSON, transforma los datos crudos en un
-resumen legible, y lo escribe tanto a stdout como a un archivo — el flujo
+resumen legible, y lo escribe tanto a stdout como a un archivo - el flujo
 de "traer datos externos y hacer algo útil con ellos" que combina varios
 paquetes de la [Parte IV](26-io-package.md) a la vez.
 
@@ -23,7 +23,7 @@ paquetes de la [Parte IV](26-io-package.md) a la vez.
 `EventoRaw` existe solo porque así llega el JSON de la API (timestamps
 como string). Convertirlo a `Evento` con un `time.Time` real, en un paso
 explícito, evita que el resto del programa tenga que lidiar con parseo
-de fechas — un patrón que vale la pena en cualquier integración con una
+de fechas - un patrón que vale la pena en cualquier integración con una
 API externa.
 
 ## Ejecutarlo
