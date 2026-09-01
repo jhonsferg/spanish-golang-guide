@@ -2863,3 +2863,15 @@ func main() {
 **Fin del Capítulo 50: Distributed Systems - Sistemas Distribuidos a Escala**
 
 *Este capítulo proporciona una base sólida para entender sistemas distribuidos con Go, desde teoría fundamental hasta implementaciones prácticas. Los ejercicios progresivos permiten practicar conceptos en contextos realistas.*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/50-distributed-systems/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/50-distributed-systems):
+
+```bash
+cd examples/50-distributed-systems
+go run .
+```
