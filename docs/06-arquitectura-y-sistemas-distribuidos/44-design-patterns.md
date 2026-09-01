@@ -1,6 +1,7 @@
 # Capítulo 44: Design patterns en Go
 
 ## Tabla de Contenidos
+
 1. [Descripción General de Patrones de Diseño](#descripción-general)
 2. [Patrón Singleton](#patrón-singleton)
 3. [Patrón Factory](#patrón-factory)
@@ -30,6 +31,7 @@ Los patrones de diseño son soluciones probadas a problemas comunes en el desarr
 Los 23 patrones originales se dividen en tres categorías:
 
 #### **1. Patrones Creacionales** (5 patrones)
+
 Controlan la creación de objetos para evitar la complejidad y mantener la flexibilidad:
 
 - **Singleton**: Una única instancia controlada globalmente
@@ -39,6 +41,7 @@ Controlan la creación de objetos para evitar la complejidad y mantener la flexi
 - **Prototype**: Clonar objetos existentes en lugar de crear nuevos
 
 #### **2. Patrones Estructurales** (7 patrones)
+
 Tratan con composición de clases y objetos para formar estructuras más grandes:
 
 - **Adapter**: Convertir interfaz de una clase en otra esperada
@@ -50,6 +53,7 @@ Tratan con composición de clases y objetos para formar estructuras más grandes
 - **Proxy**: Proporcionar sustituto para otro objeto
 
 #### **3. Patrones Comportamentales** (11 patrones)
+
 Definen patrones de comunicación e interacción entre objetos:
 
 - **Chain of Responsibility**: Pasar solicitud por cadena de manejadores
@@ -86,6 +90,7 @@ La comunidad Go sigue estos principios:
 ```
 
 **Principios Go:**
+
 1. **Interfaces pequeñas**: Una interfaz = un método
 2. **Composición sobre herencia**: Embedding vs herencia
 3. **Explícito sobre implícito**: Código claro preferible a magic
@@ -100,6 +105,7 @@ La comunidad Go sigue estos principios:
 El patrón Singleton asegura que una clase tenga una única instancia y proporciona un punto global de acceso a ella.
 
 **Problema que resuelve:**
+
 ```
 ❌ Múltiples instancias de recursos costosos (BD, logger)
 ❌ Inconsistencia de estado global
@@ -172,7 +178,7 @@ func GetLogger() *Logger {
 func (l *Logger) Log(msg string) {
     l.mu.Lock()
     defer l.mu.Unlock()
-    
+
     l.messages = append(l.messages, msg)
     fmt.Println("[LOG]", msg)
 }
@@ -207,7 +213,7 @@ var global = &Logger{
 func Info(msg string) {
     global.mu.Lock()
     defer global.mu.Unlock()
-    
+
     global.out = append(global.out, fmt.Sprintf("INFO: %s", msg))
     fmt.Println(msg)
 }
@@ -222,6 +228,7 @@ func GetAll() []string {
 ### Comparación con Otros Lenguajes
 
 #### **Python: Decorator o Metaclass**
+
 ```python
 # Python usa decorador para Singleton
 @singleton
@@ -231,11 +238,12 @@ class DatabaseConnection:
 ```
 
 #### **Java: Eager o Lazy Initialization**
+
 ```java
 // Java requiere sincronización manual
 public class Singleton {
     private static Singleton instance;
-    
+
     public synchronized static Singleton getInstance() {
         if (instance == null) {
             instance = new Singleton();
@@ -246,6 +254,7 @@ public class Singleton {
 ```
 
 #### **Go: sync.Once (Elegante y Seguro)**
+
 ```go
 // Go simplifica con sync.Once
 var instance *MyType
@@ -262,6 +271,7 @@ func GetInstance() *MyType {
 ### Casos de Uso en Go Real
 
 #### **1. Logger Global (logging package)**
+
 ```go
 package logging
 
@@ -297,6 +307,7 @@ func Debug(msg string) {
 ```
 
 #### **2. Database Connection Pool**
+
 ```go
 package database
 
@@ -324,6 +335,7 @@ func GetDB() *DB {
 ```
 
 #### **3. Configuration Manager**
+
 ```go
 package config
 
@@ -507,7 +519,7 @@ func main() {
     factory := GetUIFactory("mac")
     button := factory.CreateButton()
     textbox := factory.CreateTextBox()
-    
+
     fmt.Println(button.Render())
     fmt.Println(textbox.Render())
 }
@@ -617,6 +629,7 @@ func main() {
 El patrón Builder separa la construcción de un objeto complejo de su representación, permitiendo crear diferentes representaciones paso a paso.
 
 **Problema que resuelve:**
+
 ```
 ❌ Constructores con muchos parámetros
 ❌ Parámetros opcionales
@@ -701,7 +714,7 @@ func main() {
         WithMaxConnections(500).
         WithLogLevel("debug").
         Build()
-    
+
     fmt.Printf("%+v\n", config)
 }
 ```
@@ -801,12 +814,12 @@ func main() {
         WithCredentials("user", "pass").
         WithDatabase("mydb").
         Build()
-    
+
     if err != nil {
         fmt.Println("Error:", err)
         return
     }
-    
+
     fmt.Printf("%+v\n", config)
 }
 ```
@@ -862,11 +875,11 @@ func NewClient(options ...ClientOption) *Client {
         UserAgent:  "Go-Client/1.0",
         Headers:    make(map[string]string),
     }
-    
+
     for _, opt := range options {
         opt(&opts)
     }
-    
+
     return &Client{opts: opts}
 }
 
@@ -880,7 +893,7 @@ func main() {
             "Authorization": "Bearer token",
         }),
     )
-    
+
     fmt.Printf("%+v\n", client.opts)
 }
 ```
@@ -900,17 +913,17 @@ import (
 func main() {
     // Builder patrón implícito en http.Client
     client := &http.Client{}
-    
+
     // Request builder pattern
     req, _ := http.NewRequest(
         http.MethodPost,
         "https://api.example.com/data",
         bytes.NewBufferString(`{"key":"value"}`),
     )
-    
+
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("Authorization", "Bearer token")
-    
+
     resp, _ := client.Do(req)
     defer resp.Body.Close()
 }
@@ -986,11 +999,11 @@ func ProcessData(data string) string {
 // Composición de decorators
 func main() {
     handler := WithLogging(WithTiming(WithCaching(ProcessData)))
-    
+
     result1 := handler("data1")
     result2 := handler("data1") // Desde cache
     result3 := handler("data2")
-    
+
     fmt.Println(result1, result2, result3)
 }
 ```
@@ -1060,9 +1073,9 @@ func main() {
         w.WriteHeader(http.StatusOK)
         w.Write([]byte("Response"))
     })
-    
+
     wrapped := WrapHandler(handler)
-    
+
     http.Handle("/api/data", wrapped)
     http.ListenAndServe(":8080", nil)
 }
@@ -1144,6 +1157,7 @@ func NewDecoratedDB(sqlDB *sql.DB) DB {
 El patrón Strategy encapsula un conjunto de algoritmos intercambiables permitiendo seleccionar el algoritmo en tiempo de ejecución.
 
 **Problema que resuelve:**
+
 ```
 ❌ Switch/case gigantes con lógica diferente
 ❌ Cambiar algoritmo en tiempo de ejecución
@@ -1224,7 +1238,7 @@ func main() {
     sorter := &Sorter{strategy: &BubbleSort{}}
     sorter.SortData(data1)
     fmt.Println("BubbleSort:", data1)
-    
+
     data2 := []int{5, 2, 8, 1, 9}
     sorter.SetStrategy(&QuickSort{})
     sorter.SortData(data2)
@@ -1276,10 +1290,10 @@ func (p *PaymentProcessor) Process(amount float64) bool {
 // Uso
 func main() {
     processor := &PaymentProcessor{}
-    
+
     processor.SetPaymentMethod(CreditCard)
     processor.Process(100.00)
-    
+
     processor.SetPaymentMethod(Bitcoin)
     processor.Process(5000.00)
     processor.Process(15000.00)
@@ -1343,12 +1357,12 @@ func (dp *DataPipeline) Process(data []byte) ([]byte, error) {
     if err != nil {
         return nil, err
     }
-    
+
     encrypted, err := dp.encryption.Encrypt(compressed)
     if err != nil {
         return nil, err
     }
-    
+
     return encrypted, nil
 }
 
@@ -1358,7 +1372,7 @@ func main() {
         compression: &GzipCompression{},
         encryption:  &AESEncryption{},
     }
-    
+
     result, _ := pipeline.Process([]byte("sensitive data"))
     fmt.Printf("Processed: %v\n", result)
 }
@@ -1411,7 +1425,7 @@ func (s *Subject) Attach(obs Observer) {
 func (s *Subject) Detach(obs Observer) {
     s.mu.Lock()
     defer s.mu.Unlock()
-    
+
     for i, o := range s.observers {
         if o == obs {
             s.observers = append(s.observers[:i], s.observers[i+1:]...)
@@ -1424,7 +1438,7 @@ func (s *Subject) Detach(obs Observer) {
 func (s *Subject) Notify() {
     s.mu.RLock()
     defer s.mu.RUnlock()
-    
+
     for _, obs := range s.observers {
         obs.Update(s.state)
     }
@@ -1450,15 +1464,15 @@ func (co *ConcreteObserver) Update(data interface{}) {
 // Uso
 func main() {
     subject := &Subject{}
-    
+
     obs1 := &ConcreteObserver{name: "Observer1"}
     obs2 := &ConcreteObserver{name: "Observer2"}
-    
+
     subject.Attach(obs1)
     subject.Attach(obs2)
-    
+
     subject.SetState("Nuevo estado")
-    
+
     subject.Detach(obs1)
     subject.SetState("Otro estado")
 }
@@ -1493,7 +1507,7 @@ func NewEventBus() *EventBus {
 func (eb *EventBus) Subscribe(eventType string, callback EventCallback) {
     eb.mu.Lock()
     defer eb.mu.Unlock()
-    
+
     eb.callbacks[eventType] = append(eb.callbacks[eventType], callback)
 }
 
@@ -1502,11 +1516,11 @@ func (eb *EventBus) Publish(eventType string, data interface{}) {
     eb.mu.RLock()
     callbacks, ok := eb.callbacks[eventType]
     eb.mu.RUnlock()
-    
+
     if !ok {
         return
     }
-    
+
     for _, callback := range callbacks {
         go callback(data)
     }
@@ -1515,16 +1529,16 @@ func (eb *EventBus) Publish(eventType string, data interface{}) {
 // Uso
 func main() {
     bus := NewEventBus()
-    
+
     // Suscribirse a eventos
     bus.Subscribe("user.created", func(event interface{}) {
         fmt.Println("Usuario creado:", event)
     })
-    
+
     bus.Subscribe("user.deleted", func(event interface{}) {
         fmt.Println("Usuario eliminado:", event)
     })
-    
+
     // Publicar eventos
     bus.Publish("user.created", map[string]string{"id": "123", "name": "John"})
     bus.Publish("user.deleted", map[string]string{"id": "123"})
@@ -1604,24 +1618,24 @@ type TemperatureStats struct {
 
 func (ts *TemperatureStats) OnTemperatureChange(event TemperatureEvent) {
     ts.readings = append(ts.readings, event.Value)
-    
+
     avg := 0.0
     for _, r := range ts.readings {
         avg += r
     }
     avg /= float64(len(ts.readings))
-    
+
     fmt.Printf("[STATS] Promedio: %.1f°C, Lecturas: %d\n", avg, len(ts.readings))
 }
 
 // Uso
 func main() {
     sensor := &TemperatureSensor{}
-    
+
     sensor.RegisterObserver(&TemperatureLogger{})
     sensor.RegisterObserver(&TemperatureAlarm{threshold: 30.0})
     sensor.RegisterObserver(&TemperatureStats{})
-    
+
     sensor.SetTemperature(25.5)
     sensor.SetTemperature(32.0)
     sensor.SetTemperature(28.0)
@@ -1685,13 +1699,13 @@ func (xa *XMLAdapter) WriteData(data interface{}) ([]byte, error) {
 // Uso
 func main() {
     data := map[string]string{"name": "Alice", "age": "30"}
-    
+
     var writer DataWriter
-    
+
     writer = &JSONWriter{}
     result, _ := writer.WriteData(data)
     fmt.Println("JSON:", string(result))
-    
+
     writer = &XMLAdapter{legacySystem: &LegacyXMLSystem{}}
     result, _ = writer.WriteData(data)
     fmt.Println("XML:", string(result))
@@ -1751,7 +1765,7 @@ func MakeRequest(client HTTPClient, url string) {
 // Uso
 func main() {
     MakeRequest(&StandardClient{}, "https://api.example.com")
-    
+
     adapter := &LegacyHTTPAdapter{
         legacySystem: &LegacyHTTPSystem{},
     }
@@ -1819,7 +1833,7 @@ func main() {
         logger: &LoggingSystem{},
         auth:   &AuthSystem{},
     }
-    
+
     http.HandleFunc("/api/data", adapter.Chain(ApiHandler))
     http.ListenAndServe(":8080", nil)
 }
@@ -1881,7 +1895,7 @@ func (r *SQLUserRepository) FindByID(id int) (*User, error) {
         "SELECT id, name, email, age FROM users WHERE id = $1",
         id,
     ).Scan(&user.ID, &user.Name, &user.Email, &user.Age)
-    
+
     if err == sql.ErrNoRows {
         return nil, errors.New("user not found")
     }
@@ -1894,7 +1908,7 @@ func (r *SQLUserRepository) FindAll() ([]*User, error) {
         return nil, err
     }
     defer rows.Close()
-    
+
     var users []*User
     for rows.Next() {
         user := &User{}
@@ -1955,7 +1969,7 @@ func NewInMemoryUserRepository() *InMemoryUserRepository {
 func (r *InMemoryUserRepository) FindByID(id int) (*User, error) {
     r.mu.RLock()
     defer r.mu.RUnlock()
-    
+
     user, ok := r.users[id]
     if !ok {
         return nil, errors.New("user not found")
@@ -1966,7 +1980,7 @@ func (r *InMemoryUserRepository) FindByID(id int) (*User, error) {
 func (r *InMemoryUserRepository) FindAll() ([]*User, error) {
     r.mu.RLock()
     defer r.mu.RUnlock()
-    
+
     var users []*User
     for _, user := range r.users {
         users = append(users, user)
@@ -1977,7 +1991,7 @@ func (r *InMemoryUserRepository) FindAll() ([]*User, error) {
 func (r *InMemoryUserRepository) Save(user *User) error {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     user.ID = r.nextID
     r.users[r.nextID] = user
     r.nextID++
@@ -1987,7 +2001,7 @@ func (r *InMemoryUserRepository) Save(user *User) error {
 func (r *InMemoryUserRepository) Update(user *User) error {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     if _, ok := r.users[user.ID]; !ok {
         return errors.New("user not found")
     }
@@ -1998,7 +2012,7 @@ func (r *InMemoryUserRepository) Update(user *User) error {
 func (r *InMemoryUserRepository) Delete(id int) error {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     if _, ok := r.users[id]; !ok {
         return errors.New("user not found")
     }
@@ -2029,11 +2043,11 @@ func (us *UserService) CreateUser(name, email string, age int) (*User, error) {
         Email: email,
         Age:   age,
     }
-    
+
     if err := us.repo.Save(user); err != nil {
         return nil, fmt.Errorf("failed to save user: %w", err)
     }
-    
+
     return user, nil
 }
 
@@ -2053,10 +2067,10 @@ func (us *UserService) DeleteUser(id int) error {
 func TestUserService() {
     repo := NewInMemoryUserRepository()
     service := NewUserService(repo)
-    
+
     user, _ := service.CreateUser("Alice", "alice@example.com", 30)
     fmt.Printf("Created: %+v\n", user)
-    
+
     retrieved, _ := service.GetUser(user.ID)
     fmt.Printf("Retrieved: %+v\n", retrieved)
 }
@@ -2129,7 +2143,7 @@ func (us *UserService) GetUser(id string) {
 func main() {
     logger := &ConsoleLogger{}
     db := &MockDatabase{}
-    
+
     service := NewUserService(logger, db)
     service.GetUser("123")
 }
@@ -2176,39 +2190,39 @@ func (c *Container) RegisterFactory(name string, factory func() interface{}) {
 // Obtener servicio
 func (c *Container) Get(name string) (interface{}, error) {
     c.mu.RLock()
-    
+
     if service, ok := c.services[name]; ok {
         c.mu.RUnlock()
         return service, nil
     }
-    
+
     factory, ok := c.factories[name]
     c.mu.RUnlock()
-    
+
     if !ok {
         return nil, fmt.Errorf("service not found: %s", name)
     }
-    
+
     return factory(), nil
 }
 
 // Uso
 func main() {
     container := NewContainer()
-    
+
     // Registrar singleton
     logger := &ConsoleLogger{}
     container.Register("logger", logger)
-    
+
     // Registrar factory
     container.RegisterFactory("db", func() interface{} {
         return &MockDatabase{}
     })
-    
+
     // Usar
     logger, _ := container.Get("logger")
     db, _ := container.Get("db")
-    
+
     service := NewUserService(logger.(Logger), db.(Database))
     service.GetUser("123")
 }
@@ -2261,11 +2275,11 @@ func NewServer(options ...ServerOption) *Server {
         timeout: 30,
         logger:  &ConsoleLogger{},
     }
-    
+
     for _, opt := range options {
         opt(s)
     }
-    
+
     return s
 }
 
@@ -2277,7 +2291,7 @@ func main() {
         WithTimeout(60),
         WithLogger(&ConsoleLogger{}),
     )
-    
+
     fmt.Printf("%+v\n", server)
 }
 ```
@@ -2464,12 +2478,14 @@ func SaveUser(user *User) error {
 ### Principios de Diseño en Go
 
 #### **1. Simplicidad Primero**
+
 ```go
 // Busca la solución más simple primero
 // Agrega complejidad solo si es necesario
 ```
 
 #### **2. Interfaces Pequeñas**
+
 ```go
 // ✓ Una responsabilidad
 type Reader interface {
@@ -2486,6 +2502,7 @@ type DataProcessor interface {
 ```
 
 #### **3. Composición sobre Herencia**
+
 ```go
 // Go no tiene herencia, usa embedding
 type Logger struct {
@@ -2499,6 +2516,7 @@ type Server struct {
 ```
 
 #### **4. Testing First**
+
 ```go
 // Escribe tests que deberían pasar
 // Esto guía el diseño automáticamente
@@ -2517,6 +2535,7 @@ type Repository interface {
 **Objetivo:** Implementar un logger singleton thread-safe que pueda ser usado desde múltiples goroutines.
 
 **Requisitos:**
+
 - Usar `sync.Once`
 - Métodos: `Debug()`, `Info()`, `Warn()`, `Error()`
 - Thread-safe
@@ -2524,6 +2543,7 @@ type Repository interface {
 - No duplicar logs idénticos consecutivos
 
 **Solución esperada:**
+
 ```go
 package main
 
@@ -2568,18 +2588,18 @@ func GetLogger() *Logger {
 func (l *Logger) log(level string, msg string) {
     l.mu.Lock()
     defer l.mu.Unlock()
-    
+
     entry := fmt.Sprintf("[%s] %s - %s", time.Now().Format("15:04:05"), level, msg)
-    
+
     if len(l.logs) > 0 && l.logs[len(l.logs)-1] == entry {
         return // No duplicar
     }
-    
+
     l.logs = append(l.logs, entry)
     if len(l.logs) > l.maxLogs {
         l.logs = l.logs[1:]
     }
-    
+
     fmt.Println(entry)
 }
 
@@ -2590,7 +2610,7 @@ func (l *Logger) Error(msg string) { l.log("ERROR", msg) }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 5; i++ {
         wg.Add(1)
         go func(id int) {
@@ -2599,7 +2619,7 @@ func main() {
             logger.Info(fmt.Sprintf("Goroutine %d", id))
         }(i)
     }
-    
+
     wg.Wait()
 }
 ```
@@ -2609,12 +2629,14 @@ func main() {
 **Objetivo:** Crear una factory que genere diferentes tipos de handlers HTTP.
 
 **Requisitos:**
+
 - Tipos: GET, POST, PUT, DELETE
 - Cada tipo tiene comportamiento distinto
 - Registry de handlers extensible
 - Manejar tipo desconocido
 
 **Solución esperada:**
+
 ```go
 package main
 
@@ -2677,6 +2699,7 @@ func main() {
 **Objetivo:** Construir solicitudes HTTP complejas usando el patrón Builder.
 
 **Requisitos:**
+
 - Método fluido
 - Headers personalizados
 - Query parameters
@@ -2684,6 +2707,7 @@ func main() {
 - Valores por defecto sensatos
 
 **Solución esperada:**
+
 ```go
 package main
 
@@ -2751,12 +2775,12 @@ func (r *HTTPRequest) String() string {
     for k, v := range r.query {
         qp.Add(k, v)
     }
-    
+
     fullURL := r.url
     if len(r.query) > 0 {
         fullURL += "?" + qp.Encode()
     }
-    
+
     s := fmt.Sprintf("%s %s\n", r.method, fullURL)
     for k, v := range r.headers {
         s += fmt.Sprintf("%s: %s\n", k, v)
@@ -2777,7 +2801,7 @@ func main() {
         Query("offset", "0").
         Body(`{"name":"John"}`).
         Build()
-    
+
     fmt.Println(req)
 }
 ```
@@ -2787,12 +2811,14 @@ func main() {
 **Objetivo:** Implementar estrategias de procesamiento intercambiables para análisis de datos.
 
 **Requisitos:**
+
 - Estrategias: Sum, Average, Min, Max
 - Intercambiable en runtime
 - Agregar nueva estrategia fácilmente
 - Procesar datasets grandes
 
 **Solución esperada:**
+
 ```go
 package main
 
@@ -2868,16 +2894,16 @@ func (a *Analyzer) Analyze(data []int) int {
 func main() {
     data := []int{10, 20, 30, 40, 50}
     analyzer := &Analyzer{}
-    
+
     analyzer.SetStrategy(&SumStrategy{})
     fmt.Println("Sum:", analyzer.Analyze(data))
-    
+
     analyzer.SetStrategy(&AverageStrategy{})
     fmt.Println("Average:", analyzer.Analyze(data))
-    
+
     analyzer.SetStrategy(&MinStrategy{})
     fmt.Println("Min:", analyzer.Analyze(data))
-    
+
     analyzer.SetStrategy(&MaxStrategy{})
     fmt.Println("Max:", analyzer.Analyze(data))
 }
@@ -2888,6 +2914,7 @@ func main() {
 **Objetivo:** Implementar patrón Repository con múltiples implementaciones (SQL e In-Memory).
 
 **Requisitos:**
+
 - Interfaz Repository
 - Implementación SQL
 - Implementación In-Memory
@@ -2895,6 +2922,7 @@ func main() {
 - Testeable
 
 **Solución esperada:**
+
 ```go
 package main
 
@@ -2934,7 +2962,7 @@ func NewInMemoryRepository() *InMemoryRepository {
 func (ir *InMemoryRepository) GetByID(id int) (*Product, error) {
     ir.mu.RLock()
     defer ir.mu.RUnlock()
-    
+
     p, ok := ir.products[id]
     if !ok {
         return nil, errors.New("product not found")
@@ -2945,7 +2973,7 @@ func (ir *InMemoryRepository) GetByID(id int) (*Product, error) {
 func (ir *InMemoryRepository) GetAll() []*Product {
     ir.mu.RLock()
     defer ir.mu.RUnlock()
-    
+
     var products []*Product
     for _, p := range ir.products {
         products = append(products, p)
@@ -2956,7 +2984,7 @@ func (ir *InMemoryRepository) GetAll() []*Product {
 func (ir *InMemoryRepository) Save(product *Product) error {
     ir.mu.Lock()
     defer ir.mu.Unlock()
-    
+
     if product.ID == 0 {
         product.ID = ir.nextID
         ir.nextID++
@@ -2968,7 +2996,7 @@ func (ir *InMemoryRepository) Save(product *Product) error {
 func (ir *InMemoryRepository) Delete(id int) error {
     ir.mu.Lock()
     defer ir.mu.Unlock()
-    
+
     if _, ok := ir.products[id]; !ok {
         return errors.New("product not found")
     }
@@ -2998,11 +3026,11 @@ func (ps *ProductService) ListProducts() []*Product {
 func main() {
     repo := NewInMemoryRepository()
     service := NewProductService(repo)
-    
+
     service.CreateProduct("Laptop", 999.99)
     service.CreateProduct("Mouse", 29.99)
     service.CreateProduct("Keyboard", 79.99)
-    
+
     products := service.ListProducts()
     for _, p := range products {
         fmt.Printf("ID: %d, Name: %s, Price: $%.2f\n", p.ID, p.Name, p.Price)
@@ -3017,17 +3045,18 @@ func main() {
 Los patrones de diseño son herramientas poderosas cuando se usan apropiadamente. Go rechaza cierta complejidad innecesaria de lenguajes como Java, preferiendo soluciones simples y directas.
 
 **Recordar:**
+
 - ✓ Patrones cuando resuelven problemas reales
 - ✗ Patrones como "magic bullets"
 - Go idiomático > GoF patterns
 - Simplicidad > Over-engineering
 
 **Próximos pasos:**
+
 1. Estudiar librerías populares y sus patterns
 2. Practicar implementación
 3. Conocer antipatterns comunes
 4. Entender cuándo aplicar y cuándo no
-
 
 ---
 

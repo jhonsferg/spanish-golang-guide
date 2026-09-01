@@ -25,6 +25,7 @@
 Chi fue creado por **Peter Bourgon** y el equipo de Gokit, y desde 2015 se ha convertido en el router preferido para aplicaciones Go que buscan composabilidad y flexibilidad.
 
 **Características principales:**
+
 - ✅ Router ultra-minimalista (~1000 líneas de código)
 - ✅ Basado en Radix Tree para enrutamiento O(1)
 - ✅ Middleware composable y modular
@@ -129,6 +130,7 @@ go-chi/oauth          // OAuth middleware
 ### 60.1.5 Adopción en la Comunidad
 
 Chi es usado en producción por:
+
 - **Uber** (componentes internos)
 - **Hashicorp** (APIs internas)
 - **Countless startups** en la comunidad Go
@@ -164,21 +166,21 @@ go mod tidy
 package main
 
 import (
-	"net/http"
-	"github.com/go-chi/chi/v5"
+ "net/http"
+ "github.com/go-chi/chi/v5"
 )
 
 func main() {
-	// Crear router
-	r := chi.NewRouter()
-	
-	// Definir rutas
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hola, Chi!"))
-	})
-	
-	// Servidor
-	http.ListenAndServe(":3000", r)
+ // Crear router
+ r := chi.NewRouter()
+
+ // Definir rutas
+ r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("Hola, Chi!"))
+ })
+
+ // Servidor
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -189,7 +191,7 @@ Chi usa la firma estándar de Go:
 ```go
 // Firma de handler - igual a net/http
 type Handler interface {
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
+ ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
 
 // Función helper
@@ -200,22 +202,22 @@ type HandlerFunc func(w http.ResponseWriter, r *http.Request)
 
 ```go
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	// Procesar petición
-	name := r.URL.Query().Get("name")
-	if name == "" {
-		name = "Mundo"
-	}
-	
-	// Responder
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message":"Hola, ` + name + `!"}`))
+ // Procesar petición
+ name := r.URL.Query().Get("name")
+ if name == "" {
+  name = "Mundo"
+ }
+
+ // Responder
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusOK)
+ w.Write([]byte(`{"message":"Hola, ` + name + `!"}`))
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Get("/hello", HelloHandler)
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Get("/hello", HelloHandler)
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -241,14 +243,14 @@ r.MethodFunc("POST", "/data", PostData)
 
 // Cualquier método (catch-all)
 r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("Ruta no encontrada"))
+ w.WriteHeader(http.StatusNotFound)
+ w.Write([]byte("Ruta no encontrada"))
 })
 
 // Método no permitido
 r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	w.Write([]byte("Método no permitido"))
+ w.WriteHeader(http.StatusMethodNotAllowed)
+ w.Write([]byte("Método no permitido"))
 })
 ```
 
@@ -260,23 +262,23 @@ http.ListenAndServe(":3000", r)
 
 // Con control de timeout
 server := &http.Server{
-	Addr:         ":3000",
-	Handler:      r,
-	ReadTimeout:  15 * time.Second,
-	WriteTimeout: 15 * time.Second,
-	IdleTimeout:  60 * time.Second,
+ Addr:         ":3000",
+ Handler:      r,
+ ReadTimeout:  15 * time.Second,
+ WriteTimeout: 15 * time.Second,
+ IdleTimeout:  60 * time.Second,
 }
 
 if err := server.ListenAndServe(); err != nil {
-	log.Fatal(err)
+ log.Fatal(err)
 }
 
 // Con graceful shutdown
 go func() {
-	if err := server.ListenAndServe(); err != nil && 
-	   err != http.ErrServerClosed {
-		log.Fatalf("Error: %v", err)
-	}
+ if err := server.ListenAndServe(); err != nil &&
+    err != http.ErrServerClosed {
+  log.Fatalf("Error: %v", err)
+ }
 }()
 
 // Listening...
@@ -284,8 +286,8 @@ sigChan := make(chan os.Signal, 1)
 signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 <-sigChan
 
-ctx, cancel := context.WithTimeout(context.Background(), 
-	5*time.Second)
+ctx, cancel := context.WithTimeout(context.Background(),
+ 5*time.Second)
 defer cancel()
 server.Shutdown(ctx)
 ```
@@ -296,39 +298,39 @@ server.Shutdown(ctx)
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"time"
+ "encoding/json"
+ "log"
+ "net/http"
+ "time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	r := chi.NewRouter()
-	
-	// Middleware global
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	// Rutas
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"message": "Bienvenido a Chi",
-			"time":    time.Now().String(),
-		})
-	})
-	
-	r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": "ok",
-		})
-	})
-	
-	log.Println("🚀 Servidor escuchando en :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ // Middleware global
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ // Rutas
+ r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+  json.NewEncoder(w).Encode(map[string]string{
+   "message": "Bienvenido a Chi",
+   "time":    time.Now().String(),
+  })
+ })
+
+ r.Get("/status", func(w http.ResponseWriter, r *http.Request) {
+  json.NewEncoder(w).Encode(map[string]string{
+   "status": "ok",
+  })
+ })
+
+ log.Println("🚀 Servidor escuchando en :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -345,27 +347,27 @@ r := chi.NewRouter()
 
 // Parámetro simple
 r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	w.Write([]byte("Usuario: " + id))
+ id := chi.URLParam(r, "id")
+ w.Write([]byte("Usuario: " + id))
 })
 
 // Múltiples parámetros
 r.Get("/posts/{postID}/comments/{commentID}", func(w http.ResponseWriter, r *http.Request) {
-	postID := chi.URLParam(r, "postID")
-	commentID := chi.URLParam(r, "commentID")
-	w.Write([]byte("Post: " + postID + ", Comment: " + commentID))
+ postID := chi.URLParam(r, "postID")
+ commentID := chi.URLParam(r, "commentID")
+ w.Write([]byte("Post: " + postID + ", Comment: " + commentID))
 })
 
 // Parámetro con ruta
 r.Get("/files/{filepath}", func(w http.ResponseWriter, r *http.Request) {
-	filepath := chi.URLParam(r, "filepath")
-	w.Write([]byte("Archivo: " + filepath))
+ filepath := chi.URLParam(r, "filepath")
+ w.Write([]byte("Archivo: " + filepath))
 })
 
 // Números
 r.Get("/api/v{version}/users", func(w http.ResponseWriter, r *http.Request) {
-	version := chi.URLParam(r, "version")
-	w.Write([]byte("API v" + version))
+ version := chi.URLParam(r, "version")
+ w.Write([]byte("API v" + version))
 })
 ```
 
@@ -374,17 +376,17 @@ r.Get("/api/v{version}/users", func(w http.ResponseWriter, r *http.Request) {
 ```go
 // Wildcard (captura todo después)
 r.Get("/files/*", func(w http.ResponseWriter, r *http.Request) {
-	// r.RequestURI conserva el wildcard
-	w.Write([]byte("Ruta: " + r.RequestURI))
+ // r.RequestURI conserva el wildcard
+ w.Write([]byte("Ruta: " + r.RequestURI))
 })
 
 // Uso práctico: Servir archivos estáticos
-r.Get("/static/*", http.StripPrefix("/static", 
-	http.FileServer(http.Dir("./static"))).ServeHTTP)
+r.Get("/static/*", http.StripPrefix("/static",
+ http.FileServer(http.Dir("./static"))).ServeHTTP)
 
 // Servir documentación
 r.Get("/docs/*", http.StripPrefix("/docs",
-	http.FileServer(http.Dir("./docs"))).ServeHTTP)
+ http.FileServer(http.Dir("./docs"))).ServeHTTP)
 ```
 
 ### 60.3.3 Patrones Regex
@@ -395,32 +397,32 @@ r.Get("/docs/*", http.StripPrefix("/docs",
 
 // Opción 1: Validar dentro del handler
 r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	// Validar que sea un número
-	if !isNumeric(id) {
-		http.Error(w, "ID debe ser numérico", http.StatusBadRequest)
-		return
-	}
-	
-	w.Write([]byte("Usuario válido: " + id))
+ id := chi.URLParam(r, "id")
+
+ // Validar que sea un número
+ if !isNumeric(id) {
+  http.Error(w, "ID debe ser numérico", http.StatusBadRequest)
+  return
+ }
+
+ w.Write([]byte("Usuario válido: " + id))
 })
 
 func isNumeric(s string) bool {
-	for _, c := range s {
-		if c < '0' || c > '9' {
-			return false
-		}
-	}
-	return true
+ for _, c := range s {
+  if c < '0' || c > '9' {
+   return false
+  }
+ }
+ return true
 }
 
 // Opción 2: Router separado para parámetros específicos
 r.Route("/api/v{version}", func(r chi.Router) {
-	// Solo números
-	if version := chi.URLParam(r, "version"); isNumeric(version) {
-		r.Get("/users", ListUsers)
-	}
+ // Solo números
+ if version := chi.URLParam(r, "version"); isNumeric(version) {
+  r.Get("/users", ListUsers)
+ }
 })
 ```
 
@@ -428,29 +430,29 @@ r.Route("/api/v{version}", func(r chi.Router) {
 
 ```go
 r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
-	// Un parámetro
-	query := r.URL.Query().Get("q")
-	
-	// Parámetro con valor por defecto
-	page := r.URL.Query().Get("page")
-	if page == "" {
-		page = "1"
-	}
-	
-	// Múltiples valores
-	tags := r.URL.Query()["tag"]
-	
-	// Acceso a todos
-	params := r.URL.Query()
-	
-	response := map[string]interface{}{
-		"query": query,
-		"page":  page,
-		"tags":  tags,
-	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+ // Un parámetro
+ query := r.URL.Query().Get("q")
+
+ // Parámetro con valor por defecto
+ page := r.URL.Query().Get("page")
+ if page == "" {
+  page = "1"
+ }
+
+ // Múltiples valores
+ tags := r.URL.Query()["tag"]
+
+ // Acceso a todos
+ params := r.URL.Query()
+
+ response := map[string]interface{}{
+  "query": query,
+  "page":  page,
+  "tags":  tags,
+ }
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(response)
 })
 
 // Uso: /search?q=golang&page=2&tag=web&tag=api
@@ -463,32 +465,33 @@ r := chi.NewRouter()
 
 // Agrupar rutas por prefijo
 r.Route("/api", func(r chi.Router) {
-	// Middleware solo para /api/*
-	r.Use(AuthMiddleware)
-	
-	r.Route("/v1", func(r chi.Router) {
-		r.Get("/users", ListUsers)
-		r.Post("/users", CreateUser)
-		r.Get("/users/{id}", GetUser)
-		r.Delete("/users/{id}", DeleteUser)
-	})
-	
-	r.Route("/v2", func(r chi.Router) {
-		r.Get("/users", ListUsersV2)
-		r.Post("/users", CreateUserV2)
-	})
+ // Middleware solo para /api/*
+ r.Use(AuthMiddleware)
+
+ r.Route("/v1", func(r chi.Router) {
+  r.Get("/users", ListUsers)
+  r.Post("/users", CreateUser)
+  r.Get("/users/{id}", GetUser)
+  r.Delete("/users/{id}", DeleteUser)
+ })
+
+ r.Route("/v2", func(r chi.Router) {
+  r.Get("/users", ListUsersV2)
+  r.Post("/users", CreateUserV2)
+ })
 })
 
 // Patrón de group adicional
 r.Route("/admin", func(r chi.Router) {
-	r.Use(AdminOnly)
-	
-	r.Get("/dashboard", AdminDashboard)
-	r.Get("/stats", AdminStats)
+ r.Use(AdminOnly)
+
+ r.Get("/dashboard", AdminDashboard)
+ r.Get("/stats", AdminStats)
 })
 ```
 
 **Resultado:**
+
 ```
 GET    /api/v1/users         → ListUsers
 POST   /api/v1/users         → CreateUser
@@ -507,52 +510,53 @@ GET    /admin/stats          → AdminStats (requiere AdminOnly)
 ```go
 // Definir subrouter independiente
 func createUsersRouter() chi.Router {
-	r := chi.NewRouter()
-	
-	r.Get("/", ListUsers)
-	r.Post("/", CreateUser)
-	r.Get("/{id}", GetUser)
-	r.Put("/{id}", UpdateUser)
-	r.Delete("/{id}", DeleteUser)
-	
-	return r
+ r := chi.NewRouter()
+
+ r.Get("/", ListUsers)
+ r.Post("/", CreateUser)
+ r.Get("/{id}", GetUser)
+ r.Put("/{id}", UpdateUser)
+ r.Delete("/{id}", DeleteUser)
+
+ return r
 }
 
 // Router de posts
 func createPostsRouter() chi.Router {
-	r := chi.NewRouter()
-	
-	r.Get("/", ListPosts)
-	r.Post("/", CreatePost)
-	r.Get("/{id}", GetPost)
-	r.Put("/{id}", UpdatePost)
-	
-	return r
+ r := chi.NewRouter()
+
+ r.Get("/", ListPosts)
+ r.Post("/", CreatePost)
+ r.Get("/{id}", GetPost)
+ r.Put("/{id}", UpdatePost)
+
+ return r
 }
 
 // Router principal
 func main() {
-	r := chi.NewRouter()
-	
-	// Middleware global
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	// Montar subrouters
-	r.Mount("/api/users", createUsersRouter())
-	r.Mount("/api/posts", createPostsRouter())
-	
-	// Pueden tener middleware específico
-	r.Route("/admin", func(r chi.Router) {
-		r.Use(AdminAuthMiddleware)
-		r.Mount("/analytics", createAnalyticsRouter())
-	})
-	
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ // Middleware global
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ // Montar subrouters
+ r.Mount("/api/users", createUsersRouter())
+ r.Mount("/api/posts", createPostsRouter())
+
+ // Pueden tener middleware específico
+ r.Route("/admin", func(r chi.Router) {
+  r.Use(AdminAuthMiddleware)
+  r.Mount("/analytics", createAnalyticsRouter())
+ })
+
+ http.ListenAndServe(":3000", r)
 }
 ```
 
 **Ventajas del Mounting:**
+
 - ✅ Separación de concerns
 - ✅ Reutilización de subrouters
 - ✅ Escalabilidad
@@ -607,16 +611,16 @@ type HandlerFunc func(w http.ResponseWriter, r *http.Request)
 
 // Patrón general
 func MyMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Antes del handler
-		fmt.Println("Antes del handler")
-		
-		// Llamar al siguiente
-		next.ServeHTTP(w, r)
-		
-		// Después del handler
-		fmt.Println("Después del handler")
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  // Antes del handler
+  fmt.Println("Antes del handler")
+
+  // Llamar al siguiente
+  next.ServeHTTP(w, r)
+
+  // Después del handler
+  fmt.Println("Después del handler")
+ })
 }
 ```
 
@@ -661,15 +665,15 @@ r.Use(middleware.Recoverer)
 
 // Middleware LOCAL - solo para algunas rutas
 r.Route("/api", func(r chi.Router) {
-	r.Use(AuthMiddleware)
-	r.Use(RateLimitMiddleware)
-	
-	r.Get("/users", GetUsers)
+ r.Use(AuthMiddleware)
+ r.Use(RateLimitMiddleware)
+
+ r.Get("/users", GetUsers)
 })
 
 r.Route("/public", func(r chi.Router) {
-	// Sin Auth ni RateLimit
-	r.Get("/posts", GetPosts)
+ // Sin Auth ni RateLimit
+ r.Get("/posts", GetPosts)
 })
 ```
 
@@ -679,19 +683,19 @@ r.Route("/public", func(r chi.Router) {
 
 ```go
 func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		
-		// Registrar
-		log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.RemoteAddr)
-		
-		// Ejecutar handler
-		next.ServeHTTP(w, r)
-		
-		// Registrar tiempo
-		duration := time.Since(start)
-		log.Printf("Completado en %v", duration)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+
+  // Registrar
+  log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.RemoteAddr)
+
+  // Ejecutar handler
+  next.ServeHTTP(w, r)
+
+  // Registrar tiempo
+  duration := time.Since(start)
+  log.Printf("Completado en %v", duration)
+ })
 }
 
 // Usar
@@ -702,26 +706,26 @@ r.Use(LoggingMiddleware)
 
 ```go
 func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		
-		if token == "" {
-			http.Error(w, "No autorizado", http.StatusUnauthorized)
-			return
-		}
-		
-		if !isValidToken(token) {
-			http.Error(w, "Token inválido", http.StatusForbidden)
-			return
-		}
-		
-		next.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  token := r.Header.Get("Authorization")
+
+  if token == "" {
+   http.Error(w, "No autorizado", http.StatusUnauthorized)
+   return
+  }
+
+  if !isValidToken(token) {
+   http.Error(w, "Token inválido", http.StatusForbidden)
+   return
+  }
+
+  next.ServeHTTP(w, r)
+ })
 }
 
 func isValidToken(token string) bool {
-	// Validación real aquí
-	return strings.HasPrefix(token, "Bearer ")
+ // Validación real aquí
+ return strings.HasPrefix(token, "Bearer ")
 }
 ```
 
@@ -729,20 +733,20 @@ func isValidToken(token string) bool {
 
 ```go
 func CORSMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", 
-			"GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", 
-			"Content-Type, Authorization")
-		
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		
-		next.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  w.Header().Set("Access-Control-Allow-Methods",
+   "GET, POST, PUT, DELETE, OPTIONS")
+  w.Header().Set("Access-Control-Allow-Headers",
+   "Content-Type, Authorization")
+
+  if r.Method == http.MethodOptions {
+   w.WriteHeader(http.StatusOK)
+   return
+  }
+
+  next.ServeHTTP(w, r)
+ })
 }
 ```
 
@@ -750,27 +754,27 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 ```go
 func RateLimitMiddleware(next http.Handler) http.Handler {
-	limiter := make(map[string]*time.Ticker)
-	mu := &sync.Mutex{}
-	
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ip := r.RemoteAddr
-		
-		mu.Lock()
-		if _, exists := limiter[ip]; !exists {
-			limiter[ip] = time.NewTicker(1 * time.Second)
-		}
-		ticker := limiter[ip]
-		mu.Unlock()
-		
-		select {
-		case <-ticker.C:
-			next.ServeHTTP(w, r)
-		default:
-			http.Error(w, "Demasiadas peticiones", 
-				http.StatusTooManyRequests)
-		}
-	})
+ limiter := make(map[string]*time.Ticker)
+ mu := &sync.Mutex{}
+
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  ip := r.RemoteAddr
+
+  mu.Lock()
+  if _, exists := limiter[ip]; !exists {
+   limiter[ip] = time.NewTicker(1 * time.Second)
+  }
+  ticker := limiter[ip]
+  mu.Unlock()
+
+  select {
+  case <-ticker.C:
+   next.ServeHTTP(w, r)
+  default:
+   http.Error(w, "Demasiadas peticiones",
+    http.StatusTooManyRequests)
+  }
+ })
 }
 ```
 
@@ -784,20 +788,20 @@ r.Use(middleware.Recoverer)
 
 // With() - Middleware solo para una ruta específica
 r.With(middleware.Timeout(5*time.Second)).
-	Get("/slow-endpoint", SlowHandler)
+ Get("/slow-endpoint", SlowHandler)
 
 // Ejemplo más complejo
 r.With(
-	AuthMiddleware,
-	RateLimitMiddleware,
-	LoggingMiddleware,
+ AuthMiddleware,
+ RateLimitMiddleware,
+ LoggingMiddleware,
 ).Post("/api/create", CreateHandler)
 
 // Chain - crear cadena de middleware
 chain := middleware.Chain(
-	middleware.Logger,
-	middleware.Recoverer,
-	CustomMiddleware,
+ middleware.Logger,
+ middleware.Recoverer,
+ CustomMiddleware,
 )
 
 r.Use(chain)
@@ -808,26 +812,26 @@ r.Use(chain)
 ```go
 // Crear helper para cadenas
 type Chain struct {
-	middlewares []func(http.Handler) http.Handler
+ middlewares []func(http.Handler) http.Handler
 }
 
 func (c *Chain) Add(mw func(http.Handler) http.Handler) *Chain {
-	c.middlewares = append(c.middlewares, mw)
-	return c
+ c.middlewares = append(c.middlewares, mw)
+ return c
 }
 
 func (c *Chain) Handler(h http.Handler) http.Handler {
-	for i := len(c.middlewares) - 1; i >= 0; i-- {
-		h = c.middlewares[i](h)
-	}
-	return h
+ for i := len(c.middlewares) - 1; i >= 0; i-- {
+  h = c.middlewares[i](h)
+ }
+ return h
 }
 
 // Uso
 chain := &Chain{}
 chain.Add(middleware.Logger).
-	Add(middleware.Recoverer).
-	Add(AuthMiddleware)
+ Add(middleware.Recoverer).
+ Add(AuthMiddleware)
 
 r.Handle("/api/users", chain.Handler(GetUsers))
 ```
@@ -837,20 +841,20 @@ r.Handle("/api/users", chain.Handler(GetUsers))
 ```go
 // Pasar datos entre middleware
 func UserMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID := extractUserID(r)
-		
-		// Guardar en contexto
-		ctx := context.WithValue(r.Context(), "userID", userID)
-		
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  userID := extractUserID(r)
+
+  // Guardar en contexto
+  ctx := context.WithValue(r.Context(), "userID", userID)
+
+  next.ServeHTTP(w, r.WithContext(ctx))
+ })
 }
 
 // Acceder en handler
 func GetProfile(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
-	w.Write([]byte("Perfil de usuario: " + userID))
+ userID := r.Context().Value("userID").(string)
+ w.Write([]byte("Perfil de usuario: " + userID))
 }
 ```
 
@@ -862,25 +866,25 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func HandleRequest(w http.ResponseWriter, r *http.Request) {
-	// Método HTTP
-	method := r.Method // GET, POST, etc.
-	
-	// URL y rutas
-	path := r.URL.Path           // /users/123
-	url := r.URL.String()        // URL completa
-	rawQuery := r.URL.RawQuery   // q=search&page=1
-	
-	// Headers
-	userAgent := r.Header.Get("User-Agent")
-	contentType := r.Header.Get("Content-Type")
-	authorization := r.Header.Get("Authorization")
-	
-	// Host
-	host := r.Host
-	scheme := r.Header.Get("X-Forwarded-Proto")
-	
-	// Cliente
-	remoteAddr := r.RemoteAddr
+ // Método HTTP
+ method := r.Method // GET, POST, etc.
+
+ // URL y rutas
+ path := r.URL.Path           // /users/123
+ url := r.URL.String()        // URL completa
+ rawQuery := r.URL.RawQuery   // q=search&page=1
+
+ // Headers
+ userAgent := r.Header.Get("User-Agent")
+ contentType := r.Header.Get("Content-Type")
+ authorization := r.Header.Get("Authorization")
+
+ // Host
+ host := r.Host
+ scheme := r.Header.Get("X-Forwarded-Proto")
+
+ // Cliente
+ remoteAddr := r.RemoteAddr
 }
 ```
 
@@ -888,25 +892,25 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	// Un valor
-	query := r.URL.Query().Get("q")
-	
-	// Con valor por defecto
-	page := r.URL.Query().Get("page")
-	if page == "" {
-		page = "1"
-	}
-	
-	// Múltiples valores del mismo parámetro
-	tags := r.URL.Query()["tag"]  // []string{"web", "api"}
-	
-	// Acceso directo
-	q := r.URL.Query()
-	for key, values := range q {
-		for _, value := range values {
-			log.Printf("%s = %s", key, value)
-		}
-	}
+ // Un valor
+ query := r.URL.Query().Get("q")
+
+ // Con valor por defecto
+ page := r.URL.Query().Get("page")
+ if page == "" {
+  page = "1"
+ }
+
+ // Múltiples valores del mismo parámetro
+ tags := r.URL.Query()["tag"]  // []string{"web", "api"}
+
+ // Acceso directo
+ q := r.URL.Query()
+ for key, values := range q {
+  for _, value := range values {
+   log.Printf("%s = %s", key, value)
+  }
+ }
 }
 ```
 
@@ -914,12 +918,12 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func UserDetailHandler(w http.ResponseWriter, r *http.Request) {
-	// Con Chi
-	userID := chi.URLParam(r, "id")
-	
-	// Múltiples parámetros
-	postID := chi.URLParam(r, "postID")
-	commentID := chi.URLParam(r, "commentID")
+ // Con Chi
+ userID := chi.URLParam(r, "id")
+
+ // Múltiples parámetros
+ postID := chi.URLParam(r, "postID")
+ commentID := chi.URLParam(r, "commentID")
 }
 
 // En main
@@ -934,37 +938,37 @@ Chi no proporciona automático binding, así que es manual (como debe ser):
 ```go
 // JSON Request
 type CreateUserRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Age   int    `json:"age"`
+ Name  string `json:"name"`
+ Email string `json:"email"`
+ Age   int    `json:"age"`
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var req CreateUserRequest
-	
-	// Decodificar
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "JSON inválido", http.StatusBadRequest)
-		return
-	}
-	
-	// Validar
-	if req.Name == "" || req.Email == "" {
-		http.Error(w, "Campos requeridos", http.StatusBadRequest)
-		return
-	}
-	
-	// Procesar
-	user := User{
-		Name:  req.Name,
-		Email: req.Email,
-		Age:   req.Age,
-	}
-	
-	// Responder
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+ var req CreateUserRequest
+
+ // Decodificar
+ if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+  http.Error(w, "JSON inválido", http.StatusBadRequest)
+  return
+ }
+
+ // Validar
+ if req.Name == "" || req.Email == "" {
+  http.Error(w, "Campos requeridos", http.StatusBadRequest)
+  return
+ }
+
+ // Procesar
+ user := User{
+  Name:  req.Name,
+  Email: req.Email,
+  Age:   req.Age,
+ }
+
+ // Responder
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusCreated)
+ json.NewEncoder(w).Encode(user)
 }
 ```
 
@@ -972,26 +976,26 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func FormHandler(w http.ResponseWriter, r *http.Request) {
-	// Parsear form
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Error parseando form", http.StatusBadRequest)
-		return
-	}
-	
-	// Acceder campos
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	
-	// Archivos
-	file, handler, err := r.FormFile("upload")
-	if err != nil {
-		http.Error(w, "Error en archivo", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-	
-	log.Printf("Archivo: %s, Tamaño: %d bytes", 
-		handler.Filename, handler.Size)
+ // Parsear form
+ if err := r.ParseForm(); err != nil {
+  http.Error(w, "Error parseando form", http.StatusBadRequest)
+  return
+ }
+
+ // Acceder campos
+ username := r.FormValue("username")
+ password := r.FormValue("password")
+
+ // Archivos
+ file, handler, err := r.FormFile("upload")
+ if err != nil {
+  http.Error(w, "Error en archivo", http.StatusBadRequest)
+  return
+ }
+ defer file.Close()
+
+ log.Printf("Archivo: %s, Tamaño: %d bytes",
+  handler.Filename, handler.Size)
 }
 ```
 
@@ -999,15 +1003,15 @@ func FormHandler(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func RawBodyHandler(w http.ResponseWriter, r *http.Request) {
-	// Leer cuerpo completo
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error leyendo body", http.StatusBadRequest)
-		return
-	}
-	
-	// Usar body
-	log.Printf("Body: %s", string(body))
+ // Leer cuerpo completo
+ body, err := io.ReadAll(r.Body)
+ if err != nil {
+  http.Error(w, "Error leyendo body", http.StatusBadRequest)
+  return
+ }
+
+ // Usar body
+ log.Printf("Body: %s", string(body))
 }
 ```
 
@@ -1015,54 +1019,54 @@ func RawBodyHandler(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func ResponseExamples(w http.ResponseWriter, r *http.Request) {
-	// Configurar headers
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("X-Custom-Header", "value")
-	
-	// Status code (debe ser antes de Write)
-	w.WriteHeader(http.StatusOK)
-	
-	// Escribir contenido
-	w.Write([]byte("Hola"))
-	
-	// O usar fmt.Fprintf
-	fmt.Fprintf(w, "Número: %d", 42)
-	
-	// JSON
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "ok",
-	})
+ // Configurar headers
+ w.Header().Set("Content-Type", "application/json")
+ w.Header().Set("X-Custom-Header", "value")
+
+ // Status code (debe ser antes de Write)
+ w.WriteHeader(http.StatusOK)
+
+ // Escribir contenido
+ w.Write([]byte("Hola"))
+
+ // O usar fmt.Fprintf
+ fmt.Fprintf(w, "Número: %d", 42)
+
+ // JSON
+ json.NewEncoder(w).Encode(map[string]string{
+  "status": "ok",
+ })
 }
 
 // Responder diferentes tipos
 func JSONResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	data := map[string]interface{}{
-		"status": "success",
-		"data": map[string]string{
-			"id":   "123",
-			"name": "John",
-		},
-	}
-	json.NewEncoder(w).Encode(data)
+ w.Header().Set("Content-Type", "application/json")
+ data := map[string]interface{}{
+  "status": "success",
+  "data": map[string]string{
+   "id":   "123",
+   "name": "John",
+  },
+ }
+ json.NewEncoder(w).Encode(data)
 }
 
 func XMLResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/xml")
-	xml.NewEncoder(w).Encode(struct {
-		Status string `xml:"status"`
-	}{Status: "ok"})
+ w.Header().Set("Content-Type", "application/xml")
+ xml.NewEncoder(w).Encode(struct {
+  Status string `xml:"status"`
+ }{Status: "ok"})
 }
 
 func PlainTextResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, "Texto simple")
+ w.Header().Set("Content-Type", "text/plain")
+ fmt.Fprint(w, "Texto simple")
 }
 
 func HTMLResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	html := `<html><body><h1>Hola</h1></body></html>`
-	w.Write([]byte(html))
+ w.Header().Set("Content-Type", "text/html")
+ html := `<html><body><h1>Hola</h1></body></html>`
+ w.Write([]byte(html))
 }
 ```
 
@@ -1070,42 +1074,42 @@ func HTMLResponse(w http.ResponseWriter, r *http.Request) {
 
 ```go
 func StreamHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	
-	// Streaming JSON
-	w.Write([]byte("["))
-	
-	for i := 0; i < 100; i++ {
-		if i > 0 {
-			w.Write([]byte(","))
-		}
-		
-		json.NewEncoder(w).Encode(map[string]int{
-			"item": i,
-		})
-		
-		// Flush después de cada item (si es necesario)
-		if f, ok := w.(http.Flusher); ok {
-			f.Flush()
-		}
-	}
-	
-	w.Write([]byte("]"))
+ w.Header().Set("Content-Type", "application/json")
+
+ // Streaming JSON
+ w.Write([]byte("["))
+
+ for i := 0; i < 100; i++ {
+  if i > 0 {
+   w.Write([]byte(","))
+  }
+
+  json.NewEncoder(w).Encode(map[string]int{
+   "item": i,
+  })
+
+  // Flush después de cada item (si es necesario)
+  if f, ok := w.(http.Flusher); ok {
+   f.Flush()
+  }
+ }
+
+ w.Write([]byte("]"))
 }
 
 // Server-Sent Events (SSE)
 func SSEHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	
-	flusher := w.(http.Flusher)
-	
-	for i := 0; i < 10; i++ {
-		fmt.Fprintf(w, "data: Mensaje %d\n\n", i)
-		flusher.Flush()
-		time.Sleep(1 * time.Second)
-	}
+ w.Header().Set("Content-Type", "text/event-stream")
+ w.Header().Set("Cache-Control", "no-cache")
+ w.Header().Set("Connection", "keep-alive")
+
+ flusher := w.(http.Flusher)
+
+ for i := 0; i < 10; i++ {
+  fmt.Fprintf(w, "data: Mensaje %d\n\n", i)
+  flusher.Flush()
+  time.Sleep(1 * time.Second)
+ }
 }
 ```
 
@@ -1122,46 +1126,46 @@ La verdadera fuerza de Chi es la composabilidad mediante mounting:
 
 // users/router.go
 func NewUserRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", ListUsers)
-	r.Post("/", CreateUser)
-	r.Get("/{id}", GetUser)
-	r.Put("/{id}", UpdateUser)
-	r.Delete("/{id}", DeleteUser)
-	return r
+ r := chi.NewRouter()
+ r.Get("/", ListUsers)
+ r.Post("/", CreateUser)
+ r.Get("/{id}", GetUser)
+ r.Put("/{id}", UpdateUser)
+ r.Delete("/{id}", DeleteUser)
+ return r
 }
 
 // posts/router.go
 func NewPostRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", ListPosts)
-	r.Post("/", CreatePost)
-	r.Get("/{id}", GetPost)
-	return r
+ r := chi.NewRouter()
+ r.Get("/", ListPosts)
+ r.Post("/", CreatePost)
+ r.Get("/{id}", GetPost)
+ return r
 }
 
 // comments/router.go
 func NewCommentRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", ListComments)
-	r.Post("/", CreateComment)
-	return r
+ r := chi.NewRouter()
+ r.Get("/", ListComments)
+ r.Post("/", CreateComment)
+ return r
 }
 
 // main.go
 func main() {
-	r := chi.NewRouter()
-	
-	// Global middleware
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	// Mount
-	r.Mount("/api/users", NewUserRouter())
-	r.Mount("/api/posts", NewPostRouter())
-	r.Mount("/api/comments", NewCommentRouter())
-	
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ // Global middleware
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ // Mount
+ r.Mount("/api/users", NewUserRouter())
+ r.Mount("/api/posts", NewPostRouter())
+ r.Mount("/api/comments", NewCommentRouter())
+
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -1170,38 +1174,38 @@ func main() {
 ```go
 // Con interfaces
 type UserStore interface {
-	GetUser(id string) (User, error)
-	SaveUser(user User) error
+ GetUser(id string) (User, error)
+ SaveUser(user User) error
 }
 
 type UserHandler struct {
-	store UserStore
+ store UserStore
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	user, err := h.store.GetUser(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(user)
+ id := chi.URLParam(r, "id")
+ user, err := h.store.GetUser(id)
+ if err != nil {
+  http.Error(w, err.Error(), http.StatusInternalServerError)
+  return
+ }
+ json.NewEncoder(w).Encode(user)
 }
 
 // Crear router
 func NewUserRouter(store UserStore) chi.Router {
-	h := &UserHandler{store: store}
-	r := chi.NewRouter()
-	r.Get("/{id}", h.GetUser)
-	return r
+ h := &UserHandler{store: store}
+ r := chi.NewRouter()
+ r.Get("/{id}", h.GetUser)
+ return r
 }
 
 // main.go
 func main() {
-	store := NewMySQLUserStore()
-	r := chi.NewRouter()
-	r.Mount("/users", NewUserRouter(store))
-	http.ListenAndServe(":3000", r)
+ store := NewMySQLUserStore()
+ r := chi.NewRouter()
+ r.Mount("/users", NewUserRouter(store))
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -1212,41 +1216,41 @@ func main() {
 
 // API middleware
 func apiMiddleware() []func(http.Handler) http.Handler {
-	return []func(http.Handler) http.Handler{
-		middleware.Logger,
-		middleware.Recoverer,
-		AuthMiddleware,
-		RateLimitMiddleware,
-	}
+ return []func(http.Handler) http.Handler{
+  middleware.Logger,
+  middleware.Recoverer,
+  AuthMiddleware,
+  RateLimitMiddleware,
+ }
 }
 
 // Admin middleware
 func adminMiddleware() []func(http.Handler) http.Handler {
-	return []func(http.Handler) http.Handler{
-		middleware.Logger,
-		middleware.Recoverer,
-		StrictAuthMiddleware,
-		AdminOnlyMiddleware,
-	}
+ return []func(http.Handler) http.Handler{
+  middleware.Logger,
+  middleware.Recoverer,
+  StrictAuthMiddleware,
+  AdminOnlyMiddleware,
+ }
 }
 
 // Aplicar
 func main() {
-	r := chi.NewRouter()
-	
-	r.Route("/api", func(r chi.Router) {
-		for _, mw := range apiMiddleware() {
-			r.Use(mw)
-		}
-		r.Mount("/users", NewUserRouter())
-	})
-	
-	r.Route("/admin", func(r chi.Router) {
-		for _, mw := range adminMiddleware() {
-			r.Use(mw)
-		}
-		r.Mount("/dashboard", NewAdminRouter())
-	})
+ r := chi.NewRouter()
+
+ r.Route("/api", func(r chi.Router) {
+  for _, mw := range apiMiddleware() {
+   r.Use(mw)
+  }
+  r.Mount("/users", NewUserRouter())
+ })
+
+ r.Route("/admin", func(r chi.Router) {
+  for _, mw := range adminMiddleware() {
+   r.Use(mw)
+  }
+  r.Mount("/dashboard", NewAdminRouter())
+ })
 }
 ```
 
@@ -1256,29 +1260,29 @@ func main() {
 // Envolver handlers para agregar funcionalidad
 
 func withTimer(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		h.ServeHTTP(w, r)
-		log.Printf("Handler tardó: %v", time.Since(start))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+  h.ServeHTTP(w, r)
+  log.Printf("Handler tardó: %v", time.Since(start))
+ })
 }
 
 func withRecovery(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				log.Printf("Panic: %v", err)
-				http.Error(w, "Internal Server Error", 
-					http.StatusInternalServerError)
-			}
-		}()
-		h.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  defer func() {
+   if err := recover(); err != nil {
+    log.Printf("Panic: %v", err)
+    http.Error(w, "Internal Server Error",
+     http.StatusInternalServerError)
+   }
+  }()
+  h.ServeHTTP(w, r)
+ })
 }
 
 // Usar
 r.Get("/fast", withTimer(withRecovery(
-	http.HandlerFunc(FastHandler))))
+ http.HandlerFunc(FastHandler))))
 ```
 
 ### 60.6.5 Diagrama de Composición
@@ -1324,67 +1328,67 @@ r.Get("/fast", withTimer(withRecovery(
 ```go
 // Opción 1: Validación Manual Explícita
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Name  string `json:"name"`
-		Email string `json:"email"`
-		Age   int    `json:"age"`
-	}
-	
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid JSON")
-		return
-	}
-	
-	// Validación explícita
-	if req.Name == "" {
-		respondError(w, http.StatusBadRequest, "Name requerido")
-		return
-	}
-	
-	if !isValidEmail(req.Email) {
-		respondError(w, http.StatusBadRequest, "Email inválido")
-		return
-	}
-	
-	if req.Age < 0 || req.Age > 150 {
-		respondError(w, http.StatusBadRequest, "Age inválido")
-		return
-	}
-	
-	// Procesar
-	user := createUser(req.Name, req.Email, req.Age)
-	respondJSON(w, http.StatusCreated, user)
+ var req struct {
+  Name  string `json:"name"`
+  Email string `json:"email"`
+  Age   int    `json:"age"`
+ }
+
+ if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+  respondError(w, http.StatusBadRequest, "Invalid JSON")
+  return
+ }
+
+ // Validación explícita
+ if req.Name == "" {
+  respondError(w, http.StatusBadRequest, "Name requerido")
+  return
+ }
+
+ if !isValidEmail(req.Email) {
+  respondError(w, http.StatusBadRequest, "Email inválido")
+  return
+ }
+
+ if req.Age < 0 || req.Age > 150 {
+  respondError(w, http.StatusBadRequest, "Age inválido")
+  return
+ }
+
+ // Procesar
+ user := createUser(req.Name, req.Email, req.Age)
+ respondJSON(w, http.StatusCreated, user)
 }
 
 func isValidEmail(email string) bool {
-	// Validación real
-	return strings.Contains(email, "@")
+ // Validación real
+ return strings.Contains(email, "@")
 }
 
 // Opción 2: Usar library (go-playground/validator)
 import "github.com/go-playground/validator/v10"
 
 func CreateUserHandlerWithValidator(w http.ResponseWriter, r *http.Request) {
-	type CreateUserReq struct {
-		Name  string `json:"name" validate:"required,min=2,max=100"`
-		Email string `json:"email" validate:"required,email"`
-		Age   int    `json:"age" validate:"required,min=0,max=150"`
-	}
-	
-	var req CreateUserReq
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid JSON")
-		return
-	}
-	
-	v := validator.New()
-	if err := v.Struct(req); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	
-	user := createUser(req.Name, req.Email, req.Age)
-	respondJSON(w, http.StatusCreated, user)
+ type CreateUserReq struct {
+  Name  string `json:"name" validate:"required,min=2,max=100"`
+  Email string `json:"email" validate:"required,email"`
+  Age   int    `json:"age" validate:"required,min=0,max=150"`
+ }
+
+ var req CreateUserReq
+ if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+  respondError(w, http.StatusBadRequest, "Invalid JSON")
+  return
+ }
+
+ v := validator.New()
+ if err := v.Struct(req); err != nil {
+  respondError(w, http.StatusBadRequest, err.Error())
+  return
+ }
+
+ user := createUser(req.Name, req.Email, req.Age)
+ respondJSON(w, http.StatusCreated, user)
 }
 ```
 
@@ -1393,51 +1397,51 @@ func CreateUserHandlerWithValidator(w http.ResponseWriter, r *http.Request) {
 ```go
 // Opción 1: Errores Simples
 type APIError struct {
-	Code    int
-	Message string
+ Code    int
+ Message string
 }
 
 func handleError(w http.ResponseWriter, err error) {
-	if err == nil {
-		return
-	}
-	
-	switch err.(type) {
-	case *NotFoundError:
-		respondError(w, http.StatusNotFound, err.Error())
-	case *ValidationError:
-		respondError(w, http.StatusBadRequest, err.Error())
-	case *AuthError:
-		respondError(w, http.StatusUnauthorized, err.Error())
-	default:
-		log.Printf("Unexpected error: %v", err)
-		respondError(w, http.StatusInternalServerError, 
-			"Internal Server Error")
-	}
+ if err == nil {
+  return
+ }
+
+ switch err.(type) {
+ case *NotFoundError:
+  respondError(w, http.StatusNotFound, err.Error())
+ case *ValidationError:
+  respondError(w, http.StatusBadRequest, err.Error())
+ case *AuthError:
+  respondError(w, http.StatusUnauthorized, err.Error())
+ default:
+  log.Printf("Unexpected error: %v", err)
+  respondError(w, http.StatusInternalServerError,
+   "Internal Server Error")
+ }
 }
 
 // Opción 2: Errores Estructurados
 type Error struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Details map[string]interface{} `json:"details,omitempty"`
+ Code    string `json:"code"`
+ Message string `json:"message"`
+ Details map[string]interface{} `json:"details,omitempty"`
 }
 
-func respondError(w http.ResponseWriter, code int, 
-	err *Error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(err)
+func respondError(w http.ResponseWriter, code int,
+ err *Error) {
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(code)
+ json.NewEncoder(w).Encode(err)
 }
 
 // Uso
 respondError(w, http.StatusBadRequest, &Error{
-	Code:    "INVALID_EMAIL",
-	Message: "Email format is invalid",
-	Details: map[string]interface{}{
-		"field": "email",
-		"value": "invalid-email",
-	},
+ Code:    "INVALID_EMAIL",
+ Message: "Email format is invalid",
+ Details: map[string]interface{}{
+  "field": "email",
+  "value": "invalid-email",
+ },
 })
 ```
 
@@ -1446,46 +1450,46 @@ respondError(w, http.StatusBadRequest, &Error{
 ```go
 // Definir tipos de error
 type NotFoundError struct {
-	Resource string
-	ID       string
+ Resource string
+ ID       string
 }
 
 func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("%s with ID %s not found", e.Resource, e.ID)
+ return fmt.Sprintf("%s with ID %s not found", e.Resource, e.ID)
 }
 
 type ValidationError struct {
-	Field   string
-	Message string
+ Field   string
+ Message string
 }
 
 func (e *ValidationError) Error() string {
-	return fmt.Sprintf("Validation error on %s: %s", 
-		e.Field, e.Message)
+ return fmt.Sprintf("Validation error on %s: %s",
+  e.Field, e.Message)
 }
 
 type AuthError struct {
-	Message string
+ Message string
 }
 
 func (e *AuthError) Error() string {
-	return fmt.Sprintf("Authentication error: %s", e.Message)
+ return fmt.Sprintf("Authentication error: %s", e.Message)
 }
 
 // Usar
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	user, err := findUser(id)
-	if err != nil {
-		if _, ok := err.(*NotFoundError); ok {
-			respondError(w, http.StatusNotFound, 
-				&Error{Code: "USER_NOT_FOUND", Message: err.Error()})
-		}
-		return
-	}
-	
-	respondJSON(w, http.StatusOK, user)
+ id := chi.URLParam(r, "id")
+
+ user, err := findUser(id)
+ if err != nil {
+  if _, ok := err.(*NotFoundError); ok {
+   respondError(w, http.StatusNotFound,
+    &Error{Code: "USER_NOT_FOUND", Message: err.Error()})
+  }
+  return
+ }
+
+ respondJSON(w, http.StatusOK, user)
 }
 ```
 
@@ -1496,27 +1500,27 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 import "fmt"
 
 func getUser(id string) (User, error) {
-	user, err := db.Query("SELECT * FROM users WHERE id = ?", id)
-	if err != nil {
-		// Wrap error para contexto
-		return User{}, fmt.Errorf("failed to query user %s: %w", id, err)
-	}
-	return user, nil
+ user, err := db.Query("SELECT * FROM users WHERE id = ?", id)
+ if err != nil {
+  // Wrap error para contexto
+  return User{}, fmt.Errorf("failed to query user %s: %w", id, err)
+ }
+ return user, nil
 }
 
 // Verificar tipo
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	user, err := getUser(id)
-	
-	if err != nil {
-		log.Printf("Error: %v", err)
-		respondError(w, http.StatusInternalServerError, 
-			&Error{Code: "INTERNAL_ERROR", Message: "Failed to get user"})
-		return
-	}
-	
-	respondJSON(w, http.StatusOK, user)
+ id := chi.URLParam(r, "id")
+ user, err := getUser(id)
+
+ if err != nil {
+  log.Printf("Error: %v", err)
+  respondError(w, http.StatusInternalServerError,
+   &Error{Code: "INTERNAL_ERROR", Message: "Failed to get user"})
+  return
+ }
+
+ respondJSON(w, http.StatusOK, user)
 }
 ```
 
@@ -1525,44 +1529,44 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 // Helpers para simplificar respuestas
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(status)
+ json.NewEncoder(w).Encode(data)
 }
 
 func respondError(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{
-		"error": message,
-	})
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(status)
+ json.NewEncoder(w).Encode(map[string]string{
+  "error": message,
+ })
 }
 
 func respondSuccess(w http.ResponseWriter, data interface{}) {
-	respondJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"data":    data,
-	})
+ respondJSON(w, http.StatusOK, map[string]interface{}{
+  "success": true,
+  "data":    data,
+ })
 }
 
 func respondCreated(w http.ResponseWriter, data interface{}) {
-	respondJSON(w, http.StatusCreated, map[string]interface{}{
-		"success": true,
-		"data":    data,
-	})
+ respondJSON(w, http.StatusCreated, map[string]interface{}{
+  "success": true,
+  "data":    data,
+ })
 }
 
 // Uso simplificado
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	user, err := findUser(id)
-	
-	if err != nil {
-		respondError(w, http.StatusNotFound, "Usuario no encontrado")
-		return
-	}
-	
-	respondSuccess(w, user)
+ id := chi.URLParam(r, "id")
+ user, err := findUser(id)
+
+ if err != nil {
+  respondError(w, http.StatusNotFound, "Usuario no encontrado")
+  return
+ }
+
+ respondSuccess(w, user)
 }
 ```
 
@@ -1578,33 +1582,33 @@ Chi funciona perfecto con `net/http/httptest`:
 package main
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"github.com/go-chi/chi/v5"
+ "net/http"
+ "net/http/httptest"
+ "testing"
+ "github.com/go-chi/chi/v5"
 )
 
 func setupRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello"))
-	})
-	return r
+ r := chi.NewRouter()
+ r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("Hello"))
+ })
+ return r
 }
 
 func TestGetRoot(t *testing.T) {
-	req := httptest.NewRequest("GET", "/", nil)
-	w := httptest.NewRecorder()
-	
-	setupRouter().ServeHTTP(w, req)
-	
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected 200, got %d", w.Code)
-	}
-	
-	if w.Body.String() != "Hello" {
-		t.Errorf("Expected 'Hello', got %s", w.Body.String())
-	}
+ req := httptest.NewRequest("GET", "/", nil)
+ w := httptest.NewRecorder()
+
+ setupRouter().ServeHTTP(w, req)
+
+ if w.Code != http.StatusOK {
+  t.Errorf("Expected 200, got %d", w.Code)
+ }
+
+ if w.Body.String() != "Hello" {
+  t.Errorf("Expected 'Hello', got %s", w.Body.String())
+ }
 }
 ```
 
@@ -1612,63 +1616,63 @@ func TestGetRoot(t *testing.T) {
 
 ```go
 func TestMultipleRoutes(t *testing.T) {
-	tests := []struct {
-		name           string
-		method         string
-		path           string
-		expectedCode   int
-		expectedBody   string
-	}{
-		{
-			name:         "GET root",
-			method:       "GET",
-			path:         "/",
-			expectedCode: 200,
-			expectedBody: "Welcome",
-		},
-		{
-			name:         "GET user",
-			method:       "GET",
-			path:         "/users/123",
-			expectedCode: 200,
-			expectedBody: "User: 123",
-		},
-		{
-			name:         "POST user",
-			method:       "POST",
-			path:         "/users",
-			expectedCode: 201,
-			expectedBody: "User created",
-		},
-		{
-			name:         "Not found",
-			method:       "GET",
-			path:         "/notfound",
-			expectedCode: 404,
-		},
-	}
-	
-	r := setupRouter()
-	
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, tt.path, nil)
-			w := httptest.NewRecorder()
-			
-			r.ServeHTTP(w, req)
-			
-			if w.Code != tt.expectedCode {
-				t.Errorf("Expected %d, got %d", 
-					tt.expectedCode, w.Code)
-			}
-			
-			if tt.expectedBody != "" && 
-			   w.Body.String() != tt.expectedBody {
-				t.Errorf("Expected body '%s', got '%s'",
-					tt.expectedBody, w.Body.String())
-			}
-		})
-	}
+ tests := []struct {
+  name           string
+  method         string
+  path           string
+  expectedCode   int
+  expectedBody   string
+ }{
+  {
+   name:         "GET root",
+   method:       "GET",
+   path:         "/",
+   expectedCode: 200,
+   expectedBody: "Welcome",
+  },
+  {
+   name:         "GET user",
+   method:       "GET",
+   path:         "/users/123",
+   expectedCode: 200,
+   expectedBody: "User: 123",
+  },
+  {
+   name:         "POST user",
+   method:       "POST",
+   path:         "/users",
+   expectedCode: 201,
+   expectedBody: "User created",
+  },
+  {
+   name:         "Not found",
+   method:       "GET",
+   path:         "/notfound",
+   expectedCode: 404,
+  },
+ }
+
+ r := setupRouter()
+
+ for _, tt := range tests {
+  t.Run(tt.name, func(t *testing.T) {
+   req := httptest.NewRequest(tt.method, tt.path, nil)
+   w := httptest.NewRecorder()
+
+   r.ServeHTTP(w, req)
+
+   if w.Code != tt.expectedCode {
+    t.Errorf("Expected %d, got %d",
+     tt.expectedCode, w.Code)
+   }
+
+   if tt.expectedBody != "" &&
+      w.Body.String() != tt.expectedBody {
+    t.Errorf("Expected body '%s', got '%s'",
+     tt.expectedBody, w.Body.String())
+   }
+  })
+ }
 }
 ```
 
@@ -1676,33 +1680,33 @@ func TestMultipleRoutes(t *testing.T) {
 
 ```go
 import (
-	"bytes"
-	"encoding/json"
+ "bytes"
+ "encoding/json"
 )
 
 func TestCreateUser(t *testing.T) {
-	payload := map[string]string{
-		"name":  "John",
-		"email": "john@example.com",
-	}
-	
-	body, _ := json.Marshal(payload)
-	req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	
-	setupRouter().ServeHTTP(w, req)
-	
-	if w.Code != http.StatusCreated {
-		t.Errorf("Expected 201, got %d", w.Code)
-	}
-	
-	var result map[string]interface{}
-	json.NewDecoder(w.Body).Decode(&result)
-	
-	if result["name"] != "John" {
-		t.Error("Name not set correctly")
-	}
+ payload := map[string]string{
+  "name":  "John",
+  "email": "john@example.com",
+ }
+
+ body, _ := json.Marshal(payload)
+ req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
+ req.Header.Set("Content-Type", "application/json")
+ w := httptest.NewRecorder()
+
+ setupRouter().ServeHTTP(w, req)
+
+ if w.Code != http.StatusCreated {
+  t.Errorf("Expected 201, got %d", w.Code)
+ }
+
+ var result map[string]interface{}
+ json.NewDecoder(w.Body).Decode(&result)
+
+ if result["name"] != "John" {
+  t.Error("Name not set correctly")
+ }
 }
 ```
 
@@ -1710,31 +1714,31 @@ func TestCreateUser(t *testing.T) {
 
 ```go
 func TestAuthMiddleware(t *testing.T) {
-	r := chi.NewRouter()
-	r.Use(authMiddleware)
-	
-	r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Success"))
-	})
-	
-	// Sin token
-	req := httptest.NewRequest("GET", "/protected", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	
-	if w.Code != http.StatusUnauthorized {
-		t.Errorf("Expected 401 sin token, got %d", w.Code)
-	}
-	
-	// Con token válido
-	req = httptest.NewRequest("GET", "/protected", nil)
-	req.Header.Set("Authorization", "Bearer valid-token")
-	w = httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected 200 con token, got %d", w.Code)
-	}
+ r := chi.NewRouter()
+ r.Use(authMiddleware)
+
+ r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("Success"))
+ })
+
+ // Sin token
+ req := httptest.NewRequest("GET", "/protected", nil)
+ w := httptest.NewRecorder()
+ r.ServeHTTP(w, req)
+
+ if w.Code != http.StatusUnauthorized {
+  t.Errorf("Expected 401 sin token, got %d", w.Code)
+ }
+
+ // Con token válido
+ req = httptest.NewRequest("GET", "/protected", nil)
+ req.Header.Set("Authorization", "Bearer valid-token")
+ w = httptest.NewRecorder()
+ r.ServeHTTP(w, req)
+
+ if w.Code != http.StatusOK {
+  t.Errorf("Expected 200 con token, got %d", w.Code)
+ }
 }
 ```
 
@@ -1742,45 +1746,45 @@ func TestAuthMiddleware(t *testing.T) {
 
 ```go
 func TestFullAPI(t *testing.T) {
-	// Setup
-	r := setupRouter()
-	server := httptest.NewServer(r)
-	defer server.Close()
-	
-	// Test 1: Create
-	resp, err := http.Post(server.URL+"/users", 
-		"application/json", 
-		bytes.NewReader([]byte(`{"name":"John"}`)))
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusCreated {
-		t.Errorf("Create failed: %d", resp.StatusCode)
-	}
-	
-	// Test 2: List
-	resp, err = http.Get(server.URL + "/users")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("List failed: %d", resp.StatusCode)
-	}
-	
-	// Test 3: Get
-	resp, err = http.Get(server.URL + "/users/1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer resp.Body.Close()
-	
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Get failed: %d", resp.StatusCode)
-	}
+ // Setup
+ r := setupRouter()
+ server := httptest.NewServer(r)
+ defer server.Close()
+
+ // Test 1: Create
+ resp, err := http.Post(server.URL+"/users",
+  "application/json",
+  bytes.NewReader([]byte(`{"name":"John"}`)))
+ if err != nil {
+  t.Fatal(err)
+ }
+ defer resp.Body.Close()
+
+ if resp.StatusCode != http.StatusCreated {
+  t.Errorf("Create failed: %d", resp.StatusCode)
+ }
+
+ // Test 2: List
+ resp, err = http.Get(server.URL + "/users")
+ if err != nil {
+  t.Fatal(err)
+ }
+ defer resp.Body.Close()
+
+ if resp.StatusCode != http.StatusOK {
+  t.Errorf("List failed: %d", resp.StatusCode)
+ }
+
+ // Test 3: Get
+ resp, err = http.Get(server.URL + "/users/1")
+ if err != nil {
+  t.Fatal(err)
+ }
+ defer resp.Body.Close()
+
+ if resp.StatusCode != http.StatusOK {
+  t.Errorf("Get failed: %d", resp.StatusCode)
+ }
 }
 ```
 
@@ -1794,130 +1798,130 @@ func TestFullAPI(t *testing.T) {
 package main
 
 import (
-	"encoding/json"
-	"net/http"
-	"log"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "encoding/json"
+ "net/http"
+ "log"
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 type User struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+ ID    string `json:"id"`
+ Name  string `json:"name"`
+ Email string `json:"email"`
 }
 
 var users = map[string]User{
-	"1": {ID: "1", Name: "John", Email: "john@example.com"},
-	"2": {ID: "2", Name: "Jane", Email: "jane@example.com"},
+ "1": {ID: "1", Name: "John", Email: "john@example.com"},
+ "2": {ID: "2", Name: "Jane", Email: "jane@example.com"},
 }
 
 // Handlers
 func ListUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(users)
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusOK)
+ json.NewEncoder(w).Encode(users)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-	
-	if user.Name == "" || user.Email == "" {
-		http.Error(w, "Missing fields", http.StatusBadRequest)
-		return
-	}
-	
-	user.ID = generateID()
-	users[user.ID] = user
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+ var user User
+ if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+  http.Error(w, "Invalid JSON", http.StatusBadRequest)
+  return
+ }
+
+ if user.Name == "" || user.Email == "" {
+  http.Error(w, "Missing fields", http.StatusBadRequest)
+  return
+ }
+
+ user.ID = generateID()
+ users[user.ID] = user
+
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusCreated)
+ json.NewEncoder(w).Encode(user)
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	user, ok := users[id]
-	if !ok {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+ id := chi.URLParam(r, "id")
+ user, ok := users[id]
+ if !ok {
+  http.Error(w, "User not found", http.StatusNotFound)
+  return
+ }
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(user)
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	_, ok := users[id]
-	if !ok {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-	
-	var user User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-	
-	user.ID = id
-	users[id] = user
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+ id := chi.URLParam(r, "id")
+ _, ok := users[id]
+ if !ok {
+  http.Error(w, "User not found", http.StatusNotFound)
+  return
+ }
+
+ var user User
+ if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+  http.Error(w, "Invalid JSON", http.StatusBadRequest)
+  return
+ }
+
+ user.ID = id
+ users[id] = user
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(user)
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	_, ok := users[id]
-	if !ok {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-	
-	delete(users, id)
-	w.WriteHeader(http.StatusNoContent)
+ id := chi.URLParam(r, "id")
+ _, ok := users[id]
+ if !ok {
+  http.Error(w, "User not found", http.StatusNotFound)
+  return
+ }
+
+ delete(users, id)
+ w.WriteHeader(http.StatusNoContent)
 }
 
 // Router
 func NewUserRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", ListUsers)
-	r.Post("/", CreateUser)
-	r.Get("/{id}", GetUser)
-	r.Put("/{id}", UpdateUser)
-	r.Delete("/{id}", DeleteUser)
-	return r
+ r := chi.NewRouter()
+ r.Get("/", ListUsers)
+ r.Post("/", CreateUser)
+ r.Get("/{id}", GetUser)
+ r.Put("/{id}", UpdateUser)
+ r.Delete("/{id}", DeleteUser)
+ return r
 }
 
 // Helpers
 func generateID() string {
-	return "user_" + randString(8)
+ return "user_" + randString(8)
 }
 
 func randString(n int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
-	result := make([]byte, n)
-	for i := range result {
-		result[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(result)
+ const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+ result := make([]byte, n)
+ for i := range result {
+  result[i] = charset[rand.Intn(len(charset))]
+ }
+ return string(result)
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	r.Mount("/api/users", NewUserRouter())
-	
-	log.Println("Server running on :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ r.Mount("/api/users", NewUserRouter())
+
+ log.Println("Server running on :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -1930,36 +1934,36 @@ import "github.com/golang-jwt/jwt/v5"
 const secretKey = "your-secret-key"
 
 type Claims struct {
-	UserID string `json:"user_id"`
-	jwt.RegisteredClaims
+ UserID string `json:"user_id"`
+ jwt.RegisteredClaims
 }
 
 func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "No token", http.StatusUnauthorized)
-			return
-		}
-		
-		// Parsear token
-		token, err := jwt.ParseWithClaims(authHeader, 
-			&Claims{}, 
-			func(token *jwt.Token) (interface{}, error) {
-				return []byte(secretKey), nil
-			})
-		
-		if err != nil || !token.Valid {
-			http.Error(w, "Invalid token", http.StatusForbidden)
-			return
-		}
-		
-		// Pasar a contexto
-		claims := token.Claims.(*Claims)
-		ctx := context.WithValue(r.Context(), "userID", claims.UserID)
-		
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  authHeader := r.Header.Get("Authorization")
+  if authHeader == "" {
+   http.Error(w, "No token", http.StatusUnauthorized)
+   return
+  }
+
+  // Parsear token
+  token, err := jwt.ParseWithClaims(authHeader,
+   &Claims{},
+   func(token *jwt.Token) (interface{}, error) {
+    return []byte(secretKey), nil
+   })
+
+  if err != nil || !token.Valid {
+   http.Error(w, "Invalid token", http.StatusForbidden)
+   return
+  }
+
+  // Pasar a contexto
+  claims := token.Claims.(*Claims)
+  ctx := context.WithValue(r.Context(), "userID", claims.UserID)
+
+  next.ServeHTTP(w, r.WithContext(ctx))
+ })
 }
 ```
 
@@ -1967,32 +1971,32 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 ```go
 func CORSMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", 
-			"GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", 
-			"Content-Type, Authorization")
-		w.Header().Set("Access-Control-Max-Age", "86400")
-		
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		
-		next.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  w.Header().Set("Access-Control-Allow-Methods",
+   "GET, POST, PUT, DELETE, OPTIONS")
+  w.Header().Set("Access-Control-Allow-Headers",
+   "Content-Type, Authorization")
+  w.Header().Set("Access-Control-Max-Age", "86400")
+
+  if r.Method == http.MethodOptions {
+   w.WriteHeader(http.StatusOK)
+   return
+  }
+
+  next.ServeHTTP(w, r)
+ })
 }
 
 // O usar library
 import "github.com/go-chi/cors"
 
 r.Use(cors.Handler(cors.Options{
-	AllowedOrigins:   []string{"https://*", "http://*"},
-	AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-	AllowCredentials: true,
-	MaxAge:           300,
+ AllowedOrigins:   []string{"https://*", "http://*"},
+ AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+ AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+ AllowCredentials: true,
+ MaxAge:           300,
 }))
 ```
 
@@ -2000,58 +2004,58 @@ r.Use(cors.Handler(cors.Options{
 
 ```go
 type LogEntry struct {
-	Method     string
-	Path       string
-	Status     int
-	Duration   time.Duration
-	RemoteAddr string
-	UserAgent  string
+ Method     string
+ Path       string
+ Status     int
+ Duration   time.Duration
+ RemoteAddr string
+ UserAgent  string
 }
 
 func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		
-		// Wrapper para capturar status
-		wrapped := &responseWriter{ResponseWriter: w, statusCode: 200}
-		
-		next.ServeHTTP(wrapped, r)
-		
-		entry := LogEntry{
-			Method:     r.Method,
-			Path:       r.URL.Path,
-			Status:     wrapped.statusCode,
-			Duration:   time.Since(start),
-			RemoteAddr: r.RemoteAddr,
-			UserAgent:  r.Header.Get("User-Agent"),
-		}
-		
-		// Log
-		log.Printf("[%s] %s %s -> %d (%v)",
-			entry.Method, entry.Path, entry.RemoteAddr,
-			entry.Status, entry.Duration)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+
+  // Wrapper para capturar status
+  wrapped := &responseWriter{ResponseWriter: w, statusCode: 200}
+
+  next.ServeHTTP(wrapped, r)
+
+  entry := LogEntry{
+   Method:     r.Method,
+   Path:       r.URL.Path,
+   Status:     wrapped.statusCode,
+   Duration:   time.Since(start),
+   RemoteAddr: r.RemoteAddr,
+   UserAgent:  r.Header.Get("User-Agent"),
+  }
+
+  // Log
+  log.Printf("[%s] %s %s -> %d (%v)",
+   entry.Method, entry.Path, entry.RemoteAddr,
+   entry.Status, entry.Duration)
+ })
 }
 
 type responseWriter struct {
-	http.ResponseWriter
-	statusCode int
-	written    bool
+ http.ResponseWriter
+ statusCode int
+ written    bool
 }
 
 func (rw *responseWriter) WriteHeader(code int) {
-	if !rw.written {
-		rw.statusCode = code
-		rw.written = true
-		rw.ResponseWriter.WriteHeader(code)
-	}
+ if !rw.written {
+  rw.statusCode = code
+  rw.written = true
+  rw.ResponseWriter.WriteHeader(code)
+ }
 }
 
 func (rw *responseWriter) Write(b []byte) (int, error) {
-	if !rw.written {
-		rw.written = true
-	}
-	return rw.ResponseWriter.Write(b)
+ if !rw.written {
+  rw.written = true
+ }
+ return rw.ResponseWriter.Write(b)
 }
 ```
 
@@ -2061,28 +2065,28 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 import "github.com/google/uuid"
 
 func RequestIDMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Generar o usar existente
-		requestID := r.Header.Get("X-Request-ID")
-		if requestID == "" {
-			requestID = uuid.New().String()
-		}
-		
-		// Añadir a contexto
-		ctx := context.WithValue(r.Context(), "requestID", requestID)
-		
-		// Responder con el ID
-		w.Header().Set("X-Request-ID", requestID)
-		
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  // Generar o usar existente
+  requestID := r.Header.Get("X-Request-ID")
+  if requestID == "" {
+   requestID = uuid.New().String()
+  }
+
+  // Añadir a contexto
+  ctx := context.WithValue(r.Context(), "requestID", requestID)
+
+  // Responder con el ID
+  w.Header().Set("X-Request-ID", requestID)
+
+  next.ServeHTTP(w, r.WithContext(ctx))
+ })
 }
 
 // Usar en handlers
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-	requestID := r.Context().Value("requestID").(string)
-	log.Printf("[%s] Processing request", requestID)
-	w.Write([]byte("OK"))
+ requestID := r.Context().Value("requestID").(string)
+ log.Printf("[%s] Processing request", requestID)
+ w.Write([]byte("OK"))
 }
 ```
 
@@ -2148,52 +2152,52 @@ func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 // ============ CHI ============
 func setupChi() chi.Router {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	
-	r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-		w.Write([]byte("User: " + id))
-	})
-	
-	return r
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+
+ r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
+  id := chi.URLParam(r, "id")
+  w.Write([]byte("User: " + id))
+ })
+
+ return r
 }
 
 // ============ GIN ============
 func setupGin() *gin.Engine {
-	r := gin.Default()
-	
-	r.GET("/users/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		c.String(200, "User: "+id)
-	})
-	
-	return r
+ r := gin.Default()
+
+ r.GET("/users/:id", func(c *gin.Context) {
+  id := c.Param("id")
+  c.String(200, "User: "+id)
+ })
+
+ return r
 }
 
 // ============ ECHO ============
 func setupEcho() *echo.Echo {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	
-	e.GET("/users/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		return c.String(200, "User: "+id)
-	})
-	
-	return e
+ e := echo.New()
+ e.Use(middleware.Logger())
+
+ e.GET("/users/:id", func(c echo.Context) error {
+  id := c.Param("id")
+  return c.String(200, "User: "+id)
+ })
+
+ return e
 }
 
 // ============ FIBER ============
 func setupFiber() *fiber.App {
-	app := fiber.New()
-	
-	app.Get("/users/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-		return c.SendString("User: " + id)
-	})
-	
-	return app
+ app := fiber.New()
+
+ app.Get("/users/:id", func(c *fiber.Ctx) error {
+  id := c.Params("id")
+  return c.SendString("User: " + id)
+ })
+
+ return app
 }
 ```
 
@@ -2272,32 +2276,32 @@ proyecto/
 package main
 
 import (
-	"log"
-	"net/http"
-	"time"
-	
-	"myapi/internal/router"
-	"myapi/config"
+ "log"
+ "net/http"
+ "time"
+
+ "myapi/internal/router"
+ "myapi/config"
 )
 
 func main() {
-	cfg := config.Load()
-	
-	r := router.New(cfg)
-	
-	server := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      r,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-	
-	log.Printf("Starting server on %s", server.Addr)
-	if err := server.ListenAndServe(); err != nil && 
-	   err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
+ cfg := config.Load()
+
+ r := router.New(cfg)
+
+ server := &http.Server{
+  Addr:         ":" + cfg.Port,
+  Handler:      r,
+  ReadTimeout:  15 * time.Second,
+  WriteTimeout: 15 * time.Second,
+  IdleTimeout:  60 * time.Second,
+ }
+
+ log.Printf("Starting server on %s", server.Addr)
+ if err := server.ListenAndServe(); err != nil &&
+    err != http.ErrServerClosed {
+  log.Fatal(err)
+ }
 }
 ```
 
@@ -2307,39 +2311,39 @@ func main() {
 package router
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"myapi/config"
-	"myapi/internal/handlers"
-	"myapi/internal/middleware/auth"
-	"myapi/internal/middleware/cors"
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
+ "myapi/config"
+ "myapi/internal/handlers"
+ "myapi/internal/middleware/auth"
+ "myapi/internal/middleware/cors"
 )
 
 func New(cfg *config.Config) chi.Router {
-	r := chi.NewRouter()
-	
-	// Global middleware
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.RequestID)
-	r.Use(cors.Handler())
-	
-	// Health check
-	r.Get("/health", handlers.Health)
-	
-	// API routes
-	r.Route("/api", func(r chi.Router) {
-		r.Mount("/users", handlers.UserRouter())
-		r.Mount("/posts", handlers.PostRouter())
-	})
-	
-	// Admin routes (requieren auth)
-	r.Route("/admin", func(r chi.Router) {
-		r.Use(auth.Middleware())
-		r.Mount("/dashboard", handlers.AdminRouter())
-	})
-	
-	return r
+ r := chi.NewRouter()
+
+ // Global middleware
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+ r.Use(middleware.RequestID)
+ r.Use(cors.Handler())
+
+ // Health check
+ r.Get("/health", handlers.Health)
+
+ // API routes
+ r.Route("/api", func(r chi.Router) {
+  r.Mount("/users", handlers.UserRouter())
+  r.Mount("/posts", handlers.PostRouter())
+ })
+
+ // Admin routes (requieren auth)
+ r.Route("/admin", func(r chi.Router) {
+  r.Use(auth.Middleware())
+  r.Mount("/dashboard", handlers.AdminRouter())
+ })
+
+ return r
 }
 ```
 
@@ -2392,82 +2396,82 @@ docker-compose up -d
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"sync"
-	
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "encoding/json"
+ "log"
+ "net/http"
+ "sync"
+
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+ ID   string `json:"id"`
+ Name string `json:"name"`
 }
 
 var (
-	users = make(map[string]User)
-	mu    sync.RWMutex
+ users = make(map[string]User)
+ mu    sync.RWMutex
 )
 
 func listUsers(w http.ResponseWriter, r *http.Request) {
-	mu.RLock()
-	defer mu.RUnlock()
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+ mu.RLock()
+ defer mu.RUnlock()
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(users)
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
-	var user User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-	
-	mu.Lock()
-	defer mu.Unlock()
-	
-	if user.ID == "" {
-		http.Error(w, "ID required", http.StatusBadRequest)
-		return
-	}
-	
-	users[user.ID] = user
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+ var user User
+ if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+  http.Error(w, "Invalid JSON", http.StatusBadRequest)
+  return
+ }
+
+ mu.Lock()
+ defer mu.Unlock()
+
+ if user.ID == "" {
+  http.Error(w, "ID required", http.StatusBadRequest)
+  return
+ }
+
+ users[user.ID] = user
+
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusCreated)
+ json.NewEncoder(w).Encode(user)
 }
 
 func getUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	mu.RLock()
-	user, ok := users[id]
-	mu.RUnlock()
-	
-	if !ok {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+ id := chi.URLParam(r, "id")
+
+ mu.RLock()
+ user, ok := users[id]
+ mu.RUnlock()
+
+ if !ok {
+  http.Error(w, "User not found", http.StatusNotFound)
+  return
+ }
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(user)
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	r.Get("/users", listUsers)
-	r.Post("/users", createUser)
-	r.Get("/users/{id}", getUser)
-	
-	log.Println("🚀 Microservice running on :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ r.Get("/users", listUsers)
+ r.Post("/users", createUser)
+ r.Get("/users/{id}", getUser)
+
+ log.Println("🚀 Microservice running on :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2479,50 +2483,50 @@ func main() {
 package main
 
 import (
-	"io"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
-	
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "io"
+ "net/http"
+ "net/http/httputil"
+ "net/url"
+
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 func createReverseProxy(target string) http.HandlerFunc {
-	proxyURL, _ := url.Parse(target)
-	proxy := httputil.NewSingleHostReverseProxy(proxyURL)
-	
-	return func(w http.ResponseWriter, r *http.Request) {
-		proxy.ServeHTTP(w, r)
-	}
+ proxyURL, _ := url.Parse(target)
+ proxy := httputil.NewSingleHostReverseProxy(proxyURL)
+
+ return func(w http.ResponseWriter, r *http.Request) {
+  proxy.ServeHTTP(w, r)
+ }
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	// Gateway a diferentes servicios
-	r.Route("/api", func(r chi.Router) {
-		// Users service
-		r.Mount("/users", chi.HandlerFunc(
-			createReverseProxy("http://localhost:3001")))
-		
-		// Posts service
-		r.Mount("/posts", chi.HandlerFunc(
-			createReverseProxy("http://localhost:3002")))
-		
-		// Comments service
-		r.Mount("/comments", chi.HandlerFunc(
-			createReverseProxy("http://localhost:3003")))
-	})
-	
-	// Health check
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Gateway OK"))
-	})
-	
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ // Gateway a diferentes servicios
+ r.Route("/api", func(r chi.Router) {
+  // Users service
+  r.Mount("/users", chi.HandlerFunc(
+   createReverseProxy("http://localhost:3001")))
+
+  // Posts service
+  r.Mount("/posts", chi.HandlerFunc(
+   createReverseProxy("http://localhost:3002")))
+
+  // Comments service
+  r.Mount("/comments", chi.HandlerFunc(
+   createReverseProxy("http://localhost:3003")))
+ })
+
+ // Health check
+ r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("Gateway OK"))
+ })
+
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2538,21 +2542,21 @@ func main() {
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"time"
-	
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "encoding/json"
+ "fmt"
+ "log"
+ "net/http"
+ "time"
+
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 type Todo struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Completed bool      `json:"completed"`
-	CreatedAt time.Time `json:"created_at"`
+ ID        string    `json:"id"`
+ Title     string    `json:"title"`
+ Completed bool      `json:"completed"`
+ CreatedAt time.Time `json:"created_at"`
 }
 
 // Implementar:
@@ -2564,7 +2568,7 @@ type Todo struct {
 // 6. Usar middleware Logger y Recoverer
 
 func main() {
-	// Tu código aquí
+ // Tu código aquí
 }
 
 // Solución esperada: ~50 líneas
@@ -2576,148 +2580,148 @@ func main() {
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"sync"
-	"time"
-	
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "encoding/json"
+ "log"
+ "net/http"
+ "sync"
+ "time"
+
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 type Todo struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Completed bool      `json:"completed"`
-	CreatedAt time.Time `json:"created_at"`
+ ID        string    `json:"id"`
+ Title     string    `json:"title"`
+ Completed bool      `json:"completed"`
+ CreatedAt time.Time `json:"created_at"`
 }
 
 var (
-	todos = make(map[string]Todo)
-	mu    sync.RWMutex
-	idGen int
+ todos = make(map[string]Todo)
+ mu    sync.RWMutex
+ idGen int
 )
 
 func ListTodos(w http.ResponseWriter, r *http.Request) {
-	mu.RLock()
-	defer mu.RUnlock()
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(todos)
+ mu.RLock()
+ defer mu.RUnlock()
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(todos)
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Title string `json:"title"`
-	}
-	
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-	
-	if req.Title == "" {
-		http.Error(w, "Title required", http.StatusBadRequest)
-		return
-	}
-	
-	mu.Lock()
-	defer mu.Unlock()
-	
-	idGen++
-	id := fmt.Sprintf("todo_%d", idGen)
-	
-	todo := Todo{
-		ID:        id,
-		Title:     req.Title,
-		Completed: false,
-		CreatedAt: time.Now(),
-	}
-	
-	todos[id] = todo
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(todo)
+ var req struct {
+  Title string `json:"title"`
+ }
+
+ if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+  http.Error(w, "Invalid JSON", http.StatusBadRequest)
+  return
+ }
+
+ if req.Title == "" {
+  http.Error(w, "Title required", http.StatusBadRequest)
+  return
+ }
+
+ mu.Lock()
+ defer mu.Unlock()
+
+ idGen++
+ id := fmt.Sprintf("todo_%d", idGen)
+
+ todo := Todo{
+  ID:        id,
+  Title:     req.Title,
+  Completed: false,
+  CreatedAt: time.Now(),
+ }
+
+ todos[id] = todo
+
+ w.Header().Set("Content-Type", "application/json")
+ w.WriteHeader(http.StatusCreated)
+ json.NewEncoder(w).Encode(todo)
 }
 
 func GetTodo(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	mu.RLock()
-	todo, ok := todos[id]
-	mu.RUnlock()
-	
-	if !ok {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(todo)
+ id := chi.URLParam(r, "id")
+
+ mu.RLock()
+ todo, ok := todos[id]
+ mu.RUnlock()
+
+ if !ok {
+  http.Error(w, "Not found", http.StatusNotFound)
+  return
+ }
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(todo)
 }
 
 func UpdateTodo(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	var req struct {
-		Title     string `json:"title"`
-		Completed bool   `json:"completed"`
-	}
-	
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
-	
-	mu.Lock()
-	defer mu.Unlock()
-	
-	todo, ok := todos[id]
-	if !ok {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	
-	if req.Title != "" {
-		todo.Title = req.Title
-	}
-	todo.Completed = req.Completed
-	
-	todos[id] = todo
-	
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(todo)
+ id := chi.URLParam(r, "id")
+
+ var req struct {
+  Title     string `json:"title"`
+  Completed bool   `json:"completed"`
+ }
+
+ if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+  http.Error(w, "Invalid JSON", http.StatusBadRequest)
+  return
+ }
+
+ mu.Lock()
+ defer mu.Unlock()
+
+ todo, ok := todos[id]
+ if !ok {
+  http.Error(w, "Not found", http.StatusNotFound)
+  return
+ }
+
+ if req.Title != "" {
+  todo.Title = req.Title
+ }
+ todo.Completed = req.Completed
+
+ todos[id] = todo
+
+ w.Header().Set("Content-Type", "application/json")
+ json.NewEncoder(w).Encode(todo)
 }
 
 func DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	
-	mu.Lock()
-	defer mu.Unlock()
-	
-	if _, ok := todos[id]; !ok {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	
-	delete(todos, id)
-	w.WriteHeader(http.StatusNoContent)
+ id := chi.URLParam(r, "id")
+
+ mu.Lock()
+ defer mu.Unlock()
+
+ if _, ok := todos[id]; !ok {
+  http.Error(w, "Not found", http.StatusNotFound)
+  return
+ }
+
+ delete(todos, id)
+ w.WriteHeader(http.StatusNoContent)
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	r.Get("/todos", ListTodos)
-	r.Post("/todos", CreateTodo)
-	r.Get("/todos/{id}", GetTodo)
-	r.Put("/todos/{id}", UpdateTodo)
-	r.Delete("/todos/{id}", DeleteTodo)
-	
-	log.Println("Server on :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ r.Get("/todos", ListTodos)
+ r.Post("/todos", CreateTodo)
+ r.Get("/todos/{id}", GetTodo)
+ r.Put("/todos/{id}", UpdateTodo)
+ r.Delete("/todos/{id}", DeleteTodo)
+
+ log.Println("Server on :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2746,50 +2750,50 @@ func main() {
 package main
 
 import (
-	"encoding/json" 
-	"log"
-	"net/http"
-	
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+ "encoding/json"
+ "log"
+ "net/http"
+
+ "github.com/go-chi/chi/v5"
+ "github.com/go-chi/chi/v5/middleware"
 )
 
 // User router
 func UserRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode([]string{"user1", "user2"})
-	})
-	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusCreated)
-	})
-	return r
+ r := chi.NewRouter()
+ r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+  json.NewEncoder(w).Encode([]string{"user1", "user2"})
+ })
+ r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusCreated)
+ })
+ return r
 }
 
 // Product router
 func ProductRouter() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode([]string{"prod1", "prod2"})
-	})
-	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusCreated)
-	})
-	return r
+ r := chi.NewRouter()
+ r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+  json.NewEncoder(w).Encode([]string{"prod1", "prod2"})
+ })
+ r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+  w.WriteHeader(http.StatusCreated)
+ })
+ return r
 }
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	
-	r.Route("/api", func(r chi.Router) {
-		r.Mount("/users", UserRouter())
-		r.Mount("/products", ProductRouter())
-	})
-	
-	log.Println("Server on :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+ r.Use(middleware.Logger)
+ r.Use(middleware.Recoverer)
+
+ r.Route("/api", func(r chi.Router) {
+  r.Mount("/users", UserRouter())
+  r.Mount("/products", ProductRouter())
+ })
+
+ log.Println("Server on :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2813,70 +2817,70 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"strings"
-	"time"
-	
-	"github.com/go-chi/chi/v5"
+ "fmt"
+ "log"
+ "net/http"
+ "strings"
+ "time"
+
+ "github.com/go-chi/chi/v5"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		if token == "" {
-			http.Error(w, "No token", http.StatusUnauthorized)
-			return
-		}
-		if !strings.HasPrefix(token, "Bearer ") {
-			http.Error(w, "Invalid token", http.StatusForbidden)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  token := r.Header.Get("Authorization")
+  if token == "" {
+   http.Error(w, "No token", http.StatusUnauthorized)
+   return
+  }
+  if !strings.HasPrefix(token, "Bearer ") {
+   http.Error(w, "Invalid token", http.StatusForbidden)
+   return
+  }
+  next.ServeHTTP(w, r)
+ })
 }
 
 func LoggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.RemoteAddr)
-		next.ServeHTTP(w, r)
-		log.Printf("Completed in %v", time.Since(start))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+  log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.RemoteAddr)
+  next.ServeHTTP(w, r)
+  log.Printf("Completed in %v", time.Since(start))
+ })
 }
 
 func RateLimitMiddleware(next http.Handler) http.Handler {
-	limiter := make(map[string]int)
-	
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ip := r.RemoteAddr
-		limiter[ip]++
-		
-		if limiter[ip] > 100 {
-			http.Error(w, "Too many requests", http.StatusTooManyRequests)
-			return
-		}
-		
-		next.ServeHTTP(w, r)
-	})
+ limiter := make(map[string]int)
+
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  ip := r.RemoteAddr
+  limiter[ip]++
+
+  if limiter[ip] > 100 {
+   http.Error(w, "Too many requests", http.StatusTooManyRequests)
+   return
+  }
+
+  next.ServeHTTP(w, r)
+ })
 }
 
 func main() {
-	r := chi.NewRouter()
-	
-	r.Route("/api", func(r chi.Router) {
-		r.Use(LoggingMiddleware)
-		r.Use(RateLimitMiddleware)
-		r.Use(AuthMiddleware)
-		
-		r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Protected resource"))
-		})
-	})
-	
-	log.Println("Server on :3000")
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ r.Route("/api", func(r chi.Router) {
+  r.Use(LoggingMiddleware)
+  r.Use(RateLimitMiddleware)
+  r.Use(AuthMiddleware)
+
+  r.Get("/protected", func(w http.ResponseWriter, r *http.Request) {
+   w.Write([]byte("Protected resource"))
+  })
+ })
+
+ log.Println("Server on :3000")
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2917,26 +2921,26 @@ Solución en siguiente sección.
 ```go
 // MAL - Todo en un solo lugar
 func main() {
-	r := chi.NewRouter()
-	
-	// Usuarios
-	r.Get("/users", getUsers)
-	r.Post("/users", createUser)
-	r.Get("/users/{id}", getUser)
-	
-	// Posts
-	r.Get("/posts", getPosts)
-	r.Post("/posts", createPost)
-	
-	// Productos
-	r.Get("/products", getProducts)
-	
-	// Comentarios
-	r.Get("/comments", getComments)
-	
-	// ... 200 líneas más
-	
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ // Usuarios
+ r.Get("/users", getUsers)
+ r.Post("/users", createUser)
+ r.Get("/users/{id}", getUser)
+
+ // Posts
+ r.Get("/posts", getPosts)
+ r.Post("/posts", createPost)
+
+ // Productos
+ r.Get("/products", getProducts)
+
+ // Comentarios
+ r.Get("/comments", getComments)
+
+ // ... 200 líneas más
+
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2945,14 +2949,14 @@ func main() {
 ```go
 // BIEN - Modular y escalable
 func main() {
-	r := chi.NewRouter()
-	
-	r.Mount("/api/users", routes.UserRouter())
-	r.Mount("/api/posts", routes.PostRouter())
-	r.Mount("/api/products", routes.ProductRouter())
-	r.Mount("/api/comments", routes.CommentRouter())
-	
-	http.ListenAndServe(":3000", r)
+ r := chi.NewRouter()
+
+ r.Mount("/api/users", routes.UserRouter())
+ r.Mount("/api/posts", routes.PostRouter())
+ r.Mount("/api/products", routes.ProductRouter())
+ r.Mount("/api/comments", routes.CommentRouter())
+
+ http.ListenAndServe(":3000", r)
 }
 ```
 
@@ -2964,7 +2968,7 @@ var db *sql.DB
 var cache map[string]string
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	// Usar db y cache global - difícil de testear
+ // Usar db y cache global - difícil de testear
 }
 ```
 
@@ -2973,12 +2977,12 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 ```go
 // BIEN - Inyección de dependencias
 type Handler struct {
-	db    *sql.DB
-	cache Cache
+ db    *sql.DB
+ cache Cache
 }
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	// Usar h.db y h.cache - fácil de testear
+ // Usar h.db y h.cache - fácil de testear
 }
 ```
 
@@ -2987,10 +2991,10 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 ```go
 // MAL - Sin manejo de errores
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user User
-	json.NewDecoder(r.Body).Decode(&user) // ¿Qué si falla?
-	db.SaveUser(user)                      // ¿Qué si falla?
-	json.NewEncoder(w).Encode(user)        // ¿Qué si falla?
+ var user User
+ json.NewDecoder(r.Body).Decode(&user) // ¿Qué si falla?
+ db.SaveUser(user)                      // ¿Qué si falla?
+ json.NewEncoder(w).Encode(user)        // ¿Qué si falla?
 }
 ```
 
@@ -2999,19 +3003,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 ```go
 // BIEN - Manejo explícito de errores
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		respondError(w, http.StatusBadRequest, "Invalid JSON")
-		return
-	}
-	
-	if err := db.SaveUser(user); err != nil {
-		respondError(w, http.StatusInternalServerError, 
-			"Database error")
-		return
-	}
-	
-	respondJSON(w, http.StatusCreated, user)
+ var user User
+ if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+  respondError(w, http.StatusBadRequest, "Invalid JSON")
+  return
+ }
+
+ if err := db.SaveUser(user); err != nil {
+  respondError(w, http.StatusInternalServerError,
+   "Database error")
+  return
+ }
+
+ respondJSON(w, http.StatusCreated, user)
 }
 ```
 
@@ -3020,16 +3024,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 ```go
 // MAL - Middleware hace demasiado
 func SuperMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Logging
-		// Auth
-		// CORS
-		// Rate limiting
-		// Validación
-		// Transformación
-		// ... 100 líneas más
-		next.ServeHTTP(w, r)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  // Logging
+  // Auth
+  // CORS
+  // Rate limiting
+  // Validación
+  // Transformación
+  // ... 100 líneas más
+  next.ServeHTTP(w, r)
+ })
 }
 ```
 
@@ -3042,10 +3046,10 @@ r.Use(middleware.Recoverer)
 r.Use(CORSMiddleware)
 
 r.Route("/api", func(r chi.Router) {
-	r.Use(AuthMiddleware)
-	r.Use(RateLimitMiddleware)
-	
-	// ... rutas
+ r.Use(AuthMiddleware)
+ r.Use(RateLimitMiddleware)
+
+ // ... rutas
 })
 ```
 
@@ -3054,6 +3058,7 @@ r.Route("/api", func(r chi.Router) {
 ## CONCLUSIÓN
 
 Chi es el router ideal para:
+
 - ✅ Arquitecturas de microservicios
 - ✅ Máxima composabilidad
 - ✅ Performance critical applications
@@ -3065,6 +3070,7 @@ Con su filosofía "Small core, big ecosystem", Chi te proporciona exactamente lo
 ---
 
 **Próximos pasos:**
+
 - Explorar el ecosystem de Chi middleware
 - Implementar patrones avanzados de composición
 - Integrar con bases de datos y sistemas externos

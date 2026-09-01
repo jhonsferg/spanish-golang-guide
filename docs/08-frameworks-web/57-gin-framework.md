@@ -29,6 +29,7 @@
 Gin es un framework web HTTP de alto rendimiento escrito en Go, creado en 2014 por Jíu Tian. Se ha convertido en uno de los frameworks más populares en el ecosistema Go debido a su simplicidad, velocidad y funcionalidad.
 
 **Hitos principales:**
+
 ```
 2014: Creación inicial de Gin
 2015: Versión 1.0 release
@@ -74,6 +75,7 @@ Gin es un framework web HTTP de alto rendimiento escrito en Go, creado en 2014 p
 ### 57.1.3 Performance vs Features
 
 **Filosofía Gin:**
+
 ```
    Velocidad (ms/req)
    ↑
@@ -113,21 +115,25 @@ Gin es un framework web HTTP de alto rendimiento escrito en Go, creado en 2014 p
 **Ventajas únicas de Gin:**
 
 1. **Radix Tree Routing**: Matching O(k) donde k=longitud de la ruta
+
    ```
    Ventaja: Sin regex, routing extremadamente rápido
    ```
 
 2. **Minimal by Default**: Sin ORM, sin templates por defecto
+
    ```
    Ventaja: Libertad arquitectónica, menor overhead
    ```
 
 3. **Bindings & Validations**: Integración nativa con validator/v10
+
    ```
    Ventaja: Conversión y validación automática
    ```
 
 4. **Context & Concurrency**: Goroutine-safe por diseño
+
    ```
    Ventaja: Sin race conditions en middleware
    ```
@@ -139,6 +145,7 @@ Gin es un framework web HTTP de alto rendimiento escrito en Go, creado en 2014 p
 ### 57.2.1 Instalación
 
 **Requisitos previos:**
+
 ```bash
 # Go version >= 1.16
 go version
@@ -149,6 +156,7 @@ export PATH=$PATH:$GOPATH/bin
 ```
 
 **Instalación estándar:**
+
 ```bash
 # Crear nuevo proyecto
 mkdir -p $HOME/myapp && cd $HOME/myapp
@@ -164,6 +172,7 @@ go mod tidy
 ```
 
 **Instalación alternativa con versión específica:**
+
 ```bash
 # Versión pinned (recomendado para producción)
 go get github.com/gin-gonic/gin@v1.9.1
@@ -175,6 +184,7 @@ go list -m github.com/gin-gonic/gin
 ### 57.2.2 Primer Server (3 Líneas)
 
 **Servidor mínimo funcional:**
+
 ```go
 package main
 
@@ -188,6 +198,7 @@ func main() {
 ```
 
 **Test inmediato:**
+
 ```bash
 # Terminal 1: Ejecutar servidor
 go run main.go
@@ -969,6 +980,7 @@ func main() {
 ```
 
 **Output cuando se accede a `/test`:**
+
 ```
 [1] Before request
 [Handler] Processing
@@ -3646,6 +3658,7 @@ Request Entry
 ### ✅ BEST PRACTICES
 
 **1. Usar ShouldBind en lugar de BindJSON:**
+
 ```go
 // ✅ CORRECTO
 if err := c.ShouldBindJSON(&req); err != nil {
@@ -3658,6 +3671,7 @@ c.BindJSON(&req) // Hace abort automático
 ```
 
 **2. Validación al binding:**
+
 ```go
 // ✅ CORRECTO
 type UserRequest struct {
@@ -3672,6 +3686,7 @@ type UserRequest struct {
 ```
 
 **3. Middleware granular:**
+
 ```go
 // ✅ CORRECTO
 protected := r.Group("/api")
@@ -3685,6 +3700,7 @@ r.Use(authMiddleware()) // Global para todo
 ```
 
 **4. Error handling estructurado:**
+
 ```go
 // ✅ CORRECTO
 type ErrorResponse struct {
@@ -3698,6 +3714,7 @@ c.JSON(500, "error") // String genérico
 ```
 
 **5. Context passing seguro:**
+
 ```go
 // ✅ CORRECTO
 userID, exists := c.Get("userID")
@@ -3777,6 +3794,7 @@ go func() {
 Gin es un framework moderno, rápido y flexible para construir APIs REST en Go. Su arquitectura minimalista permite máxima flexibilidad mientras mantiene excelente performance.
 
 **Puntos clave:**
+
 - Radix tree routing para máxima velocidad
 - Middleware flexible y granular
 - Binding y validación integrados
@@ -3784,6 +3802,7 @@ Gin es un framework moderno, rápido y flexible para construir APIs REST en Go. 
 - Comunidad activa y bien documentada
 
 **Próximos pasos:**
+
 - Explorar WebSockets (considera Echo)
 - Integrar con gRPC
 - Implementar GraphQL
@@ -3793,17 +3812,16 @@ Gin es un framework moderno, rápido y flexible para construir APIs REST en Go. 
 
 ## REFERENCIAS
 
-- Documentación oficial: https://gin-gonic.com
-- GitHub: https://github.com/gin-gonic/gin
-- Ejemplos: https://github.com/gin-gonic/examples
-- Comunidad: https://discord.gg/B394FqX
+- Documentación oficial: <https://gin-gonic.com>
+- GitHub: <https://github.com/gin-gonic/gin>
+- Ejemplos: <https://github.com/gin-gonic/examples>
+- Comunidad: <https://discord.gg/B394FqX>
 
 ---
 
 **Fin del Capítulo 57**
 
 Líneas totales: 2,247 | Tamaño: ~52 KB | Secciones: 11 | Subsecciones: 50+ | Ejercicios: 5 | Código: 80+ ejemplos
-
 
 ---
 

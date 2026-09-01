@@ -152,6 +152,7 @@ Máxima flexibilidad ORM
 ### 62.1.5 Comparativa: sqlc vs GORM vs Ent
 
 **sqlc**
+
 - ✅ Type-safe 100%
 - ✅ Cero overhead
 - ✅ SQL puro y explícito
@@ -160,6 +161,7 @@ Máxima flexibilidad ORM
 - ❌ Menos abstracción
 
 **GORM**
+
 - ✅ Muy productivo
 - ✅ Relaciones automáticas
 - ✅ Menos SQL que escribir
@@ -168,6 +170,7 @@ Máxima flexibilidad ORM
 - ❌ Debugging complicado
 
 **Ent**
+
 - ✅ Generación de código
 - ✅ Type-safe
 - ✅ Buena para modelos
@@ -176,6 +179,7 @@ Máxima flexibilidad ORM
 - ❌ Overhead en queries complejas
 
 **Recomendación por caso:**
+
 - **APIs críticas de performance**: sqlc
 - **Prototipado rápido**: GORM
 - **GraphQL + tipos**: Ent
@@ -188,13 +192,13 @@ Máxima flexibilidad ORM
 // ✅ SQLC - Error de compilación si es incorrecto
 func ProcessUsers(ctx context.Context, db *sql.DB) error {
     querier := sqlc.New(db)
-    
+
     // Parámetro debe ser int64 exactamente
     users, err := querier.GetUsersByAge(ctx, 30)
     if err != nil {
         return err
     }
-    
+
     for _, user := range users {
         // Campos tipados correctamente
         fmt.Printf("%d: %s (%s)\n", user.ID, user.Name, user.Email)
@@ -205,10 +209,10 @@ func ProcessUsers(ctx context.Context, db *sql.DB) error {
 // ❌ GORM - Error en runtime
 func ProcessUsersGORM(db *gorm.DB) {
     var users []User
-    
+
     // String cuando debería ser int → error en runtime
     db.Where("age = ?", "treinta").Find(&users)
-    
+
     for _, user := range users {
         fmt.Printf("%d: %s\n", user.ID, user.Name)
     }
@@ -343,7 +347,7 @@ out:
   type: "go"
   dir: "sqlc"
   package: "sqlc"
-  
+
   # Opciones de generación
   emit_db_tags: true
   emit_prepared_queries: true
@@ -352,10 +356,10 @@ out:
   emit_empty_slices: true
   emit_methods: true
   emit_pointers_for_null_types: true
-  
+
   sql_driver: "pgx"
   sql_package: "pgx"
-  
+
   go_type_overrides:
     - db_type: "uuid"
       go_type: "github.com/google/uuid.UUID"
@@ -453,12 +457,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - uses: sqlc-dev/setup-sqlc@v3
-      
+
       - name: Generate code
         run: sqlc generate
-      
+
       - name: Check for changes
         run: |
           if git diff --quiet sqlc/; then
@@ -468,7 +472,7 @@ jobs:
             git diff sqlc/
             exit 1
           fi
-      
+
       - name: Run tests
         run: go test ./...
 ```
@@ -478,27 +482,27 @@ jobs:
 ```makefile
 .PHONY: sqlc
 sqlc:
-	sqlc generate
+ sqlc generate
 
 .PHONY: db-up
 db-up:
-	docker-compose up -d postgres
+ docker-compose up -d postgres
 
 .PHONY: db-down
 db-down:
-	docker-compose down
+ docker-compose down
 
 .PHONY: migrate
 migrate: sqlc
-	docker-compose exec postgres psql -U myuser -d myappdb -f /docker-entrypoint-initdb.d/migrations.sql
+ docker-compose exec postgres psql -U myuser -d myappdb -f /docker-entrypoint-initdb.d/migrations.sql
 
 .PHONY: test
 test: db-up
-	go test ./...
+ go test ./...
 
 .PHONY: dev
 dev:
-	docker-compose up
+ docker-compose up
 ```
 
 ---
@@ -695,7 +699,7 @@ BEGIN
         VALUES (TG_TABLE_NAME, OLD.id, 'DELETE', to_jsonb(OLD));
     ELSIF TG_OP = 'UPDATE' THEN
         INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
-        VALUES (TG_TABLE_NAME, NEW.id, 'UPDATE', to_jsonb(OLD), to_jsonb(NEW), 
+        VALUES (TG_TABLE_NAME, NEW.id, 'UPDATE', to_jsonb(OLD), to_jsonb(NEW),
                 COALESCE(current_setting('app.current_user_id')::bigint, NULL));
     END IF;
     RETURN NULL;
@@ -726,6 +730,7 @@ LIMIT 1;
 ```
 
 Estructura:
+
 - `-- name: GetUserByID :one` → Nombre y tipo de retorno
 - `:one` → Retorna un registro (error si no existe)
 - `:many` → Retorna múltiples registros
@@ -740,7 +745,7 @@ Estructura:
 -- sql/users.sql
 
 -- name: GetUserByID :one
-SELECT id, email, username, first_name, last_name, avatar_url, 
+SELECT id, email, username, first_name, last_name, avatar_url,
        is_active, created_at, updated_at
 FROM users
 WHERE id = $1 AND deleted_at IS NULL;
@@ -794,8 +799,8 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING id, email, username, created_at;
 
 -- Generado como:
--- func (q *Queries) CreateUserWithReturn(ctx context.Context, 
---     email string, username string, passwordHash string, 
+-- func (q *Queries) CreateUserWithReturn(ctx context.Context,
+--     email string, username string, passwordHash string,
 --     firstName *string, lastName *string) (*User, error)
 ```
 
@@ -903,7 +908,7 @@ WHERE (email = @email OR username = @username)
 LIMIT 1;
 
 -- Generado como:
--- func (q *Queries) GetUserByEmailOrUsername(ctx context.Context, 
+-- func (q *Queries) GetUserByEmailOrUsername(ctx context.Context,
 --     params GetUserByEmailOrUsernameParams) (*User, error)
 
 -- Tipo generado:
@@ -1055,21 +1060,21 @@ type Querier interface {
     GetUserByID(ctx context.Context, id int64) (*User, error)
     ListActiveUsers(ctx context.Context, limit int64, offset int64) ([]User, error)
     CountActiveUsers(ctx context.Context) (int64, error)
-    CreateUserWithReturn(ctx context.Context, 
-        email string, username string, passwordHash string, 
+    CreateUserWithReturn(ctx context.Context,
+        email string, username string, passwordHash string,
         firstName sql.NullString, lastName sql.NullString) (*User, error)
-    UpdateUserWithReturn(ctx context.Context, 
+    UpdateUserWithReturn(ctx context.Context,
         email string, firstName sql.NullString, lastNamestring, id int64) (*User, error)
     SoftDeleteUser(ctx context.Context, id int64) error
-    
+
     // Posts
     GetPostByID(ctx context.Context, id int64) (*Post, error)
     ListPostsByUserID(ctx context.Context, userID int64) ([]Post, error)
-    CreatePost(ctx context.Context, 
+    CreatePost(ctx context.Context,
         userID int64, title string, slug string, content string) error
-    
+
     // Comments
-    CreateComment(ctx context.Context, 
+    CreateComment(ctx context.Context,
         postID int64, userID int64, content string) error
 }
 
@@ -1125,20 +1130,20 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (*User, error) {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, username, first_name, last_name, avatar_url, 
+SELECT id, email, username, first_name, last_name, avatar_url,
        is_active, created_at, updated_at
 FROM users
 WHERE id = $1 AND deleted_at IS NULL`
 
 // ListActiveUsers retorna usuarios activos
-func (q *Queries) ListActiveUsers(ctx context.Context, 
+func (q *Queries) ListActiveUsers(ctx context.Context,
     limit int64, offset int64) ([]User, error) {
     rows, err := q.db.QueryContext(ctx, listActiveUsers, limit, offset)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
-    
+
     var users []User
     for rows.Next() {
         var user User
@@ -1154,7 +1159,7 @@ func (q *Queries) ListActiveUsers(ctx context.Context,
         }
         users = append(users, user)
     }
-    
+
     if err := rows.Err(); err != nil {
         return nil, err
     }
@@ -1172,10 +1177,10 @@ LIMIT $1 OFFSET $2`
 func (q *Queries) CreateUserWithReturn(ctx context.Context,
     email string, username string, passwordHash string,
     firstName sql.NullString, lastName sql.NullString) (*User, error) {
-    
+
     row := q.db.QueryRowContext(ctx, createUserWithReturn,
         email, username, passwordHash, firstName, lastName)
-    
+
     var user User
     err := row.Scan(&user.ID, &user.Email, &user.Username, &user.CreatedAt)
     if err != nil {
@@ -1199,34 +1204,34 @@ package main
 import (
     "database/sql"
     "log"
-    
+
     _ "github.com/lib/pq"
     "myapp/sqlc"
 )
 
 func main() {
     // Conectar a la BD
-    db, err := sql.Open("postgres", 
+    db, err := sql.Open("postgres",
         "postgresql://user:pass@localhost/dbname?sslmode=disable")
     if err != nil {
         log.Fatal(err)
     }
     defer db.Close()
-    
+
     // Validar conexión
     if err := db.Ping(); err != nil {
         log.Fatal(err)
     }
-    
+
     // Crear instancia de Queries
     queries := sqlc.New(db)
-    
+
     // Usar las queries
     user, err := queries.GetUserByID(ctx, 1)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Usuario: %s (%s)\n", user.Username, user.Email)
 }
 ```
@@ -1241,7 +1246,7 @@ func main() {
 -- sql/posts.sql
 
 -- name: GetPostWithAuthor :one
-SELECT 
+SELECT
     p.id, p.title, p.content, p.is_published, p.created_at,
     u.id as author_id, u.username as author_username, u.email as author_email
 FROM posts p
@@ -1286,7 +1291,7 @@ func (q *Queries) GetPostWithAuthor(ctx context.Context, id int64) (*GetPostWith
 
 ```sql
 -- name: ListPostsWithCommentCount :many
-SELECT 
+SELECT
     p.id, p.title, p.is_published, p.created_at,
     COUNT(c.id) as comment_count
 FROM posts p
@@ -1301,7 +1306,7 @@ LIMIT $1;
 
 ```sql
 -- name: GetUserStats :one
-SELECT 
+SELECT
     u.id,
     u.username,
     COUNT(p.id) as post_count,
@@ -1331,7 +1336,7 @@ type GetUserStatsRow struct {
 
 ```sql
 -- name: GetTopPostAuthors :many
-SELECT 
+SELECT
     u.id,
     u.username,
     COUNT(p.id) as post_count,
@@ -1375,7 +1380,7 @@ ORDER BY like_count DESC;
 ```sql
 -- name: GetPostRankings :many
 WITH post_stats AS (
-    SELECT 
+    SELECT
         id,
         title,
         like_count,
@@ -1385,7 +1390,7 @@ WITH post_stats AS (
     WHERE is_published = true
 ),
 ranked_posts AS (
-    SELECT 
+    SELECT
         id,
         title,
         like_count,
@@ -1416,7 +1421,7 @@ type GetPostRankingsRow struct {
 
 ```sql
 -- name: GetPostsWithRank :many
-SELECT 
+SELECT
     id,
     title,
     like_count,
@@ -1434,7 +1439,7 @@ ORDER BY created_at DESC;
 -- Blog Analytics Query
 -- name: GetBlogAnalytics :one
 WITH user_metrics AS (
-    SELECT 
+    SELECT
         user_id,
         COUNT(*) as total_posts,
         COUNT(CASE WHEN is_published THEN 1 END) as published_posts,
@@ -1445,7 +1450,7 @@ WITH user_metrics AS (
     GROUP BY user_id
 ),
 comment_metrics AS (
-    SELECT 
+    SELECT
         user_id,
         COUNT(*) as total_comments,
         COUNT(CASE WHEN is_approved THEN 1 END) as approved_comments
@@ -1453,7 +1458,7 @@ comment_metrics AS (
     GROUP BY user_id
 ),
 engagement AS (
-    SELECT 
+    SELECT
         u.id as user_id,
         um.total_posts,
         um.published_posts,
@@ -1472,7 +1477,7 @@ engagement AS (
     GROUP BY u.id, um.total_posts, um.published_posts, um.total_likes, um.avg_views,
              cm.total_comments, cm.approved_comments
 )
-SELECT 
+SELECT
     user_id, total_posts, published_posts, total_likes, avg_views,
     total_comments, approved_comments, total_likes_received
 FROM engagement;
@@ -1505,9 +1510,9 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 // CreateUserWithProfile crea un usuario y su perfil en una transacción
-func (r *UserRepository) CreateUserWithProfile(ctx context.Context, 
+func (r *UserRepository) CreateUserWithProfile(ctx context.Context,
     email, username, passwordHash, bio string) (*sqlc.User, error) {
-    
+
     // Iniciar transacción
     tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
         Isolation: sql.LevelReadCommitted,
@@ -1515,32 +1520,32 @@ func (r *UserRepository) CreateUserWithProfile(ctx context.Context,
     if err != nil {
         return nil, err
     }
-    
+
     // Crear queries para la transacción
     queries := sqlc.New(tx)
-    
+
     // Crear usuario
-    user, err := queries.CreateUserWithReturn(ctx, 
-        email, username, passwordHash, 
-        sql.NullString{Valid: false}, 
+    user, err := queries.CreateUserWithReturn(ctx,
+        email, username, passwordHash,
+        sql.NullString{Valid: false},
         sql.NullString{Valid: false})
     if err != nil {
         tx.Rollback()
         return nil, err
     }
-    
+
     // Crear perfil
     _, err = queries.CreateUserProfile(ctx, user.ID, bio)
     if err != nil {
         tx.Rollback()
         return nil, err
     }
-    
+
     // Confirmar transacción
     if err := tx.Commit(); err != nil {
         return nil, err
     }
-    
+
     return user, nil
 }
 ```
@@ -1552,19 +1557,19 @@ func (r *UserRepository) CreateUserWithProfile(ctx context.Context,
 type TransactionFunc func(ctx context.Context, tx *sqlc.Queries) error
 
 // WithTx ejecuta una función dentro de una transacción
-func (r *UserRepository) WithTx(ctx context.Context, 
+func (r *UserRepository) WithTx(ctx context.Context,
     fn TransactionFunc) error {
-    
+
     tx, err := r.db.BeginTx(ctx, nil)
     if err != nil {
         return err
     }
-    
+
     if err := fn(ctx, sqlc.New(tx)); err != nil {
         tx.Rollback()
         return err
     }
-    
+
     return tx.Commit().Err()
 }
 
@@ -1574,7 +1579,7 @@ err := repo.WithTx(ctx, func(ctx context.Context, queries *sqlc.Queries) error {
     if err != nil {
         return err
     }
-    
+
     return queries.CreateUserProfile(ctx, user.ID, bio)
 })
 ```
@@ -1583,20 +1588,20 @@ err := repo.WithTx(ctx, func(ctx context.Context, queries *sqlc.Queries) error {
 
 ```go
 // Insertar múltiples usuarios en una transacción
-func (r *UserRepository) BulkCreateUsers(ctx context.Context, 
+func (r *UserRepository) BulkCreateUsers(ctx context.Context,
     users []CreateUserInput) error {
-    
+
     if len(users) == 0 {
         return nil
     }
-    
+
     // Preparar arrays para UNNEST
     emails := make([]string, len(users))
     usernames := make([]string, len(users))
     hashes := make([]string, len(users))
     firstNames := make([]string, len(users))
     lastNames := make([]string, len(users))
-    
+
     for i, u := range users {
         emails[i] = u.Email
         usernames[i] = u.Username
@@ -1604,12 +1609,12 @@ func (r *UserRepository) BulkCreateUsers(ctx context.Context,
         firstNames[i] = u.FirstName
         lastNames[i] = u.LastName
     }
-    
+
     queries := sqlc.New(r.db)
-    
+
     _, err := queries.CreateMultipleUsers(ctx,
         emails, usernames, hashes, firstNames, lastNames)
-    
+
     return err
 }
 ```
@@ -1618,50 +1623,50 @@ func (r *UserRepository) BulkCreateUsers(ctx context.Context,
 
 ```go
 // Función robusta de transacción
-func (r *UserRepository) TransferUserPosts(ctx context.Context, 
+func (r *UserRepository) TransferUserPosts(ctx context.Context,
     fromUserID, toUserID int64) error {
-    
+
     tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
         Isolation: sql.LevelSerializable,
     })
     if err != nil {
         return fmt.Errorf("failed to begin transaction: %w", err)
     }
-    
+
     queries := sqlc.New(tx)
-    
+
     // Paso 1: Validar que ambos usuarios existan
     fromUser, err := queries.GetUserByID(ctx, fromUserID)
     if err != nil {
         tx.Rollback()
         return fmt.Errorf("from user not found: %w", err)
     }
-    
+
     toUser, err := queries.GetUserByID(ctx, toUserID)
     if err != nil {
         tx.Rollback()
         return fmt.Errorf("to user not found: %w", err)
     }
-    
+
     // Paso 2: Transferir posts
     if err := queries.TransferUserPosts(ctx, fromUserID, toUserID); err != nil {
         tx.Rollback()
         return fmt.Errorf("failed to transfer posts: %w", err)
     }
-    
+
     // Paso 3: Registrar auditoría
-    if err := queries.CreateAuditLog(ctx, 
-        "posts", fromUserID, "UPDATE", toUserID, 
+    if err := queries.CreateAuditLog(ctx,
+        "posts", fromUserID, "UPDATE", toUserID,
         sql.NullString{String: "transferred to " + toUser.Username, Valid: true}); err != nil {
         tx.Rollback()
         return fmt.Errorf("failed to create audit log: %w", err)
     }
-    
+
     // Confirmar
     if err := tx.Commit(); err != nil {
         return fmt.Errorf("failed to commit transaction: %w", err)
     }
-    
+
     return nil
 }
 ```
@@ -1670,14 +1675,14 @@ func (r *UserRepository) TransferUserPosts(ctx context.Context,
 
 ```go
 // Ejemplo de rollback inteligente
-func (r *UserRepository) UpdateUserWithValidation(ctx context.Context, 
+func (r *UserRepository) UpdateUserWithValidation(ctx context.Context,
     userID int64, updates *UpdateUserInput) error {
-    
+
     tx, err := r.db.BeginTx(ctx, nil)
     if err != nil {
         return err
     }
-    
+
     // Defer asegura rollback si algo falla
     defer func() {
         if r := recover(); r != nil {
@@ -1685,16 +1690,16 @@ func (r *UserRepository) UpdateUserWithValidation(ctx context.Context,
             panic(r)
         }
     }()
-    
+
     queries := sqlc.New(tx)
-    
+
     // 1. Obtener usuario actual
     user, err := queries.GetUserByID(ctx, userID)
     if err != nil {
         tx.Rollback()
         return err
     }
-    
+
     // 2. Validar email único si cambió
     if updates.Email != "" && updates.Email != user.Email {
         existing, _ := queries.GetUserByEmail(ctx, updates.Email)
@@ -1703,16 +1708,16 @@ func (r *UserRepository) UpdateUserWithValidation(ctx context.Context,
             return ErrEmailAlreadyExists
         }
     }
-    
+
     // 3. Actualizar
-    if err := queries.UpdateUser(ctx, 
+    if err := queries.UpdateUser(ctx,
         sql.NullString{String: updates.Email, Valid: updates.Email != ""},
         sql.NullString{String: updates.FirstName, Valid: updates.FirstName != ""},
         userID); err != nil {
         tx.Rollback()
         return err
     }
-    
+
     // Si todo está bien, confirmar
     return tx.Commit().Err()
 }
@@ -1740,7 +1745,7 @@ LIMIT 1;
 
 -- name: UpdateUser :exec
 UPDATE users
-SET 
+SET
     email = COALESCE(NULLIF($1, ''), email),
     first_name = COALESCE(NULLIF($2, ''), first_name),
     updated_at = CURRENT_TIMESTAMP
@@ -1761,7 +1766,7 @@ import (
     "context"
     "database/sql"
     "testing"
-    
+
     _ "github.com/lib/pq"
     "github.com/testcontainers/testcontainers-go"
     "github.com/testcontainers/testcontainers-go/wait"
@@ -1783,8 +1788,8 @@ func SetupTestDB(ctx context.Context, t *testing.T) *TestDB {
         },
         WaitingFor: wait.ForLog("database system is ready to accept connections"),
     }
-    
-    container, err := testcontainers.GenericContainer(ctx, 
+
+    container, err := testcontainers.GenericContainer(ctx,
         testcontainers.GenericContainerRequest{
             ContainerRequest: req,
             Started:          true,
@@ -1792,35 +1797,35 @@ func SetupTestDB(ctx context.Context, t *testing.T) *TestDB {
     if err != nil {
         t.Fatalf("Failed to start container: %v", err)
     }
-    
+
     host, err := container.Host(ctx)
     if err != nil {
         container.Terminate(ctx)
         t.Fatalf("Failed to get container host: %v", err)
     }
-    
+
     port, err := container.MappedPort(ctx, "5432")
     if err != nil {
         container.Terminate(ctx)
         t.Fatalf("Failed to get container port: %v", err)
     }
-    
+
     dsn := fmt.Sprintf("postgresql://test:test@%s:%s/testdb?sslmode=disable",
         host, port.Port())
-    
+
     db, err := sql.Open("postgres", dsn)
     if err != nil {
         container.Terminate(ctx)
         t.Fatalf("Failed to connect: %v", err)
     }
-    
+
     // Ejecutar migraciones
     if err := runMigrations(ctx, db); err != nil {
         container.Terminate(ctx)
         db.Close()
         t.Fatalf("Failed to run migrations: %v", err)
     }
-    
+
     return &TestDB{
         Container: container,
         DB:        db,
@@ -1874,9 +1879,9 @@ func NewFixtures(ctx context.Context, db *sql.DB) *Fixtures {
 }
 
 // CreateTestUser crea un usuario de prueba
-func (f *Fixtures) CreateTestUser(ctx context.Context, 
+func (f *Fixtures) CreateTestUser(ctx context.Context,
     email, username string) (*sqlc.User, error) {
-    
+
     return f.Queries.CreateUserWithReturn(ctx,
         email, username, "hashedpass123",
         sql.NullString{Valid: false},
@@ -1884,9 +1889,9 @@ func (f *Fixtures) CreateTestUser(ctx context.Context,
 }
 
 // CreateTestPost crea un post de prueba
-func (f *Fixtures) CreateTestPost(ctx context.Context, 
+func (f *Fixtures) CreateTestPost(ctx context.Context,
     userID int64, title, content string) (*sqlc.Post, error) {
-    
+
     return f.Queries.CreatePostWithReturn(ctx,
         userID, title, slugify(title), content,
         sql.NullString{Valid: false})
@@ -1900,7 +1905,7 @@ func (f *Fixtures) Clean(ctx context.Context) error {
         "DELETE FROM posts",
         "DELETE FROM users",
     }
-    
+
     for _, q := range queries {
         if _, err := f.DB.ExecContext(ctx, q); err != nil {
             return err
@@ -1934,21 +1939,21 @@ type SeedData struct {
 
 func (f *Fixtures) SeedData(ctx context.Context) (*SeedData, error) {
     data := &SeedData{}
-    
+
     // Crear usuario
     user, err := f.CreateTestUser(ctx, "john@example.com", "john")
     if err != nil {
         return nil, err
     }
     data.UserID = user.ID
-    
+
     // Crear posts
     post, err := f.CreateTestPost(ctx, user.ID, "First Post", "Content here")
     if err != nil {
         return nil, err
     }
     data.PostID = post.ID
-    
+
     // Crear comentario
     comment, err := f.Queries.CreateCommentWithReturn(ctx,
         post.ID, user.ID, "Great post!")
@@ -1956,7 +1961,7 @@ func (f *Fixtures) SeedData(ctx context.Context) (*SeedData, error) {
         return nil, err
     }
     data.CommentID = comment.ID
-    
+
     return data, nil
 }
 ```
@@ -1977,20 +1982,20 @@ import (
 
 func TestCreateUserWithProfile(t *testing.T) {
     ctx := context.Background()
-    
+
     // Setup
     tdb := test.SetupTestDB(ctx, t)
     defer tdb.Close(ctx)
-    
+
     repo := NewUserRepository(tdb.DB)
-    
+
     // Test
     user, err := repo.CreateUserWithProfile(ctx,
         "test@example.com",
         "testuser",
         "hashedpass",
         "Test bio")
-    
+
     // Assert
     require.NoError(t, err)
     assert.NotNil(t, user)
@@ -2002,22 +2007,22 @@ func TestTransferUserPosts(t *testing.T) {
     ctx := context.Background()
     tdb := test.SetupTestDB(ctx, t)
     defer tdb.Close(ctx)
-    
+
     fixtures := test.NewFixtures(ctx, tdb.DB)
     defer fixtures.Clean(ctx)
-    
+
     data, err := fixtures.SeedData(ctx)
     require.NoError(t, err)
-    
+
     // Crear otro usuario
     user2, err := fixtures.CreateTestUser(ctx, "jane@example.com", "jane")
     require.NoError(t, err)
-    
+
     // Transfer
     repo := NewUserRepository(tdb.DB)
     err = repo.TransferUserPosts(ctx, data.UserID, user2.ID)
     require.NoError(t, err)
-    
+
     // Verificar
     posts, err := fixtures.Queries.ListPostsByUserID(ctx, user2.ID)
     require.NoError(t, err)
@@ -2028,18 +2033,18 @@ func TestBulkCreateUsers(t *testing.T) {
     ctx := context.Background()
     tdb := test.SetupTestDB(ctx, t)
     defer tdb.Close(ctx)
-    
+
     repo := NewUserRepository(tdb.DB)
-    
+
     users := []CreateUserInput{
         {Email: "user1@test.com", Username: "user1", PasswordHash: "hash1", FirstName: "User", LastName: "One"},
         {Email: "user2@test.com", Username: "user2", PasswordHash: "hash2", FirstName: "User", LastName: "Two"},
         {Email: "user3@test.com", Username: "user3", PasswordHash: "hash3", FirstName: "User", LastName: "Three"},
     }
-    
+
     err := repo.BulkCreateUsers(ctx, users)
     require.NoError(t, err)
-    
+
     // Verificar
     activeUsers, err := repo.queries.ListActiveUsers(ctx, 10, 0)
     require.NoError(t, err)
@@ -2089,7 +2094,7 @@ SELECT id, username, email FROM users LIMIT $1;
 
 -- ✅ Eficiente - Una sola query
 -- name: ListUsersWithStats :many
-SELECT 
+SELECT
     u.id,
     u.username,
     u.email,
@@ -2116,7 +2121,7 @@ LIMIT $1;
 
 func (r *UserRepository) GetUserByIDMany(ctx context.Context, ids []int64) {
     queries := sqlc.New(r.db)
-    
+
     // Cada GetUserByID usa la misma prepared statement
     for _, id := range ids {
         user, _ := queries.GetUserByID(ctx, id)
@@ -2138,13 +2143,13 @@ import (
 
 func initDB() *sql.DB {
     db, _ := sql.Open("postgres", dsn)
-    
+
     // Configurar pool
     db.SetMaxOpenConns(25)           // Máximo de conexiones abiertas
     db.SetMaxIdleConns(5)            // Máximo de conexiones idle
     db.SetConnMaxLifetime(5 * time.Minute)  // Vida máxima de conexión
     db.SetConnMaxIdleTime(2 * time.Minute) // Máximo idle time
-    
+
     return db
 }
 ```
@@ -2181,12 +2186,12 @@ func BenchmarkGetUserByID(b *testing.B) {
     ctx := context.Background()
     db := setupTestDB()
     defer db.Close()
-    
+
     queries := sqlc.New(db)
-    
+
     // Crear usuario de prueba
     user, _ := queries.CreateUserWithReturn(ctx, "bench@test.com", "bench", "hash", nil, nil)
-    
+
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
         queries.GetUserByID(ctx, user.ID)
@@ -2197,17 +2202,17 @@ func BenchmarkListUsersWithStats(b *testing.B) {
     ctx := context.Background()
     db := setupTestDB()
     defer db.Close()
-    
+
     queries := sqlc.New(db)
-    
+
     // Crear datos de prueba
     for i := 0; i < 100; i++ {
-        queries.CreateUserWithReturn(ctx, 
+        queries.CreateUserWithReturn(ctx,
             fmt.Sprintf("user%d@test.com", i),
             fmt.Sprintf("user%d", i),
             "hash", nil, nil)
     }
-    
+
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
         queries.ListUsersWithStats(ctx, 50)
@@ -2257,7 +2262,7 @@ import (
     "database/sql"
     "net/http"
     "strconv"
-    
+
     "github.com/gin-gonic/gin"
     "myapp/internal/repository"
     "myapp/sqlc"
@@ -2280,7 +2285,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
         return
     }
-    
+
     user, err := h.repo.GetUserByID(c.Request.Context(), userID)
     if err != nil {
         if err == sql.ErrNoRows {
@@ -2290,7 +2295,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
         return
     }
-    
+
     c.JSON(http.StatusOK, user)
 }
 
@@ -2298,24 +2303,24 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 func (h *UserHandler) ListUsers(c *gin.Context) {
     limit := int64(50)
     offset := int64(0)
-    
+
     if l := c.Query("limit"); l != "" {
         limit, _ = strconv.ParseInt(l, 10, 64)
     }
     if o := c.Query("offset"); o != "" {
         offset, _ = strconv.ParseInt(o, 10, 64)
     }
-    
+
     users, err := h.repo.ListActiveUsers(c.Request.Context(), limit, offset)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
         return
     }
-    
+
     if users == nil {
         users = []sqlc.User{} // Retornar array vacío en lugar de null
     }
-    
+
     c.JSON(http.StatusOK, gin.H{"data": users})
 }
 
@@ -2332,17 +2337,17 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    
+
     // Hash password
     hashedPass, _ := hashPassword(req.Password)
-    
+
     user, err := h.repo.CreateUserWithReturn(c.Request.Context(),
         req.Email, req.Username, hashedPass)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
         return
     }
-    
+
     c.JSON(http.StatusCreated, user)
 }
 
@@ -2354,32 +2359,32 @@ type UpdateUserRequest struct {
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
     userID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-    
+
     var req UpdateUserRequest
     if err := c.ShouldBindJSON(&req); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    
+
     user, err := h.repo.UpdateUserWithReturn(c.Request.Context(), userID,
         req.FirstName, req.LastName)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
         return
     }
-    
+
     c.JSON(http.StatusOK, user)
 }
 
 // DeleteUser - DELETE /users/:id
 func (h *UserHandler) DeleteUser(c *gin.Context) {
     userID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-    
+
     if err := h.repo.SoftDeleteUser(c.Request.Context(), userID); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
         return
     }
-    
+
     c.JSON(http.StatusNoContent, nil)
 }
 ```
@@ -2399,18 +2404,18 @@ import (
 func main() {
     db, _ := sql.Open("postgres", dsn)
     defer db.Close()
-    
+
     r := gin.Default()
-    
+
     userHandler := handler.NewUserHandler(db)
-    
+
     // Routes
     r.GET("/users/:id", userHandler.GetUser)
     r.GET("/users", userHandler.ListUsers)
     r.POST("/users", userHandler.CreateUser)
     r.PUT("/users/:id", userHandler.UpdateUser)
     r.DELETE("/users/:id", userHandler.DeleteUser)
-    
+
     r.Run(":8080")
 }
 ```
@@ -2425,7 +2430,7 @@ import (
     "database/sql"
     "net/http"
     "strconv"
-    
+
     "github.com/labstack/echo/v4"
     "myapp/internal/repository"
 )
@@ -2445,7 +2450,7 @@ func (h *EchoUserHandler) GetUser(c echo.Context) error {
     if err != nil {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    
+
     user, err := h.repo.GetUserByID(c.Request().Context(), userID)
     if err != nil {
         if err == sql.ErrNoRows {
@@ -2453,30 +2458,30 @@ func (h *EchoUserHandler) GetUser(c echo.Context) error {
         }
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
     }
-    
+
     return c.JSON(http.StatusOK, user)
 }
 
 func (h *EchoUserHandler) ListUsers(c echo.Context) error {
     limit, _ := strconv.ParseInt(c.QueryParam("limit"), 10, 64)
     offset, _ := strconv.ParseInt(c.QueryParam("offset"), 10, 64)
-    
+
     if limit == 0 {
         limit = 50
     }
-    
+
     users, err := h.repo.ListActiveUsers(c.Request().Context(), limit, offset)
     if err != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
     }
-    
+
     return c.JSON(http.StatusOK, map[string]interface{}{"data": users})
 }
 
 // Registrar con Echo
 func RegisterRoutes(e *echo.Echo, db *sql.DB) {
     handler := NewEchoUserHandler(db)
-    
+
     g := e.Group("/api/v1")
     g.GET("/users/:id", handler.GetUser)
     g.GET("/users", handler.ListUsers)
@@ -2499,7 +2504,7 @@ import (
 type UserRepository interface {
     GetUserByID(ctx context.Context, id int64) (*sqlc.User, error)
     ListActiveUsers(ctx context.Context, limit, offset int64) ([]sqlc.User, error)
-    CreateUserWithReturn(ctx context.Context, 
+    CreateUserWithReturn(ctx context.Context,
         email, username, passwordHash string) (*sqlc.User, error)
     UpdateUserWithReturn(ctx context.Context, userID int64,
         firstName, lastName *string) (*sqlc.User, error)
@@ -2523,7 +2528,7 @@ func (r *userRepository) GetUserByID(ctx context.Context, id int64) (*sqlc.User,
     return r.queries.GetUserByID(ctx, id)
 }
 
-func (r *userRepository) ListActiveUsers(ctx context.Context, 
+func (r *userRepository) ListActiveUsers(ctx context.Context,
     limit, offset int64) ([]sqlc.User, error) {
     return r.queries.ListActiveUsers(ctx, limit, offset)
 }
@@ -2538,17 +2543,17 @@ func (r *userRepository) CreateUserWithReturn(ctx context.Context,
 
 func (r *userRepository) UpdateUserWithReturn(ctx context.Context, userID int64,
     firstName, lastName *string) (*sqlc.User, error) {
-    
+
     fn := sql.NullString{Valid: firstName != nil}
     if firstName != nil {
         fn.String = *firstName
     }
-    
+
     ln := sql.NullString{Valid: lastName != nil}
     if lastName != nil {
         ln.String = *lastName
     }
-    
+
     return r.queries.UpdateUserWithReturn(ctx, fn, ln, "", userID)
 }
 
@@ -2585,10 +2590,10 @@ func New(db *sql.DB) *App {
 func (a *App) setupRoutes() {
     // Crear repositorios
     userRepo := repository.NewUserRepository(a.db)
-    
+
     // Crear handlers
     userHandler := handler.NewUserHandler(a.db)
-    
+
     // Registrar rutas
     users := a.router.Group("/users")
     {
@@ -2616,10 +2621,10 @@ func (a *App) Close() error {
 func main() {
     db, _ := sql.Open("postgres", dsn)
     defer db.Close()
-    
+
     app := app.New(db)
     defer app.Close()
-    
+
     app.Run(":8080")
 }
 ```
@@ -2666,7 +2671,7 @@ func WrapDBError(err error) error {
     if err == nil {
         return nil
     }
-    
+
     if err == sql.ErrNoRows {
         return &AppError{
             Type:    ErrTypeNotFound,
@@ -2674,7 +2679,7 @@ func WrapDBError(err error) error {
             Cause:   err,
         }
     }
-    
+
     // Detectar constraint violations (postgres)
     if err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\"" {
         return &AppError{
@@ -2683,7 +2688,7 @@ func WrapDBError(err error) error {
             Cause:   err,
         }
     }
-    
+
     return &AppError{
         Type:    ErrTypeInternal,
         Message: "Database error",
@@ -2713,20 +2718,20 @@ func IsConflict(err error) bool {
 ```go
 func (h *UserHandler) GetUser(c *gin.Context) {
     userID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-    
+
     user, err := h.repo.GetUserByID(c.Request.Context(), userID)
     err = errors.WrapDBError(err)
-    
+
     if errors.IsNotFound(err) {
         c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         return
     }
-    
+
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
         return
     }
-    
+
     c.JSON(http.StatusOK, user)
 }
 ```
@@ -2753,11 +2758,11 @@ func New(logger *slog.Logger) *QueryLogger {
 }
 
 // LogQuery registra las queries ejecutadas
-func (ql *QueryLogger) LogQuery(ctx context.Context, query string, 
+func (ql *QueryLogger) LogQuery(ctx context.Context, query string,
     args []interface{}, startTime time.Time, err error) {
-    
+
     duration := time.Since(startTime)
-    
+
     if err != nil {
         ql.logger.Error("Query failed",
             slog.String("query", query),
@@ -2767,12 +2772,12 @@ func (ql *QueryLogger) LogQuery(ctx context.Context, query string,
         )
         return
     }
-    
+
     level := slog.LevelDebug
     if duration > time.Second {
         level = slog.LevelWarn
     }
-    
+
     ql.logger.Log(ctx, level, "Query executed",
         slog.String("query", query),
         slog.Duration("duration", duration),
@@ -2802,18 +2807,18 @@ func NewInstrumentedDB(db *sql.DB, logger *logger.QueryLogger) *InstrumentedDB {
     return &InstrumentedDB{db: db, logger: logger}
 }
 
-func (idb *InstrumentedDB) QueryContext(ctx context.Context, 
+func (idb *InstrumentedDB) QueryContext(ctx context.Context,
     query string, args ...interface{}) (*sql.Rows, error) {
-    
+
     start := time.Now()
     rows, err := idb.db.QueryContext(ctx, query, args...)
     idb.logger.LogQuery(ctx, query, args, start, err)
     return rows, err
 }
 
-func (idb *InstrumentedDB) ExecContext(ctx context.Context, 
+func (idb *InstrumentedDB) ExecContext(ctx context.Context,
     query string, args ...interface{}) (sql.Result, error) {
-    
+
     start := time.Now()
     result, err := idb.db.ExecContext(ctx, query, args...)
     idb.logger.LogQuery(ctx, query, args, start, err)
@@ -2954,7 +2959,7 @@ var (
         },
         []string{"query_name", "status"},
     )
-    
+
     DBConnections = promauto.NewGaugeVec(
         prometheus.GaugeOpts{
             Name: "db_connections",
@@ -2978,6 +2983,7 @@ func UpdateConnections(openConn, inUse, idle int) {
 ### 62.11.6 Best Practices Checklist
 
 ✅ **DO:**
+
 - Usar sqlc para queries críticas de performance
 - Implementar transacciones para operaciones multi-paso
 - Usar prepared statements (sqlc lo hace automáticamente)
@@ -2990,6 +2996,7 @@ func UpdateConnections(openConn, inUse, idle int) {
 - Monitoreo de performance
 
 ❌ **DON'T:**
+
 - No escribir SQL dinámico (sqlc genera seguro)
 - No usar queries N+1
 - No ignorar errores de BD
@@ -3005,12 +3012,14 @@ func UpdateConnections(openConn, inUse, idle int) {
 **Case Study 1: Blog Platform**
 
 Requisitos:
+
 - 10,000+ usuarios activos
 - 100,000+ posts
 - 1M+ comments
 - Queries complejas con joins
 
 Solución con sqlc:
+
 ```sql
 -- Optimized query para feed del usuario
 -- name: GetUserFeed :many
@@ -3024,9 +3033,9 @@ user_posts AS (
     AND is_published = true
     AND published_at > NOW() - INTERVAL '30 days'
 )
-SELECT 
-    p.*, 
-    u.username, 
+SELECT
+    p.*,
+    u.username,
     u.avatar_url,
     COUNT(pl.id) as like_count,
     EXISTS(SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as liked_by_user
@@ -3039,6 +3048,7 @@ LIMIT $2;
 ```
 
 Resultados:
+
 - Query time: 50ms (vs 2s con GORM)
 - Memory usage: 2MB (vs 50MB con reflexión)
 - Type safety: 100%
@@ -3046,44 +3056,47 @@ Resultados:
 **Case Study 2: E-commerce**
 
 Requisitos:
+
 - Órdenes con múltiples items
 - Inventario en tiempo real
 - Transacciones críticas
 
 Solución con sqlc:
+
 ```go
-func (r *OrderRepository) CreateOrder(ctx context.Context, 
+func (r *OrderRepository) CreateOrder(ctx context.Context,
     userID int64, items []OrderItem) (*Order, error) {
-    
+
     tx, _ := r.db.BeginTx(ctx, nil)
     defer tx.Rollback()
-    
+
     queries := sqlc.New(tx)
-    
+
     // 1. Crear orden
     order, _ := queries.CreateOrderWithReturn(ctx, userID)
-    
+
     // 2. Validar inventario y crear líneas
     for _, item := range items {
         product, _ := queries.GetProductForUpdate(ctx, item.ProductID)
-        
+
         if product.Stock < item.Quantity {
             return nil, ErrInsufficientStock
         }
-        
+
         // 3. Crear línea de orden
         queries.CreateOrderLine(ctx, order.ID, item.ProductID, item.Quantity)
-        
+
         // 4. Actualizar inventario
         queries.UpdateProductStock(ctx, item.ProductID, -item.Quantity)
     }
-    
+
     tx.Commit()
     return order, nil
 }
 ```
 
 Resultados:
+
 - Transacciones atomícticas 100% seguras
 - Evita race conditions
 - Zero overhead de ORM
@@ -3099,6 +3112,7 @@ Resultados:
 **Pasos:**
 
 1. Inicializar proyecto
+
 ```bash
 mkdir sqlc-first-app
 cd sqlc-first-app
@@ -3106,6 +3120,7 @@ go mod init github.com/myuser/sqlc-first-app
 ```
 
 2. Crear `sqlc.yaml`
+
 ```yaml
 version: "2"
 project:
@@ -3124,6 +3139,7 @@ out:
 ```
 
 3. Crear `schema/migrations.sql`
+
 ```sql
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
@@ -3134,6 +3150,7 @@ CREATE TABLE users (
 ```
 
 4. Crear `sql/queries.sql`
+
 ```sql
 -- name: GetUserByID :one
 SELECT id, email, username, created_at FROM users WHERE id = $1;
@@ -3147,11 +3164,13 @@ SELECT id, email, username, created_at FROM users ORDER BY created_at DESC;
 ```
 
 5. Generar código
+
 ```bash
 sqlc generate
 ```
 
 6. Crear `main.go`
+
 ```go
 package main
 
@@ -3160,36 +3179,36 @@ import (
     "database/sql"
     "fmt"
     "log"
-    
+
     _ "github.com/lib/pq"
     "github.com/myuser/sqlc-first-app/sqlc"
 )
 
 func main() {
-    db, err := sql.Open("postgres", 
+    db, err := sql.Open("postgres",
         "postgresql://user:pass@localhost/testdb?sslmode=disable")
     if err != nil {
         log.Fatal(err)
     }
     defer db.Close()
-    
+
     queries := sqlc.New(db)
     ctx := context.Background()
-    
+
     // Crear usuario
     user, err := queries.CreateUser(ctx, "john@example.com", "john")
     if err != nil {
         log.Fatal(err)
     }
     fmt.Printf("Created user: %v\n", user)
-    
+
     // Obtener usuario
     retrieved, err := queries.GetUserByID(ctx, user.ID)
     if err != nil {
         log.Fatal(err)
     }
     fmt.Printf("Retrieved user: %v\n", retrieved)
-    
+
     // Listar todos
     users, err := queries.ListAllUsers(ctx)
     if err != nil {
@@ -3200,6 +3219,7 @@ func main() {
 ```
 
 **Verificación:**
+
 - ✅ Código genera sin errores
 - ✅ Tipos correctos
 - ✅ Queries funcionan
@@ -3213,6 +3233,7 @@ func main() {
 **Pasos:**
 
 1. Extender `schema/migrations.sql`
+
 ```sql
 CREATE TABLE posts (
     id BIGSERIAL PRIMARY KEY,
@@ -3231,6 +3252,7 @@ CREATE TABLE comments (
 ```
 
 2. Agregar queries complejas en `sql/queries.sql`
+
 ```sql
 -- name: GetPostWithAuthor :one
 SELECT p.id, p.title, p.created_at, u.username, u.email
@@ -3239,7 +3261,7 @@ INNER JOIN users u ON p.user_id = u.id
 WHERE p.id = $1;
 
 -- name: GetPostsWithCommentCount :many
-SELECT 
+SELECT
     p.id, p.title, p.created_at,
     COUNT(c.id) as comment_count,
     u.username
@@ -3251,16 +3273,17 @@ ORDER BY p.created_at DESC;
 ```
 
 3. Crear archivo de test `exercise2_test.go`
+
 ```go
 func TestJoinQueries(t *testing.T) {
     ctx := context.Background()
     db := setupTestDB(ctx, t)
     queries := sqlc.New(db)
-    
+
     // Crear usuario y post
     user, _ := queries.CreateUser(ctx, "test@example.com", "test")
     post, _ := queries.CreatePostWithReturn(ctx, user.ID, "Test Post")
-    
+
     // Test JOIN
     result, err := queries.GetPostWithAuthor(ctx, post.ID)
     assert.NoError(t, err)
@@ -3269,6 +3292,7 @@ func TestJoinQueries(t *testing.T) {
 ```
 
 **Verificación:**
+
 - ✅ Joins generan correctamente
 - ✅ Agregaciones funcionan
 - ✅ Tipos anidados generados
@@ -3282,19 +3306,20 @@ func TestJoinQueries(t *testing.T) {
 **Pasos:**
 
 1. Crear `internal/repository/transaction_test.go`
+
 ```go
 func TestTransactionCommit(t *testing.T) {
     ctx := context.Background()
     db := setupTestDB(ctx, t)
-    
+
     tx, _ := db.BeginTx(ctx, nil)
     queries := sqlc.New(tx)
-    
+
     user, _ := queries.CreateUser(ctx, "tx@example.com", "txuser")
     post, _ := queries.CreatePostWithReturn(ctx, user.ID, "TX Post")
-    
+
     tx.Commit()
-    
+
     // Verificar que persiste
     queries2 := sqlc.New(db)
     retrieved, _ := queries2.GetPostWithAuthor(ctx, post.ID)
@@ -3304,15 +3329,15 @@ func TestTransactionCommit(t *testing.T) {
 func TestTransactionRollback(t *testing.T) {
     ctx := context.Background()
     db := setupTestDB(ctx, t)
-    
+
     tx, _ := db.BeginTx(ctx, nil)
     queries := sqlc.New(tx)
-    
+
     user, _ := queries.CreateUser(ctx, "rollback@example.com", "rbuser")
-    
+
     // NO hacer commit - simular error
     tx.Rollback()
-    
+
     // Verificar que NO persiste
     queries2 := sqlc.New(db)
     _, err := queries2.GetUserByID(ctx, user.ID)
@@ -3321,6 +3346,7 @@ func TestTransactionRollback(t *testing.T) {
 ```
 
 **Verificación:**
+
 - ✅ Commits persisten
 - ✅ Rollbacks deshacen cambios
 - ✅ Manejo de errores robusto
@@ -3341,24 +3367,25 @@ func TestTransactionRollback(t *testing.T) {
 func TestGetUserEndpoint(t *testing.T) {
     db := setupTestDB(context.Background(), t)
     queries := sqlc.New(db)
-    user, _ := queries.CreateUser(context.Background(), 
+    user, _ := queries.CreateUser(context.Background(),
         "endpoint@example.com", "epuser")
-    
+
     router := gin.Default()
     handler := NewUserHandler(db)
     router.GET("/users/:id", handler.GetUser)
-    
-    req, _ := http.NewRequest("GET", 
+
+    req, _ := http.NewRequest("GET",
         fmt.Sprintf("/users/%d", user.ID), nil)
     w := httptest.NewRecorder()
     router.ServeHTTP(w, req)
-    
+
     assert.Equal(t, 200, w.Code)
     assert.Contains(t, w.Body.String(), "epuser")
 }
 ```
 
 **Verificación:**
+
 - ✅ Endpoints funcionan
 - ✅ Serialización JSON correcta
 - ✅ Error handling en HTTP
@@ -3392,6 +3419,7 @@ docker-compose logs -f app
 ```
 
 **Verificación:**
+
 - ✅ Contenedor runs correctamente
 - ✅ Base de datos se inicializa
 - ✅ API responde
@@ -3450,6 +3478,7 @@ Al eliminar la reflexión y generar código puro Go, sqlc proporciona:
 5. **Cambios de schema detectados** en tiempo de compilación
 
 Para aplicaciones que necesitan:
+
 - **Alta performance**
 - **Type safety absoluta**
 - **Queries complejas**

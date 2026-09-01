@@ -525,14 +525,14 @@ func main() {
     // Kubernetes inyecta automáticamente
     serviceHost := os.Getenv("HELLO_GO_SERVICE_HOST")
     servicePort := os.Getenv("HELLO_GO_SERVICE_PORT")
-    
+
     url := "http://" + serviceHost + ":" + servicePort
     resp, err := http.Get(url)
     if err != nil {
         log.Fatal(err)
     }
     defer resp.Body.Close()
-    
+
     log.Printf("Response: %d", resp.StatusCode)
 }
 ```
@@ -668,16 +668,16 @@ func main() {
     // Método 1: Variables de entorno
     dbUser := os.Getenv("DB_USER")
     dbPass := os.Getenv("DB_PASSWORD")
-    
+
     // Método 2: Leer desde volumen montado
     secretPath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
     token, err := ioutil.ReadFile(secretPath)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Token length: %d", len(token))
-    
+
     // NUNCA loguear secretos
     log.Printf("User: %s", dbUser)
 }
@@ -976,13 +976,13 @@ func main() {
     http.HandleFunc("/health", healthCheck)
     http.HandleFunc("/ready", readyCheck)
     http.HandleFunc("/startup", startupCheck)
-    
+
     // Simular inicialización
     go func() {
         time.Sleep(2 * time.Second)
         atomic.StoreInt32(&ready, 1)
     }()
-    
+
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -1039,6 +1039,7 @@ spec:
 ### 47.9.2 Clases de Calidad (QoS)
 
 **Guaranteed** (máxima prioridad):
+
 ```yaml
 resources:
   requests:
@@ -1050,6 +1051,7 @@ resources:
 ```
 
 **Burstable**:
+
 ```yaml
 resources:
   requests:
@@ -1061,6 +1063,7 @@ resources:
 ```
 
 **BestEffort** (sin garantía):
+
 ```yaml
 # Sin recursos especificados
 ```
@@ -1099,6 +1102,7 @@ kubectl describe node node-1
 ### 47.10.1 ¿Qué es Ingress?
 
 Ingress proporciona acceso HTTP/HTTPS desde fuera del cluster, con:
+
 - Routing basado en hostname
 - Routing basado en rutas
 - Terminación TLS
@@ -1326,6 +1330,7 @@ spec:
 ### 47.11.5 Antipatterns
 
 ❌ **Hardcoded Configuration**:
+
 ```go
 // MAL
 const dbHost = "postgres.prod.example.com"
@@ -1333,6 +1338,7 @@ const dbPassword = "secretpassword123"
 ```
 
 ✅ **Usar ConfigMaps y Secrets**:
+
 ```go
 // BIEN
 dbHost := os.Getenv("DB_HOST")
@@ -1340,6 +1346,7 @@ dbPassword := os.Getenv("DB_PASSWORD")
 ```
 
 ❌ **Sin Resource Limits**:
+
 ```yaml
 # MAL
 spec:
@@ -1349,6 +1356,7 @@ spec:
 ```
 
 ✅ **Con Resource Limits**:
+
 ```yaml
 # BIEN
 spec:
@@ -1365,6 +1373,7 @@ spec:
 ```
 
 ❌ **Single Replica en Producción**:
+
 ```yaml
 # MAL
 spec:
@@ -1372,6 +1381,7 @@ spec:
 ```
 
 ✅ **Alta Disponibilidad**:
+
 ```yaml
 # BIEN
 spec:
@@ -1435,7 +1445,7 @@ func main() {
         requestCount.WithLabelValues(r.Method, r.URL.Path).Inc()
         w.WriteHeader(http.StatusOK)
     })
-    
+
     http.Handle("/metrics", promhttp.Handler())
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -1467,7 +1477,7 @@ func main() {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprint(w, "Hello from Kubernetes Pod!")
     })
-    
+
     log.Println("Server starting on :8080")
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -1711,14 +1721,14 @@ import (
 func main() {
     appEnv := os.Getenv("APP_ENV")
     logLevel := os.Getenv("LOG_LEVEL")
-    
+
     config, _ := ioutil.ReadFile("/etc/config/app.conf")
-    
+
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Env: %s, LogLevel: %s\n", appEnv, logLevel)
         fmt.Fprintf(w, "Config: %s\n", string(config))
     })
-    
+
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 ```
@@ -1937,7 +1947,7 @@ import (
     "os"
     "sync/atomic"
     "time"
-    
+
     _ "github.com/lib/pq"
 )
 
@@ -1955,17 +1965,17 @@ func main() {
         log.Fatalf("Failed to connect to DB: %v", err)
     }
     defer db.Close()
-    
+
     if err = db.Ping(); err != nil {
         log.Fatalf("Failed to ping DB: %v", err)
     }
-    
+
     atomic.StoreInt32(&ready, 1)
-    
+
     http.HandleFunc("/", handleRoot)
     http.HandleFunc("/health", handleHealth)
     http.HandleFunc("/ready", handleReady)
-    
+
     log.Println("Server starting on :8080")
     log.Fatal(http.ListenAndServe(":8080", nil))
 }

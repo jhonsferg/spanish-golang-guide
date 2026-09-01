@@ -368,9 +368,9 @@ func main() {
 
     fmt.Println("=== Build Info ===")
     fmt.Printf("Go Version: %s\n", info.GoVersion)
-    
+
     for _, setting := range info.Settings {
-        if setting.Key == "CGO_ENABLED" || 
+        if setting.Key == "CGO_ENABLED" ||
            setting.Key == "GOOS" ||
            setting.Key == "GOARCH" {
             fmt.Printf("%s=%s\n", setting.Key, setting.Value)
@@ -380,7 +380,7 @@ func main() {
     fmt.Println("\n=== Dependencies ===")
     for _, dep := range info.Deps {
         if dep.Replace != nil {
-            fmt.Printf("%s -> %s (%s)\n", 
+            fmt.Printf("%s -> %s (%s)\n",
                 dep.Path, dep.Replace.Path, dep.Replace.Version)
         } else {
             fmt.Printf("%s %s\n", dep.Path, dep.Version)
@@ -435,18 +435,18 @@ TARGETS=(
 
 for TARGET in "${TARGETS[@]}"; do
     IFS='/' read -r OS ARCH <<< "$TARGET"
-    
+
     OUTPUT="${APP_NAME}_${VERSION}_${OS}_${ARCH}"
     if [ "$OS" = "windows" ]; then
         OUTPUT="${OUTPUT}.exe"
     fi
-    
+
     echo "Building for $OS/$ARCH -> $OUTPUT"
-    
+
     GOOS=$OS GOARCH=$ARCH go build \
         -ldflags="-X main.Version=$VERSION" \
         -o "$OUTPUT"
-    
+
     if [ $? -eq 0 ]; then
         echo "✓ Success"
     else
@@ -649,7 +649,7 @@ func main() {
     for i := 0; i < 100; i++ {
         computeExpensive()
     }
-    
+
     for i := 30; i <= 35; i++ {
         fmt.Printf("fib(%d) = %d\n", i, fibonacci(i))
     }
@@ -693,7 +693,7 @@ import (
 func TestCPUProfile(t *testing.T) {
     f, _ := os.Create("test_cpu.prof")
     defer f.Close()
-    
+
     pprof.StartCPUProfile(f)
     defer pprof.StopCPUProfile()
 
@@ -705,7 +705,7 @@ func TestCPUProfile(t *testing.T) {
 
 func BenchmarkFibonacci(b *testing.B) {
     b.ReportAllocs()
-    
+
     for i := 0; i < b.N; i++ {
         fibonacci(20)
     }
@@ -769,12 +769,12 @@ func main() {
     go computeLoop()
 
     http.HandleFunc("/", handler)
-    
+
     fmt.Println("Server running on :6060")
     fmt.Println("Profiling available at:")
     fmt.Println("  http://localhost:6060/debug/pprof")
     fmt.Println("  http://localhost:6060/debug/pprof/profile?seconds=30")
-    
+
     log.Fatal(http.ListenAndServe(":6060", nil))
 }
 ```
@@ -936,14 +936,14 @@ import (
 func main() {
     // Ver configuración actual de GC
     fmt.Printf("GC Percentage: %d%%\n", debug.SetGCPercent(-1))
-    
+
     // Restaurar y establecer valor personalizado
     debug.SetGCPercent(50)  // Ejecutar GC cuando heap crezca 50%
-    
+
     // Ver métricas de GC
     var m runtime.MemStats
     runtime.ReadMemStats(&m)
-    
+
     fmt.Printf("Alloc: %v MB\n", m.Alloc / 1024 / 1024)
     fmt.Printf("TotalAlloc: %v MB\n", m.TotalAlloc / 1024 / 1024)
     fmt.Printf("Sys: %v MB\n", m.Sys / 1024 / 1024)
@@ -952,7 +952,7 @@ func main() {
 
     // Forzar GC
     runtime.GC()
-    
+
     time.Sleep(1 * time.Second)
 }
 ```
@@ -1061,7 +1061,7 @@ func BenchmarkSum(b *testing.B) {
     }
 
     b.ResetTimer()  // Excluir setup del timing
-    
+
     for i := 0; i < b.N; i++ {
         sum(numbers)
     }
@@ -1074,7 +1074,7 @@ func BenchmarkSumParallel(b *testing.B) {
     }
 
     b.ResetTimer()
-    
+
     b.RunParallel(func(pb *testing.PB) {
         for pb.Next() {
             sum(numbers)
@@ -1084,7 +1084,7 @@ func BenchmarkSumParallel(b *testing.B) {
 
 func BenchmarkSumVariableSizes(b *testing.B) {
     sizes := []int{10, 100, 1000, 10000}
-    
+
     for _, size := range sizes {
         b.Run(fmt.Sprintf("size_%d", size), func(b *testing.B) {
             numbers := make([]int, size)
@@ -1133,7 +1133,7 @@ go test -bench=. -v
 ```go
 func BenchmarkAllocation(b *testing.B) {
     b.ReportAllocs()  // Reportar allocations
-    
+
     for i := 0; i < b.N; i++ {
         _ = make([]int, 100)  // Allocation no necesaria
     }
@@ -1141,9 +1141,9 @@ func BenchmarkAllocation(b *testing.B) {
 
 func BenchmarkNoAllocation(b *testing.B) {
     b.ReportAllocs()
-    
+
     slice := make([]int, 100)
-    
+
     for i := 0; i < b.N; i++ {
         slice = slice[:0]  // Reutilizar slice
     }
@@ -1249,7 +1249,7 @@ func withPool() {
             return make([]byte, 1024)
         },
     }
-    
+
     for i := 0; i < 1000000; i++ {
         buf := pool.Get().([]byte)
         process(buf)
@@ -1286,7 +1286,7 @@ func BenchmarkConcat(b *testing.B) {
             slowConcat(parts)
         }
     })
-    
+
     b.Run("fast", func(b *testing.B) {
         for i := 0; i < b.N; i++ {
             fastConcat(parts)
@@ -1319,7 +1319,7 @@ func BenchmarkPolymorphism(b *testing.B) {
             processInterface(42)
         }
     })
-    
+
     b.Run("generic", func(b *testing.B) {
         for i := 0; i < b.N; i++ {
             processGeneric(42)
@@ -1335,13 +1335,13 @@ func BenchmarkPolymorphism(b *testing.B) {
 func batchProcess(data []int) int {
     total := 0
     const batchSize = 64
-    
+
     for i := 0; i < len(data); i += batchSize {
         end := i + batchSize
         if end > len(data) {
             end = len(data)
         }
-        
+
         for j := i; j < end; j++ {
             total += data[j]
         }
@@ -1464,12 +1464,12 @@ func worker(id int, wg *sync.WaitGroup) {
 
 func main() {
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 3; i++ {
         wg.Add(1)
         go worker(i, &wg)
     }
-    
+
     wg.Wait()
 }
 ```
@@ -1495,7 +1495,7 @@ fmt.Println("Debug: value =", v)
 import "log/slog"
 
 logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-logger.Info("processing item", 
+logger.Info("processing item",
     slog.Int("item_id", itemID),
     slog.Duration("duration", elapsed),
 )
@@ -1535,7 +1535,7 @@ func (p *Profiler) Stop() {
 
 func processData(data []int) {
     defer NewProfiler("processData").Stop()
-    
+
     // Procesamiento...
     time.Sleep(100 * time.Millisecond)
 }
@@ -1557,32 +1557,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      
+
       - name: Build
         run: go build -v -o app
-      
+
       - name: Run Tests
         run: go test -v -race -coverprofile=coverage.out ./...
-      
+
       - name: Run Benchmarks
         run: go test -bench=. -benchmem > benchmarks.txt
-      
+
       - name: Upload Benchmarks
         uses: actions/upload-artifact@v3
         with:
           name: benchmarks
           path: benchmarks.txt
-      
+
       - name: Cross-Compile
         run: |
           GOOS=linux GOARCH=amd64 go build -o app_linux_amd64
           GOOS=darwin GOARCH=arm64 go build -o app_darwin_arm64
           GOOS=windows GOARCH=amd64 go build -o app_windows_amd64.exe
-      
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -1602,7 +1602,7 @@ go test -bench=. -benchmem -run=^$ > current.txt
 # Comparar con baseline
 if [ -f baseline.txt ]; then
     benchstat baseline.txt current.txt
-    
+
     # Fallar si hay regresión > 5%
     benchstat -threshold 0.05 baseline.txt current.txt
 fi
@@ -1656,16 +1656,19 @@ func main() {
 | **Curva aprendizaje** | Suave | Pronunciada | Pronunciada |
 
 **Cuándo usar Go:**
+
 - Microservicios, APIs, herramientas CLI
 - Latencia <10ms aceptable
 - Desarrollo rápido priorizado
 
 **Cuándo usar C++:**
+
 - Sistemas embebidos, gráficos
 - Latencia < 1ms requerida
 - Control total de memoria
 
 **Cuándo usar Rust:**
+
 - Sistemas críticos, kernels, firmware
 - Memory safety crítica
 - Performance comparable a C++
@@ -1847,17 +1850,17 @@ TARGETS=(
 
 for TARGET in "${TARGETS[@]}"; do
     IFS='/' read -r OS ARCH <<< "$TARGET"
-    
+
     OUTPUT="${APP_NAME}_${VERSION}_${OS}_${ARCH}"
     [ "$OS" = "windows" ] && OUTPUT="${OUTPUT}.exe"
-    
+
     echo "Building $TARGET -> $OUTPUT"
-    
+
     GOOS=$OS GOARCH=$ARCH go build \
         -ldflags="-X main.Version=$VERSION -X main.OS=$OS -X main.ARCH=$ARCH -s -w" \
         -o "$OUTPUT" \
         . || exit 1
-    
+
     # Mostrar info del binario
     file "$OUTPUT"
 done
@@ -1890,13 +1893,13 @@ func main() {
     flag.Parse()
 
     if *version {
-        fmt.Printf("%s v%s (%s/%s)\n", 
-            "todoapp", Version, 
+        fmt.Printf("%s v%s (%s/%s)\n",
+            "todoapp", Version,
             runtime.GOOS, runtime.GOARCH)
         return
     }
 
-    fmt.Printf("Todo App running on %s/%s\n", 
+    fmt.Printf("Todo App running on %s/%s\n",
         runtime.GOOS, runtime.GOARCH)
 }
 ```
@@ -1937,7 +1940,7 @@ func fastFibonacci(n int) int {
     if n <= 1 {
         return n
     }
-    
+
     prev, curr := 0, 1
     for i := 2; i <= n; i++ {
         prev, curr = curr, prev+curr
@@ -1956,15 +1959,15 @@ func computeIntensive() float64 {
 func slowAlgorithm() {
     fmt.Println("Starting CPU profiling...")
     start := time.Now()
-    
+
     // Fibonacci recursivo (lento)
     for i := 30; i <= 35; i++ {
         _ = slowFibonacci(i)
     }
-    
+
     // Computación intensiva
     _ = computeIntensive()
-    
+
     elapsed := time.Since(start)
     fmt.Printf("Slow algorithm took: %v\n", elapsed)
 }
@@ -1972,15 +1975,15 @@ func slowAlgorithm() {
 func fastAlgorithm() {
     fmt.Println("Starting optimized version...")
     start := time.Now()
-    
+
     // Fibonacci iterativo (rápido)
     for i := 30; i <= 35; i++ {
         _ = fastFibonacci(i)
     }
-    
+
     // Misma computación
     _ = computeIntensive()
-    
+
     elapsed := time.Since(start)
     fmt.Printf("Fast algorithm took: %v\n", elapsed)
 }
@@ -2088,26 +2091,26 @@ func efficientSliceGrow(count int) []int {
 
 func leaky(count int) {
     fmt.Println("=== Leaky (Many Allocations) ===")
-    
+
     runtime.GC()
     pprof.WriteHeapProfile(os.Create("leaky_start.prof"))
-    
+
     _ = leakyStringConcat(count)
     _ = leakySliceGrow(count)
-    
+
     runtime.GC()
     pprof.WriteHeapProfile(os.Create("leaky_end.prof"))
 }
 
 func optimized(count int) {
     fmt.Println("=== Optimized (Fewer Allocations) ===")
-    
+
     runtime.GC()
     pprof.WriteHeapProfile(os.Create("opt_start.prof"))
-    
+
     _ = efficientStringConcat(count)
     _ = efficientSliceGrow(count)
-    
+
     runtime.GC()
     pprof.WriteHeapProfile(os.Create("opt_end.prof"))
 }
@@ -2210,10 +2213,10 @@ func BenchmarkProcessSlow(b *testing.B) {
     for i := range data {
         data[i] = i
     }
-    
+
     b.ReportAllocs()
     b.ResetTimer()
-    
+
     for i := 0; i < b.N; i++ {
         h.ProcessSlow(data)
     }
@@ -2225,10 +2228,10 @@ func BenchmarkProcessFast(b *testing.B) {
     for i := range data {
         data[i] = i
     }
-    
+
     b.ReportAllocs()
     b.ResetTimer()
-    
+
     for i := 0; i < b.N; i++ {
         h.ProcessFast(data)
     }
@@ -2237,10 +2240,10 @@ func BenchmarkProcessFast(b *testing.B) {
 func TestProcess(t *testing.T) {
     h := &RequestHandler{name: "test"}
     data := []int{1, 2, 3, 4, 5}
-    
+
     result := h.Process(data)
     expected := 15 * 1000
-    
+
     if result != expected {
         t.Errorf("Expected %d, got %d", expected, result)
     }

@@ -1,6 +1,7 @@
 # Capítulo 21: Goroutines - Concurrencia en Go
 
 ## Índice
+
 1. [¿Qué es una Goroutine?](#211-qué-es-una-goroutine)
 2. [Crear Goroutines](#212-crear-goroutines)
 3. [Goroutines y Main](#213-goroutines-y-main)
@@ -36,18 +37,21 @@ Características fundamentales:
 Es crucial entender la diferencia fundamental:
 
 **Concurrencia:**
+
 - Múltiples tareas se interleavan
 - Una estructura de su ejecución
 - "Hacer progreso en múltiples tareas" (no necesariamente simultáneamente)
 - Resolución de problemas complejos
 
 **Paralelismo:**
+
 - Múltiples tareas se ejecutan en múltiples núcleos simultáneamente
 - Propiedad del hardware
 - "Hacer cosas simultáneamente"
 - Mejora de rendimiento
 
 **Go permite ambas:**
+
 ```
 Concurrencia sin Paralelismo:
 ├─ Goroutine A ─┐
@@ -76,6 +80,7 @@ Go usa **green threads** (hilos verdes), no threads del sistema operativo:
 ### 21.1.4 Ventajas de las Goroutines
 
 **1. Escalabilidad**
+
 ```
 Python/Java (OS threads): ~1000 threads simultáneos
 Go (goroutines): ~100,000+ goroutines simultáneas
@@ -83,6 +88,7 @@ Go (goroutines): ~100,000+ goroutines simultáneas
 
 **2. Simplicidad de Sintaxis**
 Go hace que la programación concurrente sea simple y elegante:
+
 ```go
 // Java - verboso y complejo
 Thread t = new Thread(() -> {
@@ -96,11 +102,13 @@ go funcionConcurrente()
 ```
 
 **3. Gestión de Recursos**
+
 - No hay que crear pools de threads
 - No hay que gestionar límites
 - El runtime optimiza automáticamente
 
 **4. Mejor Composabilidad**
+
 - Las goroutines se componen bien
 - Canales para comunicación
 - Context para cancelación
@@ -129,6 +137,7 @@ Goroutines son perfectas para:
 ### 21.1.6 M:N Scheduling - El Secreto de Go
 
 Go implementa un modelo de scheduling **M:N**:
+
 - **M** goroutines
 - **N** OS threads (típicamente igual al número de CPUs)
 
@@ -150,6 +159,7 @@ Goroutines (M) ─┐
 4. Otra goroutine toma su lugar
 
 Esto permite:
+
 - Miles de goroutines con solo algunos threads
 - Bloqueo sin desperdicio de recursos
 - Eficiencia máxima en operaciones I/O
@@ -183,10 +193,10 @@ func tarea() {
 func main() {
     // Llamada normal - síncrona
     tarea() // Espera a que termine
-    
+
     // Llamada como goroutine - asíncrona
     go tarea() // No espera
-    
+
     // Sin hacer nada aquí, main termina y el programa cierra
 }
 ```
@@ -209,7 +219,7 @@ func main() {
     operacion(1) // 1s
     operacion(2) // 1s
     // Total: 2 segundos
-    
+
     // ASÍNCRONO: no espera
     go operacion(1)  // Inicia pero no espera
     go operacion(2)  // Inicia pero no espera
@@ -231,12 +241,12 @@ func main() {
     go func() {
         fmt.Println("Hola desde goroutine")
     }()
-    
+
     // Con parámetros
     go func(nombre string) {
         fmt.Printf("Hola, %s\n", nombre)
     }("Carlos")
-    
+
     // Con acceso a variables externas
     contador := 0
     go func() {
@@ -261,21 +271,21 @@ func saludar(nombre string) {
 
 func main() {
     nombres := []string{"Alice", "Bob", "Charlie"}
-    
+
     // ❌ INCORRECTO: Todos imprimirán "Charlie"
     for _, nombre := range nombres {
         go func() {
             fmt.Println(nombre) // Captura la variable, no el valor
         }()
     }
-    
+
     // ✓ CORRECTO: Pasar como parámetro
     for _, nombre := range nombres {
         go func(n string) {
             fmt.Println(n) // Cada goroutine recibe su valor
         }(nombre)
     }
-    
+
     // ✓ ALTERNATIVO: Copiar a variable local
     for _, nombre := range nombres {
         n := nombre // Copiar
@@ -335,7 +345,7 @@ func tarea() {
 
 func main() {
     go tarea()
-    
+
     // main termina aquí
     // El programa cierra sin esperar la goroutine
     // Output: (vacío)
@@ -376,10 +386,10 @@ func tarea() {
 
 func main() {
     go tarea()
-    
+
     // Esperar lo suficiente para que la goroutine termine
     time.Sleep(2 * time.Second)
-    
+
     // Output:
     // Tarea iniciada
     // Tarea completada
@@ -387,6 +397,7 @@ func main() {
 ```
 
 **Problemas:**
+
 - Tiempo arbitrario (¿2 segundos? ¿5?)
 - Desperdicia CPU esperando
 - No es confiable
@@ -411,12 +422,12 @@ func tarea(wg *sync.WaitGroup) {
 
 func main() {
     var wg sync.WaitGroup
-    
+
     wg.Add(1)          // Aumentar contador
     go tarea(&wg)      // Pasar WaitGroup
-    
+
     wg.Wait()          // Esperar a que todas terminen
-    
+
     fmt.Println("Todas las goroutines completadas")
 }
 ```
@@ -453,11 +464,11 @@ func tarea(done chan bool) {
 
 func main() {
     done := make(chan bool)
-    
+
     go tarea(done)
-    
+
     <-done  // Esperar señal
-    
+
     fmt.Println("Tarea completada")
 }
 ```
@@ -511,14 +522,14 @@ func tarea(id int) {
 
 func main() {
     fmt.Printf("Goroutines activas al inicio: %d\n", runtime.NumGoroutine())
-    
+
     go tarea(1)
     go tarea(2)
-    
+
     fmt.Printf("Goroutines activas después de go: %d\n", runtime.NumGoroutine())
-    
+
     time.Sleep(2 * time.Second)
-    
+
     fmt.Printf("Goroutines activas al final: %d\n", runtime.NumGoroutine())
 }
 
@@ -544,20 +555,20 @@ import (
 
 func trabajador(id int, duracion time.Duration) {
     fmt.Printf("[%d] Iniciando (%dms)\n", id, duracion.Milliseconds())
-    
+
     // CREADA → RUNNING
-    
+
     // Simular trabajo
     time.Sleep(duracion)
-    
+
     // BLOCKED (durante Sleep) → RUNNING → TERMINATED
-    
+
     fmt.Printf("[%d] Completada\n", id)
 }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     for i := 1; i <= 3; i++ {
         wg.Add(1)
         id := i
@@ -566,7 +577,7 @@ func main() {
             trabajador(id, time.Duration(id)*100*time.Millisecond)
         }()
     }
-    
+
     wg.Wait()
     fmt.Println("Todas completadas")
 }
@@ -592,9 +603,9 @@ func serverEterno() {
 
 func main() {
     go serverEterno()
-    
+
     time.Sleep(3 * time.Second)
-    
+
     // El programa termina, serverEterno se detiene abruptamente
     fmt.Println("Main terminando")
 }
@@ -619,7 +630,7 @@ import (
 
 func descargarArchivo(nombre string, duracion time.Duration, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     fmt.Printf("Descargando: %s\n", nombre)
     time.Sleep(duracion)
     fmt.Printf("✓ %s completado\n", nombre)
@@ -627,9 +638,9 @@ func descargarArchivo(nombre string, duracion time.Duration, wg *sync.WaitGroup)
 
 func main() {
     var wg sync.WaitGroup
-    
+
     start := time.Now()
-    
+
     // Descargar 5 archivos
     archivos := []struct {
         nombre   string
@@ -641,18 +652,18 @@ func main() {
         {"archivo4.txt", 3 * time.Second},
         {"archivo5.txt", 1 * time.Second},
     }
-    
+
     for _, archivo := range archivos {
         wg.Add(1)
         a := archivo
         go descargarArchivo(a.nombre, a.duracion, &wg)
     }
-    
+
     wg.Wait()
-    
+
     elapsed := time.Since(start)
     fmt.Printf("\nTiempo total: %.2fs\n", elapsed.Seconds())
-    
+
     // Output:
     // Descargando: archivo1.txt
     // Descargando: archivo2.txt
@@ -670,6 +681,7 @@ func main() {
 ```
 
 **Análisis:**
+
 - Síncrono: 1+2+1+3+1 = 8 segundos
 - Concurrente: max(1,2,1,3,1) = 3 segundos
 - **Mejora: 2.67x más rápido**
@@ -688,25 +700,25 @@ import (
 
 func procesarElemento(id int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     duracion := time.Duration(rand.Intn(5)) * time.Second
     fmt.Printf("[%d] Procesando (%ds)\n", id, duracion)
-    
+
     time.Sleep(duracion)
-    
+
     fmt.Printf("[%d] ✓ Completado\n", id)
 }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // Procesar 10 elementos concurrentemente
     for i := 1; i <= 10; i++ {
         wg.Add(1)
         id := i
         go procesarElemento(id, &wg)
     }
-    
+
     wg.Wait()
     fmt.Println("✓ Todos procesados")
 }
@@ -727,25 +739,25 @@ import (
 
 func mostrarGoroutineID(id int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     // Obtener ID de la goroutine actual
     var gid uint64
     gid = uint64(id) // (En Go 1.17+, no hay API directa para goroutine ID)
-    
+
     fmt.Printf("Goroutine %d en OS thread %d\n", gid, id)
 }
 
 func main() {
     var wg sync.WaitGroup
     numGoroutines := 8
-    
+
     for i := 0; i < numGoroutines; i++ {
         wg.Add(1)
         go mostrarGoroutineID(i, &wg)
     }
-    
+
     wg.Wait()
-    
+
     fmt.Printf("OS threads usados: %d\n", runtime.NumCPU())
 }
 ```
@@ -766,13 +778,13 @@ func main() {
     var mu sync.Mutex
     contador := 0
     var wg sync.WaitGroup
-    
+
     // 10 goroutines incrementando el contador
     for i := 0; i < 10; i++ {
         wg.Add(1)
         go func() {
             defer wg.Done()
-            
+
             for j := 0; j < 1000; j++ {
                 mu.Lock()
                 contador++
@@ -780,9 +792,9 @@ func main() {
             }
         }()
     }
-    
+
     wg.Wait()
-    
+
     fmt.Printf("Contador final: %d\n", contador)
     // Output: 10000 (¡Sin race condition!)
 }
@@ -818,23 +830,23 @@ import (
 
 func tarea(id int, wg *sync.WaitGroup) {
     defer wg.Done()  // Decrementar cuando termine
-    
+
     fmt.Printf("Tarea %d ejecutándose\n", id)
 }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // Indicar que esperaremos 3 goroutines
     wg.Add(3)
-    
+
     go tarea(1, &wg)
     go tarea(2, &wg)
     go tarea(3, &wg)
-    
+
     // Bloquear hasta que las 3 terminen
     wg.Wait()
-    
+
     fmt.Println("✓ Todas completadas")
 }
 ```
@@ -857,15 +869,15 @@ func procesarElemento(elemento string, wg *sync.WaitGroup) {
 func main() {
     var wg sync.WaitGroup
     elementos := []string{"A", "B", "C", "D", "E"}
-    
+
     // Incrementar contador para cada goroutine
     wg.Add(len(elementos))
-    
+
     // Crear goroutine para cada elemento
     for _, elem := range elementos {
         go procesarElemento(elem, &wg)
     }
-    
+
     // Esperar a que todas terminen
     wg.Wait()
 }
@@ -883,16 +895,16 @@ import (
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // Opción 1: Agregar una por una
     wg.Add(1)
     wg.Add(1)
     wg.Add(1)
-    
+
     // Opción 2: Agregar en bloque
     var wg2 sync.WaitGroup
     wg2.Add(3)
-    
+
     // Opción 3: Agregar dinámicamente en un loop
     var wg3 sync.WaitGroup
     for i := 0; i < 3; i++ {
@@ -913,12 +925,12 @@ func main() {
 func main() {
     var wg sync.WaitGroup
     wg.Add(1)
-    
+
     go func() {
         fmt.Println("Goroutine")
         // Olvidó llamar wg.Done()
     }()
-    
+
     wg.Wait()  // ⏰ Espera eternamente
 }
 ```
@@ -929,12 +941,12 @@ func main() {
 // ❌ INCORRECTO: Race condition
 func main() {
     var wg sync.WaitGroup
-    
+
     go func() {
         wg.Add(1)      // Demasiado tarde
         defer wg.Done()
     }()
-    
+
     wg.Wait()  // Puede terminar antes de Add()
 }
 ```
@@ -963,28 +975,28 @@ import (
 
 func procesarLote(items []string, numWorkers int) {
     var wg sync.WaitGroup
-    
+
     // Canal para distribuir trabajo
     trabajos := make(chan string, len(items))
-    
+
     // Iniciar workers
     for i := 0; i < numWorkers; i++ {
         wg.Add(1)
         go func(id int) {
             defer wg.Done()
-            
+
             for trabajo := range trabajos {
                 fmt.Printf("Worker %d: %s\n", id, trabajo)
             }
         }(i)
     }
-    
+
     // Enviar trabajo
     for _, item := range items {
         trabajos <- item
     }
     close(trabajos)
-    
+
     // Esperar a todos los workers
     wg.Wait()
 }
@@ -1013,6 +1025,7 @@ type Context interface {
 ```
 
 **Propósitos:**
+
 - Pasar valores entre goroutines
 - Establecer timeouts y deadlines
 - Cancelación coordinada
@@ -1034,21 +1047,21 @@ func main() {
     // - Nunca se cancela
     // - Sin deadline
     // - Usado al inicio del programa
-    
+
     ctx1 := context.Background()
     fmt.Println("Background context:", ctx1)
-    
+
     // context.TODO()
     // - Contexto raíz de relleno
     // - Usado cuando no sabes qué context usar
     // - Indica "necesito un context aquí, pero aún no sé cuál"
-    
+
     ctx2 := context.TODO()
     fmt.Println("TODO context:", ctx2)
-    
+
     // Generalmente: usa Background() en main
     ctx := context.Background()
-    
+
     // Chequear si está cancelado
     fmt.Println("Error:", ctx.Err()) // nil (no cancelado)
     fmt.Println("Done channel:", ctx.Done())
@@ -1086,9 +1099,9 @@ func main() {
     // Crear context con timeout de 3 segundos
     ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
     defer cancel()  // Liberar recursos
-    
+
     operacionLenta(ctx)
-    
+
     // Output:
     // Paso 1
     // Paso 2
@@ -1125,18 +1138,18 @@ func servidor(ctx context.Context, nombre string) {
 
 func main() {
     ctx, cancel := context.WithCancel(context.Background())
-    
+
     // Iniciar dos servidores
     go servidor(ctx, "API")
     go servidor(ctx, "Cache")
-    
+
     // Dejar ejecutar 3 segundos
     time.Sleep(3 * time.Second)
-    
+
     // Cancelar todos
     fmt.Println("Cancelando...")
     cancel()
-    
+
     time.Sleep(1 * time.Second)
 }
 ```
@@ -1156,12 +1169,12 @@ import (
 
 func tarea(ctx context.Context) {
     deadline, ok := ctx.Deadline()
-    
+
     if ok {
         fmt.Printf("Deadline: %v\n", deadline)
         fmt.Printf("Tiempo restante: %v\n", time.Until(deadline))
     }
-    
+
     select {
     case <-ctx.Done():
         fmt.Println("Cancelado")
@@ -1176,7 +1189,7 @@ func main() {
         time.Now().Add(5*time.Second),
     )
     defer cancel()
-    
+
     tarea(ctx)
 }
 ```
@@ -1203,19 +1216,19 @@ const (
 func procesarPedido(ctx context.Context) {
     requestID := ctx.Value(requestIDKey)
     userID := ctx.Value(userIDKey)
-    
+
     fmt.Printf("Pedido %v para usuario %v\n", requestID, userID)
 }
 
 func main() {
     ctx := context.Background()
-    
+
     // Agregar valores
     ctx = context.WithValue(ctx, requestIDKey, "REQ-123")
     ctx = context.WithValue(ctx, userIDKey, "USER-456")
-    
+
     procesarPedido(ctx)
-    
+
     // Output: Pedido REQ-123 para usuario USER-456
 }
 ```
@@ -1235,6 +1248,7 @@ Background()
 ```
 
 **Comportamiento:**
+
 - Cancelar un context cancela todos sus hijos
 - Los valores se heredan hacia abajo
 - Los timeouts se heredan
@@ -1264,22 +1278,22 @@ func trabajador(ctx context.Context, id int) {
 func main() {
     // Context raíz
     rootCtx, rootCancel := context.WithCancel(context.Background())
-    
+
     // Context hijo
     childCtx, childCancel := context.WithCancel(rootCtx)
-    
+
     go trabajador(childCtx, 1)
     time.Sleep(1 * time.Second)
-    
+
     // Cancelar solo el hijo
     fmt.Println("Cancelando hijo...")
     childCancel()
     time.Sleep(1 * time.Second)
-    
+
     // Ambos se cancelan
     fmt.Println("Cancelando raíz...")
     rootCancel()
-    
+
     time.Sleep(500 * time.Millisecond)
 }
 ```
@@ -1302,16 +1316,16 @@ import (
 
 func main() {
     fmt.Printf("Goroutines al inicio: %d\n", runtime.NumGoroutine())
-    
+
     // Crear goroutine que nunca termina
     go func() {
         for {
             // Bucle infinito - nunca retorna
         }
     }()
-    
+
     fmt.Printf("Goroutines después: %d\n", runtime.NumGoroutine())
-    
+
     // Output:
     // Goroutines al inicio: 1
     // Goroutines después: 2
@@ -1351,7 +1365,7 @@ func main() {
 // ❌ LEAK: Deadlock de mutex
 func main() {
     var mu sync.Mutex
-    
+
     go func() {
         mu.Lock()
         mu.Lock()  // ⏰ Se bloquea aquí para siempre
@@ -1388,15 +1402,15 @@ import (
 func main() {
     initialGoroutines := runtime.NumGoroutine()
     fmt.Printf("Goroutines iniciales: %d\n", initialGoroutines)
-    
+
     // Ejecutar operación
     tarea()
-    
+
     time.Sleep(100 * time.Millisecond)
-    
+
     finalGoroutines := runtime.NumGoroutine()
     fmt.Printf("Goroutines finales: %d\n", finalGoroutines)
-    
+
     if finalGoroutines > initialGoroutines {
         fmt.Printf("⚠️ LEAK DETECTADO: +%d goroutines\n",
             finalGoroutines-initialGoroutines)
@@ -1425,7 +1439,7 @@ import (
 
 func procesador(ctx context.Context, trabajos <-chan int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     for {
         select {
         case <-ctx.Done():
@@ -1444,20 +1458,20 @@ func procesador(ctx context.Context, trabajos <-chan int, wg *sync.WaitGroup) {
 func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
     defer cancel()
-    
+
     var wg sync.WaitGroup
     trabajos := make(chan int, 10)
-    
+
     // Iniciar procesador
     wg.Add(1)
     go procesador(ctx, trabajos, &wg)
-    
+
     // Enviar trabajos
     for i := 0; i < 5; i++ {
         trabajos <- i
     }
     close(trabajos)
-    
+
     wg.Wait()
 }
 ```
@@ -1490,15 +1504,15 @@ func servidor(ctx context.Context, puerto int) {
 
 func main() {
     ctx, cancel := context.WithCancel(context.Background())
-    
+
     go servidor(ctx, 8080)
     go servidor(ctx, 8081)
-    
+
     time.Sleep(2 * time.Second)
-    
+
     // ✓ Cancelar todos ordenadamente
     cancel()
-    
+
     time.Sleep(500 * time.Millisecond)
 }
 ```
@@ -1521,9 +1535,9 @@ import (
 
 func main() {
     fmt.Printf("Goroutines al inicio: %d\n", runtime.NumGoroutine())
-    
+
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 5; i++ {
         wg.Add(1)
         go func(id int) {
@@ -1532,11 +1546,11 @@ func main() {
             time.Sleep(time.Second)
         }(i)
     }
-    
+
     fmt.Printf("Después de crear: %d\n", runtime.NumGoroutine())
-    
+
     wg.Wait()
-    
+
     fmt.Printf("Goroutines al final: %d\n", runtime.NumGoroutine())
 }
 ```
@@ -1559,13 +1573,14 @@ func main() {
             // Bucle infinito
         }
     }()
-    
+
     // Imprimir stack de todas las goroutines
     fmt.Println(debug.Stack())
 }
 ```
 
 **Output típico:**
+
 ```
 goroutine 1 [runnable]:
 main.main()
@@ -1596,16 +1611,16 @@ func main() {
     // Crear archivo de perfil
     f, _ := os.Create("goroutine.prof")
     defer f.Close()
-    
+
     // Crear goroutines
     done := make(chan struct{})
     for i := 0; i < 100; i++ {
         go trabajador(i, done)
     }
-    
+
     // Escribir perfil de goroutines
     pprof.Lookup("goroutine").WriteTo(f, 0)
-    
+
     fmt.Printf("Goroutines activas: %d\n", runtime.NumGoroutine())
 }
 ```
@@ -1626,12 +1641,12 @@ func main() {
     // Crear archivo de trace
     f, _ := os.Create("trace.out")
     defer f.Close()
-    
+
     trace.Start(f)
     defer trace.Stop()
-    
+
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 10; i++ {
         wg.Add(1)
         go func(id int) {
@@ -1639,7 +1654,7 @@ func main() {
             time.Sleep(time.Millisecond)
         }(i)
     }
-    
+
     wg.Wait()
 }
 
@@ -1661,23 +1676,23 @@ import (
 
 func tareaConLogging(id int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     gid := runtime.NumGoroutine()  // Aproximado
     log.Printf("[G%d] Iniciando tarea %d", gid, id)
-    
+
     time.Sleep(time.Second)
-    
+
     log.Printf("[G%d] Completada tarea %d", gid, id)
 }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 3; i++ {
         wg.Add(1)
         go tareaConLogging(i, &wg)
     }
-    
+
     wg.Wait()
     fmt.Printf("Goroutines finales: %d\n", runtime.NumGoroutine())
 }
@@ -1716,17 +1731,17 @@ func generadorDatos(items chan<- string, wg *sync.WaitGroup) {
 func main() {
     var wg sync.WaitGroup
     items := make(chan string, 10)
-    
+
     // Generador
     wg.Add(1)
     go generadorDatos(items, &wg)
-    
+
     // Procesadores
     for i := 0; i < 2; i++ {
         wg.Add(1)
         go procesadorDatos(i, items, &wg)
     }
-    
+
     wg.Wait()
 }
 ```
@@ -1756,9 +1771,9 @@ func (s *servicio) Iniciar() {
 func (s *servicio) correr() {
     defer s.wg.Done()
     fmt.Println("✓ Servicio iniciado")
-    
+
     <-s.ctx.Done()
-    
+
     fmt.Println("✗ Servicio detenido")
 }
 
@@ -1769,12 +1784,12 @@ func (s *servicio) Detener() {
 
 func main() {
     ctx, cancel := context.WithCancel(context.Background())
-    
+
     srv := &servicio{ctx: ctx, cancel: cancel}
     srv.Iniciar()
-    
+
     // Usar servicio...
-    
+
     srv.Detener()  // Espera a que termine
 }
 ```
@@ -1791,20 +1806,20 @@ import (
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // ✓ BUENA PRÁCTICA: Add antes de go
     tareas := []string{"T1", "T2", "T3"}
-    
+
     for _, tarea := range tareas {
         wg.Add(1)  // ANTES de crear la goroutine
-        
+
         t := tarea
         go func() {
             defer wg.Done()
             fmt.Printf("Ejecutando: %s\n", t)
         }()
     }
-    
+
     wg.Wait()
 }
 ```
@@ -1857,31 +1872,31 @@ type Resultado struct {
 
 func procesarConErrores(id int, resultados chan<- Resultado, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     // Simular operación que puede fallar
     err := error(nil)
     if id%2 == 0 {
         err = fmt.Errorf("error en tarea %d", id)
     }
-    
+
     resultados <- Resultado{ID: id, Error: err}
 }
 
 func main() {
     var wg sync.WaitGroup
     resultados := make(chan Resultado, 5)
-    
+
     for i := 0; i < 5; i++ {
         wg.Add(1)
         go procesarConErrores(i, resultados, &wg)
     }
-    
+
     // Goroutine para recolectar resultados
     go func() {
         wg.Wait()
         close(resultados)
     }()
-    
+
     // Procesar resultados
     for r := range resultados {
         if r.Error != nil {
@@ -1925,6 +1940,7 @@ wg.Wait()
 ```
 
 **Escalabilidad:**
+
 - Java: ~1000 threads en un servidor típico
 - Go: ~100,000+ goroutines en el mismo servidor
 
@@ -1961,7 +1977,7 @@ go func() {
 go func(ctx context.Context) {
     ticker := time.NewTicker(time.Second)
     defer ticker.Stop()
-    
+
     for {
         select {
         case <-ctx.Done():
@@ -2064,7 +2080,7 @@ type Resultado struct {
 
 func worker(id int, trabajos <-chan Trabajo, resultados chan<- Resultado, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     for trabajo := range trabajos {
         // Procesar trabajo
         resultado := Resultado{
@@ -2079,19 +2095,19 @@ func main() {
     // Configuración
     numWorkers := 3
     numTrabajos := 10
-    
+
     // Canales
     trabajos := make(chan Trabajo, numTrabajos)
     resultados := make(chan Resultado, numTrabajos)
-    
+
     var wg sync.WaitGroup
-    
+
     // Iniciar workers
     for i := 0; i < numWorkers; i++ {
         wg.Add(1)
         go worker(i, trabajos, resultados, &wg)
     }
-    
+
     // Enviar trabajos
     go func() {
         for i := 0; i < numTrabajos; i++ {
@@ -2099,13 +2115,13 @@ func main() {
         }
         close(trabajos)
     }()
-    
+
     // Recolectar resultados
     go func() {
         wg.Wait()
         close(resultados)
     }()
-    
+
     // Procesar resultados
     for r := range resultados {
         fmt.Printf("[%d] %s\n", r.ID, r.Resultado)
@@ -2166,12 +2182,12 @@ func main() {
     numeros := generador(5)
     duplicados := duplicar(numeros)
     cuadrados := alCuadrado(duplicados)
-    
+
     // Consumir resultados
     for resultado := range cuadrados {
         fmt.Println(resultado)
     }
-    
+
     // Output:
     // 0      (0*2)^2
     // 4      (1*2)^2
@@ -2196,11 +2212,11 @@ import (
 // Fan-Out: Un canal se distribuye a múltiples goroutines
 func distribuir(tareas <-chan int, numWorkers int) []<-chan int {
     canalesOut := make([]<-chan int, numWorkers)
-    
+
     for i := 0; i < numWorkers; i++ {
         ch := make(chan int)
         canalesOut[i] = ch
-        
+
         go func(out chan<- int) {
             defer close(out)
             for tarea := range tareas {
@@ -2208,7 +2224,7 @@ func distribuir(tareas <-chan int, numWorkers int) []<-chan int {
             }
         }(ch)
     }
-    
+
     return canalesOut
 }
 
@@ -2216,7 +2232,7 @@ func distribuir(tareas <-chan int, numWorkers int) []<-chan int {
 func combinar(canales ...<-chan int) <-chan int {
     var wg sync.WaitGroup
     salida := make(chan int)
-    
+
     for _, ch := range canales {
         wg.Add(1)
         go func(c <-chan int) {
@@ -2226,12 +2242,12 @@ func combinar(canales ...<-chan int) <-chan int {
             }
         }(ch)
     }
-    
+
     go func() {
         wg.Wait()
         close(salida)
     }()
-    
+
     return salida
 }
 
@@ -2244,13 +2260,13 @@ func main() {
         }
         close(tareas)
     }()
-    
+
     // Distribuir a 3 workers
     canalesOut := distribuir(tareas, 3)
-    
+
     // Combinar resultados
     resultados := combinar(canalesOut...)
-    
+
     // Consumir
     for r := range resultados {
         fmt.Println(r)
@@ -2267,6 +2283,7 @@ func main() {
 Crear un programa que ejecute una tarea en una goroutine usando `WaitGroup`.
 
 **Requisitos:**
+
 - Crear una goroutine que imprima "Hola desde goroutine"
 - Usar `sync.WaitGroup` para sincronización
 - La goroutine debe completarse antes de que main termine
@@ -2283,14 +2300,14 @@ import (
 
 func main() {
     var wg sync.WaitGroup
-    
+
     wg.Add(1)
-    
+
     go func() {
         defer wg.Done()
         fmt.Println("Hola desde goroutine")
     }()
-    
+
     wg.Wait()
     fmt.Println("Main completado")
 }
@@ -2307,6 +2324,7 @@ func main() {
 Crear 10 goroutines que ejecuten tareas concurrentemente con `WaitGroup`.
 
 **Requisitos:**
+
 - Crear 10 goroutines
 - Cada goroutine simula trabajo con `time.Sleep`
 - Usar `WaitGroup` para esperar todas
@@ -2325,7 +2343,7 @@ import (
 
 func procesarTarea(id int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     fmt.Printf("Tarea %d iniciada\n", id)
     time.Sleep(time.Duration(id*100) * time.Millisecond)
     fmt.Printf("Tarea %d completada\n", id)
@@ -2333,17 +2351,17 @@ func procesarTarea(id int, wg *sync.WaitGroup) {
 
 func main() {
     var wg sync.WaitGroup
-    
+
     start := time.Now()
-    
+
     for i := 1; i <= 10; i++ {
         wg.Add(1)
         id := i
         go procesarTarea(id, &wg)
     }
-    
+
     wg.Wait()
-    
+
     elapsed := time.Since(start)
     fmt.Printf("Tiempo total: %.2fs\n", elapsed.Seconds())
 }
@@ -2359,6 +2377,7 @@ func main() {
 Crear una goroutine que respete timeout con `context.Context`.
 
 **Requisitos:**
+
 - Goroutine que realiza "trabajo" en un loop
 - Usar `context.WithTimeout`
 - Respetar la cancelación del context
@@ -2377,7 +2396,7 @@ import (
 
 func trabajoLargo(ctx context.Context) {
     pasos := 0
-    
+
     for i := 0; i < 100; i++ {
         select {
         case <-ctx.Done():
@@ -2389,14 +2408,14 @@ func trabajoLargo(ctx context.Context) {
             time.Sleep(100 * time.Millisecond)
         }
     }
-    
+
     fmt.Printf("Completado: %d pasos\n", pasos)
 }
 
 func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
     defer cancel()
-    
+
     trabajoLargo(ctx)
 }
 
@@ -2410,6 +2429,7 @@ func main() {
 Crear múltiples servidores que se pueden cancelar con `context.WithCancel`.
 
 **Requisitos:**
+
 - Crear 3 "servidores" concurrentes
 - Usar `context.WithCancel` para controlar la ejecución
 - Cancelar todos después de 2 segundos
@@ -2429,10 +2449,10 @@ import (
 
 func servidor(ctx context.Context, nombre string, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     ticker := time.NewTicker(500 * time.Millisecond)
     defer ticker.Stop()
-    
+
     for {
         select {
         case <-ctx.Done():
@@ -2446,23 +2466,23 @@ func servidor(ctx context.Context, nombre string, wg *sync.WaitGroup) {
 
 func main() {
     ctx, cancel := context.WithCancel(context.Background())
-    
+
     var wg sync.WaitGroup
-    
+
     // Iniciar 3 servidores
     for i := 1; i <= 3; i++ {
         wg.Add(1)
         nombre := fmt.Sprintf("Servidor-%d", i)
         go servidor(ctx, nombre, &wg)
     }
-    
+
     // Esperar 2 segundos
     time.Sleep(2 * time.Second)
-    
+
     // Cancelar todos
     fmt.Println("Cancelando servidores...")
     cancel()
-    
+
     wg.Wait()
     fmt.Println("Todos los servidores cerrados")
 }
@@ -2477,6 +2497,7 @@ func main() {
 Implementar patrón generador que produce valores en una goroutine.
 
 **Requisitos:**
+
 - Goroutine que genera números en un rango
 - Usar channel para enviar valores
 - Consumidor que procesa valores
@@ -2498,10 +2519,10 @@ import (
 // Generador produce números del 1 al max
 func generador(ctx context.Context, max int) <-chan int {
     out := make(chan int)
-    
+
     go func() {
         defer close(out)
-        
+
         for i := 1; i <= max; i++ {
             select {
             case <-ctx.Done():
@@ -2512,14 +2533,14 @@ func generador(ctx context.Context, max int) <-chan int {
             }
         }
     }()
-    
+
     return out
 }
 
 // Procesador consume números del generador
 func procesador(ctx context.Context, numeros <-chan int, id int, wg *sync.WaitGroup) {
     defer wg.Done()
-    
+
     for {
         select {
         case <-ctx.Done():
@@ -2539,24 +2560,24 @@ func procesador(ctx context.Context, numeros <-chan int, id int, wg *sync.WaitGr
 func main() {
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
-    
+
     var wg sync.WaitGroup
-    
+
     // Generador produce números del 1 al 20
     numeros := generador(ctx, 20)
-    
+
     // Crear 2 procesadores
     for i := 1; i <= 2; i++ {
         wg.Add(1)
         id := i
         go procesador(ctx, numeros, id, &wg)
     }
-    
+
     // Esperar 5 segundos, luego cancelar
     time.Sleep(5 * time.Second)
     fmt.Println("\nCancelando...")
     cancel()
-    
+
     wg.Wait()
     fmt.Println("✓ Programa completado")
 }
@@ -2576,6 +2597,7 @@ Las **goroutines** son el corazón de la concurrencia en Go:
 4. **Poderosas**: M:N scheduling para máxima eficiencia
 
 **Conceptos clave:**
+
 - **WaitGroup**: Sincronización de múltiples goroutines
 - **Context**: Control de ciclo de vida, cancelación, timeouts
 - **Leaks**: Evitar goroutines que nunca terminan

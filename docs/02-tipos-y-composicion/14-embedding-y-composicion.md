@@ -38,7 +38,7 @@ En Java:
 // Cambio aparentemente inocuo en Padre
 class Padre {
     protected int contador = 0;
-    
+
     protected void incrementar() {
         contador++;
     }
@@ -1638,7 +1638,7 @@ type ServidorHTTP struct {
     // Embebe ServidorBase para heredar funcionalidad de servidor básica
     // y métodos como Iniciar, Detener.
     ServidorBase
-    
+
     // Configuración HTTP específica
     puerto    int
     handlers  map[string]http.Handler
@@ -1815,6 +1815,7 @@ Antes de embeber, pregúntate:
 **Objetivo:** Crear una jerarquía de vehículos usando embedding sin herencia.
 
 **Requisitos:**
+
 - Struct `Vehículo` base con campos: marca, modelo, velocidadMáxima
 - Métodos: Describir(), ObtenerVelocidadMáxima()
 - Struct `Auto` embebiendo `Vehículo`, con campo adicional: numeroPuertas
@@ -1926,6 +1927,7 @@ func main() {
 **Objetivo:** Crear un sistema donde los eventos pueden ser de múltiples tipos simultáneamente.
 
 **Requisitos:**
+
 - Struct `EventoBase` con: ID, timestamp, descripción
 - Struct `EventoConPrioridad` embebiendo `EventoBase`, con nivel
 - Struct `EventoConCategía` embebiendo `EventoBase`, con categoría
@@ -2047,6 +2049,7 @@ func main() {
 **Objetivo:** Crear un sistema de middleware HTTP usando embedding y composición de decoradores.
 
 **Requisitos:**
+
 - Interfaz `Handler` con método ServeHTTP
 - Middleware de Logging: registra cada solicitud
 - Middleware de Autenticación: verifica token
@@ -2202,6 +2205,7 @@ func main() {
 **Objetivo:** Crear un sistema de componentes UI donde cada componente puede embeber otros.
 
 **Requisitos:**
+
 - `Componente` base: renderText(), obtenerAltura(), obtenerAncho()
 - Tipos: `Texto`, `Botón`, `Panel`, `Ventana`
 - Algunos embedben otros (Ventana embebe Panel, Panel embebe múltiples componentes)
@@ -2350,6 +2354,7 @@ func main() {
 **Objetivo:** Crear un sistema donde un usuario puede tener múltiples roles, resolviendo conflictos de permisos.
 
 **Requisitos:**
+
 - `Usuario` base: id, nombre
 - Interfaces: `Permisos`, `Responsabilidades`
 - Tipos de rol: `Administrador`, `Empleado`, `Cliente`
@@ -2612,7 +2617,6 @@ func main() {
    - Delega: necesitas control fino, lógica adicional, evitar ambigüedad
 
 El embedding de Go es un diseño elegante que evita los problemas de herencia clásica mientras proporciona reutilización de código pragmática.
-
 
 ---
 

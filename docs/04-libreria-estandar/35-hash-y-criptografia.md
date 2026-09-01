@@ -13,6 +13,7 @@ La criptografía es el corazón de la seguridad moderna. Desde proteger contrase
 ### 35.1.1 Conceptos Básicos
 
 **Criptografía vs Criptología:**
+
 - **Criptografía:** Técnica de escribir en secreto
 - **Criptoanálisis:** Técnica de descifrar mensajes sin la clave
 - **Criptología:** Combinación de ambas
@@ -51,6 +52,7 @@ Reversible: "Φ≈∂ƒ˚∆˙©ƒ∆˚" + [Clave] → "Mi contraseña"
 ### 35.1.3 Casos de Uso Fundamentales
 
 **Cuándo usar Hashing:**
+
 - Almacenar contraseñas
 - Verificar integridad de archivos
 - Crear fingerprints de datos
@@ -58,12 +60,14 @@ Reversible: "Φ≈∂ƒ˚∆˙©ƒ∆˚" + [Clave] → "Mi contraseña"
 - Estructuras de datos (hash tables, blockchain)
 
 **Cuándo usar Encriptación:**
+
 - Proteger datos en tránsito (HTTPS, TLS)
 - Almacenamiento de datos sensibles
 - Comunicación privada
 - Cumplimiento normativo (GDPR, HIPAA)
 
 **Cuándo usar Signing:**
+
 - Autenticar mensajes
 - Non-repudiation (prueba de envío)
 - Verificar origen de datos
@@ -72,6 +76,7 @@ Reversible: "Φ≈∂ƒ˚∆˙©ƒ∆˚" + [Clave] → "Mi contraseña"
 ### 35.1.4 Criptografía Simétrica vs Asimétrica
 
 **Simétrica (una clave compartida):**
+
 ```
 Alice                                    Bob
   |                                       |
@@ -85,6 +90,7 @@ Pros: Rápido, simple
 Cons: Distribución de clave, escalabilidad
 
 **Asimétrica (par de claves):**
+
 ```
 Alice                              Bob
   | Clave privada de Bob (pública) |
@@ -183,12 +189,12 @@ func main() {
     data := "Hola, mundo"
     hash := HashString(data)
     fmt.Printf("SHA256('%s') = %s\n", data, hash)
-    
+
     // Verificar hash
     if VerifyHash(data, hash) {
         fmt.Println("✓ Hash verificado correctamente")
     }
-    
+
     // Hash de archivo
     if file_hash, err := HashFile("ejemplo.txt"); err == nil {
         fmt.Printf("Hash del archivo: %s\n", file_hash)
@@ -212,28 +218,28 @@ import (
 
 func DemostrarHashAlgoritmos(data string) {
     fmt.Println("=== Comparación de Algoritmos Hash ===\n")
-    
+
     // MD5 (NO USAR en seguridad)
     md5_hash := fmt.Sprintf("%x", md5.Sum([]byte(data)))
     fmt.Printf("MD5:       %s (❌ INSEGURO)\n", md5_hash)
-    
+
     // SHA1 (Debilitado)
     sha1_hash := fmt.Sprintf("%x", sha1.Sum([]byte(data)))
     fmt.Printf("SHA1:      %s (⚠️ DÉBIL)\n", sha1_hash)
-    
+
     // SHA256 (Estándar)
     sha256_hash := fmt.Sprintf("%x", sha256.Sum256([]byte(data)))
     fmt.Printf("SHA256:    %s (✓ RECOMENDADO)\n", sha256_hash)
-    
+
     // SHA512
     sha512_hash := fmt.Sprintf("%x", sha512.Sum512([]byte(data)))
     fmt.Printf("SHA512:    %s (✓ MÁXIMA SEGURIDAD)\n", sha512_hash[:64])
     fmt.Println("           (primeros 64 caracteres)")
-    
+
     // SHA3-256
     sha3_256 := fmt.Sprintf("%x", sha3.Sum256([]byte(data)))
     fmt.Printf("SHA3-256:  %s (✓ MODERNO)\n", sha3_256)
-    
+
     // SHA3-512
     sha3_512 := fmt.Sprintf("%x", sha3.Sum512([]byte(data)))
     fmt.Printf("SHA3-512:  %s (✓ MODERNO)\n", sha3_512[:64])
@@ -257,13 +263,13 @@ import (
 func mostrarAvalanche(data1, data2 string) {
     h1 := sha256.Sum256([]byte(data1))
     h2 := sha256.Sum256([]byte(data2))
-    
+
     fmt.Printf("Input 1: %s\n", data1)
     fmt.Printf("Hash 1:  %x\n\n", h1)
-    
+
     fmt.Printf("Input 2: %s\n", data2)
     fmt.Printf("Hash 2:  %x\n\n", h2)
-    
+
     // Contar diferencias
     diferences := 0
     for i := 0; i < 32; i++ {
@@ -271,7 +277,7 @@ func mostrarAvalanche(data1, data2 string) {
             diferences++
         }
     }
-    
+
     fmt.Printf("Bytes diferentes: %d/32\n", diferences)
     fmt.Printf("Cambios en bits (aproximado): ~%d/256\n", diferences*8/2)
 }
@@ -289,6 +295,7 @@ func main() {
 ### 35.3.1 ¿Qué es HMAC?
 
 HMAC (Hash-based Message Authentication Code) combina:
+
 - Un hash criptográfico
 - Una clave secreta compartida
 
@@ -297,7 +304,7 @@ HMAC (Hash-based Message Authentication Code) combina:
 ```
 Sender: mensaje + clave secreta → [HMAC-SHA256] → código
         envía mensaje + código
-        
+
 Receiver: recibe mensaje + código
           mensaje + clave secreta → [HMAC-SHA256] → código calculado
           ¿código calculado == código recibido? → autenticidad verificada
@@ -346,17 +353,17 @@ func GenerarHMACArchivo(filepath string, clave string) (string, error) {
 func main() {
     mensaje := "Transacción bancaria: $1000"
     claveSecreta := "MiClaveSecretaMuySegura"
-    
+
     // Generar HMAC
     codigo := GenerarHMAC(mensaje, claveSecreta)
     fmt.Printf("Mensaje: %s\n", mensaje)
     fmt.Printf("HMAC:    %s\n\n", codigo)
-    
+
     // Verificar HMAC válido
     if VerificarHMAC(mensaje, codigo, claveSecreta) {
         fmt.Println("✓ HMAC válido - Mensaje auténtico")
     }
-    
+
     // Intentar modificar mensaje
     mensajeModificado := "Transacción bancaria: $10000"
     if !VerificarHMAC(mensajeModificado, codigo, claveSecreta) {
@@ -368,37 +375,39 @@ func main() {
 ### 35.3.3 Casos de Uso HMAC
 
 **Webhooks con validación:**
+
 ```go
 func WebhookHandler(w http.ResponseWriter, r *http.Request) {
     // Leer el HMAC enviado en header
     receivedHMAC := r.Header.Get("X-Hub-Signature-256")
-    
+
     // Leer el cuerpo
     bodyBytes, _ := ioutil.ReadAll(r.Body)
-    
+
     // Generar HMAC con clave secreta
     secretKey := os.Getenv("WEBHOOK_SECRET")
     expectedHMAC := GenerarHMAC(string(bodyBytes), secretKey)
-    
+
     // Validar
     if !hmac.Equal([]byte(expectedHMAC), []byte(receivedHMAC)) {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
         return
     }
-    
+
     // Procesar webhook...
 }
 ```
 
 **API authentication:**
+
 ```go
 // Cliente
 func HacerRequestAutenticado(url string, datos string, apiSecret string) {
     codigo := GenerarHMAC(datos, apiSecret)
-    
+
     req, _ := http.NewRequest("POST", url, strings.NewReader(datos))
     req.Header.Set("X-API-Signature", codigo)
-    
+
     // Enviar request...
 }
 ```
@@ -457,19 +466,19 @@ func main() {
     contraseña := "MiContraseñaSegura123"
     hash, _ := HashPassword(contraseña)
     fmt.Printf("Hash original:    %s\n\n", hash)
-    
+
     // Almacenar en BD: hash
-    
+
     // Login - verificar
     if VerifyPassword(hash, contraseña) {
         fmt.Println("✓ Contraseña correcta - Login exitoso")
     }
-    
+
     // Intentar contraseña incorrecta
     if !VerifyPassword(hash, "ContraseñaIncorrecta") {
         fmt.Println("✗ Contraseña incorrecta - Login fallido")
     }
-    
+
     // Importante: cada hash es diferente (contiene salt aleatorio)
     hash2, _ := HashPassword(contraseña)
     fmt.Printf("\nHash diferente:   %s", hash2)
@@ -493,7 +502,7 @@ func HashPasswordArgon2(password string) string {
     // Configuración segura
     salt := make([]byte, 16)
     rand.Read(salt)  // Salt aleatorio
-    
+
     // Argon2id es mejor que Argon2i o Argon2d
     hash := argon2.IDKey(
         []byte(password),
@@ -503,7 +512,7 @@ func HashPasswordArgon2(password string) string {
         4,        // parallelism
         32,       // keyLen (256 bits)
     )
-    
+
     // Devolver salt + hash codificado
     return fmt.Sprintf("$argon2id$v=19$m=65536,t=3,p=4$%s$%s",
         base64.RawStdEncoding.EncodeToString(salt),
@@ -553,14 +562,14 @@ func HashConSalt(password string, salt string) string {
 
 func main() {
     pass := "MiContraseña"
-    
+
     // Generar salt aleatorio
     salt, _ := GenerarSalt(16)
     hash := HashConSalt(pass, salt)
-    
+
     fmt.Printf("Salt: %s\n", salt)
     fmt.Printf("Hash: %s\n", hash)
-    
+
     // Para verificar: regenerar hash con mismo salt y comparar
     verificar := HashConSalt(pass, salt)
     fmt.Printf("Verificación: %s\n", verificar == hash)
@@ -630,28 +639,28 @@ func EncriptarAES(plaintext string, clave string) (string, error) {
     for len(clave) < 32 {
         clave += " "
     }
-    
+
     bloque, err := aes.NewCipher([]byte(clave))
     if err != nil {
         return "", err
     }
-    
+
     // Generar IV (Initialization Vector) aleatorio
     iv := make([]byte, aes.BlockSize)
     if _, err := io.ReadFull(rand.Reader, iv); err != nil {
         return "", err
     }
-    
+
     // Crear stream con CBC
     stream := cipher.NewCBCEncrypter(bloque, iv)
-    
+
     // Rellenar plaintext (PKCS7)
     plaintext_padded := pkcs7Pad(plaintext, aes.BlockSize)
-    
+
     // Encriptar
     ciphertext := make([]byte, len(plaintext_padded))
     stream.CryptBlocks(ciphertext, []byte(plaintext_padded))
-    
+
     // Prepend IV y codificar en base64
     resultado := append(iv, ciphertext...)
     return base64.StdEncoding.EncodeToString(resultado), nil
@@ -666,31 +675,31 @@ func DesencriptarAES(ciphertext64 string, clave string) (string, error) {
     for len(clave) < 32 {
         clave += " "
     }
-    
+
     // Decodificar base64
     ciphertext, err := base64.StdEncoding.DecodeString(ciphertext64)
     if err != nil {
         return "", err
     }
-    
+
     // Extraer IV
     if len(ciphertext) < aes.BlockSize {
         return "", fmt.Errorf("ciphertext demasiado corto")
     }
     iv := ciphertext[:aes.BlockSize]
     ciphertext = ciphertext[aes.BlockSize:]
-    
+
     // Crear cipher
     bloque, err := aes.NewCipher([]byte(clave))
     if err != nil {
         return "", err
     }
-    
+
     // Desencriptar
     stream := cipher.NewCBCDecrypter(bloque, iv)
     plaintext := make([]byte, len(ciphertext))
     stream.CryptBlocks(plaintext, ciphertext)
-    
+
     // Remover padding
     plaintext, err = pkcs7Unpad(plaintext, aes.BlockSize)
     return string(plaintext), err
@@ -720,12 +729,12 @@ func pkcs7Unpad(data []byte, blockSize int) ([]byte, error) {
 func main() {
     plaintext := "Mensaje secreto muy importante"
     clave := "MiClaveSecretaDe32BytesMuyBuena"
-    
+
     // Encriptar
     encrypted, _ := EncriptarAES(plaintext, clave)
     fmt.Printf("Plaintext:  %s\n", plaintext)
     fmt.Printf("Encrypted:  %s\n\n", encrypted)
-    
+
     // Desencriptar
     decrypted, _ := DesencriptarAES(encrypted, clave)
     fmt.Printf("Decrypted:  %s\n", decrypted)
@@ -754,22 +763,22 @@ func EncriptarAES_GCM(plaintext string, clave string) (string, error) {
     if err != nil {
         return "", err
     }
-    
+
     // Crear GCM
     gcm, err := cipher.NewGCM(bloque)
     if err != nil {
         return "", err
     }
-    
+
     // Generar nonce aleatorio
     nonce := make([]byte, gcm.NonceSize())
     if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
         return "", err
     }
-    
+
     // Encriptar (incluye tag de autenticación)
     ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
-    
+
     return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
@@ -779,15 +788,15 @@ func DesencriptarAES_GCM(ciphertext64 string, clave string) (string, error) {
     if err != nil {
         return "", err
     }
-    
+
     gcm, err := cipher.NewGCM(bloque)
     if err != nil {
         return "", err
     }
-    
+
     ciphertext, _ := base64.StdEncoding.DecodeString(ciphertext64)
     nonce, ciphertext := ciphertext[:gcm.NonceSize()], ciphertext[gcm.NonceSize():]
-    
+
     plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
     return string(plaintext), err
 }
@@ -795,11 +804,11 @@ func DesencriptarAES_GCM(ciphertext64 string, clave string) (string, error) {
 func main() {
     plaintext := "Datos confidenciales"
     clave := "MiClaveSecretaDe32BytesMuyBuena"
-    
+
     // Encriptar con autenticación
     encrypted, _ := EncriptarAES_GCM(plaintext, clave)
     fmt.Println("✓ Encrypted with authentication tag")
-    
+
     // Desencriptar (si fue modificado, Open() falla)
     decrypted, err := DesencriptarAES_GCM(encrypted, clave)
     if err == nil {
@@ -867,13 +876,13 @@ func EncriptarChaCha20(plaintext string, clave string) (string, error) {
     // Expandir/truncar clave a 32 bytes
     key := make([]byte, 32)
     copy(key, []byte(clave))
-    
+
     cipher, _ := chacha20poly1305.New(key)
-    
+
     // Generar nonce de 12 bytes
     nonce := make([]byte, 12)
     io.ReadFull(rand.Reader, nonce)
-    
+
     ciphertext := cipher.Seal(nonce, nonce, []byte(plaintext), nil)
     return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
@@ -881,7 +890,7 @@ func EncriptarChaCha20(plaintext string, clave string) (string, error) {
 func main() {
     plaintext := "Mensaje cifrado"
     clave := "MiClaveSecreta32BytesMuyBuena!"
-    
+
     encrypted, _ := EncriptarChaCha20(plaintext, clave)
     fmt.Println("ChaCha20-Poly1305 encrypted:", encrypted)
 }
@@ -931,7 +940,7 @@ func EncriptarRSA(plaintext string, publicKey *rsa.PublicKey) (string, error) {
 // DesencriptarRSA desencripta con clave privada
 func DesencriptarRSA(ciphertext64 string, privateKey *rsa.PrivateKey) (string, error) {
     ciphertext, _ := base64.StdEncoding.DecodeString(ciphertext64)
-    
+
     plaintext, err := rsa.DecryptOAEP(
         sha256.New(),
         rand.Reader,
@@ -948,13 +957,13 @@ func DesencriptarRSA(ciphertext64 string, privateKey *rsa.PrivateKey) (string, e
 func main() {
     // Generar par de claves (2048 bits mínimo)
     privateKey, publicKey, _ := GenerarParRSA(2048)
-    
+
     // Alice encripta con clave pública de Bob
     plaintext := "Mensaje solo para Bob"
     encrypted, _ := EncriptarRSA(plaintext, publicKey)
     fmt.Printf("Plaintext:  %s\n", plaintext)
     fmt.Printf("Encrypted:  %s...\n\n", encrypted[:50])
-    
+
     // Bob desencripta con su clave privada
     decrypted, _ := DesencriptarRSA(encrypted, privateKey)
     fmt.Printf("Decrypted:  %s\n", decrypted)
@@ -981,7 +990,7 @@ func GuardarClavePrivada(filename string, key *rsa.PrivateKey) error {
         Type:  "RSA PRIVATE KEY",
         Bytes: x509.MarshalPKCS1PrivateKey(key),
     }
-    
+
     file, _ := os.Create(filename)
     defer file.Close()
     pem.Encode(file, privateKey)
@@ -1002,7 +1011,7 @@ func GuardarClavePublica(filename string, key *rsa.PublicKey) error {
         Type:  "PUBLIC KEY",
         Bytes: publicKeyBytes,
     }
-    
+
     file, _ := os.Create(filename)
     defer file.Close()
     pem.Encode(file, publicKey)
@@ -1013,7 +1022,7 @@ func GuardarClavePublica(filename string, key *rsa.PublicKey) error {
 func CargarClavePublica(filename string) (*rsa.PublicKey, error) {
     keyData, _ := os.ReadFile(filename)
     block, _ := pem.Decode(keyData)
-    
+
     publicKeyInterface, _ := x509.ParsePKIXPublicKey(block.Bytes)
     return publicKeyInterface.(*rsa.PublicKey), nil
 }
@@ -1021,15 +1030,15 @@ func CargarClavePublica(filename string) (*rsa.PublicKey, error) {
 func main() {
     // Generar par
     privateKey, _, _ := rsa.GenerateKey(rand.Reader, 2048)
-    
+
     // Guardar
     GuardarClavePrivada("private.pem", privateKey)
     GuardarClavePublica("public.pem", &privateKey.PublicKey)
-    
+
     // Cargar
     loadedPrivate, _ := CargarClavePrivada("private.pem")
     loadedPublic, _ := CargarClavePublica("public.pem")
-    
+
     fmt.Println("✓ Claves guardadas y cargadas exitosamente")
 }
 ```
@@ -1044,7 +1053,7 @@ SIMÉTRICA (AES):
 └────┬────┬──┘
      │    │
   Alice  Bob  (ambos tienen la misma clave)
-  
+
 Problema: ¿Cómo compartir la clave de forma segura?
 
 ASIMÉTRICA (RSA):
@@ -1083,7 +1092,7 @@ import (
 // FirmarMensaje firma un mensaje con clave privada
 func FirmarMensaje(mensaje string, privateKey *rsa.PrivateKey) (string, error) {
     hash := sha256.Sum256([]byte(mensaje))
-    
+
     signature, err := rsa.SignPSS(
         rand.Reader,
         privateKey,
@@ -1094,7 +1103,7 @@ func FirmarMensaje(mensaje string, privateKey *rsa.PrivateKey) (string, error) {
     if err != nil {
         return "", err
     }
-    
+
     return base64.StdEncoding.EncodeToString(signature), nil
 }
 
@@ -1102,7 +1111,7 @@ func FirmarMensaje(mensaje string, privateKey *rsa.PrivateKey) (string, error) {
 func VerificarFirma(mensaje string, signature64 string, publicKey *rsa.PublicKey) bool {
     hash := sha256.Sum256([]byte(mensaje))
     signature, _ := base64.StdEncoding.DecodeString(signature64)
-    
+
     err := rsa.VerifyPSS(
         publicKey,
         crypto.SHA256,
@@ -1110,7 +1119,7 @@ func VerificarFirma(mensaje string, signature64 string, publicKey *rsa.PublicKey
         signature,
         nil,
     )
-    
+
     return err == nil
 }
 
@@ -1118,19 +1127,19 @@ func main() {
     // Generar claves
     privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
     publicKey := &privateKey.PublicKey
-    
+
     // Alice firma un mensaje
     mensaje := "Confirmo pago de $1000"
     firma, _ := FirmarMensaje(mensaje, privateKey)
-    
+
     fmt.Printf("Mensaje: %s\n", mensaje)
     fmt.Printf("Firma:   %s...\n\n", firma[:50])
-    
+
     // Bob verifica la firma
     if VerificarFirma(mensaje, firma, publicKey) {
         fmt.Println("✓ Firma válida - Mensaje auténtico y no modificado")
     }
-    
+
     // Intentar modificar mensaje
     mensajeModificado := "Confirmo pago de $10000"
     if !VerificarFirma(mensajeModificado, firma, publicKey) {
@@ -1161,12 +1170,12 @@ func GenerarClaveECDSA() (*ecdsa.PrivateKey, error) {
 // FirmarECDSA firma con ECDSA
 func FirmarECDSA(mensaje string, privateKey *ecdsa.PrivateKey) (string, error) {
     hash := sha256.Sum256([]byte(mensaje))
-    
+
     r, s, err := ecdsa.Sign(rand.Reader, privateKey, hash[:])
     if err != nil {
         return "", err
     }
-    
+
     // Codificar firma (r, s)
     signature := append(r.Bytes(), s.Bytes()...)
     return fmt.Sprintf("%x", signature), nil
@@ -1175,25 +1184,25 @@ func FirmarECDSA(mensaje string, privateKey *ecdsa.PrivateKey) (string, error) {
 // VerificarECDSA verifica firma ECDSA
 func VerificarECDSA(mensaje string, signatureHex string, publicKey *ecdsa.PublicKey) bool {
     hash := sha256.Sum256([]byte(mensaje))
-    
+
     // Decodificar firma
     signatureBytes := make([]byte, hex.DecodedLen(len(signatureHex)))
     hex.Decode(signatureBytes, []byte(signatureHex))
-    
+
     // Extraer r y s
     r := big.NewInt(0).SetBytes(signatureBytes[:len(signatureBytes)/2])
     s := big.NewInt(0).SetBytes(signatureBytes[len(signatureBytes)/2:])
-    
+
     return ecdsa.Verify(publicKey, hash[:], r, s)
 }
 
 func main() {
     privateKey, _ := GenerarClaveECDSA()
     publicKey := &privateKey.PublicKey
-    
+
     mensaje := "Contrato inteligente"
     firma, _ := FirmarECDSA(mensaje, privateKey)
-    
+
     if VerificarECDSA(mensaje, firma, publicKey) {
         fmt.Println("✓ Firma ECDSA válida")
     }
@@ -1251,12 +1260,12 @@ func DemostrarDiferencia() {
         weak[i] = byte(mathRand.Intn(256))
     }
     fmt.Printf("math/rand (inseguro):   %x\n", weak)
-    
+
     // ✓ crypto/rand - Correcto
     strong := make([]byte, 16)
     rand.Read(strong)
     fmt.Printf("crypto/rand (seguro):   %x\n", strong)
-    
+
     // Diferencias:
     // math/rand:
     //   - Predecible si conoces la seed
@@ -1312,7 +1321,7 @@ func GenerarUUID() string {
     rand.Read(b)
     b[6] = (b[6] & 0x0f) | 0x40
     b[8] = (b[8] & 0x3f) | 0x80
-    
+
     return fmt.Sprintf("%x-%x-%x-%x-%x",
         b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }
@@ -1321,11 +1330,11 @@ func main() {
     // Token para resetear contraseña
     token, _ := GenerarTokenSeguro(32)
     fmt.Printf("Reset token: %s\n", token)
-    
+
     // Número aleatorio
     num, _ := GenerarNumeroDado(1, 100)
     fmt.Printf("Random 1-100: %d\n", num)
-    
+
     // UUID
     uuid := GenerarUUID()
     fmt.Printf("UUID: %s\n", uuid)
@@ -1356,21 +1365,21 @@ func CompararSegura(a, b string) bool {
 func midiendo() {
     correcto := "password123"
     incorrecto := "a"
-    
+
     // Medir tiempo inseguro
     start := time.Now()
     for i := 0; i < 100000; i++ {
         CompararInsegura(correcto, incorrecto)
     }
     tiempoInseguro := time.Since(start)
-    
+
     // Medir tiempo seguro
     start = time.Now()
     for i := 0; i < 100000; i++ {
         CompararSegura(correcto, incorrecto)
     }
     tiempoSeguro := time.Since(start)
-    
+
     fmt.Printf("Insegura: %v\n", tiempoInseguro)
     fmt.Printf("Segura:   %v\n", tiempoSeguro)
     fmt.Println("\n✓ Segura siempre toma igual tiempo")
@@ -1379,7 +1388,7 @@ func midiendo() {
 // ❌ Timing attack
 func AtaqueDeTemporización() {
     contraseña := "MySecurePass123"
-    
+
     // Atacante mide tiempo de respuesta
     intentos := []string{
         "a",           // ~0.001ms
@@ -1388,7 +1397,7 @@ func AtaqueDeTemporización() {
         "MyS",         // ~0.004ms
         "MySecure...   // continuar
     }
-    
+
     for _, intento := range intentos {
         start := time.Now()
         CompararInsegura(contraseña, intento)
@@ -1434,7 +1443,7 @@ func GenerarCertificadoAutofirmado(
     if err != nil {
         return nil, nil, err
     }
-    
+
     // Crear template
     template := x509.Certificate{
         SerialNumber: big.NewInt(1),
@@ -1444,12 +1453,12 @@ func GenerarCertificadoAutofirmado(
         },
         NotBefore: time.Now(),
         NotAfter:  time.Now().AddDate(0, 0, diasValido),
-        
+
         KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
         ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
         BasicConstraintsValid: true,
     }
-    
+
     // Autofirmar
     certBytes, err := x509.CreateCertificate(
         rand.Reader,
@@ -1461,29 +1470,29 @@ func GenerarCertificadoAutofirmado(
     if err != nil {
         return nil, nil, err
     }
-    
+
     return privateKey, certBytes, nil
 }
 
 // GuardarCertificado guarda certificado en archivo
-func GuardarCertificado(filename string, certBytes []byte, 
+func GuardarCertificado(filename string, certBytes []byte,
     privateKey *rsa.PrivateKey) error {
-    
+
     // Guardar certificado
     certPEM := pem.EncodeToMemory(&pem.Block{
         Type:  "CERTIFICATE",
         Bytes: certBytes,
     })
-    
+
     // Guardar clave privada
     keyPEM := pem.EncodeToMemory(&pem.Block{
         Type:  "RSA PRIVATE KEY",
         Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
     })
-    
+
     os.WriteFile(filename+".crt", certPEM, 0644)
     os.WriteFile(filename+".key", keyPEM, 0600)
-    
+
     return nil
 }
 
@@ -1493,26 +1502,26 @@ func AnalizarCertificado(certBytes []byte) error {
     if err != nil {
         return err
     }
-    
+
     fmt.Printf("Subject:     %s\n", cert.Subject)
     fmt.Printf("Issuer:      %s\n", cert.Issuer)
     fmt.Printf("Válido desde: %s\n", cert.NotBefore)
     fmt.Printf("Válido hasta: %s\n", cert.NotAfter)
     fmt.Printf("Serial:      %d\n", cert.SerialNumber)
-    
+
     return nil
 }
 
 func main() {
     // Generar certificado
     privateKey, certBytes, _ := GenerarCertificadoAutofirmado("localhost", 365)
-    
+
     // Analizar
     AnalizarCertificado(certBytes)
-    
+
     // Guardar
     GuardarCertificado("server", certBytes, privateKey)
-    
+
     fmt.Println("\n✓ Certificado generado: server.crt y server.key")
 }
 ```
@@ -1531,7 +1540,7 @@ func main() {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("¡Conexión segura TLS!"))
     })
-    
+
     // server.crt y server.key creados anteriormente
     log.Println("Servidor HTTPS en https://localhost:8443")
     log.Fatal(http.ListenAndServeTLS(
@@ -1561,24 +1570,24 @@ func VerificarCertificadoServidor(hostname string) error {
         return err
     }
     defer conn.Close()
-    
+
     // Obtener certificado
     cert := conn.ConnectionState().PeerCertificates[0]
-    
+
     // Opciones de verificación
     opts := x509.VerifyOptions{
         DNSName: hostname,
         Roots:   nil, // Usar certificados del sistema
     }
-    
+
     // Verificar
     if _, err := cert.Verify(opts); err != nil {
         return fmt.Errorf("certificado inválido: %v", err)
     }
-    
+
     fmt.Printf("✓ Certificado válido para %s\n", hostname)
     fmt.Printf("  Válido hasta: %s\n", cert.NotAfter)
-    
+
     return nil
 }
 
@@ -1614,24 +1623,24 @@ func DeriviarClaveContraseña(contraseña string, salt []byte) string {
         32,             // longitud de salida (256 bits)
         sha256.New,
     )
-    
+
     return base64.StdEncoding.EncodeToString(clave)
 }
 
 func main() {
     contraseña := "MiContraseña123"
-    
+
     // Generar salt aleatorio
     salt := make([]byte, 16)
     rand.Read(salt)
-    
+
     // Derivar clave
     clave := DeriviarClaveContraseña(contraseña, salt)
-    
+
     fmt.Printf("Contraseña: %s\n", contraseña)
     fmt.Printf("Salt:       %x\n", salt)
     fmt.Printf("Clave:      %s\n", clave)
-    
+
     // Mismo salt + contraseña = misma clave
     clave2 := DeriviarClaveContraseña(contraseña, salt)
     fmt.Printf("\nMisma contraseña + salt: %v\n", clave == clave2)
@@ -1667,7 +1676,7 @@ func DeriviarConScrypt(contraseña string, salt []byte) (string, error) {
 
 func main() {
     salt := []byte("saltsaltsaltsalt")
-    
+
     clave, _ := DeriviarConScrypt("contraseña", salt)
     fmt.Printf("Scrypt derivada: %s\n", clave)
 }
@@ -1700,11 +1709,11 @@ import (
 func AntiPatrones() {
     // 1. Hardcodear claves
     const API_KEY = "sk-1234567890abcdef"  // ¡NUNCA!
-    
+
     // 2. Almacenar en archivos sin protección
     key := "SecretoImportante"
     os.WriteFile("secret.txt", []byte(key), 0644)  // ¡Legible para todos!
-    
+
     // 3. Pasar claves en URLs
     url := "https://api.example.com?key=sk-1234567890"  // ¡En logs!
 }
@@ -1713,16 +1722,16 @@ func AntiPatrones() {
 func PatronesCorrectos() {
     // 1. Usar variables de entorno
     apiKey := os.Getenv("API_KEY")
-    
+
     // 2. Usar gestor de secretos
     // - HashiCorp Vault
     // - AWS Secrets Manager
     // - Azure Key Vault
     // - Google Secret Manager
-    
+
     // 3. Pasar claves en headers
     // Authorization: Bearer sk-1234567890
-    
+
     // 4. Rotar claves regularmente
     // - Cambiar cada 90 días
     // - Cuando un empleado se va
@@ -1827,9 +1836,9 @@ func NewRateLimiter(maxIntentosEnVentana int, ventana time.Duration) *RateLimite
 func (rl *RateLimiter) PermitirIntento(clave string) bool {
     rl.mu.Lock()
     defer rl.mu.Unlock()
-    
+
     ahora := time.Now()
-    
+
     // Limpiar intentos antiguos
     var intentoValidos []time.Time
     for _, t := range rl.intentos[clave] {
@@ -1838,19 +1847,19 @@ func (rl *RateLimiter) PermitirIntento(clave string) bool {
         }
     }
     rl.intentos[clave] = intentoValidos
-    
+
     // Verificar si se permite
     if len(rl.intentos[clave]) < rl.maxInt {
         rl.intentos[clave] = append(rl.intentos[clave], ahora)
         return true
     }
-    
+
     return false
 }
 
 func main() {
     limiter := NewRateLimiter(3, 1*time.Minute)
-    
+
     // Simular intentos de login
     for i := 1; i <= 5; i++ {
         if limiter.PermitirIntento("user@example.com") {
@@ -1884,10 +1893,10 @@ type ClienteE2E struct {
 func (c *ClienteE2E) EncriptarPraEnviar(mensaje string) (string, error) {
     bloque, _ := aes.NewCipher(c.claveLocal)
     gcm, _ := cipher.NewGCM(bloque)
-    
+
     nonce := make([]byte, gcm.NonceSize())
     io.ReadFull(rand.Reader, nonce)
-    
+
     ciphertext := gcm.Seal(nonce, nonce, []byte(mensaje), nil)
     return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
@@ -1896,15 +1905,15 @@ func main() {
     // Cliente crea su clave local
     claveLocal := make([]byte, 32)
     rand.Read(claveLocal)
-    
+
     cliente := &ClienteE2E{claveLocal: claveLocal}
-    
+
     // Encriptar mensaje
     cifrado, _ := cliente.EncriptarPraEnviar("Mensaje privado")
-    
+
     // Enviar solo cifrado al servidor
     // Servidor NO puede leer
-    
+
     // Receptor con misma clave local puede desencriptar
     fmt.Printf("Cifrado para servidor: %s\n", cifrado)
 }
@@ -1927,10 +1936,10 @@ import (
 func VerificarIntegridadArchivo(filepath string, hashEsperado string) bool {
     f, _ := os.Open(filepath)
     defer f.Close()
-    
+
     h := sha256.New()
     io.Copy(h, f)
-    
+
     hashReal := fmt.Sprintf("%x", h.Sum(nil))
     return hashReal == hashEsperado
 }
@@ -1939,7 +1948,7 @@ func main() {
     // Antes de distribuir archivo:
     // go run ./generar_archivo.go > archivo.bin
     // sha256sum archivo.bin > archivo.sha256
-    
+
     // Usuario descarga y verifica:
     if VerificarIntegridadArchivo("archivo.bin", "abc123...") {
         fmt.Println("✓ Archivo íntegro")
@@ -1974,29 +1983,29 @@ func calcularSHA256(filepath string) (string, error) {
         return "", err
     }
     defer f.Close()
-    
+
     h := sha256.New()
     if _, err := io.Copy(h, f); err != nil {
         return "", err
     }
-    
+
     return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 func main() {
     verify := flag.String("verify", "", "Verificar hash")
     flag.Parse()
-    
+
     if flag.NArg() == 0 {
         fmt.Println("Uso: hashfile <archivo> [-verify hash]")
         return
     }
-    
+
     archivo := flag.Arg(0)
     hash, _ := calcularSHA256(archivo)
-    
+
     fmt.Printf("%s: %s\n", archivo, hash)
-    
+
     if *verify != "" {
         if hash == *verify {
             fmt.Println("✓ Hash coincide")
@@ -2008,6 +2017,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - Calcular SHA256 de cualquier archivo
 - Comparar con hash conocido
 - Manejar archivos grandes eficientemente
@@ -2038,19 +2048,19 @@ func verificarHMAC(body []byte, firma string) bool {
     esperado := hmac.New(sha256.New, []byte(WEBHOOK_SECRET))
     esperado.Write(body)
     expected_sig := hex.EncodeToString(esperado.Sum(nil))
-    
+
     return hmac.Equal([]byte(firma), []byte(expected_sig))
 }
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
     firma := r.Header.Get("X-Signature")
     body, _ := io.ReadAll(r.Body)
-    
+
     if !verificarHMAC(body, firma) {
         http.Error(w, "Unauthorized", http.StatusUnauthorized)
         return
     }
-    
+
     fmt.Println("✓ Webhook verificado")
     w.WriteHeader(http.StatusOK)
 }
@@ -2089,11 +2099,11 @@ func (db *UsuarioDB) Registrar(usuario, contraseña string) error {
     if err != nil {
         return err
     }
-    
+
     db.mu.Lock()
     db.hashes[usuario] = string(hash)
     db.mu.Unlock()
-    
+
     return nil
 }
 
@@ -2101,27 +2111,27 @@ func (db *UsuarioDB) Verificar(usuario, contraseña string) bool {
     db.mu.RLock()
     hash, existe := db.hashes[usuario]
     db.mu.RUnlock()
-    
+
     if !existe {
         return false
     }
-    
+
     return bcrypt.CompareHashAndPassword([]byte(hash), []byte(contraseña)) == nil
 }
 
 func main() {
     db := &UsuarioDB{hashes: make(map[string]string)}
     scanner := bufio.NewScanner(os.Stdin)
-    
+
     for {
         fmt.Print("> ")
         scanner.Scan()
         cmd := strings.Fields(scanner.Text())
-        
+
         if len(cmd) == 0 {
             continue
         }
-        
+
         switch cmd[0] {
         case "register":
             if len(cmd) == 3 {
@@ -2166,32 +2176,32 @@ func encriptarArchivo(entrada, salida string, clave []byte) error {
     f, _ := os.Open(entrada)
     datos, _ := io.ReadAll(f)
     f.Close()
-    
+
     bloque, _ := aes.NewCipher(clave)
     gcm, _ := cipher.NewGCM(bloque)
-    
+
     nonce := make([]byte, gcm.NonceSize())
     io.ReadFull(rand.Reader, nonce)
-    
+
     cifrado := gcm.Seal(nonce, nonce, datos, nil)
-    
+
     os.WriteFile(salida, cifrado, 0644)
     return nil
 }
 
 func desencriptarArchivo(entrada, salida string, clave []byte) error {
     cifrado, _ := os.ReadFile(entrada)
-    
+
     bloque, _ := aes.NewCipher(clave)
     gcm, _ := cipher.NewGCM(bloque)
-    
+
     nonce, cifrado := cifrado[:gcm.NonceSize()], cifrado[gcm.NonceSize():]
-    
+
     datos, err := gcm.Open(nil, nonce, cifrado, nil)
     if err != nil {
         return fmt.Errorf("desencriptación falló: %v", err)
     }
-    
+
     os.WriteFile(salida, datos, 0644)
     return nil
 }
@@ -2201,10 +2211,10 @@ func main() {
     entrada := flag.String("in", "", "archivo entrada")
     salida := flag.String("out", "", "archivo salida")
     flag.Parse()
-    
+
     clave := make([]byte, 32)
     rand.Read(clave)
-    
+
     if *modo == "encrypt" {
         encriptarArchivo(*entrada, *salida, clave)
         fmt.Printf("✓ Encriptado: %s\n", *salida)
@@ -2241,23 +2251,23 @@ func verificarCertificado(hostname string) error {
         },
         Timeout: 10 * time.Second,
     }
-    
+
     conn, err := dialConf.Dial("tcp", hostname+":443")
     if err != nil {
         return fmt.Errorf("conexión fallida: %v", err)
     }
     defer conn.Close()
-    
+
     // Obtener certificado
     tlsConn := conn.(*tls.Conn)
     cert := tlsConn.ConnectionState().PeerCertificates[0]
-    
+
     // Analizar
     fmt.Printf("Host:        %s\n", cert.Subject.CommonName)
     fmt.Printf("Válido desde: %s\n", cert.NotBefore)
     fmt.Printf("Válido hasta: %s\n", cert.NotAfter)
     fmt.Printf("Emisor:      %s\n", cert.Issuer.String())
-    
+
     // Verificar fecha
     ahora := time.Now()
     if ahora.After(cert.NotAfter) {
@@ -2266,7 +2276,7 @@ func verificarCertificado(hostname string) error {
     if ahora.Before(cert.NotBefore) {
         return fmt.Errorf("certificado aún no válido")
     }
-    
+
     fmt.Println("✓ Certificado válido")
     return nil
 }
@@ -2274,7 +2284,7 @@ func verificarCertificado(hostname string) error {
 func main() {
     hostname := flag.String("host", "google.com", "hostname")
     flag.Parse()
-    
+
     if err := verificarCertificado(*hostname); err != nil {
         fmt.Printf("✗ Error: %v\n", err)
     }
@@ -2297,6 +2307,7 @@ La criptografía en Go es accesible pero requiere cuidado:
 | **Almacenar claves** | Vault, env vars | hardcoded |
 
 **Recuerda:**
+
 - ✓ Usa bibliotecas estándar (crypto/*)
 - ✓ Implementa rate limiting
 - ✓ Audita eventos de seguridad
@@ -2305,7 +2316,6 @@ La criptografía en Go es accesible pero requiere cuidado:
 - ✗ Nunca reinventes criptografía
 - ✗ Nunca hardcodees secretos
 - ✗ Nunca uses MD5 para seguridad
-
 
 ---
 

@@ -19,6 +19,7 @@ func (p Punto) distancia() float64 {
 ```
 
 **¿Por qué importan los métodos?**
+
 - **Encapsulación:** Asocian datos (struct) con comportamiento (métodos)
 - **Legibilidad:** `punto.distancia()` es más intuitivo que `distancia(punto)`
 - **Extensibilidad:** Agregar métodos a tipos existentes sin modificar el tipo
@@ -57,7 +58,7 @@ func (p Persona) presentar() string {
 
 func main() {
     juan := Persona{"Juan", 30}
-    
+
     // Ambas funcionan igual, pero la sintaxis es diferente:
     fmt.Println(presentar(juan))         // Función
     fmt.Println(juan.presentar())        // Método
@@ -65,6 +66,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Juan tiene 30 años
 Juan tiene 30 años
@@ -73,6 +75,7 @@ Juan tiene 30 años
 ### Ventajas de los Métodos
 
 **1. Sintaxis más clara (method call syntax)**
+
 ```go
 // Función: lectura derecha a izquierda
 resultado := procesar(validar(obtener(datos)))
@@ -82,6 +85,7 @@ resultado := datos.obtener().validar().procesar()
 ```
 
 **2. Namespace automático**
+
 ```go
 // Dos tipos con métodos del mismo nombre (sin conflicto)
 type Gato struct{ nombre string }
@@ -96,6 +100,7 @@ perro.sonido()  // "Guau"
 ```
 
 **3. Extensibilidad sin modificar el tipo**
+
 ```go
 // En archivo cliente.go
 func (p Persona) esMayorDeEdad() bool {
@@ -111,6 +116,7 @@ func (p Persona) esAdmin() bool {
 ```
 
 **4. Requisito para interfaces**
+
 ```go
 // Las interfaces se implementan implícitamente
 type Volador interface {
@@ -168,6 +174,7 @@ func (receiver TipoReceiver) NombreMetodo(parametros) TipoRetorno {
 ```
 
 **Componentes:**
+
 - `func`: Palabra clave para definir función/método
 - `(receiver TipoReceiver)`: **Receiver** - vinculación al tipo
 - `NombreMetodo`: Nombre del método (sin espacios)
@@ -211,10 +218,10 @@ func (c Cuenta) depositar(cantidad float64) (float64, error) {
 
 func main() {
     cuenta := Cuenta{"Ana", 1000}
-    
+
     fmt.Println(cuenta.obtenerTitular())          // Ana
     fmt.Println(cuenta.transferir(500))           // Transferencia de 500.00 realizada
-    
+
     nuevoSaldo, err := cuenta.depositar(200)
     if err == nil {
         fmt.Printf("Nuevo saldo: %.2f\n", nuevoSaldo)  // Nuevo saldo: 1200.00
@@ -223,6 +230,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Ana
 Transferencia de 500.00 realizada
@@ -274,7 +282,7 @@ func main() {
     email := Email("usuario@gmail.com")
     fmt.Println(email.estaValido())    // true
     fmt.Println(email.dominio())       // gmail.com
-    
+
     edad := Edad(25)
     fmt.Println(edad.esMayorDeEdad())  // true
     fmt.Println(edad.decada())         // Años 20
@@ -282,6 +290,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 true
 gmail.com
@@ -329,7 +338,7 @@ func (b Banco) extraer(cantidad float64) {
 
 func main() {
     mi_banco := Banco{1000}
-    
+
     fmt.Printf("Saldo inicial: %.2f\n", mi_banco.saldo)  // 1000.00
     mi_banco.extraer(200)                                  // Saldo después: 800.00
     fmt.Printf("Saldo final: %.2f\n", mi_banco.saldo)    // 1000.00 (sin cambios)
@@ -337,6 +346,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Saldo inicial: 1000.00
 Saldo después: 800.00
@@ -344,10 +354,12 @@ Saldo final: 1000.00
 ```
 
 **Pros del receiver por valor:**
+
 - No puede modificar el valor original (seguro, predecible)
 - No aloca en heap (eficiente para tipos pequeños)
 
 **Contras:**
+
 - Copia el valor completo (ineficiente para structs grandes)
 - No puede mutarse el receptor
 
@@ -372,7 +384,7 @@ func (b *Banco) extraer(cantidad float64) {
 
 func main() {
     mi_banco := Banco{1000}
-    
+
     fmt.Printf("Saldo inicial: %.2f\n", mi_banco.saldo)  // 1000.00
     mi_banco.extraer(200)                                  // Saldo después: 800.00
     fmt.Printf("Saldo final: %.2f\n", mi_banco.saldo)    // 800.00 (cambió)
@@ -380,6 +392,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Saldo inicial: 1000.00
 Saldo después: 800.00
@@ -387,11 +400,13 @@ Saldo final: 800.00
 ```
 
 **Pros del receiver por puntero:**
+
 - Modifica el valor original (mutación)
 - Eficiente para structs grandes (no copia)
 - Permite métodos que transforman el receptor
 
 **Contras:**
+
 - Puede ser confuso (mutación implícita)
 - Go autocompleta `&` si es necesario, pero conceptualmente diferente
 
@@ -435,19 +450,20 @@ func (p *Producto) cambiarNombre(nuevoNombre string) {
 
 func main() {
     producto := Producto{"Laptop", 1000}
-    
+
     fmt.Println(producto.obtenerPrecio())      // 1000
     fmt.Println(producto.descripcion())        // Laptop: $1000.00
-    
+
     producto.aplicarDescuento(10)              // Go autocompleta &producto
     fmt.Printf("Después descuento: $%.2f\n", producto.precio)  // $900.00
-    
+
     producto.cambiarNombre("Laptop Gaming")
     fmt.Println(producto.descripcion())        // Laptop Gaming: $900.00
 }
 ```
 
 **Salida:**
+
 ```
 1000
 Laptop: $1000.00
@@ -470,10 +486,10 @@ func (a *Auto) acelerar() {
 
 func main() {
     mi_auto := Auto{0}
-    
+
     // Go convierte esto automáticamente
     mi_auto.acelerar()  // Equivalente a (&mi_auto).acelerar()
-    
+
     fmt.Println(mi_auto.velocidad)  // 10
 }
 ```
@@ -523,12 +539,14 @@ func (e *Empleado) cambiarNombre(nuevo string) {
 ```
 
 **Method set de `Empleado` (valor):**
+
 ```
 obtenerNombre()
 trabajar()
 ```
 
 **Method set de `*Empleado` (puntero):**
+
 ```
 obtenerNombre()     // Promovido del valor
 trabajar()          // Promovido del valor
@@ -537,6 +555,7 @@ cambiarNombre()
 ```
 
 **Regla fundamental:**
+
 - Un **valor** puede llamar métodos con receiver por valor
 - Un **puntero** puede llamar métodos con receiver por valor O por puntero
 - Un **puntero** NO puede llamar métodos con receiver por valor si el tipo es grande (Go lo evita)
@@ -544,11 +563,11 @@ cambiarNombre()
 ```go
 func main() {
     emp := Empleado{"Carlos", 50000}
-    
+
     // Valor: puede llamar solo métodos por valor
     fmt.Println(emp.obtenerNombre())    // ✅ Funciona
     emp.darAumento(10)                   // ❌ Error: darAumento requiere *Empleado
-    
+
     // Puntero: puede llamar todos
     emp_ptr := &emp
     fmt.Println(emp_ptr.obtenerNombre())  // ✅ Funciona (autocompleta dereferencia)
@@ -593,7 +612,7 @@ func (c *CadenaConsulta) limitarA(cantidad int) *CadenaConsulta {
 
 func (c *CadenaConsulta) ejecutar() string {
     query := "SELECT * FROM usuarios"
-    
+
     if len(c.condiciones) > 0 {
         query += " WHERE " + fmt.Sprint(c.condiciones)
     }
@@ -603,7 +622,7 @@ func (c *CadenaConsulta) ejecutar() string {
     if c.limite > 0 {
         query += fmt.Sprintf(" LIMIT %d", c.limite)
     }
-    
+
     return query
 }
 
@@ -615,7 +634,7 @@ func main() {
     q1.ordenarPor("nombre")
     q1.limitarA(10)
     fmt.Println(q1.ejecutar())
-    
+
     // Con encadenamiento (mucho más legible)
     query := (&CadenaConsulta{}).
         donde("edad > 18").
@@ -628,6 +647,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 SELECT * FROM usuarios WHERE [edad > 18 activo = true] ORDER BY nombre LIMIT 10
 SELECT * FROM usuarios WHERE [edad > 18 activo = true] ORDER BY nombre LIMIT 10
@@ -690,13 +710,14 @@ func main() {
         conPepperoni().
         conChampinones().
         Construir()
-    
+
     fmt.Printf("Pizza: Queso=%v, Pepperoni=%v, Champiñones=%v, Cebolla=%v\n",
         pizza.queso, pizza.pepperoni, pizza.champinones, pizza.cebolla)
 }
 ```
 
 **Salida:**
+
 ```
 Pizza: Queso=true, Pepperoni=true, Champiñones=true, Cebolla=false
 ```
@@ -732,16 +753,17 @@ func main() {
         Animal: Animal{"Perro"},
         raza:   "Labrador",
     }
-    
+
     // Método heredado del Animal embebido
     fmt.Println(perro.descripcion())  // Soy un Perro
-    
+
     // También puedes acceder directamente
     fmt.Println(perro.Animal.descripcion())  // Soy un Perro
 }
 ```
 
 **Salida:**
+
 ```
 Soy un Perro
 Soy un Perro
@@ -775,13 +797,14 @@ func (g Gato) sonido() string {
 
 func main() {
     gato := Gato{Animal{"Misu"}}
-    
+
     fmt.Println(gato.sonido())            // Misu dice: Miau (método del Gato)
     fmt.Println(gato.Animal.sonido())     // Sonido genérico (método original)
 }
 ```
 
 **Salida:**
+
 ```
 Misu dice: Miau
 Sonido genérico
@@ -818,7 +841,7 @@ func main() {
         Coordinada: Coordinada{3, 4},
         z:          5,
     }
-    
+
     fmt.Println(punto.distancia())  // Punto 3D en (3.0, 4.0, 5.0)
 }
 ```
@@ -856,7 +879,7 @@ func (c CuentaBancaria) ObtenerSaldoPositivo() float64 {
 
 func main() {
     cuenta := CuentaBancaria{"Juan", -500}
-    
+
     fmt.Println(cuenta.ObtenerSaldo())           // -500
     fmt.Println(cuenta.ObtenerSaldoPositivo())   // 0
 }
@@ -891,13 +914,13 @@ func (p *Producto) ObtenerPrecio() float64 {
 
 func main() {
     prod := &Producto{"Laptop", 1000}
-    
+
     // Setter válido
     err := prod.EstablecerPrecio(900)
     if err == nil {
         fmt.Printf("Precio actualizado: $%.2f\n", prod.ObtenerPrecio())
     }
-    
+
     // Setter inválido
     err = prod.EstablecerPrecio(-100)
     if err != nil {
@@ -907,6 +930,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Precio actualizado: $900.00
 Error: el precio no puede ser negativo
@@ -935,9 +959,9 @@ func NuevoEvento(nombre string, dia int, mes time.Month, year int) (*Evento, err
     if nombre == "" {
         return nil, fmt.Errorf("el nombre no puede estar vacío")
     }
-    
+
     fecha := time.Date(year, mes, dia, 0, 0, 0, 0, time.UTC)
-    
+
     return &Evento{
         nombre:    nombre,
         fecha:     fecha,
@@ -960,15 +984,16 @@ func main() {
         fmt.Println("Error:", err)
         return
     }
-    
+
     evento.AgregarAsistente()
     evento.AgregarAsistente()
-    
+
     fmt.Println(evento.Detalles())
 }
 ```
 
 **Salida:**
+
 ```
 Evento: Conferencia Go
 Fecha: 15/03/2025
@@ -1001,10 +1026,10 @@ func (p *Persona) presentar() string {
 
 func main() {
     var p *Persona  // nil
-    
+
     // Calling método en nil no causa panic
     fmt.Println(p.presentar())  // Persona desconocida
-    
+
     // Llamar en puntero válido
     p = &Persona{"María"}
     fmt.Println(p.presentar())  // Hola, soy María
@@ -1012,6 +1037,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 Persona desconocida
 Hola, soy María
@@ -1041,7 +1067,7 @@ func (n *Nodo) Longitud() int {
 func main() {
     // Crear lista: 1 -> 2 -> 3 -> nil
     lista := &Nodo{1, &Nodo{2, &Nodo{3, nil}}}
-    
+
     fmt.Println(lista.Longitud())           // 3
     fmt.Println(lista.siguiente.Longitud()) // 2
     fmt.Println(lista.siguiente.siguiente.siguiente.Longitud()) // 0 (nil)
@@ -1049,6 +1075,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 3
 2
@@ -1083,10 +1110,10 @@ func SumarDirecto(a, b float64) float64 {
 
 func main() {
     calc := &Calculadora{}
-    
+
     // Método regular (necesita instancia)
     fmt.Println(calc.Sumar(10, 20))  // 30
-    
+
     // "Método estático" (sin instancia)
     fmt.Println(SumarDirecto(10, 20))  // 30
 }
@@ -1109,6 +1136,7 @@ func main() {
 ### Buenas Prácticas
 
 **1. Mantén receivers pequeños**
+
 ```go
 // ✅ Bien: receiver pequeño
 type Config struct {
@@ -1128,6 +1156,7 @@ func (b BaseDatos) Conectar() {}  // copia todo para cada llamada (lento)
 ```
 
 **2. Sé consistente con receivers**
+
 ```go
 // ✅ Bien: si algunos métodos necesitan puntero, usa puntero para todos
 type Usuario struct {
@@ -1148,6 +1177,7 @@ func (u *Usuario) ActualizarNombre(s string) {}  // puntero
 ```
 
 **3. Documenta métodos públicos**
+
 ```go
 // ✅ Bien: documentación clara
 // ObtenerSaldo devuelve el saldo actual de la cuenta.
@@ -1163,6 +1193,7 @@ func (c CuentaBancaria) ObtenerSaldo() float64 {
 ```
 
 **4. Usa encadenamiento solo cuando sea natural**
+
 ```go
 // ✅ Bien: encadenamiento mejora legibilidad
 query := NewQuery().
@@ -1181,6 +1212,7 @@ lista := NewList().
 ### Antipatrones
 
 **Antipatrón 1: Métodos que parecen getters pero modifican**
+
 ```go
 // ❌ Antipatrón: nombre engañoso
 func (c *Cuenta) ObtenerSaldo() float64 {
@@ -1196,6 +1228,7 @@ func (c *Cuenta) ObtenerSaldoConRegistro() float64 {
 ```
 
 **Antipatrón 2: Receivers inconsistentes por "eficiencia"**
+
 ```go
 // ❌ Antipatrón: razones inconsistentes
 type Pequeño struct { x int }
@@ -1208,6 +1241,7 @@ func (p *Pequeño) MetodoA() {}       // Siempre puntero si necesita ser mutable
 ```
 
 **Antipatrón 3: Métodos que hacen demasiado**
+
 ```go
 // ❌ Antipatrón: método hace múltiples cosas
 func (u *Usuario) CrearYValidarYGuardarYEnviarEmail() error {
@@ -1238,6 +1272,7 @@ u.EnviarEmail()
 ### Ejercicio 1: Sistema de Carrito de Compras
 
 Crea un struct `Carrito` que maneje productos. Debe incluir:
+
 - Método `AgregarProducto(nombre string, precio float64, cantidad int)` que añade items
 - Método `CalcularTotal() float64` que suma todos los precios
 - Método `AplicarDescuento(porcentaje float64)` que reduce el total
@@ -1275,6 +1310,7 @@ func main() {
 ### Ejercicio 2: Validador de Formulario
 
 Crea un struct `FormularioUsuario` que valide datos de registro:
+
 - Método `ValidarEmail() bool`
 - Método `ValidarContraseña() bool` (mínimo 8 caracteres, incluir número)
 - Método `ValidarNombre() bool` (no vacío, solo letras y espacios)
@@ -1313,6 +1349,7 @@ func main() {
 ### Ejercicio 3: Gestor de Temperaturas
 
 Crea un struct `Temperatura` con métodos para convertir entre escalas:
+
 - Struct almacena temperatura en Celsius
 - Método `AKelvin() float64` (conversión)
 - Método `AFahrenheit() float64` (conversión)
@@ -1344,6 +1381,7 @@ func main() {
 ### Ejercicio 4: Cadena de Responsabilidad - Logger
 
 Crea un sistema de logging con métodos encadenables:
+
 - Struct `Logger` con nivel mínimo (DEBUG, INFO, WARN, ERROR)
 - Método `Debug(msg string) *Logger`
 - Método `Info(msg string) *Logger`
@@ -1380,6 +1418,7 @@ func main() {
 ### Ejercicio 5: Constructor con Validación Compleja
 
 Crea un struct `Persona` con métodos que demuestren:
+
 - Constructor `NuevaPersona(nombre, email string, edad int) (*Persona, error)`
 - Métodos getters con lógica
 - Métodos setters con validación
@@ -1416,6 +1455,7 @@ func main() {
 ## Resumen del Capítulo 12
 
 **Conceptos clave:**
+
 - Métodos son funciones vinculadas a tipos mediante receivers
 - Receivers por valor: copian datos, no pueden mutar
 - Receivers por puntero: acceso directo, pueden mutar
@@ -1426,6 +1466,7 @@ func main() {
 - Go autocompleta & cuando es necesario
 
 **Patrones importantes:**
+
 - Getters y setters para encapsulación
 - Constructores para inicialización validada
 - Builder pattern para objetos complejos
@@ -1433,6 +1474,7 @@ func main() {
 - Consistencia en tipo de receiver
 
 **Reglas de oro:**
+
 1. Elige receiver basado en mutación, no tamaño
 2. Sé consistente: si un método es puntero, todos deben serlo
 3. Usa encadenamiento para mejorar legibilidad natural

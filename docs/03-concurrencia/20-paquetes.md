@@ -1,6 +1,7 @@
 # Capítulo 20: Paquetes - Organización y reutilización de código
 
 ## Índice
+
 1. [¿Qué es un Paquete?](#201-qué-es-un-paquete)
 2. [Declaración de Paquete](#202-declaración-de-paquete)
 3. [Importación de Paquetes](#203-importación-de-paquetes)
@@ -52,21 +53,25 @@ proyecto/
 ### 20.1.3 Características Clave de los Paquetes en Go
 
 **1. Namespace Global**
+
 - Cada paquete define su propio namespace
 - Los símbolos se distinguen por su paquete origen
 - No hay conflictos de nombres entre paquetes
 
 **2. Visibilidad Simple**
+
 - Exportado: comienza con mayúscula (público)
 - No exportado: comienza con minúscula (privado al paquete)
 - No hay modificadores como `public`, `private`, `protected`
 
 **3. Compilación Independiente**
+
 - Go compila paquetes de forma independiente
 - Las dependencias se resuelven en tiempo de compilación
 - No hay runtime linking
 
 **4. Inicialización Ordenada**
+
 - Cada paquete puede tener función `init()`
 - Se ejecutan en orden determinista
 - Garantiza estado consistente
@@ -96,6 +101,7 @@ func incrementCount() {
 ```
 
 Uso:
+
 ```go
 package main
 
@@ -137,6 +143,7 @@ func main() {
 ```
 
 **Reglas obligatorias:**
+
 - Debe estar presente en **todo** archivo `.go`
 - Debe ser la **primera línea** ejecutable (después de comentarios)
 - Todos los archivos en el mismo directorio deben tener el **mismo nombre de paquete**
@@ -147,6 +154,7 @@ func main() {
 **Reglas para nombres de paquetes:**
 
 1. **Minúsculas**: siempre minúsculas (no CamelCase)
+
    ```go
    package utils     // ✓ Correcto
    package Utils     // ✗ Incorrecto
@@ -154,6 +162,7 @@ func main() {
    ```
 
 2. **Una palabra**: nombres cortos y descriptivos
+
    ```go
    package fmt       // ✓ format
    package bytes     // ✓ operaciones con bytes
@@ -161,6 +170,7 @@ func main() {
    ```
 
 3. **Sin guiones ni caracteres especiales**: sólo letras y números
+
    ```go
    package http2     // ✓ Válido
    package my_util   // ✗ Incorrecto (guión bajo no recomendado)
@@ -168,6 +178,7 @@ func main() {
    ```
 
 4. **Descriptivos pero breves**: evita nombres genéricos
+
    ```go
    package parser    // ✓ Bueno
    package p         // ✗ Muy corto
@@ -176,6 +187,7 @@ func main() {
    ```
 
 5. **Relacionados con el contenido**: el nombre debe reflejar el propósito
+
    ```go
    package json      // Contiene funciones para JSON
    package csv       // Contiene funciones para CSV
@@ -185,6 +197,7 @@ func main() {
 ### 20.2.3 Excepciones: main y test
 
 **Paquete main**
+
 ```go
 package main
 
@@ -194,11 +207,13 @@ func main() {
 ```
 
 El paquete `main` es especial:
+
 - No se puede importar desde otros paquetes
 - Debe contener una función `main()`
 - Compilation ejecutable genera un binario
 
 **Paquetes test**
+
 ```go
 package mypackage_test
 
@@ -271,12 +286,14 @@ func main() {
 ```
 
 La sentencia `import` especifica:
+
 - Ruta del paquete (desde `$GOPATH/src` o `$GOROOT/src`)
 - Cómo se accede al paquete en el código
 
 ### 20.3.2 Múltiples Importaciones
 
 **Forma explícita:**
+
 ```go
 import "fmt"
 import "os"
@@ -284,6 +301,7 @@ import "math"
 ```
 
 **Forma agrupada (recomendada):**
+
 ```go
 import (
     "fmt"
@@ -295,15 +313,16 @@ import (
 Gofmt reorganiza automáticamente los imports en este formato.
 
 **Orden alfabético automático:**
+
 ```go
 import (
     "fmt"           // stdlib
     "os"
     "path/filepath"
-    
+
     "github.com/user/lib1"  // paquetes externos
     "github.com/user/lib2"
-    
+
     "miproyecto/config"     // paquetes internos
     "miproyecto/utils"
 )
@@ -330,6 +349,7 @@ func main() {
 ```
 
 **Casos de uso:**
+
 - Evitar conflictos de nombres
 - Aclarar el origen del paquete
 - Nombres más cortos para paquetes complejos
@@ -357,15 +377,18 @@ func main() {
 ```
 
 **Desventajas:**
+
 - Ambigüedad: no sabes de dónde viene el símbolo
 - Dificulta el mantenimiento
 - Conflictos potenciales
 
 **Cuándo usar:**
+
 - Tests únicamente
 - Scripts simples y pequeños
 
 **Ejemplo correcto (en tests):**
+
 ```go
 package mypackage
 
@@ -397,11 +420,13 @@ func main() {
 ```
 
 **Casos de uso:**
+
 - Registrar drivers de base de datos
 - Inicializar side-effects
 - Forzar imports de dependencias
 
 **Ejemplo: Registrar handlers HTTP**
+
 ```go
 package main
 
@@ -416,6 +441,7 @@ func main() {
 ```
 
 En `handlers/handlers.go`:
+
 ```go
 package handlers
 
@@ -433,6 +459,7 @@ func handleUsers(w http.ResponseWriter, r *http.Request) {
 ### 20.3.6 Manejo de Errores de Importación
 
 **Import no utilizado:**
+
 ```go
 import "fmt"  // Error: fmt no se usa
 
@@ -444,11 +471,13 @@ func main() {
 ```
 
 **Paquete no encontrado:**
+
 ```go
 import "miproyecto/noexistente"  // Error en compilación
 ```
 
 **Alias no utilizado:**
+
 ```go
 import util "miproyecto/utils"  // Error si util no se usa
 ```
@@ -486,6 +515,7 @@ go.mod
 ```
 
 **Archivo go.mod típico:**
+
 ```
 module github.com/usuario/miproyecto
 
@@ -498,6 +528,7 @@ require (
 ```
 
 **Instalación de dependencias:**
+
 ```bash
 go get github.com/lib/pq              # Agrega a go.mod
 go get -u github.com/lib/pq           # Actualiza a versión más reciente
@@ -517,6 +548,7 @@ import (
 ```
 
 **Estructura de proyecto:**
+
 ```
 github.com/usuario/miproyecto/
 ├── go.mod
@@ -528,6 +560,7 @@ github.com/usuario/miproyecto/
 ```
 
 **En main.go:**
+
 ```go
 package main
 
@@ -589,6 +622,7 @@ import "github.com/lib/pq"
 ```
 
 **Cambio de versión:**
+
 ```bash
 go get github.com/lib/pq@v1.11.0     # Versión específica
 go get github.com/lib/pq@latest      # Última versión
@@ -609,6 +643,7 @@ replace github.com/lib/pq => /local/path/to/pq
 ```
 
 Útil para:
+
 - Testing de cambios no publicados
 - Trabajar con forks locales
 - Monorepos
@@ -822,6 +857,7 @@ func (m *memoryStorage) Delete(key string) error {
 ```
 
 Uso:
+
 ```go
 var store storage.Storage = storage.NewMemoryStorage()
 store.Set("key", "value")
@@ -850,10 +886,12 @@ func encodeToken(userID string, expiry time.Time) (string, error) {
 ### 20.6.1 Qué es init()
 
 `init()` es una función especial ejecutada automáticamente cuando:
+
 - Se importa el paquete
 - Se carga el programa
 
 **Características:**
+
 - Se ejecuta **antes** de `main()`
 - No recibe argumentos
 - No devuelve nada
@@ -968,6 +1006,7 @@ func main() {
 ```
 
 Orden de ejecución (aproximado):
+
 1. `config.init()`
 2. `database.init()`
 3. `logger.init()`
@@ -1017,12 +1056,12 @@ func init() {
     if port != "" {
         AppPort = ":" + port
     }
-    
+
     env := os.Getenv("ENV")
     if env != "" {
         AppEnv = env
     }
-    
+
     log.Printf("App iniciada en puerto %s (env: %s)", AppPort, AppEnv)
 }
 ```
@@ -1046,11 +1085,11 @@ func init() {
     if err != nil {
         log.Fatal("No se conectó a la base de datos:", err)
     }
-    
+
     if err := DB.Ping(); err != nil {
         log.Fatal("DB no responde:", err)
     }
-    
+
     log.Println("Base de datos conectada")
 }
 ```
@@ -1126,6 +1165,7 @@ Solución: refactorizar dependencias.
 ### 20.7.1 Especificidad del Paquete main
 
 El paquete `main` es especial en Go. Es el único paquete que:
+
 - **Genera** un ejecutable binario
 - **No se puede importar** desde otros paquetes
 - **Debe contener** una función `main()`
@@ -1201,7 +1241,7 @@ var (
 // init() para setup inicial
 func init() {
     flag.Parse()
-    
+
     if *logFile != "" {
         // Configurar logging a archivo
     }
@@ -1211,7 +1251,7 @@ func init() {
 func main() {
     cfg := config.Load(*debug)
     srv := server.New(cfg)
-    
+
     if err := srv.Start(*port); err != nil {
         log.Fatal(err)
     }
@@ -1234,6 +1274,7 @@ proyecto/
 ```
 
 **main.go minimalista:**
+
 ```go
 package main
 
@@ -1246,7 +1287,7 @@ import (
 func main() {
     cfg := config.New()
     srv := server.New(cfg)
-    
+
     if err := srv.Start(); err != nil {
         log.Fatal(err)
     }
@@ -1254,6 +1295,7 @@ func main() {
 ```
 
 **Ventajas:**
+
 - Testeable: `config` y `server` se pueden testear
 - No testeable: `main` es difícil de testear (es punto de entrada)
 - Reutilizable: otros programas pueden importar `config`, `server`
@@ -1279,6 +1321,7 @@ proyecto/
 ```
 
 **Compilación:**
+
 ```bash
 go build -o bin/server ./cmd/server
 go build -o bin/cli ./cmd/cli
@@ -1343,24 +1386,27 @@ Esto aparece en `godoc`.
 **Reglas de formato:**
 
 1. **Empieza con el nombre del identificador**
+
    ```go
    // User es un usuario del sistema
    // ✓ Correcto: empieza con el nombre
-   
+
    // Este es un usuario
    // ✗ Incorrecto: no empieza con el nombre
    ```
 
 2. **Oraciones completas**
+
    ```go
    // NewUser crea un nuevo usuario con la validación requerida
    // ✓ Correcto
-   
+
    // Crear usuario
    // ✗ Menos formal
    ```
 
 3. **Formato limpio**
+
    ```go
    // GenerateToken crea un token JWT para autenticación.
    // El token expira después de 24 horas.
@@ -1377,12 +1423,14 @@ Esto aparece en `godoc`.
 ### 20.8.4 Generación de Documentación con godoc
 
 **Ver documentación en terminal:**
+
 ```bash
 godoc miproyecto/mypackage
 godoc -http=:6060              # Abre servidor web en localhost:6060
 ```
 
 **Ejemplo de salida:**
+
 ```
 PACKAGE
 
@@ -1513,6 +1561,7 @@ cmd/
 ```
 
 **Compilación:**
+
 ```bash
 go build -o bin/server ./cmd/server
 go build -o bin/cli ./cmd/cli
@@ -1534,6 +1583,7 @@ pkg/
 ```
 
 Importable:
+
 ```go
 import "github.com/usuario/myproject/pkg/config"
 ```
@@ -1553,12 +1603,14 @@ internal/
 ```
 
 **Go rechaza:**
+
 ```go
 // Desde otro proyecto:
 import "github.com/usuario/myproject/internal/models"  // Error: 403
 ```
 
 **Pero está permitido dentro del proyecto:**
+
 ```go
 // En cmd/server/main.go:
 import "github.com/usuario/myproject/internal/models"  // ✓ Permitido
@@ -1577,11 +1629,13 @@ database/
 ```
 
 **Reglas:**
+
 - Todos deben ser `package database`
 - Se importan como un único paquete
 - Los tests van en `_test.go`
 
 **Ejemplo: db.go**
+
 ```go
 package database
 
@@ -1597,6 +1651,7 @@ func Connect(dsn string) error {
 ```
 
 **Ejemplo: query.go**
+
 ```go
 package database
 
@@ -1615,6 +1670,7 @@ func (q *Query) From(table string) *Query {
 ```
 
 Importación simple:
+
 ```go
 import "miproyecto/database"
 
@@ -1645,6 +1701,7 @@ func main() {
 ### 20.10.1 Qué es una Dependencia Circular
 
 Una dependencia circular ocurre cuando:
+
 - El paquete A importa al paquete B
 - El paquete B importa al paquete A
 
@@ -1686,6 +1743,7 @@ func FunctionB() {
 ```
 
 **Error de compilación:**
+
 ```
 circular import not allowed
     miproyecto/a
@@ -2114,12 +2172,14 @@ type User struct {
 **Objetivo**: Crear un paquete `utils` con funciones útiles, documentadas y bien organizadas.
 
 **Requisitos:**
+
 - Crear directorio `utils/`
 - Tres funciones exportadas: `Reverse()`, `ToUpperWords()`, `CountWords()`
 - Documentación completa con comentarios
 - Archivo `utils_test.go` con tests básicos
 
 **Estructura:**
+
 ```
 ejercicio1/
 ├── go.mod
@@ -2180,7 +2240,7 @@ func TestReverse(t *testing.T) {
         {"Go", "oG"},
         {"", ""},
     }
-    
+
     for _, tt := range tests {
         got := Reverse(tt.input)
         if got != tt.expected {
@@ -2210,12 +2270,14 @@ func main() {
 **Objetivo**: Crear paquete `config` que carga configuración y utiliza `init()`.
 
 **Requisitos:**
+
 - Función `init()` que carga valores por defecto
 - Constructor `New()` que valida configuración
 - Implementar valores por defecto de environment variables
 - Método para acceder (patrón getter privado)
 
 **Estructura:**
+
 ```
 ejercicio2/
 ├── go.mod
@@ -2296,7 +2358,7 @@ import (
 
 func main() {
     cfg := config.New()
-    fmt.Printf("App: %s, Port: %s, Debug: %v\n", 
+    fmt.Printf("App: %s, Port: %s, Debug: %v\n",
         cfg.AppName(), cfg.Port(), cfg.IsDebug())
 }
 ```
@@ -2306,12 +2368,14 @@ func main() {
 **Objetivo**: Crear un paquete `math` con múltiples archivos sin exponer detalles internos.
 
 **Requisitos:**
+
 - Archivo `basic.go`: Funciones básicas exportadas
 - Archivo `advanced.go`: Funciones avanzadas
 - Archivo `internal.go`: Funciones privadas
 - Implementar al menos 5 operaciones
 
 **Estructura:**
+
 ```
 ejercicio3/
 ├── go.mod
@@ -2413,11 +2477,13 @@ func main() {
 **Objetivo**: Trabajar con múltiples paquetes que tienen nombres similares, usando alias.
 
 **Requisitos:**
+
 - Crear paquetes con nombres potencialmente conflictivos
 - Usar alias en imports para claridad
 - Demostrar uso de múltiples paquetes similares
 
 **Estructura:**
+
 ```
 ejercicio4/
 ├── go.mod
@@ -2482,10 +2548,10 @@ import (
 func main() {
     parsed := p.Parse("hello")
     fmt.Println(parsed.Data)
-    
+
     formatted := f.Format("world")
     fmt.Println(formatted.Formatted)
-    
+
     serialized := s.Serialize(parsed)
     fmt.Println(serialized)
 }
@@ -2496,12 +2562,14 @@ func main() {
 **Objetivo**: Crear un paquete completamente documentado siguiendo estándares Go.
 
 **Requisitos:**
+
 - Package doc al inicio
 - Documentación de cada función
 - Archivo `example_test.go` con ejemplos
 - Función `Example()` ejecutable
 
 **Estructura:**
+
 ```
 ejercicio5/
 ├── go.mod
@@ -2691,12 +2759,12 @@ Visibilidad (dentro de un paquete):
 **Fin del Capítulo 20**
 
 Ahora estás preparado para:
+
 - Organizar tu código en paquetes eficientemente
 - Manejar imports y visibilidad correctamente
 - Documentar paquetes para uso público
 - Evitar problemas comunes como ciclos de dependencia
 - Crear una arquitectura escalable y mantenible
-
 
 ---
 

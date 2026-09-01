@@ -2357,6 +2357,7 @@ func TestTCPServer(t *testing.T) {
 Implementa un servidor TCP que repita (echo) todo lo que reciba del cliente.
 
 **Requisitos:**
+
 - Escuchar en puerto 9000
 - Aceptar múltiples conexiones simultáneas
 - Para cada línea recibida, devolver: "ECHO: [línea recibida]"
@@ -2380,6 +2381,7 @@ import (
 ```
 
 **Prueba desde terminal:**
+
 ```bash
 go run ejercicio1_echo.go
 
@@ -2399,6 +2401,7 @@ QUIT
 Crea un cliente HTTP que:
 
 **Requisitos:**
+
 - Hacer GET a múltiples URLs
 - Agregar headers personalizados (User-Agent, Authorization)
 - Manejo de errors (timeout, no alcanzable)
@@ -2421,6 +2424,7 @@ import (
 ```
 
 **Uso:**
+
 ```bash
 go run ejercicio2_http_client.go
 ```
@@ -2432,6 +2436,7 @@ go run ejercicio2_http_client.go
 Implementa un servidor HTTP con múltiples endpoints.
 
 **Requisitos:**
+
 - GET /usuarios - Listar usuarios (JSON)
 - POST /usuarios - Crear usuario (JSON)
 - GET /usuarios/:id - Obtener usuario específico
@@ -2467,6 +2472,7 @@ type Usuario struct {
 Crea un programa que analice URLs y extraiga componentes.
 
 **Requisitos:**
+
 - Parsear URLs complejas
 - Extraer: scheme, host, port, path, query, fragment
 - Construir URLs dinámicamente
@@ -2487,6 +2493,7 @@ import (
 ```
 
 **Uso:**
+
 ```bash
 go run ejercicio4_url_parser.go
 ```
@@ -2498,6 +2505,7 @@ go run ejercicio4_url_parser.go
 Implementa conexión TLS directa (no vía http.Client).
 
 **Requisitos:**
+
 - Conectar a servidor HTTPS
 - Verificar certificado
 - Mostrar información del certificado
@@ -2688,12 +2696,12 @@ for i := 0; i < 1000; i++ {
 
 ## Referencias Útiles
 
-- **Go Net Docs**: https://pkg.go.dev/net
-- **Go HTTP Docs**: https://pkg.go.dev/net/http
-- **Go TLS Docs**: https://pkg.go.dev/crypto/tls
-- **RFC 793** (TCP): https://tools.ietf.org/html/rfc793
-- **RFC 1035** (DNS): https://tools.ietf.org/html/rfc1035
-- **RFC 7230-7237** (HTTP/1.1): https://tools.ietf.org/html/rfc7230
+- **Go Net Docs**: <https://pkg.go.dev/net>
+- **Go HTTP Docs**: <https://pkg.go.dev/net/http>
+- **Go TLS Docs**: <https://pkg.go.dev/crypto/tls>
+- **RFC 793** (TCP): <https://tools.ietf.org/html/rfc793>
+- **RFC 1035** (DNS): <https://tools.ietf.org/html/rfc1035>
+- **RFC 7230-7237** (HTTP/1.1): <https://tools.ietf.org/html/rfc7230>
 
 ---
 

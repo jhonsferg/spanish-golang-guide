@@ -179,13 +179,13 @@ import "fmt"
 func main() {
     // Panic con string
     panic("algo salió mal")
-    
+
     // Panic con error
     panic(errors.New("error crítico"))
-    
+
     // Panic con número
     panic(42)
-    
+
     // Panic con struct personalizado
     type ErrorInfo struct {
         Mensaje string
@@ -209,7 +209,7 @@ func ejemploPanicTipos() {
             fmt.Printf("Recuperado: %v (tipo: %T)\n", r, r)
         }
     }()
-    
+
     switch r := recover(); r {
     case nil:
         fmt.Println("Sin panic")
@@ -224,7 +224,7 @@ func ejemploPanicTipos() {
 
 // Resultado del stack trace:
 // panic: error string
-// 
+//
 // goroutine 1 [running]:
 // main.ejemploPanicTipos()
 //     /ruta/al/archivo.go:25
@@ -303,7 +303,7 @@ type PanicInfo struct {
 func panicEstructurado(msg string, contexto map[string]interface{}) {
     pc, file, line, _ := runtime.Caller(1)
     fn := runtime.FuncForPC(pc)
-    
+
     info := PanicInfo{
         Mensaje:  msg,
         Función:  fn.Name(),
@@ -311,7 +311,7 @@ func panicEstructurado(msg string, contexto map[string]interface{}) {
         Línea:    line,
         Contexto: contexto,
     }
-    
+
     panic(info)
 }
 
@@ -350,7 +350,7 @@ func main() {
             fmt.Println("¡Panic capturado:", r)
         }
     }()
-    
+
     panic("algo salió mal")
     // Línea nunca ejecutada sin defer/recover
 }
@@ -382,11 +382,11 @@ func ejecutarConRecuperación(fn func()) (err error) {
             default:
                 err = fmt.Errorf("panic: %v", x)
             }
-            
+
             log.Printf("Recuperado de panic: %v", err)
         }
     }()
-    
+
     fn()
     return nil
 }
@@ -428,7 +428,7 @@ func demostrarRecover() {
             }
         }
     }()
-    
+
     // Probar diferentes tipos
     // panic("string error")
     // panic(42)
@@ -453,7 +453,7 @@ func funcC() {
             // NO re-lanzar: El programa continúa
         }
     }()
-    
+
     panic("panic desde funcC")
     fmt.Println("funcC: línea no ejecutada")
 }
@@ -463,7 +463,7 @@ func funcB() {
     defer func() {
         fmt.Println("funcB: defer (no hay panic)")
     }()
-    
+
     funcC()
     fmt.Println("funcB: continuando después de funcC")
 }
@@ -473,7 +473,7 @@ func funcA() {
     defer func() {
         fmt.Println("funcA: defer")
     }()
-    
+
     funcB()
     fmt.Println("funcA: fin")
 }
@@ -527,22 +527,22 @@ import "fmt"
 
 func demoDeferPanic() {
     fmt.Println("Inicio")
-    
+
     defer func() {
         fmt.Println("defer 1 - siempre se ejecuta")
     }()
-    
+
     defer func() {
         fmt.Println("defer 2 - siempre se ejecuta")
     }()
-    
+
     defer func() {
         fmt.Println("defer 3 - último registrado")
         if r := recover(); r != nil {
             fmt.Printf("  Recuperado: %v\n", r)
         }
     }()
-    
+
     fmt.Println("Antes del panic")
     panic("¡Algo salió mal!")
     fmt.Println("Esta línea NO se ejecuta")
@@ -581,13 +581,13 @@ func garantizarEjecución() string {
     defer func() {
         fmt.Println("defer: limpieza siempre ocurre")
     }()
-    
+
     // Escenario 1: Return normal
     // return "valor"
-    
+
     // Escenario 2: Panic
     panic("error")
-    
+
     // Escenario 3: Nunca alcanzado
     return "nunca"
 }
@@ -613,16 +613,16 @@ func procesarArchivo(ruta string) error {
     }
     // ✓ CORRECTO: defer asegura cierre
     defer archivo.Close()
-    
+
     defer func() {
         fmt.Println("[LOG] Finalizando procesamiento")
     }()
-    
+
     // Incluso si panic ocurre aquí:
     // 1. Se ejecuta defer de logging
     // 2. Se ejecuta defer de Close
     // 3. Error se propaga
-    
+
     return nil
 }
 
@@ -632,10 +632,10 @@ func procesarArchivoMal(ruta string) error {
     if err != nil {
         return err
     }
-    
+
     // ¿Qué pasa si panic aquí? El archivo NO se cierra
     panic("error durante lectura")
-    
+
     archivo.Close()  // NUNCA SE EJECUTA
     return nil
 }
@@ -659,7 +659,7 @@ func medirTiempo(nombre string) {
         duracion := time.Since(inicio)
         fmt.Printf("[%s] Duración: %v\n", nombre, duracion)
     }()
-    
+
     // Operación que puede tomar tiempo
     time.Sleep(100 * time.Millisecond)
 }
@@ -668,7 +668,7 @@ func medirTiempo(nombre string) {
 func operacionConcurrente(mu *sync.Mutex, dato *int) {
     mu.Lock()
     defer mu.Unlock()  // Siempre se libera
-    
+
     // Incluso si panic aquí, el mutex se libera
     *dato++
     if *dato > 10 {
@@ -680,7 +680,7 @@ func operacionConcurrente(mu *sync.Mutex, dato *int) {
 func procesarTransaccion(db interface{}) error {
     // Iniciar transacción (imaginario)
     // tx := db.Begin()
-    
+
     defer func() {
         if r := recover(); r != nil {
             // tx.Rollback()  // Revertir si panic
@@ -690,7 +690,7 @@ func procesarTransaccion(db interface{}) error {
         }
         // tx.Commit()  // Confirmar si todo OK
     }()
-    
+
     // Operaciones críticas
     return nil
 }
@@ -826,15 +826,15 @@ func wrapperConRecuperacion() (resultado interface{}, err error) {
             err = fmt.Errorf("panic en wrapper: %v", r)
         }
     }()
-    
+
     // Esto es un error normal, NO un panic
     if err := operacionNormal(); err != nil {
         return nil, err  // Retornar error normalmente
     }
-    
+
     // Si ocurre panic aquí, será capturado
     panic("algo excepcional")
-    
+
     return "ok", nil
 }
 
@@ -885,7 +885,7 @@ func goroutineConPanic() {
     for i := 1; i <= 5; i++ {
         time.Sleep(100 * time.Millisecond)
         fmt.Printf("Goroutine: %d\n", i)
-        
+
         if i == 3 {
             panic("¡Error en goroutine!")
             // ← Panic aquí mata esta goroutine
@@ -895,15 +895,15 @@ func goroutineConPanic() {
 
 func main() {
     fmt.Println("Main: inicio")
-    
+
     go goroutineConPanic()
-    
+
     // Main continúa ejecutándose
     for i := 1; i <= 5; i++ {
         time.Sleep(200 * time.Millisecond)
         fmt.Printf("Main: %d\n", i)
     }
-    
+
     fmt.Println("Main: fin")
 }
 
@@ -914,7 +914,7 @@ func main() {
 // Goroutine: 2
 // Goroutine: 3
 // panic: ¡Error en goroutine!  ← Solo la goroutine muere
-// 
+//
 // Main: 2
 // Main: 3
 // Main: 4
@@ -936,7 +936,7 @@ import (
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // Goroutine 1: con panic
     wg.Add(1)
     go func() {
@@ -945,7 +945,7 @@ func main() {
         panic("error en G1")
         fmt.Println("G1: nunca se ejecuta")
     }()
-    
+
     // Goroutine 2: sin afectar
     wg.Add(1)
     go func() {
@@ -953,7 +953,7 @@ func main() {
         fmt.Println("G2: inicio")
         fmt.Println("G2: completada")
     }()
-    
+
     wg.Wait()
     fmt.Println("Main: fin")
 }
@@ -963,7 +963,7 @@ func main() {
 // G2: inicio
 // G2: completada
 // panic: error en G1
-// 
+//
 // [Program exits with panic]
 ```
 
@@ -988,13 +988,13 @@ func ejecutarConSeguridad(nombre string, fn func()) {
             // Aquí se podría notificar, logging, etc.
         }
     }()
-    
+
     fn()
 }
 
 func main() {
     var wg sync.WaitGroup
-    
+
     // Goroutine con panic (supervisada)
     wg.Add(1)
     go func() {
@@ -1004,7 +1004,7 @@ func main() {
             panic("algo salió mal")
         })
     }()
-    
+
     // Goroutine normal (supervisada)
     wg.Add(1)
     go func() {
@@ -1014,7 +1014,7 @@ func main() {
             fmt.Println("Worker 2: completado")
         })
     }()
-    
+
     wg.Wait()
     fmt.Println("Main: todos los workers finalizaron")
 }
@@ -1061,7 +1061,7 @@ func (wp *WorkerPool) Start(numWorkers int) {
 
 func (wp *WorkerPool) worker(id int) {
     defer wp.wg.Done()
-    
+
     for job := range wp.jobs {
         func() {
             defer func() {
@@ -1071,7 +1071,7 @@ func (wp *WorkerPool) worker(id int) {
                     wp.errCh <- err
                 }
             }()
-            
+
             job()
         }()
     }
@@ -1090,7 +1090,7 @@ func (wp *WorkerPool) Stop() {
 func main() {
     pool := NewWorkerPool(3)
     pool.Start(3)
-    
+
     // Enviar trabajos
     for i := 1; i <= 5; i++ {
         idx := i
@@ -1103,7 +1103,7 @@ func main() {
             fmt.Printf("Job %d: completado\n", idx)
         })
     }
-    
+
     pool.Stop()
     fmt.Println("Pool: finalizado")
 }
@@ -1145,7 +1145,7 @@ func puedeHacerPanicSafe(shouldPanic bool) (resultado string, err error) {
             }
         }
     }()
-    
+
     resultado = puedeHacerPanic(shouldPanic)
     return resultado, err
 }
@@ -1186,16 +1186,16 @@ func capturaConContext(fn func()) error {
             // Capturar stack trace
             buf := make([]byte, 4096)
             n := runtime.Stack(buf, false)
-            
+
             perr := &PanicError{
                 Valor: r,
                 Stack: string(buf[:n]),
             }
-            
+
             return  // Retornar error wrapping el panic
         }
     }()
-    
+
     fn()
     return nil
 }
@@ -1204,7 +1204,7 @@ func main() {
     err := capturaConContext(func() {
         panic("error crítico")
     })
-    
+
     if err != nil {
         fmt.Printf("Error capturado:\n%v\n", err)
     }
@@ -1230,7 +1230,7 @@ func ejecutarConLogging(operacion func(), nombre string) {
                 "[CRITICAL] Panic en %s: %v\nStack: %+v",
                 nombre, r, r,
             )
-            
+
             // Guardar en archivo de log
             file, _ := os.OpenFile(
                 "panic.log",
@@ -1238,7 +1238,7 @@ func ejecutarConLogging(operacion func(), nombre string) {
                 0644,
             )
             defer file.Close()
-            
+
             fmt.Fprintf(
                 file,
                 "[%s] Panic: %v\n",
@@ -1246,7 +1246,7 @@ func ejecutarConLogging(operacion func(), nombre string) {
             )
         }
     }()
-    
+
     operacion()
 }
 
@@ -1293,7 +1293,7 @@ func ejecutarConFallback(primario, respaldo Servicio) interface{} {
             log.Printf("Primario falló: %v, usando respaldo", r)
         }
     }()
-    
+
     resultado, _ := primario.Ejecutar()
     return resultado
 }
@@ -1301,7 +1301,7 @@ func ejecutarConFallback(primario, respaldo Servicio) interface{} {
 func main() {
     primario := &ServicioPrimario{}
     respaldo := &ServicioRespaldo{}
-    
+
     // Ejecutar primario
     resultado := ejecutarConFallback(primario, respaldo)
     fmt.Printf("Resultado: %v\n", resultado)
@@ -1325,12 +1325,12 @@ func filtroDeRecuperacion(fn func()) error {
                 // Re-lanzar errores críticos
                 panic(r)
             }
-            
+
             // Otros panics: ignorar y continuar
             fmt.Printf("Panic ignorado: %v\n", r)
         }
     }()
-    
+
     fn()
     return nil
 }
@@ -1340,9 +1340,9 @@ func main() {
     filtroDeRecuperacion(func() {
         panic("error menor")
     })
-    
+
     fmt.Println("Main: continuando después de error menor")
-    
+
     // Panic que será re-lanzado
     filtroDeRecuperacion(func() {
         panic("erro_critico")  // Esto TERMINARÁ el programa
@@ -1390,9 +1390,9 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     arr := []int{1, 2, 3}
-    
+
     fmt.Println(arr[0])  // OK: 1
     fmt.Println(arr[2])  // OK: 3
     fmt.Println(arr[3])  // PANIC: index 3 out of range [3]
@@ -1417,9 +1417,9 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     var u *Usuario  // nil pointer
-    
+
     fmt.Println(u.Nombre)  // PANIC: runtime error: invalid memory address
 }
 ```
@@ -1437,10 +1437,10 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     dividendo := 10
     divisor := 0
-    
+
     resultado := dividendo / divisor  // PANIC: divide by zero
     fmt.Println(resultado)
 }
@@ -1459,7 +1459,7 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     var m map[string]int  // nil map
     m["clave"] = 42       // PANIC: assignment to entry in nil map
 }
@@ -1478,10 +1478,10 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     ch := make(chan int)
     close(ch)
-    
+
     ch <- 42  // PANIC: send on closed channel
 }
 ```
@@ -1499,9 +1499,9 @@ func main() {
             fmt.Printf("Recuperado: %v\n", r)
         }
     }()
-    
+
     var x interface{} = "string"
-    
+
     // Panic en type assertion (sin ok)
     valor := x.(int)  // PANIC: interface conversion error
     fmt.Println(valor)
@@ -1568,12 +1568,12 @@ func main() {
             buf := make([]byte, 4096)
             n := runtime.Stack(buf, false)
             stack := string(buf[:n])
-            
+
             fmt.Printf("Panic: %v\n\n", r)
             fmt.Printf("Stack Trace:\n%s\n", stack)
         }
     }()
-    
+
     funcionA()
 }
 
@@ -1618,7 +1618,7 @@ func informacionLlamada() (string, string, int) {
     if !ok {
         return "", "", 0
     }
-    
+
     fn := runtime.FuncForPC(pc)
     return fn.Name(), archivo, línea
 }
@@ -1655,16 +1655,16 @@ type StackFrame struct {
 func capturaStack() []StackFrame {
     var frames []StackFrame
     pcs := make([]uintptr, 32)
-    
+
     // Obtener PC (Program Counter) de todas las funciones
     n := runtime.Callers(1, pcs)
-    
+
     for _, pc := range pcs[:n] {
         fn := runtime.FuncForPC(pc)
         if fn == nil {
             continue
         }
-        
+
         archivo, línea := fn.FileLine(pc)
         frames = append(frames, StackFrame{
             Función: fn.Name(),
@@ -1672,7 +1672,7 @@ func capturaStack() []StackFrame {
             Línea:   línea,
         })
     }
-    
+
     return frames
 }
 
@@ -1717,11 +1717,11 @@ func NewStackLogger() *StackLogger {
 func (sl *StackLogger) LogPanic(mensaje string) {
     pc, archivo, línea, _ := runtime.Caller(1)
     fn := runtime.FuncForPC(pc)
-    
+
     fmt.Printf("[PANIC] %s\n", mensaje)
     fmt.Printf("  Función: %s\n", fn.Name())
     fmt.Printf("  Ubicación: %s:%d\n", archivo, línea)
-    
+
     // Stack completo
     buf := make([]byte, 2048)
     n := runtime.Stack(buf, false)
@@ -1730,13 +1730,13 @@ func (sl *StackLogger) LogPanic(mensaje string) {
 
 func main() {
     logger := NewStackLogger()
-    
+
     defer func() {
         if r := recover(); r != nil {
             logger.LogPanic(fmt.Sprintf("%v", r))
         }
     }()
-    
+
     panic("error crítico")
 }
 ```
@@ -1775,9 +1775,9 @@ func TestPanicOcurre(t *testing.T) {
             t.Error("Se esperaba panic pero no ocurrió")
         }
     }()
-    
+
     funcionQueHacePanic()
-    
+
     // Si llegamos aquí sin panic: falló
     t.Error("Esta línea no debería ejecutarse si hubo panic")
 }
@@ -1789,7 +1789,7 @@ func TestNoPanic(t *testing.T) {
             t.Errorf("Unexpected panic: %v", r)
         }
     }()
-    
+
     resultado := funcionNormal()
     if resultado != "ok" {
         t.Errorf("Esperado 'ok', obtuve '%s'", resultado)
@@ -1821,12 +1821,12 @@ func TestProcesarValor(t *testing.T) {
         {"valor cero", 0, false},
         {"valor negativo", -1, true},
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.nombre, func(t *testing.T) {
             defer func() {
                 r := recover()
-                
+
                 if tt.debeHacerPan && r == nil {
                     t.Error("Se esperaba panic")
                 }
@@ -1834,7 +1834,7 @@ func TestProcesarValor(t *testing.T) {
                     t.Errorf("Panic no esperado: %v", r)
                 }
             }()
-            
+
             procesarValor(tt.entrada)
         })
     }
@@ -1857,7 +1857,7 @@ func TestConPanicProteccion(t *testing.T) {
         {"datos válidos", "ok", false},
         {"datos inválidos", nil, true},
     }
-    
+
     for _, caso := range casos {
         t.Run(caso.nombre, func(t *testing.T) {
             executarConProteccion := func() (resultado interface{}, panicked bool) {
@@ -1866,20 +1866,20 @@ func TestConPanicProteccion(t *testing.T) {
                         panicked = true
                     }
                 }()
-                
+
                 if caso.datos == nil {
                     panic("datos es nil")
                 }
                 resultado = caso.datos
                 return
             }
-            
+
             resultado, panicked := executarConProteccion()
-            
+
             if caso.panic != panicked {
                 t.Errorf("Esperado panic=%v, obtuve %v", caso.panic, panicked)
             }
-            
+
             if !caso.panic && resultado != caso.datos {
                 t.Errorf("Resultado incorrecto")
             }
@@ -1902,7 +1902,7 @@ func AssertPanic(t *testing.T, fn func(), mensaje string) {
             t.Errorf("%s: Se esperaba panic pero no ocurrió", mensaje)
         }
     }()
-    
+
     fn()
     t.Errorf("%s: Esta línea no debería ejecutarse", mensaje)
 }
@@ -1914,7 +1914,7 @@ func AssertNoPanic(t *testing.T, fn func(), mensaje string) {
             t.Errorf("%s: Panic no esperado: %v", mensaje, r)
         }
     }()
-    
+
     fn()
 }
 
@@ -1923,7 +1923,7 @@ func TestUsandoHelpers(t *testing.T) {
     AssertPanic(t, func() {
         panic("error")
     }, "debe hacer panic")
-    
+
     AssertNoPanic(t, func() {
         x := 1 + 1
     }, "no debe hacer panic")
@@ -1968,7 +1968,7 @@ func ejecutarConRecuperacion(fn func()) {
             log.Printf("Tarea falló: %v", r)
         }
     }()
-    
+
     fn()
 }
 ```
@@ -1983,10 +1983,10 @@ func procesarArchivo(ruta string) error {
         return err
     }
     defer file.Close()  // Se ejecuta SIEMPRE
-    
+
     // Incluso si ocurre panic aquí:
     datos := procesarDatos(file)
-    
+
     return guardar(datos)
 }
 ```
@@ -2015,11 +2015,11 @@ func conectar(host string, puerto int) (Conn, error) {
     if puerto < 1 || puerto > 65535 {
         panic(fmt.Sprintf("puerto inválido: %d", puerto))  // Programmer error
     }
-    
+
     if err := dial(host, puerto); err != nil {
         return nil, err  // Error normal
     }
-    
+
     return conn, nil
 }
 ```
@@ -2058,7 +2058,7 @@ func operacion() {
     defer func() {
         recover()  // Ocultar problema sin logging
     }()
-    
+
     alguna_operacion_critica()
 }
 
@@ -2069,7 +2069,7 @@ func operacion() error {
             log.Printf("PANIC: %v", r)  // Registrar siempre
         }
     }()
-    
+
     alguna_operacion_critica()
     return nil
 }
@@ -2170,6 +2170,7 @@ func main() {
 ```
 
 **Solución esperada:**
+
 - Función que hace panic
 - Función wrapper con defer/recover
 - Conversión de panic a error
@@ -2209,6 +2210,7 @@ func main() {
 ```
 
 **Solución esperada:**
+
 - Handler que ejecuta múltiples tareas
 - Recuperación individual de cada una
 - Reporte de resultados
@@ -2252,6 +2254,7 @@ func main() {
 ```
 
 **Solución esperada:**
+
 - Parser JSON que hace panic
 - Wrapper con recuperación
 - Valores por defecto apropiados
@@ -2296,6 +2299,7 @@ func main() {
 ```
 
 **Solución esperada:**
+
 - Supervisor que monitorea goroutines
 - Recuperación automática de panics
 - Reintentos con límite
@@ -2350,6 +2354,7 @@ func main() {
 ```
 
 **Solución esperada:**
+
 - Sistema completo de recuperación
 - Múltiples niveles de logging
 - Pattern Observer implementado
@@ -2417,7 +2422,7 @@ JAVA:
   } catch (IOException e) {
       log.error(e)
   }
-  
+
 GO:
   if err := conectar(); err != nil {
       return fmt.Errorf("conectar: %w", err)  // Claro: de conectar()
@@ -2443,7 +2448,7 @@ PYTHON:
       usar_default()
   finally:
       archivo.close()  # ¿Seguro si FileNotFoundError?
-      
+
 GO:
   archivo, err := os.Open("datos.txt")
   if err != nil {
@@ -2451,7 +2456,7 @@ GO:
       return
   }
   defer archivo.Close()  // SIEMPRE se ejecuta
-  
+
   var datos interface{}
   if err := json.NewDecoder(archivo).Decode(&datos); err != nil {
       usar_default()
@@ -2465,7 +2470,7 @@ GO:
 C:
   signal(SIGSEGV, handler)  // No siempre es seguro
   // Comportamiento indefinido
-  
+
 GO:
   defer func() {
       if r := recover(); r != nil {

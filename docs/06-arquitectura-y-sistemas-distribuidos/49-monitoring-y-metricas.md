@@ -7,6 +7,7 @@ En sistemas en producción, no basta con escribir código correcto. Necesitas sa
 Go, con su excelente rendimiento y modelo de concurrencia, requiere herramientas sofisticadas para monitorear comportamientos complejos. Prometheus se ha convertido en el estándar de facto para recolección de métricas en arquitecturas modernas, especialmente en ecosistemas containerizados y Kubernetes.
 
 Este capítulo te guía a través de:
+
 - Los tres pilares de la observabilidad
 - Prometheus y su arquitectura pull
 - Instrumentación de aplicaciones Go
@@ -23,6 +24,7 @@ La observabilidad moderna se construye sobre tres componentes interdependientes:
 ### 49.1.1 Conceptos Fundamentales
 
 **Logs (Registros):**
+
 - Registros detallados de eventos discretos
 - Incluyen contexto completo del evento
 - Típicamente no agregables a escala
@@ -34,6 +36,7 @@ log.Println("Usuario autenticado: user_id=123, ip=192.168.1.1, duration_ms=45")
 ```
 
 **Métricas:**
+
 - Mediciones numéricas con respecto al tiempo
 - Agregables y queryables
 - Bajo overhead incluso con alto volumen
@@ -46,6 +49,7 @@ requestDuration.WithLabelValues("POST").Observe(0.045)
 ```
 
 **Traces (Trazas):**
+
 - Seguimiento de una request a través de múltiples servicios
 - Visibilidad de latencias distribuidas
 - Contexto causal en sistemas distribuidos
@@ -77,24 +81,28 @@ Total: 255ms
 ```
 
 **Cómo se complementan:**
+
 - Métrica sube → logs del evento relevante → trace del request
 - Trace identifica servicio lento → métricas de ese servicio → logs detallados
 
 ### 49.1.3 Niveles de Observabilidad
 
 **Nivel 1: Básico**
+
 - Uptime/availability
 - Error rate
 - Request rate
 - Response time (p50, p95, p99)
 
 **Nivel 2: Intermedio**
+
 - Métricas por endpoint
 - Utilización de recursos (CPU, memoria)
 - Queue depths
 - Cache hit rates
 
 **Nivel 3: Avanzado**
+
 - Trazas distribuidas completas
 - Profiling continuo
 - Anomaly detection
@@ -109,6 +117,7 @@ Prometheus es un sistema de monitoreo de series temporales diseñado para aplica
 ### 49.2.1 Arquitectura Pull vs Push
 
 **Modelo Pull (Prometheus):**
+
 ```
 Prometheus
     ↓ (scrape every 15s)
@@ -118,12 +127,14 @@ Prometheus
 ```
 
 Ventajas:
+
 - Prometheus controla la frecuencia de scraping
 - Más fácil escalar múltiples instancias de Prometheus
 - Menos configuración en aplicaciones
 - Mejor detección de aplicaciones down
 
 **Modelo Push (Traditonal):**
+
 ```
 Tu aplicación
     ↓ (push)
@@ -139,6 +150,7 @@ nombre_metrica{label1="valor1", label2="valor2"} valor timestamp
 ```
 
 Ejemplo real:
+
 ```
 http_requests_total{method="GET", endpoint="/api/users", status="200"} 1523 1609459200000
 http_requests_total{method="GET", endpoint="/api/users", status="200"} 1847 1609459260000
@@ -148,6 +160,7 @@ http_requests_total{method="GET", endpoint="/api/users", status="200"} 2102 1609
 ### 49.2.3 Tipos de Métricas
 
 **Counter (Contador):**
+
 - Solo incrementa (nunca disminuye)
 - Se reinicia en 0 al reiniciar la aplicación
 - Uso: requests totales, errores totales, bytes procesados
@@ -158,6 +171,7 @@ errors_total{service="api"} 123
 ```
 
 **Gauge (Indicador):**
+
 - Puede subir o bajar
 - Captura estado instantáneo
 - Uso: memoria usada, conexiones activas, temperatura
@@ -168,6 +182,7 @@ active_connections 523
 ```
 
 **Histogram (Histograma):**
+
 - Distribuición de valores en buckets
 - Genera automáticamente quantiles
 - Uso: latencias, tamaños de payload
@@ -182,6 +197,7 @@ request_duration_seconds_count 500
 ```
 
 **Summary (Resumen):**
+
 - Similar a Histogram pero con quantiles calculados en cliente
 - Uso: cuando necesitas exactitud en percentiles
 
@@ -249,54 +265,55 @@ go get github.com/prometheus/client_golang/prometheus/promhttp
 package main
 
 import (
-	"net/http"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+ "net/http"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promauto"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	// promauto registra automáticamente
-	requestsTotal = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "http_requests_total",
-			Help: "Total de requests HTTP procesados",
-		},
-		[]string{"method", "endpoint", "status"},
-	)
-	
-	errorsTotal = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "errors_total",
-			Help: "Total de errores",
-		},
-		[]string{"type", "severity"},
-	)
+ // promauto registra automáticamente
+ requestsTotal = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "http_requests_total",
+   Help: "Total de requests HTTP procesados",
+  },
+  []string{"method", "endpoint", "status"},
+ )
+
+ errorsTotal = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "errors_total",
+   Help: "Total de errores",
+  },
+  []string{"type", "severity"},
+ )
 )
 
 func handleUsers(w http.ResponseWriter, r *http.Request) {
-	// Simular procesamiento
-	status := 200
-	
-	// Registrar métrica
-	requestsTotal.WithLabelValues(r.Method, "/api/users", 
-		fmt.Sprint(status)).Inc()
-	
-	w.WriteHeader(status)
-	w.Write([]byte("users list"))
+ // Simular procesamiento
+ status := 200
+
+ // Registrar métrica
+ requestsTotal.WithLabelValues(r.Method, "/api/users",
+  fmt.Sprint(status)).Inc()
+
+ w.WriteHeader(status)
+ w.Write([]byte("users list"))
 }
 
 func main() {
-	http.HandleFunc("/api/users", handleUsers)
-	
-	// Exponemos endpoint de métricas
-	http.Handle("/metrics", promhttp.Handler())
-	
-	http.ListenAndServe(":8080", nil)
+ http.HandleFunc("/api/users", handleUsers)
+
+ // Exponemos endpoint de métricas
+ http.Handle("/metrics", promhttp.Handler())
+
+ http.ListenAndServe(":8080", nil)
 }
 ```
 
 **Curl para probar:**
+
 ```bash
 # Request normal
 curl http://localhost:8080/api/users
@@ -309,31 +326,31 @@ curl http://localhost:8080/metrics | grep http_requests_total
 
 ```go
 var (
-	activeConnections = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "active_connections",
-			Help: "Conexiones activas por servicio",
-		},
-		[]string{"service"},
-	)
-	
-	memoryUsageBytes = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "memory_usage_bytes",
-			Help: "Memoria usada en bytes",
-		},
-	)
+ activeConnections = promauto.NewGaugeVec(
+  prometheus.GaugeOpts{
+   Name: "active_connections",
+   Help: "Conexiones activas por servicio",
+  },
+  []string{"service"},
+ )
+
+ memoryUsageBytes = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "memory_usage_bytes",
+   Help: "Memoria usada en bytes",
+  },
+ )
 )
 
 func monitorConnections() {
-	// Incrementar
-	activeConnections.WithLabelValues("database").Inc()
-	
-	// Decrementar
-	activeConnections.WithLabelValues("database").Dec()
-	
-	// Establecer valor exacto
-	memoryUsageBytes.Set(float64(getMemoryUsage()))
+ // Incrementar
+ activeConnections.WithLabelValues("database").Inc()
+
+ // Decrementar
+ activeConnections.WithLabelValues("database").Dec()
+
+ // Establecer valor exacto
+ memoryUsageBytes.Set(float64(getMemoryUsage()))
 }
 ```
 
@@ -341,37 +358,38 @@ func monitorConnections() {
 
 ```go
 var (
-	requestDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_request_duration_seconds",
-			Help:    "Duración de requests HTTP",
-			// Buckets: rangos de latencia para análisis
-			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
-		},
-		[]string{"method", "endpoint"},
-	)
-	
-	payloadSizeBytes = promauto.NewHistogram(
-		prometheus.HistogramOpts{
-			Name:    "http_payload_size_bytes",
-			Help:    "Tamaño de payloads HTTP",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100 a 1GB
-		},
-	)
+ requestDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_request_duration_seconds",
+   Help:    "Duración de requests HTTP",
+   // Buckets: rangos de latencia para análisis
+   Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+  },
+  []string{"method", "endpoint"},
+ )
+
+ payloadSizeBytes = promauto.NewHistogram(
+  prometheus.HistogramOpts{
+   Name:    "http_payload_size_bytes",
+   Help:    "Tamaño de payloads HTTP",
+   Buckets: prometheus.ExponentialBuckets(100, 10, 7), // 100 a 1GB
+  },
+ )
 )
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	
-	// ... procesar ...
-	
-	duration := time.Since(start).Seconds()
-	requestDuration.WithLabelValues(r.Method, "/api/data").Observe(duration)
-	payloadSizeBytes.Observe(float64(len(responsePayload)))
+ start := time.Now()
+
+ // ... procesar ...
+
+ duration := time.Since(start).Seconds()
+ requestDuration.WithLabelValues(r.Method, "/api/data").Observe(duration)
+ payloadSizeBytes.Observe(float64(len(responsePayload)))
 }
 ```
 
 **Buckets automáticos:**
+
 ```go
 // Lineal: 0, 1, 2, 3, 4, 5
 prometheus.LinearBuckets(0, 1, 5)
@@ -387,26 +405,26 @@ prometheus.ExponentialBuckets(0.1, 10, 5)
 
 ```go
 var (
-	dbQueryDuration = promauto.NewSummaryVec(
-		prometheus.SummaryOpts{
-			Name:       "db_query_duration_seconds",
-			Help:       "Duración de queries a BD",
-			Objectives: map[float64]float64{
-				0.5:   0.05,  // Median con error de 5%
-				0.9:   0.01,  // p90 con error de 1%
-				0.99:  0.001, // p99 con error de 0.1%
-				0.999: 0.0001,// p999 con error de 0.01%
-			},
-		},
-		[]string{"query_type"},
-	)
+ dbQueryDuration = promauto.NewSummaryVec(
+  prometheus.SummaryOpts{
+   Name:       "db_query_duration_seconds",
+   Help:       "Duración de queries a BD",
+   Objectives: map[float64]float64{
+    0.5:   0.05,  // Median con error de 5%
+    0.9:   0.01,  // p90 con error de 1%
+    0.99:  0.001, // p99 con error de 0.1%
+    0.999: 0.0001,// p999 con error de 0.01%
+   },
+  },
+  []string{"query_type"},
+ )
 )
 
 func queryDatabase(query string) {
-	start := time.Now()
-	// ... ejecutar query ...
-	duration := time.Since(start).Seconds()
-	dbQueryDuration.WithLabelValues("select").Observe(duration)
+ start := time.Now()
+ // ... ejecutar query ...
+ duration := time.Since(start).Seconds()
+ dbQueryDuration.WithLabelValues("select").Observe(duration)
 }
 ```
 
@@ -423,14 +441,16 @@ func queryDatabase(query string) {
 ### 49.3.6 Comparación: Prometheus en Diferentes Lenguajes
 
 **Go (prometheus/client_golang):**
+
 ```go
 counter := promauto.NewCounter(
-	prometheus.CounterOpts{Name: "requests_total"},
+ prometheus.CounterOpts{Name: "requests_total"},
 )
 counter.Inc()
 ```
 
 **Python (prometheus_client):**
+
 ```python
 from prometheus_client import Counter
 counter = Counter('requests_total', 'Total requests')
@@ -438,6 +458,7 @@ counter.inc()
 ```
 
 **Java (Micrometer):**
+
 ```java
 MeterRegistry registry = new SimpleMeterRegistry();
 Counter counter = Counter.builder("requests.total")
@@ -457,106 +478,106 @@ La instrumentación manual es tediosa y propensa a errores. El middleware autom�
 package main
 
 import (
-	"net/http"
-	"strconv"
-	"time"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+ "net/http"
+ "strconv"
+ "time"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var (
-	requestsTotal = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "http_requests_total",
-			Help: "Total requests",
-		},
-		[]string{"method", "endpoint", "status"},
-	)
-	
-	requestDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_request_duration_seconds",
-			Help:    "Request duration",
-			Buckets: []float64{.001, .01, .1, 1},
-		},
-		[]string{"method", "endpoint"},
-	)
-	
-	requestSize = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_request_size_bytes",
-			Help:    "Request size",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 5),
-		},
-		[]string{"method"},
-	)
-	
-	responseSize = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_response_size_bytes",
-			Help:    "Response size",
-			Buckets: prometheus.ExponentialBuckets(100, 10, 5),
-		},
-		[]string{"method", "status"},
-	)
+ requestsTotal = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "http_requests_total",
+   Help: "Total requests",
+  },
+  []string{"method", "endpoint", "status"},
+ )
+
+ requestDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_request_duration_seconds",
+   Help:    "Request duration",
+   Buckets: []float64{.001, .01, .1, 1},
+  },
+  []string{"method", "endpoint"},
+ )
+
+ requestSize = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_request_size_bytes",
+   Help:    "Request size",
+   Buckets: prometheus.ExponentialBuckets(100, 10, 5),
+  },
+  []string{"method"},
+ )
+
+ responseSize = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_response_size_bytes",
+   Help:    "Response size",
+   Buckets: prometheus.ExponentialBuckets(100, 10, 5),
+  },
+  []string{"method", "status"},
+ )
 )
 
 // ResponseWriter wrapper para capturar status y tamaño
 type MetricsWriter struct {
-	http.ResponseWriter
-	statusCode int
-	size       int
+ http.ResponseWriter
+ statusCode int
+ size       int
 }
 
 func (m *MetricsWriter) WriteHeader(statusCode int) {
-	m.statusCode = statusCode
-	m.ResponseWriter.WriteHeader(statusCode)
+ m.statusCode = statusCode
+ m.ResponseWriter.WriteHeader(statusCode)
 }
 
 func (m *MetricsWriter) Write(b []byte) (int, error) {
-	m.size += len(b)
-	return m.ResponseWriter.Write(b)
+ m.size += len(b)
+ return m.ResponseWriter.Write(b)
 }
 
 // Middleware que instrumenta requests
 func metricsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		
-		// Capturar tamaño del request
-		requestSize.WithLabelValues(r.Method).Observe(
-			float64(r.ContentLength),
-		)
-		
-		// Wrapper para capturar response
-		mw := &MetricsWriter{ResponseWriter: w, statusCode: 200}
-		
-		// Ejecutar handler
-		next.ServeHTTP(mw, r)
-		
-		// Registrar métricas
-		duration := time.Since(start).Seconds()
-		status := strconv.Itoa(mw.statusCode)
-		endpoint := r.URL.Path
-		
-		requestsTotal.WithLabelValues(r.Method, endpoint, status).Inc()
-		requestDuration.WithLabelValues(r.Method, endpoint).Observe(duration)
-		responseSize.WithLabelValues(r.Method, status).Observe(float64(mw.size))
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+
+  // Capturar tamaño del request
+  requestSize.WithLabelValues(r.Method).Observe(
+   float64(r.ContentLength),
+  )
+
+  // Wrapper para capturar response
+  mw := &MetricsWriter{ResponseWriter: w, statusCode: 200}
+
+  // Ejecutar handler
+  next.ServeHTTP(mw, r)
+
+  // Registrar métricas
+  duration := time.Since(start).Seconds()
+  status := strconv.Itoa(mw.statusCode)
+  endpoint := r.URL.Path
+
+  requestsTotal.WithLabelValues(r.Method, endpoint, status).Inc()
+  requestDuration.WithLabelValues(r.Method, endpoint).Observe(duration)
+  responseSize.WithLabelValues(r.Method, status).Observe(float64(mw.size))
+ })
 }
 
 func main() {
-	mux := http.NewServeMux()
-	
-	// Handler protegido por middleware
-	mux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("user list"))
-	})
-	
-	// Aplicar middleware globalmente
-	handler := metricsMiddleware(mux)
-	
-	http.ListenAndServe(":8080", handler)
+ mux := http.NewServeMux()
+
+ // Handler protegido por middleware
+ mux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("user list"))
+ })
+
+ // Aplicar middleware globalmente
+ handler := metricsMiddleware(mux)
+
+ http.ListenAndServe(":8080", handler)
 }
 ```
 
@@ -564,69 +585,69 @@ func main() {
 
 ```go
 type InstrumentedDB struct {
-	db *sql.DB
+ db *sql.DB
 }
 
 var (
-	dbQueryDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "db_query_duration_seconds",
-			Help:    "DB query duration",
-			Buckets: []float64{.001, .01, .1, 1},
-		},
-		[]string{"operation", "table"},
-	)
-	
-	dbErrors = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "db_errors_total",
-			Help: "DB errors",
-		},
-		[]string{"operation", "error_type"},
-	)
-	
-	dbConnections = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "db_connections_active",
-			Help: "Active DB connections",
-		},
-		[]string{"type"},
-	)
+ dbQueryDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "db_query_duration_seconds",
+   Help:    "DB query duration",
+   Buckets: []float64{.001, .01, .1, 1},
+  },
+  []string{"operation", "table"},
+ )
+
+ dbErrors = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "db_errors_total",
+   Help: "DB errors",
+  },
+  []string{"operation", "error_type"},
+ )
+
+ dbConnections = promauto.NewGaugeVec(
+  prometheus.GaugeOpts{
+   Name: "db_connections_active",
+   Help: "Active DB connections",
+  },
+  []string{"type"},
+ )
 )
 
-func (idb *InstrumentedDB) QueryRow(ctx context.Context, 
-	query string, args ...interface{}) *sql.Row {
-	
-	start := time.Now()
-	row := idb.db.QueryRowContext(ctx, query, args...)
-	
-	duration := time.Since(start).Seconds()
-	dbQueryDuration.WithLabelValues("query", "users").Observe(duration)
-	
-	return row
+func (idb *InstrumentedDB) QueryRow(ctx context.Context,
+ query string, args ...interface{}) *sql.Row {
+
+ start := time.Now()
+ row := idb.db.QueryRowContext(ctx, query, args...)
+
+ duration := time.Since(start).Seconds()
+ dbQueryDuration.WithLabelValues("query", "users").Observe(duration)
+
+ return row
 }
 
-func (idb *InstrumentedDB) Exec(ctx context.Context, 
-	query string, args ...interface{}) (sql.Result, error) {
-	
-	start := time.Now()
-	result, err := idb.db.ExecContext(ctx, query, args...)
-	
-	duration := time.Since(start).Seconds()
-	dbQueryDuration.WithLabelValues("exec", "users").Observe(duration)
-	
-	if err != nil {
-		dbErrors.WithLabelValues("exec", "unknown").Inc()
-	}
-	
-	return result, err
+func (idb *InstrumentedDB) Exec(ctx context.Context,
+ query string, args ...interface{}) (sql.Result, error) {
+
+ start := time.Now()
+ result, err := idb.db.ExecContext(ctx, query, args...)
+
+ duration := time.Since(start).Seconds()
+ dbQueryDuration.WithLabelValues("exec", "users").Observe(duration)
+
+ if err != nil {
+  dbErrors.WithLabelValues("exec", "unknown").Inc()
+ }
+
+ return result, err
 }
 
 func (idb *InstrumentedDB) UpdateConnectionMetrics() {
-	stats := idb.db.Stats()
-	dbConnections.WithLabelValues("open").Set(float64(stats.OpenConnections))
-	dbConnections.WithLabelValues("in_use").Set(float64(stats.InUse))
-	dbConnections.WithLabelValues("idle").Set(float64(stats.Idle))
+ stats := idb.db.Stats()
+ dbConnections.WithLabelValues("open").Set(float64(stats.OpenConnections))
+ dbConnections.WithLabelValues("in_use").Set(float64(stats.InUse))
+ dbConnections.WithLabelValues("idle").Set(float64(stats.Idle))
 }
 ```
 
@@ -634,68 +655,68 @@ func (idb *InstrumentedDB) UpdateConnectionMetrics() {
 
 ```go
 var (
-	goroutinesActive = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "goroutines_active",
-			Help: "Número de goroutines activas",
-		},
-	)
-	
-	taskQueueLength = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "task_queue_length",
-			Help: "Tamaño de colas de tareas",
-		},
-		[]string{"queue_name"},
-	)
+ goroutinesActive = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "goroutines_active",
+   Help: "Número de goroutines activas",
+  },
+ )
+
+ taskQueueLength = promauto.NewGaugeVec(
+  prometheus.GaugeOpts{
+   Name: "task_queue_length",
+   Help: "Tamaño de colas de tareas",
+  },
+  []string{"queue_name"},
+ )
 )
 
 // Pool de goroutines con instrumentación
 type InstrumentedWorkerPool struct {
-	taskQueue chan func()
-	workers   int
-	done      chan struct{}
+ taskQueue chan func()
+ workers   int
+ done      chan struct{}
 }
 
 func NewWorkerPool(workers int) *InstrumentedWorkerPool {
-	pool := &InstrumentedWorkerPool{
-		taskQueue: make(chan func(), 1000),
-		workers:   workers,
-		done:      make(chan struct{}),
-	}
-	
-	// Iniciar workers
-	for i := 0; i < workers; i++ {
-		go pool.worker()
-	}
-	
-	// Monitorear métricas cada segundo
-	go pool.monitorMetrics()
-	
-	return pool
+ pool := &InstrumentedWorkerPool{
+  taskQueue: make(chan func(), 1000),
+  workers:   workers,
+  done:      make(chan struct{}),
+ }
+
+ // Iniciar workers
+ for i := 0; i < workers; i++ {
+  go pool.worker()
+ }
+
+ // Monitorear métricas cada segundo
+ go pool.monitorMetrics()
+
+ return pool
 }
 
 func (p *InstrumentedWorkerPool) Submit(task func()) {
-	p.taskQueue <- task
+ p.taskQueue <- task
 }
 
 func (p *InstrumentedWorkerPool) worker() {
-	for task := range p.taskQueue {
-		task()
-		goroutinesActive.Dec()
-	}
+ for task := range p.taskQueue {
+  task()
+  goroutinesActive.Dec()
+ }
 }
 
 func (p *InstrumentedWorkerPool) monitorMetrics() {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-	
-	for range ticker.C {
-		goroutinesActive.Set(float64(runtime.NumGoroutine()))
-		taskQueueLength.WithLabelValues("default").Set(
-			float64(len(p.taskQueue)),
-		)
-	}
+ ticker := time.NewTicker(time.Second)
+ defer ticker.Stop()
+
+ for range ticker.C {
+  goroutinesActive.Set(float64(runtime.NumGoroutine()))
+  taskQueueLength.WithLabelValues("default").Set(
+   float64(len(p.taskQueue)),
+  )
+ }
 }
 ```
 
@@ -703,46 +724,46 @@ func (p *InstrumentedWorkerPool) monitorMetrics() {
 
 ```go
 type InstrumentedHTTPClient struct {
-	client *http.Client
+ client *http.Client
 }
 
 var (
-	outboundRequests = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "http_client_requests_total",
-			Help: "Outbound HTTP requests",
-		},
-		[]string{"method", "status", "host"},
-	)
-	
-	outboundDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_client_duration_seconds",
-			Help:    "Outbound HTTP duration",
-			Buckets: []float64{.001, .01, .1, 1, 5},
-		},
-		[]string{"method", "host"},
-	)
+ outboundRequests = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "http_client_requests_total",
+   Help: "Outbound HTTP requests",
+  },
+  []string{"method", "status", "host"},
+ )
+
+ outboundDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_client_duration_seconds",
+   Help:    "Outbound HTTP duration",
+   Buckets: []float64{.001, .01, .1, 1, 5},
+  },
+  []string{"method", "host"},
+ )
 )
 
 func (ic *InstrumentedHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	start := time.Now()
-	
-	resp, err := ic.client.Do(req)
-	
-	duration := time.Since(start).Seconds()
-	method := req.Method
-	host := req.Host
-	status := "unknown"
-	
-	if resp != nil {
-		status = strconv.Itoa(resp.StatusCode)
-	}
-	
-	outboundRequests.WithLabelValues(method, status, host).Inc()
-	outboundDuration.WithLabelValues(method, host).Observe(duration)
-	
-	return resp, err
+ start := time.Now()
+
+ resp, err := ic.client.Do(req)
+
+ duration := time.Since(start).Seconds()
+ method := req.Method
+ host := req.Host
+ status := "unknown"
+
+ if resp != nil {
+  status = strconv.Itoa(resp.StatusCode)
+ }
+
+ outboundRequests.WithLabelValues(method, status, host).Inc()
+ outboundDuration.WithLabelValues(method, host).Observe(duration)
+
+ return resp, err
 }
 ```
 
@@ -755,6 +776,7 @@ Las métricas sin alertas son solo gráficas bonitas. El alerting es lo que perm
 ### 49.5.1 Concepto de Alertas
 
 Una alerta tiene tres partes:
+
 1. **Condición**: regla PromQL que evalúa
 2. **Umbral**: cuándo consideramos que es crítico
 3. **Acción**: dónde notificar (email, Slack, etc)
@@ -762,6 +784,7 @@ Una alerta tiene tres partes:
 ### 49.5.2 Alert Rules en Prometheus
 
 Archivo `prometheus.yml`:
+
 ```yaml
 global:
   scrape_interval: 15s
@@ -783,6 +806,7 @@ scrape_configs:
 ```
 
 Archivo `alert_rules.yml`:
+
 ```yaml
 groups:
   - name: application_alerts
@@ -802,12 +826,12 @@ groups:
         annotations:
           summary: "Tasa de error alta"
           description: "Tasa de error es {{ $value | humanizePercentage }}"
-      
+
       # Alerta: latencia p95 > 500ms
       - alert: HighLatency
         expr: |
-          histogram_quantile(0.95, 
-            sum(rate(http_request_duration_seconds_bucket[5m])) 
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m]))
             by (le)
           ) > 0.5
         for: 5m
@@ -816,7 +840,7 @@ groups:
         annotations:
           summary: "Latencia alta detectada"
           description: "p95 latency: {{ $value }}s"
-      
+
       # Alerta: instancia caída
       - alert: InstanceDown
         expr: up{job="app"} == 0
@@ -826,7 +850,7 @@ groups:
         annotations:
           summary: "Instancia {{ $labels.instance }} está caída"
           description: "No se detecta heartbeat por 1 minuto"
-      
+
       # Alerta: memoria > 80%
       - alert: HighMemoryUsage
         expr: |
@@ -837,7 +861,7 @@ groups:
         annotations:
           summary: "Uso alto de memoria"
           description: "Memoria: {{ $value | humanizePercentage }}"
-      
+
       # Alerta: queue backlog
       - alert: QueueBacklog
         expr: task_queue_length > 1000
@@ -893,26 +917,26 @@ Las alertas deben tener contexto útil:
 package main
 
 import (
-	"testing"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+ "testing"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func TestHighErrorRateAlert(t *testing.T) {
-	// Reset counters
-	requestsTotal.Reset()
-	
-	// Simular 95% de errores (alerta debe activarse)
-	for i := 0; i < 100; i++ {
-		if i < 95 {
-			requestsTotal.WithLabelValues("GET", "/api", "500").Inc()
-		} else {
-			requestsTotal.WithLabelValues("GET", "/api", "200").Inc()
-		}
-	}
-	
-	// Verificar que métrica tiene el valor esperado
-	// Nota: se verifica contra archivo Prometheus scrape
+ // Reset counters
+ requestsTotal.Reset()
+
+ // Simular 95% de errores (alerta debe activarse)
+ for i := 0; i < 100; i++ {
+  if i < 95 {
+   requestsTotal.WithLabelValues("GET", "/api", "500").Inc()
+  } else {
+   requestsTotal.WithLabelValues("GET", "/api", "200").Inc()
+  }
+ }
+
+ // Verificar que métrica tiene el valor esperado
+ // Nota: se verifica contra archivo Prometheus scrape
 }
 ```
 
@@ -933,6 +957,7 @@ Prometheus almacena datos, pero Grafana es donde ocurre la visualización y comp
 ### 49.6.2 Configuración de Datasource
 
 JSON de Grafana (`provisioning/datasources/prometheus.yml`):
+
 ```yaml
 apiVersion: 1
 
@@ -1101,6 +1126,7 @@ PromQL es el lenguaje para consultar datos en Prometheus. Dominarla es essential
 ### 49.7.1 Tipos de Datos
 
 **Instant Vector**: conjunto de series en un momento
+
 ```
 http_requests_total{job="app"}
 → 1234 @ timestamp1
@@ -1108,17 +1134,20 @@ http_requests_total{job="app"}
 ```
 
 **Range Vector**: series en un rango de tiempo
+
 ```
 http_requests_total[5m]
 → [1000, 1050, 1100, 1150, 1200]
 ```
 
 **Scalar**: número simple
+
 ```
 5 or 2.5
 ```
 
 **String**: texto (raro)
+
 ```
 "hello"
 ```
@@ -1241,13 +1270,13 @@ avg_over_time(memory_usage_bytes[10m])  # promedio
 
 ```promql
 # Percentil 95 de duración de requests
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
 )
 
 # p99 por endpoint
 histogram_quantile(0.99,
-  sum(rate(http_request_duration_seconds_bucket[5m])) 
+  sum(rate(http_request_duration_seconds_bucket[5m]))
   by (endpoint, le)
 )
 
@@ -1279,7 +1308,7 @@ bottomk(3, sum by (endpoint) (rate(http_requests_total[5m])))
 
 # 6. Instancias con latencia > 200ms
 histogram_quantile(0.95,
-  sum(rate(http_request_duration_seconds_bucket[5m])) 
+  sum(rate(http_request_duration_seconds_bucket[5m]))
   by (instance, le)
 ) > 0.2
 
@@ -1309,6 +1338,7 @@ Queries complejas pueden ser costosas. Recording rules pre-computan resultados.
 ### 49.8.1 Concepto
 
 Sin recording rules:
+
 ```
 Usuario consulta:
   histogram_quantile(0.95,
@@ -1321,9 +1351,10 @@ Resultado
 ```
 
 Con recording rules:
+
 ```
 Prometheus automáticamente cada minuto:
-  job:request_latency:p95 = 
+  job:request_latency:p95 =
     histogram_quantile(0.95,
       sum(rate(http_request_duration_seconds_bucket[1m])) by (le)
     )
@@ -1347,47 +1378,47 @@ groups:
         expr: histogram_quantile(0.50,
           sum(rate(http_request_duration_seconds_bucket[1m])) by (le, job)
         )
-      
+
       - record: job:request_latency:p95
         expr: histogram_quantile(0.95,
           sum(rate(http_request_duration_seconds_bucket[1m])) by (le, job)
         )
-      
+
       - record: job:request_latency:p99
         expr: histogram_quantile(0.99,
           sum(rate(http_request_duration_seconds_bucket[1m])) by (le, job)
         )
-      
+
       # Tasa de error
       - record: job:error_rate:1m
         expr: |
           sum(rate(http_requests_total{status=~"5.."}[1m])) by (job)
           /
           sum(rate(http_requests_total[1m])) by (job)
-      
+
       # Throughput
       - record: job:requests_per_second:1m
         expr: sum(rate(http_requests_total[1m])) by (job)
-      
+
       # Requests exitosos
       - record: job:success_requests:1m
         expr: sum(rate(http_requests_total{status=~"2.."}[1m])) by (job)
-      
+
       # Conexiones activas
       - record: instance:connections:active
         expr: active_connections
-      
+
       # Memoria como porcentaje del límite
       - record: instance:memory_usage:percent
         expr: (memory_usage_bytes / memory_limit_bytes) * 100
-  
+
   - name: availability
     interval: 5m
     rules:
       # Disponibilidad en 5 minutos
       - record: job:availability:5m
         expr: (sum(up{job!=""}) by (job) / count(up{job!=""}) by (job)) * 100
-      
+
       # Alertas basadas en availability
       - alert: ServiceUnavailable
         expr: job:availability:5m < 50
@@ -1420,11 +1451,13 @@ cluster:disk_free:bytes
 ### 49.8.4 Performance Impact
 
 Recording rules reducen:
+
 - **CPU en Prometheus**: pre-computa vs compute on demand
 - **Latencia de queries**: resultado ya está listo
 - **Complejidad**: queries simples en dashboards
 
 Incrementan:
+
 - **Storage**: pre-computados son nuevas series
 - **Network I/O**: Prometheus deve evaluar cada intervalo
 
@@ -1449,8 +1482,8 @@ requestDuration.WithLabelValues(r.Method, endpoint, status).Observe(duration)
 
 // ✅ Alternativa: tracking en logs
 log.WithFields(log.Fields{
-	"user_id": user_id,
-	"request_id": request_id,
+ "user_id": user_id,
+ "request_id": request_id,
 }).Info("Request completed")
 ```
 
@@ -1473,7 +1506,7 @@ log.WithFields(log.Fields{
 ```go
 // ❌ MALO
 requestDuration.WithLabelValues(
-	fmt.Sprintf("%s_%s_%s", method, endpoint, user_id)).Observe(duration)
+ fmt.Sprintf("%s_%s_%s", method, endpoint, user_id)).Observe(duration)
 // Label como string complejo, imposible de queryar
 
 // ✅ BIEN
@@ -1506,26 +1539,26 @@ regionLabel := metrics.NewLabel("region")    // OK: cardinalidad ~10
 
 // Implementación
 var (
-	sliAvailability = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "sli:availability:percent",
-			Help: "SLI: Availability percentage",
-		},
-	)
-	
-	sliLatency = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "sli:latency:p95_seconds",
-			Help: "SLI: p95 request latency",
-		},
-	)
-	
-	sliErrorRate = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "sli:error_rate:percent",
-			Help: "SLI: Error rate percentage",
-		},
-	)
+ sliAvailability = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "sli:availability:percent",
+   Help: "SLI: Availability percentage",
+  },
+ )
+
+ sliLatency = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "sli:latency:p95_seconds",
+   Help: "SLI: p95 request latency",
+  },
+ )
+
+ sliErrorRate = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "sli:error_rate:percent",
+   Help: "SLI: Error rate percentage",
+  },
+ )
 )
 
 // Alert si SLO no se cumple
@@ -1546,6 +1579,7 @@ var alertSLOBreach = `
 No necesitas medir todo. Comienza con:
 
 **Mínimo obligatorio (Tier 1):**
+
 ```go
 // 1. Tasa de requests
 requestsTotal.WithLabelValues(method, status).Inc()
@@ -1558,6 +1592,7 @@ up.Set(1)  // o 0 si está caída
 ```
 
 **Útil (Tier 2):**
+
 ```go
 // 4. Tamaño de request/response
 requestSizeBytes.Observe(float64(req.ContentLength))
@@ -1570,6 +1605,7 @@ memoryUsageBytes.Set(float64(getMemory()))
 ```
 
 **Avanzado (Tier 3):**
+
 ```go
 // 7. Trazas distribuidas
 tracer.Start(ctx, "operation")
@@ -1579,10 +1615,10 @@ log.WithContext(ctx).WithFields(fields).Info("event")
 
 // 9. Profiling
 go func() {
-	ticker := time.NewTicker(1 * time.Minute)
-	for range ticker.C {
-		pprof.WriteHeapProfile(file)
-	}
+ ticker := time.NewTicker(1 * time.Minute)
+ for range ticker.C {
+  pprof.WriteHeapProfile(file)
+ }
 }()
 ```
 
@@ -1630,11 +1666,13 @@ someRandomMetric.Inc()  // te pareció que podría ser útil
 ### 49.10.1 Limitaciones de Prometheus Single-Node
 
 Un Prometheus standalone típicamente maneja:
+
 - 1-2 millones de series activas
 - 500k-1M scrape targets
 - Queries en ~100ms
 
 Problemas a escala:
+
 - **Storage**: serie por (métrica, labels) = explosión
 - **Ingesta**: scraping de 10k targets simultáneamente
 - **Query**: evaluar millones de series cada segundo
@@ -1661,6 +1699,7 @@ remote_read:
 ```
 
 Sistemas populares:
+
 - **Thanos**: Open source, almacenamiento en S3/GCS/Azure
 - **Cortex**: Multi-tenant, ideal para SaaS
 - **VictoriaMetrics**: Performance ultra-optimizado
@@ -1715,9 +1754,9 @@ Distribuye carga de ingesta por múltiples Prometheus:
 ```go
 // Shard ID basado en label
 func getShardID(labelValue string) int {
-	hash := fnv.New32a()
-	hash.Write([]byte(labelValue))
-	return int(hash.Sum32()) % numShards
+ hash := fnv.New32a()
+ hash.Write([]byte(labelValue))
+ return int(hash.Sum32()) % numShards
 }
 
 // Enviar a Prometheus correcto
@@ -1761,10 +1800,12 @@ services:
 ```
 
 Beneficios de Thanos:
+
 - HA automático
 - Retención ilimitada (S3/GCS)
 - Query distribuida
 - Downsampling automático
+
 ```
 
 ---
@@ -1774,6 +1815,7 @@ Beneficios de Thanos:
 ### 49.11.1 Checklist de Implementación
 
 ```
+
 □ Métrica de disponibilidad (up) implementada
 □ Latencias (request duration) medidas
 □ Errores contados por tipo
@@ -1786,6 +1828,7 @@ Beneficios de Thanos:
 □ Alertas testeadas (¿disparan cuando deben?)
 □ Runbooks vinculados en alertas
 □ Equipo capacitado en PromQL básico
+
 ```
 
 ### 49.11.2 Patrones de Éxito
@@ -1798,10 +1841,10 @@ Beneficios de Thanos:
 // Métrica detecta problema
 if errorRate > 0.05 {
     // Log proporciona contexto
-    log.Error("High error rate", 
+    log.Error("High error rate",
         "error_rate", errorRate,
         "affected_endpoint", endpoint)
-    
+
     // Trace muestra dónde falló
     span.AddEvent("error_detected",
         trace.WithAttributes(
@@ -1812,6 +1855,7 @@ if errorRate > 0.05 {
 ```
 
 **Patrón 2: Histogramas + Recording Rules + Alertas**
+
 ```yaml
 # Histograma: capta distribución
 http_request_duration_seconds_bucket
@@ -1825,6 +1869,7 @@ job:request_latency:p95
 ```
 
 **Patrón 3: Labels por Contexto de Consulta**
+
 ```go
 // Labels que responden: "¿cuál es?"
 requestDuration.WithLabelValues(
@@ -1840,6 +1885,7 @@ requestDuration.WithLabelValues(
 ### 49.11.3 Debugging de Problemas Comunes
 
 **Problema: "Prometheus está lento"**
+
 ```promql
 # 1. Verificar cardinality
 count(ALERTS)  # alertas activas
@@ -1855,6 +1901,7 @@ topk(10, prometheus_tsdb_symbol_table_size_bytes)
 ```
 
 **Problema: "Alertas no disparan"**
+
 ```yaml
 # Verificar:
 # 1. Expresión PromQL correcta
@@ -1871,9 +1918,10 @@ topk(10, prometheus_tsdb_symbol_table_size_bytes)
 ```
 
 **Problema: "Storage lleno"**
+
 ```promql
 # Investigar qué ocupa espacio
-topk(20, sum by (__name__) 
+topk(20, sum by (__name__)
   (increases(storage_bucket_chunks_total[1h])))
 
 # Reducir:
@@ -1885,21 +1933,25 @@ topk(20, sum by (__name__)
 ### 49.11.4 Evolución Recomendada
 
 **Semana 1-2: Foundation**
+
 - Prometheus + Grafana deployed
 - Métricas básicas (requests, latency, errors)
 - Dashboard simple con 5-10 gráficos
 
 **Semana 3-4: Alerting**
+
 - Alertas para SLOs críticos
 - Alertmanager + notificaciones
 - Runbooks para alertas
 
 **Mes 2: Escalabilidad**
+
 - Evaluación de cardinality
 - Optimization de labels
 - Remote storage si crece
 
 **Mes 3+: Madurez**
+
 - Trazas distribuidas
 - Logs centralizados
 - Profiling continuo
@@ -1914,63 +1966,65 @@ topk(20, sum by (__name__)
 **Objetivo**: Crear app que expone métricas simples y scrapearlas con Prometheus
 
 **Código** (`main.go`):
+
 ```go
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"time"
+ "fmt"
+ "net/http"
+ "time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promauto"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	requestsTotal = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "api_requests_total",
-			Help: "Total API requests",
-		},
-		[]string{"method", "endpoint", "status"},
-	)
-	
-	requestDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "api_request_duration_seconds",
-			Help:    "Request latency in seconds",
-			Buckets: []float64{.001, .01, .1, 1},
-		},
-		[]string{"method", "endpoint"},
-	)
+ requestsTotal = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "api_requests_total",
+   Help: "Total API requests",
+  },
+  []string{"method", "endpoint", "status"},
+ )
+
+ requestDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "api_request_duration_seconds",
+   Help:    "Request latency in seconds",
+   Buckets: []float64{.001, .01, .1, 1},
+  },
+  []string{"method", "endpoint"},
+ )
 )
 
 func handleAPI(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	
-	// Simular trabajo
-	time.Sleep(time.Duration(100+int(time.Now().Unix()%50)) * time.Millisecond)
-	
-	duration := time.Since(start).Seconds()
-	status := 200
-	
-	requestsTotal.WithLabelValues(r.Method, r.URL.Path, fmt.Sprint(status)).Inc()
-	requestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
-	
-	w.Write([]byte("OK"))
+ start := time.Now()
+
+ // Simular trabajo
+ time.Sleep(time.Duration(100+int(time.Now().Unix()%50)) * time.Millisecond)
+
+ duration := time.Since(start).Seconds()
+ status := 200
+
+ requestsTotal.WithLabelValues(r.Method, r.URL.Path, fmt.Sprint(status)).Inc()
+ requestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
+
+ w.Write([]byte("OK"))
 }
 
 func main() {
-	http.HandleFunc("/api/data", handleAPI)
-	http.Handle("/metrics", promhttp.Handler())
-	
-	fmt.Println("Server running on :8080")
-	http.ListenAndServe(":8080", nil)
+ http.HandleFunc("/api/data", handleAPI)
+ http.Handle("/metrics", promhttp.Handler())
+
+ fmt.Println("Server running on :8080")
+ http.ListenAndServe(":8080", nil)
 }
 ```
 
 **Configuración Prometheus** (`prometheus.yml`):
+
 ```yaml
 global:
   scrape_interval: 15s
@@ -1982,6 +2036,7 @@ scrape_configs:
 ```
 
 **Verificación**:
+
 ```bash
 # App en terminal 1
 go run main.go
@@ -2004,101 +2059,103 @@ curl http://localhost:8080/metrics | grep api
 **Objetivo**: Aplicar middleware automático de métricas sin tocar handlers
 
 **Código** (`main.go`):
+
 ```go
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
+ "fmt"
+ "net/http"
+ "strconv"
+ "time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promauto"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
-	httpRequests = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "http_requests_total",
-		},
-		[]string{"method", "path", "status"},
-	)
-	
-	httpDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_request_duration_seconds",
-			Buckets: []float64{.001, .01, .1, 1},
-		},
-		[]string{"method", "path"},
-	)
-	
-	activeRequests = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "http_requests_active",
-		},
-	)
+ httpRequests = promauto.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "http_requests_total",
+  },
+  []string{"method", "path", "status"},
+ )
+
+ httpDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_request_duration_seconds",
+   Buckets: []float64{.001, .01, .1, 1},
+  },
+  []string{"method", "path"},
+ )
+
+ activeRequests = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "http_requests_active",
+  },
+ )
 )
 
 type ResponseWriter struct {
-	http.ResponseWriter
-	statusCode int
-	size       int
+ http.ResponseWriter
+ statusCode int
+ size       int
 }
 
 func (rw *ResponseWriter) WriteHeader(code int) {
-	rw.statusCode = code
-	rw.ResponseWriter.WriteHeader(code)
+ rw.statusCode = code
+ rw.ResponseWriter.WriteHeader(code)
 }
 
 func (rw *ResponseWriter) Write(b []byte) (int, error) {
-	rw.size += len(b)
-	return rw.ResponseWriter.Write(b)
+ rw.size += len(b)
+ return rw.ResponseWriter.Write(b)
 }
 
 func metricsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		activeRequests.Inc()
-		defer activeRequests.Dec()
-		
-		rw := &ResponseWriter{ResponseWriter: w, statusCode: 200}
-		next.ServeHTTP(rw, r)
-		
-		duration := time.Since(start).Seconds()
-		status := strconv.Itoa(rw.statusCode)
-		
-		httpRequests.WithLabelValues(r.Method, r.URL.Path, status).Inc()
-		httpDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
-	})
+ return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+  activeRequests.Inc()
+  defer activeRequests.Dec()
+
+  rw := &ResponseWriter{ResponseWriter: w, statusCode: 200}
+  next.ServeHTTP(rw, r)
+
+  duration := time.Since(start).Seconds()
+  status := strconv.Itoa(rw.statusCode)
+
+  httpRequests.WithLabelValues(r.Method, r.URL.Path, status).Inc()
+  httpDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration)
+ })
 }
 
 func main() {
-	mux := http.NewServeMux()
-	
-	// Handlers sin instrumentación
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(50 * time.Millisecond)
-		w.Write([]byte("users list"))
-	})
-	
-	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(100 * time.Millisecond)
-		w.Write([]byte("posts list"))
-	})
-	
-	mux.Handle("/metrics", promhttp.Handler())
-	
-	// Aplicar middleware global
-	handler := metricsMiddleware(mux)
-	
-	fmt.Println("Server with middleware on :8080")
-	http.ListenAndServe(":8080", handler)
+ mux := http.NewServeMux()
+
+ // Handlers sin instrumentación
+ mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+  time.Sleep(50 * time.Millisecond)
+  w.Write([]byte("users list"))
+ })
+
+ mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
+  time.Sleep(100 * time.Millisecond)
+  w.Write([]byte("posts list"))
+ })
+
+ mux.Handle("/metrics", promhttp.Handler())
+
+ // Aplicar middleware global
+ handler := metricsMiddleware(mux)
+
+ fmt.Println("Server with middleware on :8080")
+ http.ListenAndServe(":8080", handler)
 }
 ```
 
 **Testing**:
+
 ```bash
 # Generar tráfico
 for i in {1..100}; do
@@ -2117,6 +2174,7 @@ curl http://localhost:8080/metrics | grep http
 **Objetivo**: Crear dashboard con 5+ gráficos
 
 **docker-compose.yml**:
+
 ```yaml
 version: '3'
 services:
@@ -2140,6 +2198,7 @@ services:
 ```
 
 **Dashboard JSON** (`grafana-dashboards/dashboard.json`):
+
 ```json
 {
   "dashboard": {
@@ -2202,6 +2261,7 @@ services:
 **Objetivo**: Definir alertas realistas con Alertmanager
 
 **alert_rules.yml**:
+
 ```yaml
 groups:
   - name: api_alerts
@@ -2209,21 +2269,21 @@ groups:
     rules:
       - alert: HighErrorRate
         expr: |
-          (sum(rate(http_requests_total{status=~"5.."}[5m])) 
+          (sum(rate(http_requests_total{status=~"5.."}[5m]))
            / sum(rate(http_requests_total[5m]))) > 0.05
         for: 5m
         annotations:
           summary: "Error rate > 5%"
-      
+
       - alert: HighLatency
         expr: |
-          histogram_quantile(0.95, 
+          histogram_quantile(0.95,
             sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
           ) > 1
         for: 5m
         annotations:
           summary: "p95 latency > 1s"
-      
+
       - alert: TooManyActiveRequests
         expr: http_requests_active > 1000
         for: 2m
@@ -2232,6 +2292,7 @@ groups:
 ```
 
 **alertmanager.yml**:
+
 ```yaml
 global:
   resolve_timeout: 5m
@@ -2252,120 +2313,121 @@ receivers:
 **Objetivo**: Aplicación completa con Prometheus, Grafana, alertas y trazas
 
 **main.go**:
+
 ```go
 package main
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
-	"net/http"
-	"strconv"
-	"time"
+ "context"
+ "database/sql"
+ "fmt"
+ "net/http"
+ "strconv"
+ "time"
 
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/sdk/trace"
+ _ "github.com/mattn/go-sqlite3"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promauto"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
+ "go.opentelemetry.io/otel"
+ "go.opentelemetry.io/otel/exporters/jaeger"
+ "go.opentelemetry.io/otel/sdk/trace"
 )
 
 var (
-	// Métricas
-	dbQueryDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "db_query_duration_seconds",
-			Buckets: []float64{.001, .01, .1, 1},
-		},
-		[]string{"operation"},
-	)
-	
-	activeConnections = promauto.NewGauge(
-		prometheus.GaugeOpts{
-			Name: "active_connections",
-		},
-	)
-	
-	requestLatency = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "http_latency_seconds",
-			Buckets: []float64{.001, .01, .1},
-		},
-		[]string{"endpoint"},
-	)
+ // Métricas
+ dbQueryDuration = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "db_query_duration_seconds",
+   Buckets: []float64{.001, .01, .1, 1},
+  },
+  []string{"operation"},
+ )
+
+ activeConnections = promauto.NewGauge(
+  prometheus.GaugeOpts{
+   Name: "active_connections",
+  },
+ )
+
+ requestLatency = promauto.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name:    "http_latency_seconds",
+   Buckets: []float64{.001, .01, .1},
+  },
+  []string{"endpoint"},
+ )
 )
 
 type Database struct {
-	db *sql.DB
+ db *sql.DB
 }
 
 func (d *Database) QueryUser(ctx context.Context, id string) (string, error) {
-	start := time.Now()
-	defer func() {
-		dbQueryDuration.WithLabelValues("select_user").Observe(
-			time.Since(start).Seconds(),
-		)
-	}()
-	
-	// Tracing
-	ctx, span := otel.Tracer("").Start(ctx, "queryUser")
-	defer span.End()
-	
-	activeConnections.Inc()
-	defer activeConnections.Dec()
-	
-	row := d.db.QueryRowContext(ctx, "SELECT name FROM users WHERE id = ?", id)
-	var name string
-	err := row.Scan(&name)
-	return name, err
+ start := time.Now()
+ defer func() {
+  dbQueryDuration.WithLabelValues("select_user").Observe(
+   time.Since(start).Seconds(),
+  )
+ }()
+
+ // Tracing
+ ctx, span := otel.Tracer("").Start(ctx, "queryUser")
+ defer span.End()
+
+ activeConnections.Inc()
+ defer activeConnections.Dec()
+
+ row := d.db.QueryRowContext(ctx, "SELECT name FROM users WHERE id = ?", id)
+ var name string
+ err := row.Scan(&name)
+ return name, err
 }
 
 func handleGetUser(db *Database) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		defer func() {
-			requestLatency.WithLabelValues("/users").Observe(
-				time.Since(start).Seconds(),
-			)
-		}()
-		
-		id := r.URL.Query().Get("id")
-		name, err := db.QueryUser(r.Context(), id)
-		
-		if err != nil {
-			w.WriteHeader(404)
-			return
-		}
-		
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"id":"%s","name":"%s"}`, id, name)
-	}
+ return func(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+  defer func() {
+   requestLatency.WithLabelValues("/users").Observe(
+    time.Since(start).Seconds(),
+   )
+  }()
+
+  id := r.URL.Query().Get("id")
+  name, err := db.QueryUser(r.Context(), id)
+
+  if err != nil {
+   w.WriteHeader(404)
+   return
+  }
+
+  w.Header().Set("Content-Type", "application/json")
+  fmt.Fprintf(w, `{"id":"%s","name":"%s"}`, id, name)
+ }
 }
 
 func main() {
-	// Tracing setup
-	exp, _ := jaeger.New(jaeger.WithCollectorEndpoint(
-		jaeger.WithEndpoint("http://jaeger:14268/api/traces"),
-	))
-	tp := trace.NewTracerProvider(trace.WithBatcher(exp))
-	otel.SetTracerProvider(tp)
-	
-	// Database
-	sqldb, _ := sql.Open("sqlite3", ":memory:")
-	db := &Database{db: sqldb}
-	
-	// Initialize
-	sqldb.Exec("CREATE TABLE users (id TEXT, name TEXT)")
-	sqldb.Exec("INSERT INTO users VALUES ('1', 'Alice'), ('2', 'Bob')")
-	
-	// Routes
-	http.HandleFunc("/user", handleGetUser(db))
-	http.Handle("/metrics", promhttp.Handler())
-	
-	fmt.Println("Full stack app on :8080")
-	http.ListenAndServe(":8080", nil)
+ // Tracing setup
+ exp, _ := jaeger.New(jaeger.WithCollectorEndpoint(
+  jaeger.WithEndpoint("http://jaeger:14268/api/traces"),
+ ))
+ tp := trace.NewTracerProvider(trace.WithBatcher(exp))
+ otel.SetTracerProvider(tp)
+
+ // Database
+ sqldb, _ := sql.Open("sqlite3", ":memory:")
+ db := &Database{db: sqldb}
+
+ // Initialize
+ sqldb.Exec("CREATE TABLE users (id TEXT, name TEXT)")
+ sqldb.Exec("INSERT INTO users VALUES ('1', 'Alice'), ('2', 'Bob')")
+
+ // Routes
+ http.HandleFunc("/user", handleGetUser(db))
+ http.Handle("/metrics", promhttp.Handler())
+
+ fmt.Println("Full stack app on :8080")
+ http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -2376,6 +2438,7 @@ func main() {
 La observabilidad es un pilar fundamental de operaciones modernas. Go, combinado con Prometheus y Grafana, proporciona una plataforma excepcional para construir sistemas visibles y confiables.
 
 **Recuerda:**
+
 1. **Empieza simple**: Métricas básicas (requests, latency, errors)
 2. **Crece gradualmente**: Agrega alertas, dashboards, trazas
 3. **Mantén cardinality baja**: El mayor problema en Prometheus
@@ -2388,12 +2451,12 @@ Con estos principios, construirás sistemas que no solo funcionan, sino que se e
 
 ## Referencias
 
-- **Prometheus**: https://prometheus.io/docs
-- **Client Go**: https://pkg.go.dev/github.com/prometheus/client_golang
-- **PromQL**: https://prometheus.io/docs/prometheus/latest/querying/basics
-- **Grafana**: https://grafana.com/docs
-- **Thanos**: https://thanos.io/
-- **Observability**: https://o11y.rocks/
+- **Prometheus**: <https://prometheus.io/docs>
+- **Client Go**: <https://pkg.go.dev/github.com/prometheus/client_golang>
+- **PromQL**: <https://prometheus.io/docs/prometheus/latest/querying/basics>
+- **Grafana**: <https://grafana.com/docs>
+- **Thanos**: <https://thanos.io/>
+- **Observability**: <https://o11y.rocks/>
 
 ---
 

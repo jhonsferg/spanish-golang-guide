@@ -45,18 +45,21 @@ El caching es una de las optimizaciones más críticas en sistemas de alta concu
 ### 66.1.2 - Tipos de Caching
 
 **A. Caching In-Memory Local**
+
 - Datos en memoria del proceso Go
 - Latencia ultra-baja (microsegundos)
 - Aislado por instancia
 - Ideal para cálculos, sesiones locales
 
 **B. Caching Distribuido**
+
 - Compartido entre múltiples servidores
 - Consistencia eventual o fuerte
 - Redis, Memcached, etc.
 - Escalable horizontalmente
 
 **C. Caching Multinivel**
+
 - Combina local + distribuido
 - L1: Proceso Go (muy rápido)
 - L2: Redis (más datos, latencia media)
@@ -88,19 +91,19 @@ type CacheDecision struct {
         Medium   string // 100MB - 1GB → BigCache
         Large    string // > 1GB       → Redis
     }
-    
+
     // ¿Consistencia?
     Consistency struct {
         Eventual string // → go-cache, BigCache
         Strong   string // → Redis con ACID
     }
-    
+
     // ¿Distribución?
     Distribution struct {
         Single   string // → go-cache, BigCache
         Multiple string // → Groupcache, Redis
     }
-    
+
     // ¿Vida útil?
     Lifecycle struct {
         Temporal string // TTL → go-cache
@@ -156,12 +159,14 @@ Costos               CPU+RAM           Network+CPU+RAM
 - Casos con TTL (Time To Live)
 
 **Ventajas:**
+
 - ✅ Cero dependencias externas
 - ✅ API simple (set, get, delete)
 - ✅ Limpieza automática con TTL
 - ✅ Callbacks en expiración
 
 **Desventajas:**
+
 - ❌ Pausas GC en datasets grandes
 - ❌ No distribuido
 - ❌ Sincronización básica (mutex global)
@@ -186,35 +191,36 @@ import (
 func main() {
     // Crear cache con cleanup cada 5 minutos
     c := cache.New(5*time.Minute, 10*time.Minute)
-    
+
     // Set: almacenar valor con TTL infinito
     c.Set("clave1", "valor1", cache.NoExpiration)
-    
+
     // Set con TTL específico (30 segundos)
     c.Set("token", "abc123xyz", 30*time.Second)
-    
+
     // Get: recuperar valor
     if val, found := c.Get("clave1"); found {
         fmt.Println("Valor:", val)
     }
-    
+
     // Verificar existencia sin error
     if c.Has("token") {
         fmt.Println("Token existe")
     }
-    
+
     // Delete: eliminar clave
     c.Delete("clave1")
-    
+
     // Limpiar todo
     c.Flush()
-    
+
     // Contar items
     fmt.Println("Items en cache:", c.ItemCount())
 }
 ```
 
 **Output:**
+
 ```
 Valor: valor1
 Token existe
@@ -234,24 +240,24 @@ import (
 
 func main() {
     c := cache.New(1*time.Minute, 2*time.Minute)
-    
+
     // Expiraciones distintas
     c.Set("short", "vive 5 seg", 5*time.Second)
     c.Set("medium", "vive 1 min", 1*time.Minute)
     c.Set("long", "vive 1 hora", 1*time.Hour)
     c.Set("forever", "sin expirar", cache.NoExpiration)
-    
+
     fmt.Println("--- T0 (inicio) ---")
     printCache(c)
-    
+
     time.Sleep(6 * time.Second)
-    
+
     fmt.Println("\n--- T6s (short expiró) ---")
     printCache(c)
-    
+
     // Cambiar expiración dinámicamente
     c.Set("medium", "renovado", 10*time.Second)
-    
+
     fmt.Println("\n--- Después de renovar 'medium' ---")
     if val, ok := c.Get("medium"); ok {
         fmt.Printf("medium = %v\n", val)
@@ -260,7 +266,7 @@ func main() {
 
 func printCache(c *cache.Cache) {
     for k, v := range c.Items() {
-        fmt.Printf("  %s = %v (expira en %v)\n", 
+        fmt.Printf("  %s = %v (expira en %v)\n",
             k, v.Object, time.Until(time.Unix(0, v.Expiration)))
     }
 }
@@ -280,47 +286,47 @@ import (
 
 func main() {
     c := cache.New(1*time.Minute, 2*time.Minute)
-    
+
     // En go-cache, se usa un wrapper para callbacks
     // Implementar manualmente con canales
-    
+
     type CacheItem struct {
         Value    interface{}
         OnExpire func()
     }
-    
+
     events := make(chan string, 100)
-    
+
     // Set con evento
     SetWithCallback(c, "session", "user123", 3*time.Second, func() {
         events <- "session expirado"
         log.Println("[EVENT] Session expiró")
     })
-    
+
     // Monitorear expiración
     go func() {
         ticker := time.NewTicker(500 * time.Millisecond)
         defer ticker.Stop()
-        
+
         var lastCount int
         for range ticker.C {
             current := c.ItemCount()
             if current < lastCount {
-                fmt.Printf("Ítems: %d → %d (expiración detectada)\n", 
+                fmt.Printf("Ítems: %d → %d (expiración detectada)\n",
                     lastCount, current)
             }
             lastCount = current
         }
     }()
-    
+
     time.Sleep(4 * time.Second)
 }
 
 // Helper function para simular callbacks
-func SetWithCallback(c *cache.Cache, key string, val interface{}, 
+func SetWithCallback(c *cache.Cache, key string, val interface{},
     ttl time.Duration, onExpire func()) {
     c.Set(key, val, ttl)
-    
+
     go func() {
         time.Sleep(ttl)
         if _, found := c.Get(key); !found {
@@ -350,13 +356,13 @@ func (cc *ConfigCache) GetConfig(key string) (interface{}, error) {
     if val, found := cc.cache.Get(key); found {
         return val, nil
     }
-    
+
     // Cargar de BD
     val, err := LoadFromDB(key)
     if err != nil {
         return nil, err
     }
-    
+
     // Cachear por 15 minutos
     cc.cache.Set(key, val, 15*time.Minute)
     return val, nil
@@ -377,11 +383,11 @@ func (rl *RateLimiter) IsAllowed(userID string) bool {
     if val, found := rl.cache.Get(userID); found {
         count = val.(int)
     }
-    
+
     if count >= rl.limit {
         return false
     }
-    
+
     // Incrementar contador
     count++
     rl.cache.Set(userID, count, rl.window)
@@ -425,6 +431,7 @@ func (ss *SessionStore) GetSession(sessionID string) (map[string]interface{}, bo
 - 📈 Mejor para datasets que go-cache
 
 **Ventajas sobre go-cache:**
+
 - ✅ Mejor para datos > 500 MB
 - ✅ Minimiza pausas GC
 - ✅ Ring buffer circular (evita fragmentación)
@@ -477,29 +484,29 @@ func main() {
     config.MaxEntriesInWindow = 1_000_000 // Max entradas en ventana
     config.MaxEntrySize = 500              // Max bytes por entry
     config.Verbose = true                  // Logs
-    
+
     cache, _ := bigcache.NewBigCache(config)
     defer cache.Close()
-    
+
     // SET
     cache.Set("user:1001", []byte("Alice"))
     cache.Set("user:1002", []byte("Bob"))
-    
+
     // GET
     if data, err := cache.Get("user:1001"); err == nil {
         fmt.Println("Usuario:", string(data))
     }
-    
+
     // EXISTS
     if _, err := cache.Get("user:1001"); err == nil {
         fmt.Println("Existe")
     } else {
         fmt.Println("No existe:", err)
     }
-    
+
     // DELETE
     cache.Delete("user:1001")
-    
+
     // Stats
     stats := cache.Stats()
     fmt.Printf("Entries: %d, Hits: %d, Misses: %d\n",
@@ -522,14 +529,14 @@ import (
 func main() {
     cache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(1*time.Hour))
     defer cache.Close()
-    
+
     // Benchmark: Escritura concurrente
     start := time.Now()
     var wg sync.WaitGroup
-    
+
     numGoroutines := 100
     itemsPerGoroutine := 10000
-    
+
     for i := 0; i < numGoroutines; i++ {
         wg.Add(1)
         go func(id int) {
@@ -540,15 +547,15 @@ func main() {
             }
         }(i)
     }
-    
+
     wg.Wait()
     elapsed := time.Since(start)
-    
+
     totalOps := numGoroutines * itemsPerGoroutine
     opsPerSec := float64(totalOps) / elapsed.Seconds()
-    
+
     fmt.Printf("Escrituras concurrentes: %.2fM ops/sec\n", opsPerSec/1_000_000)
-    
+
     // Lectura
     start = time.Now()
     readOps := 0
@@ -561,7 +568,7 @@ func main() {
         }
     }
     elapsed = time.Since(start)
-    
+
     readOpsPerSec := float64(readOps) / elapsed.Seconds()
     fmt.Printf("Lecturas: %.2fM ops/sec\n", readOpsPerSec/1_000_000)
 }
@@ -570,6 +577,7 @@ func main() {
 ### 66.3.6 - When to Use BigCache
 
  **Usar BigCache cuando:**
+
 - Dataset > 500 MB
 - Necesitas 1M+ ops/sec
 - Datos son frecuentemente accedidos
@@ -577,6 +585,7 @@ func main() {
 - Datos pueden ser serializados a bytes
 
  **NO usar BigCache cuando:**
+
 - Datos < 100 MB
 - Necesitas TTL flexible
 - Esperas actualizaciones frecuentes
@@ -635,7 +644,7 @@ func (ug *UserGetter) Get(ctx context.Context, key string, dest groupcache.Sink)
     if !exists {
         return fmt.Errorf("usuario no encontrado")
     }
-    
+
     // Almacenar en el sink
     dest.SetString(value)
     fmt.Printf("[DB LOOKUP] Obteniendo: %s = %s\n", key, value)
@@ -650,10 +659,10 @@ func main() {
             "user:2": "Bob",
         },
     }
-    
+
     // Crear grupo de caché
     users := groupcache.NewGroup("users", 64<<20, getter) // 64 MB
-    
+
     // Obtener valor (si no está, llama a getter)
     var data []byte
     users.Get(ctx, "user:1", groupcache.AllocatingByteSliceSink(&data))
@@ -689,33 +698,33 @@ func main() {
     // NODO 1: Configurar peers
     myself := "http://localhost:8001"
     peers := groupcache.NewHTTPPool(myself)
-    
+
     // Agregar otros nodos
     peers.Set("http://localhost:8001", "http://localhost:8002", "http://localhost:8003")
-    
+
     // Crear grupo
     getter := &DBGetter{}
     cache := groupcache.NewGroup("datos", 1<<20, getter)
-    
+
     // Handler para requests de otros nodos
     http.Handle(groupcache.HTTPPoolPath, peers)
-    
+
     // Endpoint de prueba
     http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
         key := r.URL.Query().Get("key")
         var data []byte
-        
+
         err := cache.Get(ctx, key, groupcache.AllocatingByteSliceSink(&data))
         if err != nil {
             w.WriteHeader(http.StatusInternalServerError)
             fmt.Fprintf(w, "Error: %v", err)
             return
         }
-        
+
         w.Header().Set("Content-Type", "text/plain")
         fmt.Fprintf(w, string(data))
     })
-    
+
     log.Fatal(http.ListenAndServe(":8001", nil))
 }
 ```
@@ -734,7 +743,7 @@ Tenemos 3 servidores, usuario_popular se solicita 1000x/seg:
        │    1000 req/seg a user:popular
        ├────────────────────┤
        └─ Red saturada, latencia = 100ms
-       
+
   ┌─────────────────────┐
   │  BD (hot-spot)      │
   │  100% CPU           │
@@ -744,11 +753,11 @@ Tenemos 3 servidores, usuario_popular se solicita 1000x/seg:
 SOLUCIÓN CON GROUPCACHE:
 
   Consistent Hashing decide: user:popular vive en Srv 2
-  
+
   Srv 1:  GET user:popular → Local (hit) → devuelve en <1ms
   Srv 3:  GET user:popular → Local (hit) → devuelve en <1ms
   Srv 2:  GET user:popular → BD una sola vez → cachea
-  
+
   Resultado: BD recibe 1 req/sec en lugar de 1000
 */
 
@@ -776,13 +785,13 @@ func (cg *CountingGetter) Get(ctx context.Context, key string, dest groupcache.S
 func main() {
     getter := &CountingGetter{}
     cache := groupcache.NewGroup("cache", 10<<20, getter)
-    
+
     // Simular 1000 requests al mismo key
     for i := 0; i < 1000; i++ {
         var data []byte
         cache.Get(ctx, "user:popular", groupcache.AllocatingByteSliceSink(&data))
     }
-    
+
     fmt.Printf("Hits a BD: %d\n", atomic.LoadInt64(&getter.dbHits))
     fmt.Println("Sin Groupcache: 1000 hits")
     fmt.Println("Con Groupcache: 1 hit (999 desde caché local)")
@@ -814,13 +823,13 @@ func NewGroupCacheManager() *GroupCacheManager {
 }
 
 func (gcm *GroupCacheManager) CreateGroup(
-    name string, 
-    maxSize int64, 
+    name string,
+    maxSize int64,
     getter groupcache.Getter) {
-    
+
     gcm.mu.Lock()
     defer gcm.mu.Unlock()
-    
+
     if _, exists := gcm.groups[name]; !exists {
         gcm.groups[name] = groupcache.NewGroup(name, maxSize, getter)
     }
@@ -830,15 +839,15 @@ func (gcm *GroupCacheManager) Get(
     ctx context.Context,
     group string,
     key string) ([]byte, error) {
-    
+
     gcm.mu.RLock()
     g, exists := gcm.groups[group]
     gcm.mu.RUnlock()
-    
+
     if !exists {
         return nil, fmt.Errorf("grupo %s no existe", group)
     }
-    
+
     var data []byte
     err := g.Get(ctx, key, groupcache.AllocatingByteSliceSink(&data))
     return data, err
@@ -874,7 +883,7 @@ func (gcm *GroupCacheManager) Get(
   ├─ Divide tiempo en ventanas              │
   ├─ Frecuencia de uso local                │
   ├─ Combina LRU + LFU                      │
-  └─ Evita reemplazo de hot datos           
+  └─ Evita reemplazo de hot datos  
                                             │
 
 ```
@@ -902,25 +911,25 @@ func main() {
         MaxCost:     10 << 20,   // 10 MB
         BufferItems: 64,
     }
-    
+
     cache, _ := ristretto.NewCache(config)
     defer cache.Close()
-    
+
     // Almacenar con cost
     cache.Set("user:1", "Alice", 1)      // cost = 1
     cache.Set("image:1", []byte{0,0}, 100) // cost = 100
-    
+
     // Bloom filter predice posibles hits
     // Si devuelve NO → 100% no está
     // Si devuelve SÍ → probablemente esté
-    
+
     // Lectura
     if val, found := cache.Get("user:1"); found {
         fmt.Println("Hit:", val)
     } else {
         fmt.Println("Miss (predicción acertada)")
     }
-    
+
     // Stats
     fmt.Printf("Stats: %+v\n", cache.Metrics())
 }
@@ -943,31 +952,31 @@ func main() {
         MaxCost:     1000, // 1000 unidades de cost
         BufferItems: 64,
     }
-    
+
     cache, _ := ristretto.NewCache(config)
     defer cache.Close()
-    
+
     // Agregar items con diferentes costos
     cache.Set("item1", "pequeño", 100)   // 10% de capacity
     cache.Set("item2", "mediano", 300)   // 30%
     cache.Set("item3", "grande", 500)    // 50%
     cache.Set("item4", "extra", 300)     // 30%
-    
+
     // Ahora: 100 + 300 + 500 + 300 = 1200 > 1000
     // Algo debe ser eviccionado
-    
+
     fmt.Println("Después de agregar cuatro items:")
-    
+
     found1, _ := cache.Get("item1")
     found2, _ := cache.Get("item2")
     found3, _ := cache.Get("item3")
     found4, _ := cache.Get("item4")
-    
+
     fmt.Printf("item1 (cost 100): %v\n", found1 != nil)
     fmt.Printf("item2 (cost 300): %v\n", found2 != nil)
     fmt.Printf("item3 (cost 500): %v\n", found3 != nil)
     fmt.Printf("item4 (cost 300): %v\n", found4 != nil)
-    
+
     // Metrics
     m := cache.Metrics()
     fmt.Printf("\nMetrics:\n")
@@ -996,13 +1005,13 @@ func benchmarkRistretto() {
         BufferItems: 64,
     })
     defer cache.Close()
-    
+
     bench := func(name string, fn func()) {
         start := time.Now()
         fn()
         fmt.Printf("%-30s: %v\n", name, time.Since(start))
     }
-    
+
     // Writes
     bench("Ristretto: 1M writes", func() {
         for i := 0; i < 1_000_000; i++ {
@@ -1012,14 +1021,14 @@ func benchmarkRistretto() {
             cache.WaitForItems()
         }
     })
-    
+
     // Reads
     bench("Ristretto: 1M reads", func() {
         for i := 0; i < 1_000_000; i++ {
             cache.Get(fmt.Sprintf("key:%d", i))
         }
     })
-    
+
     // Concurrent
     bench("Ristretto: 100 goroutines x 10K ops", func() {
         var wg sync.WaitGroup
@@ -1038,10 +1047,10 @@ func benchmarkRistretto() {
 
 func main() {
     benchmarkRistretto()
-    
+
     /*
     COMPARACIÓN TÍPICA:
-    
+
     go-cache:    400ms (con pausas GC)
     BigCache:    50ms  (optimizado para bytes)
     Ristretto:   30ms  (mejor concurrencia)
@@ -1052,6 +1061,7 @@ func main() {
 ### 66.5.6 - Use Cases
 
  **Usar Ristretto cuando:**
+
 - Datos heterogéneos (diferentes tamaños/costos)
 - Alta concurrencia (muchas goroutines)
 - Necesitas control fino sobre eviction
@@ -1096,14 +1106,14 @@ import (
 
 func main() {
     ctx := context.Background()
-    
+
     // Conexión simple
     rdb := redis.NewClient(&redis.Options{
         Addr:     "localhost:6379",
         Password: "",
         DB:       0,
     })
-    
+
     // Pool automático (default: 10 conexiones)
     rdb = redis.NewClient(&redis.Options{
         Addr:         "localhost:6379",
@@ -1111,11 +1121,11 @@ func main() {
         MinIdleConns: 5,            // mínimas inactivas
         MaxRetries:   3,
     })
-    
+
     // Test conexión
     pong, err := rdb.Ping(ctx).Result()
     fmt.Println("Ping:", pong, err)
-    
+
     // Cluster (automático failover)
     clusterRdb := redis.NewClusterClient(&redis.ClusterOptions{
         Addrs: []string{
@@ -1124,7 +1134,7 @@ func main() {
             "localhost:7002",
         },
     })
-    
+
     defer clusterRdb.Close()
 }
 ```
@@ -1145,39 +1155,39 @@ func main() {
     ctx := context.Background()
     rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer rdb.Close()
-    
+
     // SET y GET
     err := rdb.Set(ctx, "user:1001", "Alice", 24*time.Hour).Err()
     if err != nil {
         panic(err)
     }
-    
+
     val, err := rdb.Get(ctx, "user:1001").Result()
     fmt.Println("Usuario:", val)
-    
+
     // DEL
     rdb.Del(ctx, "user:1001")
-    
+
     // INCR (atomático)
     rdb.Set(ctx, "counter", "0", 0)
     count, _ := rdb.Incr(ctx, "counter").Result()
     fmt.Println("Counter:", count) // 1
-    
+
     // LPUSH / RPOP (listas)
     rdb.RPush(ctx, "queue", "tarea1", "tarea2", "tarea3")
     item, _ := rdb.LPop(ctx, "queue").Result()
     fmt.Println("Item:", item)
-    
+
     // HSET / HGET (hashes)
     rdb.HSet(ctx, "user:profile", "nombre", "Alice", "edad", 30)
     name, _ := rdb.HGet(ctx, "user:profile", "nombre").Result()
     fmt.Println("Nombre:", name)
-    
+
     // SADD / SMEMBERS (sets)
     rdb.SAdd(ctx, "tags", "golang", "redis", "cache")
     members, _ := rdb.SMembers(ctx, "tags").Result()
     fmt.Println("Tags:", members)
-    
+
     // ZADD / ZRANGE (sorted sets)
     rdb.ZAdd(ctx, "leaderboard",
         redis.Z{Score: 100, Member: "Alice"},
@@ -1203,31 +1213,31 @@ func main() {
     ctx := context.Background()
     rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer rdb.Close()
-    
+
     // SIN pipelining: 100 commands = 100 round-trips (100ms @ 1ms/trip)
     // CON pipelining: 100 commands = 1 round-trip (~1ms)
-    
+
     // Crear pipeline
     pipe := rdb.Pipeline()
-    
+
     // Encolar comandos
     for i := 1; i <= 100; i++ {
         pipe.Set(ctx, fmt.Sprintf("key:%d", i), i, 0)
     }
-    
+
     // Ejecutar todo de una
     cmds, err := pipe.Exec(ctx)
     if err != nil {
         panic(err)
     }
-    
+
     fmt.Printf("Ejecutados %d comandos\n", len(cmds))
-    
+
     // Pipelining con TxPipeline (transaccional)
     txPipe := rdb.TxPipeline()
     txPipe.Set(ctx, "account:alice", "100", 0)
     txPipe.Incr(ctx, "account:alice")  // Debe ser atómico
-    
+
     _, err = txPipe.Exec(ctx)
     if err != nil {
         fmt.Println("Transacción fallida:", err)
@@ -1250,19 +1260,19 @@ func main() {
     ctx := context.Background()
     rdb := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer rdb.Close()
-    
+
     // SUSCRIPTOR
     go func() {
         pubsub := rdb.Subscribe(ctx, "notifications", "alerts")
         defer pubsub.Close()
-        
+
         ch := pubsub.Channel()
-        
+
         for msg := range ch {
             fmt.Printf("[%s] %s\n", msg.Channel, msg.Payload)
         }
     }()
-    
+
     // PUBLICADOR
     for i := 1; i <= 5; i++ {
         rdb.Publish(ctx, "notifications", fmt.Sprintf("Notificación %d", i))
@@ -1283,7 +1293,7 @@ import (
 
 func main() {
     ctx := context.Background()
-    
+
     // Cluster con 3 nodos
     clusterRdb := redis.NewClusterClient(&redis.ClusterOptions{
         Addrs: []string{
@@ -1294,19 +1304,19 @@ func main() {
         ReadOnly: false, // escribe en primary
     })
     defer clusterRdb.Close()
-    
+
     // Operaciones normales (automáticamente distribuidas)
     err := clusterRdb.Set(ctx, "user:100", "Alice", 0).Err()
     val, err := clusterRdb.Get(ctx, "user:100").Result()
     fmt.Println("Usuario:", val)
-    
+
     // Pipeline en cluster
     pipe := clusterRdb.Pipeline()
     for i := 1; i <= 10; i++ {
         pipe.Set(ctx, fmt.Sprintf("k:%d", i), i, 0)
     }
     pipe.Exec(ctx)
-    
+
     // Información del cluster
     info, _ := clusterRdb.ClusterInfo(ctx).Result()
     fmt.Println("Cluster info:", info)
@@ -1327,7 +1337,7 @@ func main() {
          ▼               ▼
       Cache           Database
     (Redis)           (PostgreSQL)
-    
+
     1. GET data → Try cache first
     2. If hit    → return data
     3. If miss   → query DB
@@ -1353,7 +1363,7 @@ type User struct {
 
 func GetUserCacheAside(ctx context.Context, userID int) (*User, error) {
     cacheKey := fmt.Sprintf("user:%d", userID)
-    
+
     // 1. Intentar desde caché
     if cached, err := getFromRedis(ctx, cacheKey); err == nil {
         var user User
@@ -1361,18 +1371,18 @@ func GetUserCacheAside(ctx context.Context, userID int) (*User, error) {
         fmt.Println("✅ Hit desde caché")
         return &user, nil
     }
-    
+
     // 2. Miss - consultar BD
     fmt.Println("❌ Miss, consultando BD...")
     user, err := getUserFromDB(userID)
     if err != nil {
         return nil, err
     }
-    
+
     // 3. Cachear resultado
     data, _ := json.Marshal(user)
     setInRedis(ctx, cacheKey, data, 24*time.Hour)
-    
+
     return user, nil
 }
 
@@ -1406,7 +1416,7 @@ func getUserFromDB(id int) (*User, error) {
          ▼                ▼
        Cache          Database
        (OK)           (OK)
-    
+
     Síncronos ambos
 ```
 
@@ -1415,18 +1425,18 @@ func SetUserWriteThrough(ctx context.Context, user *User) error {
     // 1. Escribir en caché PRIMERO
     cacheKey := fmt.Sprintf("user:%d", user.ID)
     data, _ := json.Marshal(user)
-    
+
     if err := setInRedis(ctx, cacheKey, data, 24*time.Hour); err != nil {
         return fmt.Errorf("cache write failed: %w", err)
     }
-    
+
     // 2. Escribir en BD
     if err := saveUserToDB(user); err != nil {
         // ROLLBACK: eliminar de caché si BD falló
         deleteFromRedis(ctx, cacheKey)
         return fmt.Errorf("db write failed: %w", err)
     }
-    
+
     fmt.Println("✅ Datos consistentes (cache + db)")
     return nil
 }
@@ -1480,7 +1490,7 @@ func NewWriteBackBuffer(flushInterval time.Duration) *WriteBackBuffer {
         ticker: time.NewTicker(flushInterval),
         done:   make(chan struct{}),
     }
-    
+
     // Goroutine que flush periódicamente
     go wb.flushPeriodically()
     return wb
@@ -1491,7 +1501,7 @@ func (wb *WriteBackBuffer) Set(ctx context.Context, key string, value interface{
     wb.mu.Lock()
     wb.queue[key] = value
     wb.mu.Unlock()
-    
+
     fmt.Printf("✅ Escrito en buffer: %s\n", key)
     return nil
 }
@@ -1505,13 +1515,13 @@ func (wb *WriteBackBuffer) flushPeriodically() {
 func (wb *WriteBackBuffer) flush() {
     wb.mu.Lock()
     defer wb.mu.Unlock()
-    
+
     if len(wb.queue) == 0 {
         return
     }
-    
+
     fmt.Printf("💾 Flushing %d items a BD...\n", len(wb.queue))
-    
+
     for key, value := range wb.queue {
         data, _ := json.Marshal(value)
         // Simular escritura a BD
@@ -1562,7 +1572,7 @@ type RefreshAheadCache struct {
 func (rac *RefreshAheadCache) Get(ctx context.Context, key string) (interface{}, error) {
     // Incrementar contador
     rac.accessCounts[key]++
-    
+
     // Si fue accedido > threshold veces, refrescar proactivamente
     if rac.accessCounts[key] > rac.threshold {
         if time.Since(rac.lastRefresh[key]) > 10*time.Second {
@@ -1574,7 +1584,7 @@ func (rac *RefreshAheadCache) Get(ctx context.Context, key string) (interface{},
             }()
         }
     }
-    
+
     // Devolver valor actual del caché
     return getFromCache(key)
 }
@@ -1586,6 +1596,7 @@ func getFromCache(key string) (interface{}, error)   { return nil, nil }
 ### 66.7.5 - Time-Based vs Event-Based Invalidation
 
 **Time-Based (TTL Simple):**
+
 ```go
 // Expiración fija
 rdb.Set(ctx, "config", "value", 5*time.Minute)
@@ -1593,6 +1604,7 @@ rdb.Set(ctx, "config", "value", 5*time.Minute)
 ```
 
 **Event-Based (Invalidación activa):**
+
 ```go
 package cache
 
@@ -1615,6 +1627,7 @@ func (ei *EventInvalidator) Listen(ctx context.Context, rdb *redis.Client) {
 ```
 
 **Hybrid (lo mejor):**
+
 ```go
 // TTL + Event-based
 rdb.Set(ctx, "user:1", "Alice", 1*time.Hour)  // TTL fallback
@@ -1660,7 +1673,7 @@ import (
 func main() {
     // Conectar
     mc, _ := memcache.New("localhost:11211")
-    
+
     // SET
     item := &memcache.Item{
         Key:        "user:1",
@@ -1668,19 +1681,19 @@ func main() {
         Expiration: 3600, // segundos
     }
     mc.Set(item)
-    
+
     // GET
     it, err := mc.Get("user:1")
     if err == nil {
         fmt.Println("User:", string(it.Value))
     }
-    
+
     // DEL
     mc.Delete("user:1")
-    
+
     // ADD (solo si no existe)
     mc.Add(item)
-    
+
     // INCR
     mc.Increment("counter", 1)
 }
@@ -1729,7 +1742,7 @@ func main() {
         },
     })
     defer rdb.Close()
-    
+
     // Funciona como cliente normal
     // Failover automático si master cae
 }
@@ -1771,7 +1784,7 @@ import (
 
 func main() {
     ctx := context.Background()
-    
+
     // Cliente de cluster
     rdb := redis.NewClusterClient(&redis.ClusterOptions{
         Addrs: []string{
@@ -1781,16 +1794,16 @@ func main() {
         },
     })
     defer rdb.Close()
-    
+
     // API idéntica a cliente normal
     rdb.Set(ctx, "key1", "value1", 0)
     val, _ := rdb.Get(ctx, "key1").Result()
     fmt.Println(val)
-    
+
     // Info del cluster
     info, _ := rdb.ClusterInfo(ctx).Result()
     fmt.Println("Cluster state:", info)
-    
+
     // Conocer slots
     slots, _ := rdb.ClusterSlots(ctx).Result()
     for _, slot := range slots {
@@ -1832,16 +1845,16 @@ import (
 func cacheableHandler(w http.ResponseWriter, r *http.Request) {
     // Público (caché puede guardarlo)
     w.Header().Set("Cache-Control", "public, max-age=3600")
-    
+
     // Privado (navegador sí, CDN no)
     w.Header().Set("Cache-Control", "private, max-age=1800")
-    
+
     // No cacheable
     w.Header().Set("Cache-Control", "no-cache, no-store")
-    
+
     // Validar antes de usar
     w.Header().Set("Cache-Control", "public, max-age=3600, must-revalidate")
-    
+
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("Contenido"))
 }
@@ -1849,15 +1862,15 @@ func cacheableHandler(w http.ResponseWriter, r *http.Request) {
 func etagHandler(w http.ResponseWriter, r *http.Request) {
     content := "Mi contenido"
     etag := generateETag(content)
-    
+
     w.Header().Set("ETag", `"`+etag+`"`)
-    
+
     // Si cliente envía If-None-Match
     if r.Header.Get("If-None-Match") == `"`+etag+`"` {
         w.WriteHeader(http.StatusNotModified)
         return
     }
-    
+
     w.WriteHeader(http.StatusOK)
     w.Write([]byte(content))
 }
@@ -1865,14 +1878,14 @@ func etagHandler(w http.ResponseWriter, r *http.Request) {
 func lastModifiedHandler(w http.ResponseWriter, r *http.Request) {
     lastMod := time.Now().UTC()
     w.Header().Set("Last-Modified", lastMod.Format(http.TimeFormat))
-    
+
     // Si cliente envía If-Modified-Since
     ifModSince, _ := time.Parse(http.TimeFormat, r.Header.Get("If-Modified-Since"))
     if lastMod.Before(ifModSince) {
         w.WriteHeader(http.StatusNotModified)
         return
     }
-    
+
     w.WriteHeader(http.StatusOK)
     w.Write([]byte("Contenido"))
 }
@@ -1929,29 +1942,29 @@ func demonstrateDirectives(w http.ResponseWriter, r *http.Request) {
     // max-age: segundos que puede servirse desde caché
     // 1 hora
     w.Header().Set("Cache-Control", "max-age=3600")
-    
+
     // s-maxage: para caché compartido (CDN)
     // 1 día en CDN, 1 hora en navegador
     w.Header().Set("Cache-Control", "max-age=3600, s-maxage=86400")
-    
+
     // public: cualquiera puede cachear
     w.Header().Set("Cache-Control", "public, max-age=3600")
-    
+
     // private: solo navegador (no CDN ni proxies)
     w.Header().Set("Cache-Control", "private, max-age=1800")
-    
+
     // no-cache: validar con servidor antes de usar
     w.Header().Set("Cache-Control", "no-cache")
-    
+
     // no-store: nunca cachear (sensible)
     w.Header().Set("Cache-Control", "no-store")
-    
+
     // must-revalidate: si expiró, DEBE revalidar
     w.Header().Set("Cache-Control", "max-age=3600, must-revalidate")
-    
+
     // Combinado: frecuente en APIs
     // Público, 1 hora en CDN, 5 min en navegador, revalidar si expira
-    w.Header().Set("Cache-Control", 
+    w.Header().Set("Cache-Control",
         "public, max-age=300, s-maxage=3600, must-revalidate")
 }
 ```
@@ -1968,21 +1981,21 @@ import (
 
 func cfCacheHandler(w http.ResponseWriter, r *http.Request) {
     // Headers específicos de Cloudflare
-    
+
     // Cache todo durante 1 hora (bypass auth)
     w.Header().Set("Cache-Control", "public, max-age=3600")
-    
+
     // Cache status
     w.Header().Set("X-Frame-Options", "SAMEORIGIN")
     w.Header().Set("X-Content-Type-Options", "nosniff")
-    
+
     // Cloudflare Page Rules (desde CF, no desde código)
     // Pero podemos indicar intención con headers
     w.Header().Set("X-Cache-Status", "HIT") // informativo
-    
+
     // Cache purge token (si necesitas limpiar caché)
     // POST /api/purge con headers especiales
-    
+
     fmt.Fprint(w, "Contenido cacheado por Cloudflare")
 }
 
@@ -1990,12 +2003,12 @@ func cfCacheHandler(w http.ResponseWriter, r *http.Request) {
 func purgeCloudflareCache(url string) error {
     // Requiere API key de Cloudflare
     // Example:
-    req, _ := http.NewRequest("POST", 
+    req, _ := http.NewRequest("POST",
         "https://api.cloudflare.com/client/v4/zones/{zone}/purge_cache", nil)
-    
+
     req.Header.Set("X-Auth-Email", "your@email.com")
     req.Header.Set("X-Auth-Key", "your-api-key")
-    
+
     client := &http.Client{}
     resp, _ := client.Do(req)
     fmt.Println("Purge response:", resp.Status)
@@ -2079,12 +2092,12 @@ func (cm *CacheMetrics) GetStats() map[string]interface{} {
     h := atomic.LoadInt64(&cm.hits)
     m := atomic.LoadInt64(&cm.misses)
     total := h + m
-    
+
     hitRate := float64(0)
     if total > 0 {
         hitRate = float64(h) / float64(total) * 100
     }
-    
+
     return map[string]interface{}{
         "hits":       h,
         "misses":     m,
@@ -2126,7 +2139,7 @@ type HitRateMonitor struct {
 
 func (hrm *HitRateMonitor) RecordOperation(isHit bool) {
     now := time.Now().Truncate(time.Second)
-    
+
     if isHit {
         hrm.hitCounts[now]++
     } else {
@@ -2137,20 +2150,20 @@ func (hrm *HitRateMonitor) RecordOperation(isHit bool) {
 func (hrm *HitRateMonitor) GetAverageHitRate() float64 {
     total := int64(0)
     hits := int64(0)
-    
+
     for _, h := range hrm.hitCounts {
         hits += h
         total += h
     }
-    
+
     for _, m := range hrm.missCounts {
         total += m
     }
-    
+
     if total == 0 {
         return 0
     }
-    
+
     return float64(hits) / float64(total) * 100
 }
 
@@ -2208,21 +2221,21 @@ import (
 func detectMemoryLeak(interval time.Duration, threshold uint64) {
     var m runtime.MemStats
     var lastMem uint64
-    
+
     for {
         time.Sleep(interval)
-        
+
         runtime.ReadMemStats(&m)
-        
+
         if m.Alloc > lastMem+threshold {
             fmt.Printf("Memory spike: %v MB → %v MB\n",
                 lastMem/1024/1024, m.Alloc/1024/1024)
-            
+
             // Generar snapshot
             runtime.GC()
             fmt.Printf("After GC: %v MB\n", m.Alloc/1024/1024)
         }
-        
+
         lastMem = m.Alloc
     }
 }
@@ -2230,7 +2243,7 @@ func detectMemoryLeak(interval time.Duration, threshold uint64) {
 func PrintCacheStats() {
     var m runtime.MemStats
     runtime.ReadMemStats(&m)
-    
+
     fmt.Printf("Memoria caché estimada:\n")
     fmt.Printf("  Alloc: %v MB\n", m.Alloc/1024/1024)
     fmt.Printf("  TotalAlloc: %v MB\n", m.TotalAlloc/1024/1024)
@@ -2352,12 +2365,12 @@ type CatalogService struct {
 
 func (cs *CatalogService) GetProduct(ctx context.Context, id int) (*Product, error) {
     key := fmt.Sprintf("product:%d", id)
-    
+
     // L1: Local cache
     if p, ok := cs.localCache[id]; ok {
         return p, nil
     }
-    
+
     // L2: Redis (distribuido)
     val, err := cs.redis.Get(ctx, key).Result()
     if err == nil {
@@ -2366,18 +2379,18 @@ func (cs *CatalogService) GetProduct(ctx context.Context, id int) (*Product, err
         cs.localCache[id] = &p
         return &p, nil
     }
-    
+
     // L3: Database (miss)
     p, err := cs.getFromDB(id)
     if err != nil {
         return nil, err
     }
-    
+
     // Cachear en ambos niveles
     data, _ := json.Marshal(p)
     cs.redis.Set(ctx, key, data, 1*time.Hour)
     cs.localCache[id] = p
-    
+
     return p, nil
 }
 ```
@@ -2403,7 +2416,7 @@ ARQUITECTURA:
    │   BigCache  │ (últimas 10 minutos)
    │ (buckets)   │
    └──────┬──────┘
-          
+
           ▼
    ┌──────────────────┐
    │ Redis Aggregates │ (últimas 24h)
@@ -2446,7 +2459,7 @@ func (ea *EventAggregator) RecordEvent(event map[string]interface{}) error {
     key := fmt.Sprintf("event:%d:%d", timestamp.Unix(), event["id"])
     data, _ := json.Marshal(event)
     ea.bigcache.Set(key, data)
-    
+
     // 2. Agregar en Redis (últimas 24h)
     ea.redis.ZAdd(context.Background(),
         "events:24h",
@@ -2455,16 +2468,16 @@ func (ea *EventAggregator) RecordEvent(event map[string]interface{}) error {
             Member: string(data),
         },
     )
-    
+
     return nil
 }
 
 func (ea *EventAggregator) GetStats() map[string]interface{} {
     ctx := context.Background()
-    
+
     // Obtener count from Redis
     count, _ := ea.redis.ZCard(ctx, "events:24h").Result()
-    
+
     return map[string]interface{}{
         "events_24h": count,
     }
@@ -2485,35 +2498,35 @@ import (
     "json"
 )
 
-func MigrateToRedis(ctx context.Context, 
+func MigrateToRedis(ctx context.Context,
     oldCache *cache.Cache,
     newRedis *redis.Client) {
-    
+
     // Paso 1: Leer todo de go-cache
     items := oldCache.Items()
-    
+
     // Paso 2: Escribir a Redis
     pipe := newRedis.Pipeline()
-    
+
     for key, item := range items {
         // Convertir valor a JSON
         data, _ := json.Marshal(item.Object)
-        
+
         // Calcular TTL restante
         ttl := time.Until(time.Unix(0, item.Expiration))
         if ttl < 0 {
             ttl = 1 * time.Second
         }
-        
+
         pipe.Set(ctx, key, data, ttl)
     }
-    
+
     pipe.Exec(ctx)
-    
+
     // Paso 3: Dual-write nuevo código
     // Leer: redis (con fallback a go-cache)
     // Escribir: a ambos
-    
+
     // Paso 4: Deprecated go-cache cuando hit-rate < 5%
 }
 ```
@@ -2552,7 +2565,7 @@ func GetWithLocking(ctx context.Context, key string) {
             return 0
         end
     `)
-    
+
     ok, _ := lock.Run(ctx, redis.Client, []string{key + ":lock"}, uuid()).Result()
     if ok == 1 {
         // Solo este proceso consulta BD
@@ -2571,10 +2584,10 @@ func UpdateUser(userID int, data *User) error {
     if err := saveUserToDB(data); err != nil {
         return err
     }
-    
+
     // Invalidar caché INMEDIATAMENTE
     redis.Del(ctx, fmt.Sprintf("user:%d", userID))
-    
+
     return nil
 }
 
@@ -2659,12 +2672,12 @@ func main() {
     // 3. GetSession: retorna datos si existen
     // 4. DeleteSession: limpia sesión
     // 5. ListActiveSessions: cuenta sesiones activas
-    
+
     // Requisitos:
     // - Sesiones expiran en 30 minutos
     // - Mostrar hit rate de accesos
     // - Validar antes de cada operación
-    
+
     // Resultado esperado:
     // CreateSession() → "session_123abc"
     // GetSession("session_123abc") → {user: "alice", rol: "admin"}
@@ -2715,7 +2728,7 @@ func main() {
     // 3. Mostrar hit rate
     // 4. Monitorear memoria
     // 5. Comparar con go-cache
-    
+
     // Resultado esperado:
     // BigCache: 100M+ ops/sec, < 100ms GC pause
     // go-cache: 10M ops/sec, > 500ms GC pause
@@ -2741,7 +2754,7 @@ func main() {
     // 3. Configurar pipelining para batch ops
     // 4. Implementar rate limiting por usuario
     // 5. Monitorear hit rate
-    
+
     // Resultado esperado:
     // 1000 usuarios, 10K ops/sec
     // 90% hit rate
@@ -2769,7 +2782,7 @@ func main() {
     // 3. Almacenar en Redis
     // 4. Medir overhead (CPU time vs memory saved)
     // 5. Decidir si compresión vale la pena
-    
+
     // Estructura de prueba:
     type LargeData struct {
         ID       int
@@ -2778,7 +2791,7 @@ func main() {
         Profile  string // 10KB de texto
         Metadata map[string]interface{}
     }
-    
+
     // Resultado esperado:
     // Sin compresión: 10KB por item, 100ms/op
     // Con compresión: 2KB por item, 110ms/op

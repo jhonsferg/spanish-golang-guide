@@ -3,6 +3,7 @@
 ## Una Guía Exhaustiva del Framework Web Más Rápido de Go
 
 **Tabla de Contenidos**
+
 - [59.1 - Introducción a Fiber](#591---introducción-a-fiber)
 - [59.2 - Fiber Basics](#592---fiber-basics)
 - [59.3 - Routing Deep Dive](#593---routing-deep-dive)
@@ -39,6 +40,7 @@ Timeline de Fiber:
 ### 59.1.3 Por qué Fiber: Ventajas Clave
 
 **Rendimiento Superior**
+
 ```
 Benchmarks (requests/segundo):
 ┌─────────────────┬─────────────┬──────────┐
@@ -59,6 +61,7 @@ Express.js:   ~85 MB
 ```
 
 **API Familiar para Desarrolladores Node.js**
+
 ```go
 // Fiber (inspira en Express)
 app.Get("/users", handler)
@@ -71,6 +74,7 @@ http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 ```
 
 **Características Modernas**
+
 - Built-in middleware ecosystem
 - Validación de esquemas
 - Manejo de errores global
@@ -87,16 +91,16 @@ Principios Fundamentales:
 
 1. VELOCIDAD PRIMERO
    └─ Optimizado para throughput máximo
-   
+
 2. FAMILIARIDAD
    └─ API similar a Express.js para adopción rápida
-   
+
 3. SIMPLICIDAD
    └─ API mínima pero poderosa
-   
+
 4. FLEXIBILIDAD
    └─ Middleware system para extensiones
-   
+
 5. GOLANG-NATIVE
    └─ Aprovecha concurrencia con goroutines
 ```
@@ -104,6 +108,7 @@ Principios Fundamentales:
 ### 59.1.5 ¿Cuándo Usar Fiber?
 
 **✅ Use Fiber cuando:**
+
 - Necesita máximo rendimiento HTTP
 - Construye REST APIs de alto tráfico
 - Requiere baja latencia
@@ -112,6 +117,7 @@ Principios Fundamentales:
 - Presupuesto de recursos limitado
 
 **⚠️ Considere alternativas cuando:**
+
 - Necesita middleware de gorilla/mux específico
 - Proyecto usa net/http estándar extensivamente
 - Requiere compatibilidad 100% con stdlib
@@ -156,8 +162,9 @@ http.HandleFunc("/", handler)
 ### 59.1.7 Casos de Uso Reales
 
 **1. APIs REST de Alto Tráfico**
+
 ```
-Sistema de recomendaciones: 
+Sistema de recomendaciones:
 - 100k req/s
 - Fiber maneja con <5 instancias
 - Gin/Echo requieren 8-10 instancias
@@ -165,6 +172,7 @@ Sistema de recomendaciones:
 ```
 
 **2. Microservicios**
+
 ```
 Malla de servicios con ~20 microservicios
 Fiber reduce:
@@ -174,6 +182,7 @@ Fiber reduce:
 ```
 
 **3. WebSocket en Tiempo Real**
+
 ```
 Chat de 50k usuarios concurrentes:
 - Fiber: 1 servidor
@@ -193,6 +202,7 @@ Estadísticas (2024):
 ```
 
 **Recursos Clave:**
+
 - GitHub: github.com/gofiber/fiber
 - Documentación: docs.gofiber.io
 - Discord: 15k+ miembros
@@ -216,6 +226,7 @@ require github.com/gofiber/fiber/v2 v2.50.0
 ```
 
 **go.mod típico para proyecto Fiber:**
+
 ```
 module github.com/user/myapp
 
@@ -231,6 +242,7 @@ require (
 ### 59.2.2 Primera Aplicación
 
 **Ejemplo Mínimo:**
+
 ```go
 package main
 
@@ -238,16 +250,17 @@ import "github.com/gofiber/fiber/v2"
 
 func main() {
     app := fiber.New()
-    
+
     app.Get("/", func(c *fiber.Ctx) error {
         return c.SendString("¡Hola, Fiber!")
     })
-    
+
     app.Listen(":3000")
 }
 ```
 
 **Ejecutar:**
+
 ```bash
 go run main.go
 # Escuchar en http://localhost:3000
@@ -282,13 +295,13 @@ func main() {
         GETOnly:      false,          // Solo permitir GET
         ErrorHandler: customErrorHandler,
     }
-    
+
     app := fiber.New(config)
-    
+
     // Middleware global
     app.Use(logger.New())
     app.Use(recover.New())
-    
+
     // Rutas
     app.Get("/", func(c *fiber.Ctx) error {
         return c.JSON(fiber.Map{
@@ -296,14 +309,14 @@ func main() {
             "version": "1.0.0",
         })
     })
-    
+
     // Manejo de 404
     app.Use(func(c *fiber.Ctx) error {
         return c.Status(404).JSON(fiber.Map{
             "error": "Ruta no encontrada",
         })
     })
-    
+
     log.Fatal(app.Listen(":3000"))
 }
 
@@ -323,6 +336,7 @@ func customErrorHandler(c *fiber.Ctx, err error) error {
 ### 59.2.4 Contexto de Fiber (fiber.Ctx)
 
 **¿Qué es el Contexto?**
+
 ```
 El contexto (c *fiber.Ctx) representa una solicitud HTTP individual.
 Incluye toda la información de la solicitud y métodos para responder.
@@ -353,29 +367,29 @@ func handler(c *fiber.Ctx) error {
     header := c.Get("Content-Type") // Header
     ip := c.IP()                   // IP del cliente
     body := c.Body()               // Body sin procesar
-    
+
     // Información del contexto
     baseURL := c.BaseURL()         // http://localhost:3000
     hostname := c.Hostname()       // localhost
     port := c.Port()               // "3000"
     protocol := c.Protocol()       // http
-    
+
     // Métodos de respuesta
     c.SendString("texto")          // Response de texto
     c.JSON(map[string]interface{}{}) // Response JSON
     c.Status(200)                  // Establecer status code
     c.Redirect("/other")           // Redireccionar
-    
+
     // Valores locales (compartir datos en middleware)
     c.Locals("userID", 123)        // Establecer
     userID := c.Locals("userID")   // Obtener (interface{})
-    
+
     // Cookies
     c.Cookie(&fiber.Cookie{
         Name:  "session",
         Value: "abc123",
     })
-    
+
     return nil
 }
 ```
@@ -391,26 +405,26 @@ import (
 
 func main() {
     app := fiber.New()
-    
+
     app.Get("/", func(c *fiber.Ctx) error {
         return c.SendString("Hola")
     })
-    
+
     // Diferentes formas de escuchar
-    
+
     // 1. Puerto simple
     app.Listen(":3000")
-    
+
     // 2. Host específico
     app.Listen("127.0.0.1:3000")
-    
+
     // 3. Con configuración TLS
     app.ListenTLS(":443", "cert.pem", "key.pem")
-    
+
     // 4. Con listener personalizado
     ln, _ := net.Listen("tcp", ":3000")
     app.Listener(ln)
-    
+
     // 5. Graceful shutdown
     go func() {
         time.Sleep(10 * time.Second)
@@ -471,26 +485,27 @@ proyecto-fiber/
 ```
 
 **Makefile típico:**
+
 ```makefile
 .PHONY: run test build clean docker-build
 
 run:
-	go run main.go
+ go run main.go
 
 test:
-	go test ./... -v -coverage
+ go test ./... -v -coverage
 
 build:
-	go build -o app
+ go build -o app
 
 clean:
-	rm -f app
+ rm -f app
 
 docker-build:
-	docker build -t myapp .
+ docker build -t myapp .
 
 lint:
-	golangci-lint run
+ golangci-lint run
 ```
 
 ---
@@ -500,6 +515,7 @@ lint:
 ### 59.3.1 Routing Fundamentales
 
 **Métodos HTTP Básicos:**
+
 ```go
 app.Get("/users", getUsers)        // GET
 app.Post("/users", createUser)     // POST
@@ -559,7 +575,7 @@ app.Get("/users/:id", func(c *fiber.Ctx) error {
 app.Get("/search", func(c *fiber.Ctx) error {
     query := c.Query("q")           // Valor simple
     limit := c.Query("limit", "10") // Con default
-    
+
     return c.JSON(fiber.Map{
         "search": query,
         "limit": limit,
@@ -585,14 +601,14 @@ app.Get("/filter", func(c *fiber.Ctx) error {
 app.Get("/items", func(c *fiber.Ctx) error {
     // ?sort=name:asc,date:desc
     sort := c.Query("sort")
-    
+
     // ?page=1&size=10
     page := c.QueryInt("page", 1)    // Valor entero
     size := c.QueryInt("size", 10)
-    
+
     // ?active=true
     active := c.QueryBool("active", false)
-    
+
     return c.JSON(fiber.Map{
         "sort": sort,
         "page": page,
@@ -699,7 +715,7 @@ app.Get("/links", func(c *fiber.Ctx) error {
     userUrl := c.GetRouteURL("user.detail", fiber.Map{
         "id": "123",
     })
-    
+
     return c.JSON(fiber.Map{
         "home": homeUrl,
         "about": aboutUrl,
@@ -820,13 +836,13 @@ Response HTTP
 func customMiddleware(c *fiber.Ctx) error {
     // Antes del handler
     println("Solicitud entrante:", c.Path())
-    
+
     // Continuar al siguiente middleware/handler
     err := c.Next()
-    
+
     // Después del handler
     println("Solicitud completada:", c.Path())
-    
+
     return err
 }
 
@@ -838,7 +854,7 @@ app.Get("/", handler)
 app.Get("/admin", adminMiddleware, adminHandler)
 
 // Múltiples middleware en una ruta
-app.Post("/secure", 
+app.Post("/secure",
     authMiddleware,
     validateMiddleware,
     secureHandler,
@@ -852,6 +868,7 @@ api.Get("/status", statusHandler)
 ### 59.4.3 Middleware Incorporado de Fiber
 
 **Logger Middleware:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/logger"
 
@@ -868,6 +885,7 @@ app.Use(logger.New(logger.Config{
 ```
 
 **Recover Middleware (Manejo de Panic):**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/recover"
 
@@ -883,6 +901,7 @@ app.Get("/crash", func(c *fiber.Ctx) error {
 ```
 
 **CORS Middleware:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/cors"
 
@@ -900,6 +919,7 @@ app.Use(cors.New())
 ```
 
 **Rate Limiting:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/limiter"
 import "github.com/gofiber/fiber/v2/utils"
@@ -921,6 +941,7 @@ app.Use(limiter.New(limiter.Config{
 ```
 
 **Compression Middleware:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/compress"
 
@@ -933,6 +954,7 @@ app.Use(compress.New(compress.Config{
 ```
 
 **Request ID:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/requestid"
 
@@ -946,6 +968,7 @@ app.Get("/", func(c *fiber.Ctx) error {
 ```
 
 **Timeout Middleware:**
+
 ```go
 import "github.com/gofiber/fiber/v2/middleware/timeout"
 
@@ -959,6 +982,7 @@ app.Use(timeout.New(timeout.Config{
 ### 59.4.4 Custom Middleware Avanzado
 
 **Middleware de Autenticación:**
+
 ```go
 package middleware
 
@@ -975,7 +999,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
             "error": "Token no proporcionado",
         })
     }
-    
+
     // Validar formato Bearer
     parts := strings.Split(authHeader, " ")
     if len(parts) != 2 || parts[0] != "Bearer" {
@@ -983,9 +1007,9 @@ func AuthMiddleware(c *fiber.Ctx) error {
             "error": "Formato de token inválido",
         })
     }
-    
+
     token := parts[1]
-    
+
     // Validar token (ejemplo simple)
     userID, err := validateToken(token)
     if err != nil {
@@ -993,11 +1017,11 @@ func AuthMiddleware(c *fiber.Ctx) error {
             "error": "Token inválido",
         })
     }
-    
+
     // Almacenar en contexto
     c.Locals("userID", userID)
     c.Locals("token", token)
-    
+
     return c.Next()
 }
 
@@ -1012,6 +1036,7 @@ func validateToken(token string) (int, error) {
 ```
 
 **Middleware de Logging Personalizado:**
+
 ```go
 package middleware
 
@@ -1023,17 +1048,17 @@ import (
 
 func CustomLogger(c *fiber.Ctx) error {
     start := time.Now()
-    
+
     // Pasar al siguiente handler
     err := c.Next()
-    
+
     // Calcular duración
     duration := time.Since(start)
-    
+
     // Log
     statusCode := c.Response().StatusCode()
     color := getStatusColor(statusCode)
-    
+
     fmt.Printf("%s[%d]%s %s %s en %v\n",
         color,
         statusCode,
@@ -1042,7 +1067,7 @@ func CustomLogger(c *fiber.Ctx) error {
         c.Path(),
         duration,
     )
-    
+
     return err
 }
 
@@ -1061,6 +1086,7 @@ func getStatusColor(status int) string {
 ```
 
 **Middleware de Validación Global:**
+
 ```go
 package middleware
 
@@ -1092,7 +1118,7 @@ app.Post("/users", ValidateContentType, createUserHandler)
 ```go
 func main() {
     app := fiber.New()
-    
+
     // 1. Middleware Global
     app.Use(func(c *fiber.Ctx) error {
         println("1. Middleware Global - ANTES")
@@ -1100,7 +1126,7 @@ func main() {
         println("1. Middleware Global - DESPUÉS")
         return err
     })
-    
+
     // 2. Grupo con middleware
     api := app.Group("/api", func(c *fiber.Ctx) error {
         println("2. Grupo Middleware - ANTES")
@@ -1108,7 +1134,7 @@ func main() {
         println("2. Grupo Middleware - DESPUÉS")
         return err
     })
-    
+
     // 3. Ruta específica con middleware
     api.Get("/users", func(c *fiber.Ctx) error {
         println("3. Middleware Ruta - ANTES")
@@ -1119,7 +1145,7 @@ func main() {
         println("4. HANDLER")
         return c.SendString("OK")
     })
-    
+
     app.Listen(":3000")
 }
 
@@ -1151,14 +1177,14 @@ type User struct {
 // Parsing JSON simple
 app.Post("/users", func(c *fiber.Ctx) error {
     user := new(User)
-    
+
     // Parsear JSON del body
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": err.Error(),
         })
     }
-    
+
     return c.JSON(fiber.Map{
         "message": "Usuario recibido",
         "user": user,
@@ -1168,38 +1194,38 @@ app.Post("/users", func(c *fiber.Ctx) error {
 // Parsing JSON con manejo de errores personalizado
 app.Post("/users", func(c *fiber.Ctx) error {
     user := new(User)
-    
+
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": "JSON inválido",
             "details": err.Error(),
         })
     }
-    
+
     // Validar datos
     if user.Name == "" || user.Email == "" {
         return c.Status(400).JSON(fiber.Map{
             "error": "Nombre y email requeridos",
         })
     }
-    
+
     return c.JSON(user)
 })
 
 // Parsing JSON sin struct (usando map)
 app.Post("/flexible", func(c *fiber.Ctx) error {
     var data map[string]interface{}
-    
+
     if err := c.BindJSON(&data); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": err.Error(),
         })
     }
-    
+
     // Acceder a valores
     name := data["name"].(string)
     age := int(data["age"].(float64))
-    
+
     return c.JSON(fiber.Map{
         "name": name,
         "age": age,
@@ -1220,11 +1246,11 @@ type LoginForm struct {
 // Parsing form-urlencoded
 app.Post("/login", func(c *fiber.Ctx) error {
     form := new(LoginForm)
-    
+
     if err := c.BindForm(form); err != nil {
         return c.Status(400).SendString("Error parsing form")
     }
-    
+
     return c.JSON(fiber.Map{
         "username": form.Username,
         "remember": form.Remember,
@@ -1243,7 +1269,7 @@ app.Post("/login", func(c *fiber.Ctx) error {
 app.Post("/form", func(c *fiber.Ctx) error {
     username := c.FormValue("username")
     password := c.FormValue("password", "") // Con default
-    
+
     return c.JSON(fiber.Map{
         "username": username,
         "password": password,
@@ -1264,13 +1290,13 @@ type SearchQuery struct {
 // Parsing query parameters
 app.Get("/search", func(c *fiber.Ctx) error {
     query := new(SearchQuery)
-    
+
     if err := c.BindQuery(query); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": err.Error(),
         })
     }
-    
+
     return c.JSON(query)
 })
 
@@ -1286,6 +1312,7 @@ app.Get("/search", func(c *fiber.Ctx) error {
 ### 59.5.4 File Uploads
 
 **Archivo Único:**
+
 ```go
 app.Post("/upload", func(c *fiber.Ctx) error {
     // Obtener archivo
@@ -1295,18 +1322,18 @@ app.Post("/upload", func(c *fiber.Ctx) error {
             "error": "No file provided",
         })
     }
-    
+
     // Información del archivo
     filename := file.Filename
     size := file.Size
-    
+
     // Validar tamaño (máx 10MB)
     if size > 10*1024*1024 {
         return c.Status(400).JSON(fiber.Map{
             "error": "File too large",
         })
     }
-    
+
     // Guardar archivo
     path := fmt.Sprintf("./uploads/%s", filename)
     if err := c.SaveFile(file, path); err != nil {
@@ -1314,7 +1341,7 @@ app.Post("/upload", func(c *fiber.Ctx) error {
             "error": "Failed to save file",
         })
     }
-    
+
     return c.JSON(fiber.Map{
         "filename": filename,
         "size": size,
@@ -1324,6 +1351,7 @@ app.Post("/upload", func(c *fiber.Ctx) error {
 ```
 
 **Múltiples Archivos:**
+
 ```go
 app.Post("/upload-multiple", func(c *fiber.Ctx) error {
     // Obtener formulario
@@ -1331,21 +1359,21 @@ app.Post("/upload-multiple", func(c *fiber.Ctx) error {
     if err != nil {
         return c.Status(400).SendString("Error parsing form")
     }
-    
+
     // Obtener archivos
     files := form.File["files"]
-    
+
     uploaded := []string{}
     for _, file := range files {
         filename := file.Filename
         path := fmt.Sprintf("./uploads/%s", filename)
-        
+
         if err := c.SaveFile(file, path); err != nil {
             continue
         }
         uploaded = append(uploaded, filename)
     }
-    
+
     return c.JSON(fiber.Map{
         "uploaded": uploaded,
         "count": len(uploaded),
@@ -1365,9 +1393,9 @@ app.Post("/upload-multiple", func(c *fiber.Ctx) error {
 // Acceder a body sin procesar
 app.Post("/raw", func(c *fiber.Ctx) error {
     body := c.Body()
-    
+
     println("Raw body:", string(body))
-    
+
     return c.JSON(fiber.Map{
         "bytes_received": len(body),
     })
@@ -1379,7 +1407,7 @@ app.Post("/text", func(c *fiber.Ctx) error {
         println("Body:", string(body))
         return nil
     })
-    
+
     return c.SendString("OK")
 })
 ```
@@ -1387,15 +1415,16 @@ app.Post("/text", func(c *fiber.Ctx) error {
 ### 59.5.6 Cookies
 
 **Lectura de Cookies:**
+
 ```go
 app.Get("/", func(c *fiber.Ctx) error {
     // Obtener cookie específica
     sessionID := c.Cookies("sessionid")
     userPref := c.Cookies("theme", "dark") // Con default
-    
+
     // Todas las cookies
     allCookies := c.Cookies()
-    
+
     return c.JSON(fiber.Map{
         "sessionid": sessionID,
         "theme": userPref,
@@ -1405,6 +1434,7 @@ app.Get("/", func(c *fiber.Ctx) error {
 ```
 
 **Escritura de Cookies:**
+
 ```go
 app.Post("/login", func(c *fiber.Ctx) error {
     // Crear cookie
@@ -1418,7 +1448,7 @@ app.Post("/login", func(c *fiber.Ctx) error {
         HTTPOnly: true,        // No accesible desde JS
         SameSite: "Strict",    // CSRF protection
     })
-    
+
     return c.JSON(fiber.Map{
         "message": "Cookie set",
     })
@@ -1431,7 +1461,7 @@ app.Post("/logout", func(c *fiber.Ctx) error {
         Value:   "",
         Expires: time.Now().Add(-time.Hour),
     })
-    
+
     return c.SendString("Logged out")
 })
 ```
@@ -1444,7 +1474,7 @@ app.Get("/", func(c *fiber.Ctx) error {
     contentType := c.Get("Content-Type")
     userAgent := c.Get("User-Agent")
     auth := c.Get("Authorization")
-    
+
     return c.JSON(fiber.Map{
         "content_type": contentType,
         "user_agent": userAgent,
@@ -1463,7 +1493,7 @@ app.Get("/download", func(c *fiber.Ctx) error {
     c.Set("Content-Type", "application/octet-stream")
     c.Set("Content-Disposition", `attachment; filename="file.pdf"`)
     c.Set("X-Custom-Header", "custom-value")
-    
+
     return c.SendFile("./file.pdf")
 })
 ```
@@ -1481,7 +1511,7 @@ app.Get("/api/user", func(c *fiber.Ctx) error {
         "name": "John Doe",
         "email": "john@example.com",
     }
-    
+
     return c.JSON(user)
 })
 
@@ -1497,7 +1527,7 @@ app.Post("/users", func(c *fiber.Ctx) error {
         "id": 123,
         "name": "Jane Doe",
     }
-    
+
     return c.Status(201).JSON(newUser)  // 201 Created
 })
 
@@ -1507,7 +1537,7 @@ app.Get("/users", func(c *fiber.Ctx) error {
         {"id": 1, "name": "User 1"},
         {"id": 2, "name": "User 2"},
     }
-    
+
     return c.JSON(users)
 })
 ```
@@ -1534,22 +1564,24 @@ app.Get("/special", func(c *fiber.Ctx) error {
 ### 59.6.3 HTML Templates
 
 **Instalación:**
+
 ```bash
 go get -u github.com/gofiber/template/html/v2
 ```
 
 **Configuración:**
+
 ```go
 import "github.com/gofiber/template/html/v2"
 
 func main() {
     // Crear engine HTML
     engine := html.New("./views", ".html")
-    
+
     app := fiber.New(fiber.Config{
         Views: engine,
     })
-    
+
     app.Get("/", func(c *fiber.Ctx) error {
         // Renderizar template
         return c.Render("index", fiber.Map{
@@ -1557,12 +1589,13 @@ func main() {
             "Message": "Bienvenido a Fiber",
         })
     })
-    
+
     app.Listen(":3000")
 }
 ```
 
 **Template HTML (views/index.html):**
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -1577,6 +1610,7 @@ func main() {
 ```
 
 **Más ejemplos:**
+
 ```go
 // Template con loop
 app.Get("/users", func(c *fiber.Ctx) error {
@@ -1584,7 +1618,7 @@ app.Get("/users", func(c *fiber.Ctx) error {
         {"id": 1, "name": "Alice"},
         {"id": 2, "name": "Bob"},
     }
-    
+
     return c.Render("users", fiber.Map{
         "Users": users,
     })
@@ -1630,12 +1664,12 @@ app.Get("/stream", func(c *fiber.Ctx) error {
     c.Set("Content-Type", "text/event-stream")
     c.Set("Cache-Control", "no-cache")
     c.Set("Connection", "keep-alive")
-    
+
     for i := 0; i < 5; i++ {
         c.WriteString(fmt.Sprintf("data: Mensaje %d\n\n", i))
         time.Sleep(1 * time.Second)
     }
-    
+
     return nil
 })
 
@@ -1643,7 +1677,7 @@ app.Get("/stream", func(c *fiber.Ctx) error {
 app.Get("/stream-file", func(c *fiber.Ctx) error {
     file, _ := os.Open("./large-file.bin")
     defer file.Close()
-    
+
     c.Set("Content-Type", "application/octet-stream")
     return c.SendStream(file)
 })
@@ -1683,11 +1717,13 @@ app.Get("/external", func(c *fiber.Ctx) error {
 ### 59.7.1 Schema Validation
 
 **Instalación de Validator:**
+
 ```bash
 go get -u github.com/go-playground/validator/v10
 ```
 
 **Validación Básica:**
+
 ```go
 import "github.com/go-playground/validator/v10"
 
@@ -1701,13 +1737,13 @@ var validate = validator.New()
 
 app.Post("/users", func(c *fiber.Ctx) error {
     user := new(User)
-    
+
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{
             "error": "JSON inválido",
         })
     }
-    
+
     // Validar struct
     if err := validate.Struct(user); err != nil {
         errors := err.(validator.ValidationErrors)
@@ -1715,7 +1751,7 @@ app.Post("/users", func(c *fiber.Ctx) error {
             "errors": formatValidationErrors(errors),
         })
     }
-    
+
     return c.JSON(user)
 })
 
@@ -1748,6 +1784,7 @@ func getErrorMessage(err validator.FieldError) string {
 ```
 
 **Tags de Validación Comunes:**
+
 ```go
 type Product struct {
     // Strings
@@ -1757,18 +1794,18 @@ type Product struct {
     Email    string `validate:"required,email"`           // Email válido
     Phone    string `validate:"required,e164"`            // Formato E.164
     Desc     string `validate:"max=500"`                  // Longitud máxima
-    
+
     // Números
     Age      int    `validate:"gte=0,lte=150"`            // Entre 0 y 150
     Price    float64 `validate:"gt=0"`                    // Mayor que 0
     Rating   float32 `validate:"gte=0,lte=5"`             // Entre 0 y 5
-    
+
     // Booleano
     Active   bool   `validate:"required"`                 // Requerido
-    
+
     // Structs anidados
     Address  Address `validate:"required"`                // Validar anidado
-    
+
     // Arrays
     Tags     []string `validate:"required,min=1,dive,required,min=3"`  // Array con validación
 }
@@ -1816,7 +1853,7 @@ func main() {
     config := fiber.Config{
         ErrorHandler: globalErrorHandler,
     }
-    
+
     app := fiber.New(config)
     app.Listen(":3000")
 }
@@ -1824,19 +1861,19 @@ func main() {
 func globalErrorHandler(c *fiber.Ctx, err error) error {
     code := 500
     message := "Error interno"
-    
+
     // Fiber errors
     if e, ok := err.(*fiber.Error); ok {
         code = e.Code
         message = e.Message
     }
-    
+
     // Custom errors
     if customErr, ok := err.(*CustomError); ok {
         code = customErr.Code
         message = customErr.Message
     }
-    
+
     return c.Status(code).JSON(fiber.Map{
         "error": message,
         "code": code,
@@ -1936,21 +1973,22 @@ Express:  10+ instancias
 ### 59.8.2 Optimizaciones de Fiber
 
 **Configuración de Producción:**
+
 ```go
 app := fiber.New(fiber.Config{
     // Network
     Network:           "tcp4",        // TCP4 solo (más rápido)
     Prefork:           true,          // Usar múltiples procesos
     MaxRequestsPerConn: 0,            // Sin límite
-    
+
     // Performance
     BodyLimit:        1024 * 1024,    // 1MB
     Concurrency:      256 * 1024,     // Max goroutines simultáneas
     DisableKeepalive: false,          // Mantener conexiones vivas
-    
+
     // Compresión
     CompressedFileSuffix: ".fiber.gz",
-    
+
     // Errores
     DisableStartupMessage: false,
 })
@@ -1981,7 +2019,7 @@ var bufferPool = sync.Pool{
 app.Get("/data", func(c *fiber.Ctx) error {
     buf := bufferPool.Get().([]byte)
     defer bufferPool.Put(buf)
-    
+
     return c.Send(buf)
 })
 
@@ -2017,7 +2055,7 @@ func init() {
     if err != nil {
         panic(err)
     }
-    
+
     // Configuración de pool
     db.SetMaxOpenConns(25)    // Máximo conexiones abiertas
     db.SetMaxIdleConns(5)     // Máximo conexiones ociosas
@@ -2032,13 +2070,13 @@ app.Get("/users", func(c *fiber.Ctx) error {
         return c.Status(500).SendString("Error")
     }
     defer rows.Close()
-    
+
     for rows.Next() {
         var user User
         rows.Scan(&user.ID, &user.Name)
         users = append(users, user)
     }
-    
+
     return c.JSON(users)
 })
 ```
@@ -2133,15 +2171,15 @@ app := fiber.New(fiber.Config{
     WriteTimeout:         30 * time.Second, // Timeout escritura
     IdleTimeout:          5 * time.Minute,  // Timeout inactivo
     MaxRequestsPerConn:   0,                // 0 = sin límite
-    
+
     // Tune de memoria
     BodyLimit:           4 * 1024 * 1024,   // 4MB
     Concurrency:         256 * 1024,        // Max goroutines
-    
+
     // Tune de parseo
     JSONEncoder:         json.Marshal,      // Custom encoder
     JSONDecoder:         json.Unmarshal,    // Custom decoder
-    
+
     // Tune de output
     NoDefaultContentType: false,             // Sin Content-Type default
     DisableKeepalive:    false,              // Mantener vivo
@@ -2155,11 +2193,13 @@ app := fiber.New(fiber.Config{
 ### 59.9.1 WebSocket
 
 **Instalación:**
+
 ```bash
 go get -u github.com/gofiber/websocket/v2
 ```
 
 **Servidor WebSocket:**
+
 ```go
 import "github.com/gofiber/websocket/v2"
 
@@ -2167,15 +2207,15 @@ import "github.com/gofiber/websocket/v2"
 app.Get("/ws", websocket.New(func(c *websocket.Conn) {
     // c.Locals puede ser usado para obtener datos
     id := c.Locals("id")
-    
+
     for {
         messageType, message, err := c.ReadMessage()
         if err != nil {
             break
         }
-        
+
         println("Mensaje recibido:", string(message))
-        
+
         // Enviar echo back
         c.WriteMessage(messageType, message)
     }
@@ -2183,6 +2223,7 @@ app.Get("/ws", websocket.New(func(c *websocket.Conn) {
 ```
 
 **Chat en Tiempo Real:**
+
 ```go
 import "github.com/gofiber/websocket/v2"
 
@@ -2190,12 +2231,12 @@ var clients = make(map[*websocket.Conn]bool)
 
 app.Get("/ws", websocket.New(func(c *websocket.Conn) {
     clients[c] = true
-    
+
     username := c.Query("username")
-    
+
     // Anunciar entrada
     broadcast([]byte(username + " se ha conectado"))
-    
+
     for {
         _, msg, err := c.ReadMessage()
         if err != nil {
@@ -2203,7 +2244,7 @@ app.Get("/ws", websocket.New(func(c *websocket.Conn) {
             broadcast([]byte(username + " se desconectó"))
             break
         }
-        
+
         // Broadcast del mensaje
         fullMsg := []byte(username + ": " + string(msg))
         broadcast(fullMsg)
@@ -2218,6 +2259,7 @@ func broadcast(msg []byte) {
 ```
 
 **Cliente WebSocket (JavaScript):**
+
 ```javascript
 const ws = new WebSocket("ws://localhost:3000/ws?username=John");
 
@@ -2251,14 +2293,14 @@ app.Get("/events", func(c *fiber.Ctx) error {
     c.Set("Cache-Control", "no-cache")
     c.Set("Connection", "keep-alive")
     c.Set("Access-Control-Allow-Origin", "*")
-    
+
     // Simular envío de eventos
     for i := 0; i < 10; i++ {
         c.WriteString(fmt.Sprintf("data: Evento %d\n\n", i))
         c.Context().Response.Write(nil)  // Flush
         time.Sleep(1 * time.Second)
     }
-    
+
     return nil
 })
 
@@ -2337,6 +2379,7 @@ go get -u github.com/golang-jwt/jwt/v5
 ```
 
 **Generar Token:**
+
 ```go
 import "github.com/golang-jwt/jwt/v5"
 
@@ -2348,7 +2391,7 @@ func generateToken(userID int) (string, error) {
         "iat": time.Now().Unix(),
         "exp": time.Now().Add(24 * time.Hour).Unix(),
     }
-    
+
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString(secretKey)
 }
@@ -2356,12 +2399,12 @@ func generateToken(userID int) (string, error) {
 app.Post("/login", func(c *fiber.Ctx) error {
     // Validar credenciales
     userID := 123
-    
+
     token, err := generateToken(userID)
     if err != nil {
         return c.Status(500).SendString("Error generando token")
     }
-    
+
     return c.JSON(fiber.Map{
         "token": token,
     })
@@ -2369,6 +2412,7 @@ app.Post("/login", func(c *fiber.Ctx) error {
 ```
 
 **Verificar Token (Middleware):**
+
 ```go
 func authMiddleware(c *fiber.Ctx) error {
     authHeader := c.Get("Authorization")
@@ -2377,20 +2421,20 @@ func authMiddleware(c *fiber.Ctx) error {
             "error": "No autorizado",
         })
     }
-    
+
     token := strings.TrimPrefix(authHeader, "Bearer ")
-    
+
     claims := jwt.MapClaims{}
     _, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
         return secretKey, nil
     })
-    
+
     if err != nil {
         return c.Status(401).JSON(fiber.Map{
             "error": "Token inválido",
         })
     }
-    
+
     c.Locals("userID", claims["sub"])
     return c.Next()
 }
@@ -2418,17 +2462,17 @@ import (
 
 func TestGetUsers(t *testing.T) {
     app := fiber.New()
-    
+
     app.Get("/users", func(c *fiber.Ctx) error {
         return c.JSON([]fiber.Map{
             {"id": 1, "name": "John"},
         })
     })
-    
+
     // Test
     req := httptest.NewRequest("GET", "/users", nil)
     resp, _ := app.Test(req)
-    
+
     // Assert
     if resp.StatusCode != 200 {
         t.Errorf("Expected 200, got %d", resp.StatusCode)
@@ -2442,21 +2486,21 @@ func TestGetUsers(t *testing.T) {
 func TestUserFlow(t *testing.T) {
     app := fiber.New()
     setupRoutes(app)
-    
+
     // Crear usuario
     body := strings.NewReader(`{"name":"John","email":"john@example.com"}`)
     req := httptest.NewRequest("POST", "/users", body)
     req.Header.Set("Content-Type", "application/json")
-    
+
     resp, _ := app.Test(req)
     if resp.StatusCode != 201 {
         t.Fatal("Failed to create user")
     }
-    
+
     // Obtener usuarios
     req = httptest.NewRequest("GET", "/users", nil)
     resp, _ = app.Test(req)
-    
+
     if resp.StatusCode != 200 {
         t.Fatal("Failed to get users")
     }
@@ -2476,12 +2520,12 @@ app.Get("/health", func(c *fiber.Ctx) error {
 app.Get("/health/detailed", func(c *fiber.Ctx) error {
     dbOK := checkDatabase()
     cacheOK := checkCache()
-    
+
     status := "UP"
     if !dbOK || !cacheOK {
         status = "DEGRADED"
     }
-    
+
     return c.JSON(fiber.Map{
         "status": status,
         "database": dbOK,
@@ -2519,7 +2563,7 @@ var (
         },
         []string{"method", "path", "status"},
     )
-    
+
     httpRequestDuration = prometheus.NewHistogramVec(
         prometheus.HistogramOpts{
             Name: "http_request_duration_seconds",
@@ -2532,23 +2576,23 @@ var (
 // Middleware de métricas
 func metricsMiddleware(c *fiber.Ctx) error {
     start := time.Now()
-    
+
     err := c.Next()
-    
+
     duration := time.Since(start).Seconds()
     status := c.Response().StatusCode()
-    
+
     httpRequestsTotal.WithLabelValues(
         c.Method(),
         c.Path(),
         fmt.Sprintf("%d", status),
     ).Inc()
-    
+
     httpRequestDuration.WithLabelValues(
         c.Method(),
         c.Path(),
     ).Observe(duration)
-    
+
     return err
 }
 
@@ -2568,19 +2612,19 @@ import (
 
 func setupLogging() {
     logFile, _ := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-    
+
     log.SetOutput(logFile)
     log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
 
 func main() {
     setupLogging()
-    
+
     app.Use(func(c *fiber.Ctx) error {
         log.Printf("[%s] %s %s\n", c.Method(), c.Path(), c.IP())
         return c.Next()
     })
-    
+
     app.Listen(":3000")
 }
 ```
@@ -2592,6 +2636,7 @@ func main() {
 ### 59.11.1 Docker Deployment
 
 **Dockerfile Multi-Stage:**
+
 ```dockerfile
 # Build stage
 FROM golang:1.21 AS builder
@@ -2611,6 +2656,7 @@ CMD ["./app"]
 ```
 
 **docker-compose.yml:**
+
 ```yaml
 version: '3.8'
 services:
@@ -2637,6 +2683,7 @@ volumes:
 ### 59.11.2 Kubernetes Setup
 
 **deployment.yaml:**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -2727,25 +2774,25 @@ func main() {
     app := fiber.New(fiber.Config{
         AppName: "Fiber API v1.0",
     })
-    
+
     // Middleware
     app.Use(cors.New())
     app.Use(logger.New())
-    
+
     // Rutas
     api := app.Group("/api/v1")
-    
+
     api.Get("/users", getUsers)
     api.Post("/users", createUser)
     api.Get("/users/:id", getUser)
     api.Put("/users/:id", updateUser)
     api.Delete("/users/:id", deleteUser)
-    
+
     // Health check
     app.Get("/health", func(c *fiber.Ctx) error {
         return c.JSON(fiber.Map{"status": "OK"})
     })
-    
+
     log.Fatal(app.Listen(":3000"))
 }
 
@@ -2758,15 +2805,15 @@ func createUser(c *fiber.Ctx) error {
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": err.Error()})
     }
-    
+
     if err := validate.Struct(user); err != nil {
         return c.Status(422).JSON(fiber.Map{"error": err.Error()})
     }
-    
+
     user.ID = nextID
     nextID++
     users = append(users, *user)
-    
+
     return c.Status(201).JSON(user)
 }
 
@@ -2783,11 +2830,11 @@ func getUser(c *fiber.Ctx) error {
 func updateUser(c *fiber.Ctx) error {
     id, _ := c.ParamsInt("id")
     user := new(User)
-    
+
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": err.Error()})
     }
-    
+
     for i, u := range users {
         if u.ID == id {
             user.ID = id
@@ -2851,6 +2898,7 @@ Estrategias de Escalado:
 ### 59.11.5 Troubleshooting
 
 **Problema: High Memory Usage**
+
 ```go
 // ❌ MAL - Leak de memoria
 app.Get("/data", func(c *fiber.Ctx) error {
@@ -2871,15 +2919,16 @@ app.Get("/data", func(c *fiber.Ctx) error {
 ```
 
 **Problema: Slow Requests**
+
 ```go
 // Identificar bottleneck
 app.Use(func(c *fiber.Ctx) error {
     start := time.Now()
     err := c.Next()
-    
+
     duration := time.Since(start)
     if duration > 1*time.Second {
-        log.Printf("SLOW REQUEST: %s %s took %v", 
+        log.Printf("SLOW REQUEST: %s %s took %v",
             c.Method(), c.Path(), duration)
     }
     return err
@@ -2887,6 +2936,7 @@ app.Use(func(c *fiber.Ctx) error {
 ```
 
 **Problema: Connection Pool Exhausted**
+
 ```go
 // Síntomas: Conexiones rechazadas
 // Solución: Aumentar pool size
@@ -2922,14 +2972,15 @@ var nextID = 1
 func main() {
     app := fiber.New()
     app.Use(logger.New())
-    
+
     // Implementar CRUD aquí
-    
+
     app.Listen(":3000")
 }
 ```
 
 **Tareas:**
+
 1. ✅ GET /products - Listar todos
 2. ✅ POST /products - Crear
 3. ✅ GET /products/:id - Obtener uno
@@ -3277,7 +3328,7 @@ app.Get("/ws", websocket.New(func(c *websocket.Conn) {
         delete(clients, c)
         c.Close()
     }()
-    
+
     for {
         _, msg, err := c.ReadMessage()
         if err != nil {
@@ -3302,7 +3353,7 @@ app.Get("/file", func(c *fiber.Ctx) error {
 app.Get("/file", func(c *fiber.Ctx) error {
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
     defer cancel()
-    
+
     result, err := fetchDataWithContext(ctx)
     if err != nil {
         return c.Status(504).SendString("Timeout")
@@ -3331,11 +3382,11 @@ var (
 
 app.Get("/users/:id", func(c *fiber.Ctx) error {
     id, _ := c.ParamsInt("id")
-    
+
     userCacheMutex.RLock()
     user, ok := userCache[id]
     userCacheMutex.RUnlock()
-    
+
     if !ok {
         return c.Status(404).SendString("No encontrado")
     }
@@ -3350,7 +3401,7 @@ app.Get("/users/:id", func(c *fiber.Ctx) error {
 app.Post("/users", func(c *fiber.Ctx) error {
     user := new(User)
     c.BindJSON(user)
-    
+
     if user.Name != "" {  // Solo verificar si no está vacío
         // Guardar
     }
@@ -3363,16 +3414,16 @@ app.Post("/users", func(c *fiber.Ctx) error {
     if err := c.BindJSON(user); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "JSON inválido"})
     }
-    
+
     if err := validate.Struct(user); err != nil {
         return c.Status(422).JSON(fiber.Map{"error": err.Error()})
     }
-    
+
     // Validaciones de negocio
     if userExists(user.Email) {
         return c.Status(409).JSON(fiber.Map{"error": "Email duplicado"})
     }
-    
+
     return c.JSON(user)
 })
 ```
@@ -3384,7 +3435,7 @@ app.Post("/users", func(c *fiber.Ctx) error {
 app.Get("/data", func(c *fiber.Ctx) error {
     db, _ := sql.Open("postgres", connString)  // Caro!
     defer db.Close()
-    
+
     rows, _ := db.Query("SELECT * FROM users")
     return c.JSON(rows)
 })
@@ -3427,7 +3478,6 @@ Para proyectos que requieren máximo rendimiento con una API familiar, **Fiber e
 **Fin del Capítulo 59**
 
 *Última actualización: 2024 | Fiber v2.50+*
-
 
 ---
 

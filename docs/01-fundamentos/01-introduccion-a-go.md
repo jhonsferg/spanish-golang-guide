@@ -38,6 +38,7 @@ Rob Pike (quien creó Go junto a Robert Griesemer y Ken Thompson) lo describe as
 > "Go was designed to make programming fun again. It was a reaction against the complexity of C++, the slowness of Java, and the lack of control in Python."
 
 Esto significa que Go:
+
 - **Rechaza deliberadamente complejidad** que otros lenguajes permitían
 - **Reacciona contra tendencias** de lenguajes existentes
 - **Prioriza la productividad del desarrollador** sin sacrificar performance
@@ -46,12 +47,14 @@ Esto significa que Go:
 ### Características Superficiales vs Profundas
 
 **Características superficiales** (Lo que ves):
+
 - Sintaxis limpia
 - Compilación rápida
 - Binarios sin dependencias
 - Concurrencia fcil
 
 **Características profundas** (Lo que significa):
+
 - Una filosofía de "menos es más"
 - Un rechazo deliberado de "features" que parecen útiles pero complican el código
 - Una apuesta por la composición sobre la herencia
@@ -66,21 +69,24 @@ Esto significa que Go:
 En 2007, el mundo de la programación estaba dividido:
 
 **Campo 1: Lenguajes de Alto Rendimiento (Compilados)**
+
 - C: Rápido, pero costo cognitivo muy alto
 - C++: Rápido, pero tan complejo que es peligroso
 - Java: Tipado, pero VM lenta y compilación lenta
 
 **Campo 2: Lenguajes Productivos (Interpretados)**
+
 - Python: Muy productivo, pero lento
 - Ruby: Muy productivo, pero lento
 - PHP: Productivo en web, pero inconsistente
 
 **El Dilema:**
+
 ```
          Performance
               ↑
               |
-    C/C++    |        
+    C/C++    |  
               |  ✗ Complejidad alta
               |
               |
@@ -95,6 +101,7 @@ En 2007, el mundo de la programación estaba dividido:
 ```
 
 No existía un lenguaje que fuera:
+
 1. Rápido (compilado)
 2. Productivo (fácil de escribir)
 3. Seguro (tipado estático)
@@ -105,6 +112,7 @@ No existía un lenguaje que fuera:
 Google tenía un problema aún más específico: **Concurrencia a escala masiva**.
 
 **Infraestructura de Google en 2007:**
+
 - Miles de servidores
 - Millones de conexiones simultáneas
 - Código en C++, Java y Python
@@ -112,6 +120,7 @@ Google tenía un problema aún más específico: **Concurrencia a escala masiva*
 - Mantenimiento: Pesadilla de dependencias
 
 **Caso concreto:**
+
 ```
 Proyecto grande en C++:
  500,000 líneas de código
@@ -122,6 +131,7 @@ Proyecto grande en C++:
 ```
 
 **Con concurrencia:**
+
 ```
 Crear 100,000 threads:
  C++/Java: 1 thread = 1-10MB de stack
@@ -148,6 +158,7 @@ En 2007, Robert Griesemer, Rob Pike y Ken Thompson (todos en Google) se sentaron
 Go hizo elecciones que otros lenguajes NO harían:
 
 **Decisión 1: No herencia clásica**
+
 ```
 // ❌ Lenguajes tradicionales:
 class Animal {}
@@ -162,6 +173,7 @@ type Perro struct {
 **Razón:** La herencia es compleja, el embedding es simple.
 
 **Decisión 2: No generics (hasta 1.18)**
+
 ```
 // ❌ Java/C++:
 List<Integer> numeros = new ArrayList<>();
@@ -174,6 +186,7 @@ var numeros []int
 **Razón:** Generics añaden complejidad al lenguaje; interface{} es suficiente.
 
 **Decisión 3: No excepciones**
+
 ```
 // ❌ Java:
 try {
@@ -192,9 +205,10 @@ if err != nil {
 **Razón:** Las excepciones rompen el flujo de control; errores explícitos son más claros.
 
 **Decisión 4: Goroutines en lugar de Threads**
+
 ```
 // ❌ Java:
-new Thread(() -> { 
+new Thread(() -> {
     System.out.println("Hola");
 }).start();  // ~1-10MB de stack
 
@@ -231,6 +245,7 @@ int main() {
 ```
 
 El compilador de C++ debe:
+
 1. Procesar cada `#include` (buscar archivos)
 2. Procesar cada `#include` de esos archivos recursivamente
 3. Parsing completo de headers (sintaxis, tipos)
@@ -242,6 +257,7 @@ El compilador de C++ debe:
 **Ejemplo real:**
 
 En proyectos grandes de Google:
+
 - 10,000 archivos .cpp
 - 50,000+ headers
 - Cada cambio: Re-incluir todo transitivamente
@@ -315,12 +331,12 @@ Google tenía servidores manejando millones de conexiones. Con el modelo de thre
 int main() {
     while(1) {
         Connection conn = listener.accept();
-        
+
         // Opción 1: Thread pool
         thread_pool.execute([conn]() {
             handleConnection(conn);  // 10 MB cada thread!
         });
-        
+
         // Opción 2: Event loop (complicado)
         // Non-blocking socket, manual state machine...
     }
@@ -328,6 +344,7 @@ int main() {
 ```
 
 Ambas opciones son **malas**:
+
 - Opción 1: Consume demasiada memoria
 - Opción 2: Código tan complicado que tiene bugs
 
@@ -336,6 +353,7 @@ Ambas opciones son **malas**:
 **En 2007, los lenguajes populares eran:**
 
 **C++:**
+
 ```cpp
 template<typename T, typename U = T::type>
 class Foo : public Bar<T, U> {
@@ -349,9 +367,10 @@ class Foo : public Bar<T, U> {
 ```
 
 **Java:**
+
 ```java
 public class Foo extends Bar implements Baz {
-    public <T extends Serializable & Comparable<? super T>> 
+    public <T extends Serializable & Comparable<? super T>>
     void method(List<? extends Number> list) {
         // ...
     }
@@ -364,6 +383,7 @@ public class Foo extends Bar implements Baz {
 **El problema:**
 
 Cada desarrollador escribía código diferente porque había múltiples formas de resolver el mismo problema. Esto causaba:
+
 - Inconsistencia en codebase
 - Dificultad para cambiar de equipo
 - Bugs derivados de patrones no comunes
@@ -667,11 +687,13 @@ case y := <-ch2:
 **Impacto:**
 
 Concurrencia NO es:
+
 - ❌ Una librería especial
 - ❌ Un patrón complejo
- Algo que aprendes "después"- 
+ Algo que aprendes "después"-
 
 Es:
+
 - ✅ Parte del lenguaje
 - ✅ Tan simple como crear una función
 - ✅ La forma natural de resolver problemas
@@ -706,12 +728,14 @@ type Hacedor interface {
 **Razón:**
 
 Herencia es REALMENTE complicada en la práctica:
+
 - ❌ Diamond problem
 - ❌ Fragile base class problem
 - ❌ Deep hierarchies
 - ❌ Confusión
 
 Composición es directa:
+
 - ✅ Cada tipo hace una cosa
 - ✅ Reutilización clara
 - ✅ Fácil de entender
@@ -798,6 +822,7 @@ Lenguaje C++:
 ### Principio 7: Performance Predecible
 
 Go garantiza:
+
 - **Compilación rápida** (no esperas)
 - **Ejecución rápida** (no sorpresas)
 - **GC predecible** (evita pausas largas)
@@ -845,7 +870,7 @@ JavaScript (2007):
  Herramienta de build: ❌ (no había)
  Gestor de paquetes: ❌ (npm fue 2010)
  Testing framework: ❌
- Linter: 
+ Linter:
  Formateador: ❌
 ```
 
@@ -879,6 +904,7 @@ func procesar(items []int) {
 ### Principio 10: Network-First
 
 Go fue diseñado asumiendo:
+
 - **Concurrencia**: Necesitas manejar múltiples conexiones
 - **Distributed systems**: Tu código corre en múltiples máquinas
 - **Networking**: HTTP, TCP, UDP, son básicos
@@ -1012,6 +1038,7 @@ Dirección actual:
 **Docker fue escrito en Go.**
 
 Antes de Docker:
+
 ```
  Virtualización: VMs (10 GB cada una)
  Containers: No existían
@@ -1020,6 +1047,7 @@ Antes de Docker:
 ```
 
 Docker con Go:
+
 ```
  Binario pequeño: ~20 MB
  Performance: Sin overhead
@@ -1030,6 +1058,7 @@ Docker con Go:
 **Impacto:**
 
 Docker revolucionó la industria. Y fue posible porque Go podía:
+
 - Compilar rápido
 - Binario sin dependencias
 - Máximo performance
@@ -1040,6 +1069,7 @@ Docker revolucionó la industria. Y fue posible porque Go podía:
 Google liberó Kubernetes (escrito en Go).
 
 **Kubernetes requería:**
+
 - Concurrencia masiva ✅ (Goroutines)
 - Networking complejo ✅ (HTTP, gRPC)
 - Performance ✅ (Compilado, rápido)
@@ -1047,7 +1077,7 @@ Google liberó Kubernetes (escrito en Go).
 
 Go fue PERFECTO para esto.
 
-### Prometheus, Terraform, Etcd...
+### Prometheus, Terraform, Etcd
 
 ```
 2010-2020: Todo proyecto importante en DevOps fue escrito en Go
@@ -1064,6 +1094,7 @@ Go fue PERFECTO para esto.
 **¿Por qué Go?**
 
 No fue porque Go fue impuesto. Fue porque:
+
 1. Go resolvía el problema
 2. Go era más simple que alternativas
 3. Go era más rápido que alternativas
@@ -1121,7 +1152,7 @@ Razones por las que Go es ideal:
 5. Cross-compile → Compilar en CI/CD
 ```
 
-###Herramientas CLI
+### Herramientas CLI
 
 ```
 Herramientas Go populares:
@@ -1145,7 +1176,8 @@ Por qué Go?
 
 ### Ejercicio 1: Análisis Histórico
 
-**Pregunta:** En cuál habría sido la mejor opción para Google?2007, 
+**Pregunta:** En cuál habría sido la mejor opción para Google?2007,
+
 - A) Usar C++ (que ya tenían)
 - B) Cambiar a Python
 - C) Crear un nuevo lenguaje
@@ -1154,6 +1186,7 @@ Por qué Go?
 **Respuesta:** C) Crear un nuevo lenguaje
 
 **Análisis:**
+
 ```
 A) C++: Compilación lenta (problema 1)
 B) Python: No lo suficientemente rápido
@@ -1168,6 +1201,7 @@ D) Java: Startup lento, verboso
 **Respuesta:** Interfaces implícitas (Principio 5)
 
 **Análisis:**
+
 ```
 En 2007, esto fue revolucionario:
  Java requería "implements"
@@ -1183,6 +1217,7 @@ Go: Si caminas como un pato y graznas como un pato, eres un pato
 **Pregunta:** Si estuvieras en 2007 con Go vs Rust (ambos imaginarios en Go design), ¿cuál elegirías para servidor en Google?
 
 **Análisis:**
+
 ```
 Go (actual):
  Goroutines: fáciles
@@ -1229,4 +1264,3 @@ Necesitas:
 **Fin del Capítulo 1**
 
 ---
-

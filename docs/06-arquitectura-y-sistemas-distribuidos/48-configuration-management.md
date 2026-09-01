@@ -55,9 +55,9 @@ func main() {
     host := flag.String("host", "localhost", "Dirección del servidor")
     port := flag.Int("port", 8080, "Puerto del servidor")
     debug := flag.Bool("debug", false, "Modo debug")
-    
+
     flag.Parse()
-    
+
     fmt.Printf("Host: %s\n", *host)
     fmt.Printf("Port: %d\n", *port)
     fmt.Printf("Debug: %v\n", *debug)
@@ -81,14 +81,14 @@ import (
 func main() {
     host := os.Getenv("APP_HOST")
     port := os.Getenv("APP_PORT")
-    
+
     if host == "" {
         host = "localhost"
     }
     if port == "" {
         port = "8080"
     }
-    
+
     fmt.Printf("Host: %s, Port: %s\n", host, port)
 }
 ```
@@ -193,17 +193,17 @@ func (l *Loader) Load() (*AppConfig, error) {
             Port: 8080,
         },
     }
-    
+
     // 2. Cargar desde archivo
     configFile := l.configPath
     if configFile == "" {
         configFile = fmt.Sprintf("config.%s.json", l.env)
     }
-    
+
     if err := l.loadFromFile(configFile, cfg); err != nil && !os.IsNotExist(err) {
         return nil, err
     }
-    
+
     // 3. Override desde variables de entorno
     if host := os.Getenv("SERVER_HOST"); host != "" {
         cfg.Server.Host = host
@@ -211,7 +211,7 @@ func (l *Loader) Load() (*AppConfig, error) {
     if port := os.Getenv("SERVER_PORT"); port != "" {
         fmt.Sscanf(port, "%d", &cfg.Server.Port)
     }
-    
+
     return cfg, nil
 }
 
@@ -253,7 +253,7 @@ func main() {
     // Lectura simple
     dbHost := os.Getenv("DB_HOST")
     fmt.Println("DB Host:", dbHost) // "" si no existe
-    
+
     // Lectura con valor por defecto
     dbPort := getEnvOrDefault("DB_PORT", "5432")
     fmt.Println("DB Port:", dbPort)
@@ -287,7 +287,7 @@ func getEnvInt(key string, defaultValue int) int {
     if value == "" {
         return defaultValue
     }
-    
+
     intVal, err := strconv.Atoi(value)
     if err != nil {
         fmt.Printf("Error parsing %s as int: %v\n", key, err)
@@ -302,7 +302,7 @@ func getEnvBool(key string, defaultValue bool) bool {
     if value == "" {
         return defaultValue
     }
-    
+
     boolVal, err := strconv.ParseBool(value)
     if err != nil {
         fmt.Printf("Error parsing %s as bool: %v\n", key, err)
@@ -317,7 +317,7 @@ func getEnvDuration(key string, defaultValue time.Duration) time.Duration {
     if value == "" {
         return defaultValue
     }
-    
+
     dur, err := time.ParseDuration(value)
     if err != nil {
         fmt.Printf("Error parsing %s as duration: %v\n", key, err)
@@ -331,7 +331,7 @@ func main() {
     port := getEnvInt("PORT", 8080)
     debug := getEnvBool("DEBUG", false)
     timeout := getEnvDuration("TIMEOUT", 30*time.Second)
-    
+
     fmt.Printf("Port: %d, Debug: %v, Timeout: %v\n", port, debug, timeout)
 }
 ```
@@ -352,16 +352,16 @@ func getEnvIntRequired(key string) (int, error) {
     if value == "" {
         return 0, fmt.Errorf("variable de entorno requerida no encontrada: %s", key)
     }
-    
+
     intVal, err := strconv.Atoi(value)
     if err != nil {
         return 0, fmt.Errorf("valor inválido para %s: %s", key, value)
     }
-    
+
     if intVal <= 0 {
         return 0, fmt.Errorf("%s debe ser mayor a 0, recibido: %d", key, intVal)
     }
-    
+
     return intVal, nil
 }
 
@@ -411,10 +411,10 @@ import (
 func main() {
     // Cargar .env si existe (ignorar si no existe)
     godotenv.Load(".env")
-    
+
     appName := os.Getenv("APP_NAME")
     dbHost := os.Getenv("DB_HOST")
-    
+
     fmt.Printf("App: %s, DB: %s\n", appName, dbHost)
 }
 ```
@@ -473,11 +473,11 @@ func main() {
     // Establecer valores por defecto
     viper.SetDefault("server.host", "localhost")
     viper.SetDefault("server.port", 8080)
-    
+
     // Leer configuración
     host := viper.GetString("server.host")
     port := viper.GetInt("server.port")
-    
+
     fmt.Printf("Host: %s, Port: %d\n", host, port)
 }
 ```
@@ -499,7 +499,7 @@ func LoadViperConfig(env string) error {
     viper.SetConfigType("yaml")
     viper.AddConfigPath("./config")
     viper.AddConfigPath(".")
-    
+
     // Leer el archivo
     if err := viper.ReadInConfig(); err != nil {
         if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -507,7 +507,7 @@ func LoadViperConfig(env string) error {
         }
         // No encontrado, usar valores por defecto
     }
-    
+
     fmt.Println("Configuración cargada desde:", viper.ConfigFileUsed())
     return nil
 }
@@ -534,13 +534,13 @@ func ConfigureEnvironmentOverride() {
     // Habilitar binding de env vars
     viper.SetEnvPrefix("APP")
     viper.AutomaticEnv()
-    
+
     // Mapeo personalizado: env var a config path
     viper.BindEnv("database.host", "DB_HOST")
     viper.BindEnv("database.port", "DB_PORT")
     viper.BindEnv("database.user", "DB_USER")
     viper.BindEnv("database.password", "DB_PASSWORD")
-    
+
     // Configurar sustitución de caracteres
     viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }
@@ -574,12 +574,12 @@ func LoadConfig() (*AppConfig, error) {
     viper.SetDefault("server.host", "localhost")
     viper.SetDefault("server.port", 8080)
     viper.SetDefault("log_level", "info")
-    
+
     var config AppConfig
     if err := viper.Unmarshal(&config); err != nil {
         return nil, fmt.Errorf("error unmarshal config: %w", err)
     }
-    
+
     return &config, nil
 }
 
@@ -608,22 +608,22 @@ func LoadConfigWithWatcher() {
     viper.SetConfigName("config.dev")
     viper.SetConfigType("yaml")
     viper.AddConfigPath("./config")
-    
+
     if err := viper.ReadInConfig(); err != nil {
         log.Fatal(err)
     }
-    
+
     // Configurar watcher
     viper.WatchConfig()
     viper.OnConfigChange(func(e fsnotify.Event) {
         fmt.Println("Configuración modificada:", e.Name)
-        
+
         var config AppConfig
         if err := viper.Unmarshal(&config); err != nil {
             fmt.Println("Error reloadear config:", err)
             return
         }
-        
+
         // Aplicar nuevos valores
         fmt.Printf("Nueva configuración: %+v\n", config)
     })
@@ -662,12 +662,12 @@ func main() {
     if err != nil {
         panic(err)
     }
-    
+
     var cfg Config
     if err := json.Unmarshal(data, &cfg); err != nil {
         panic(err)
     }
-    
+
     fmt.Printf("Server: %s:%d\n", cfg.Server.Host, cfg.Server.Port)
 }
 ```
@@ -689,24 +689,24 @@ func LoadAndValidateJSON(filename string) (*Config, error) {
     if err != nil {
         return nil, fmt.Errorf("error leyendo archivo: %w", err)
     }
-    
+
     // Validar JSON válido
     var raw map[string]interface{}
     if err := json.Unmarshal(data, &raw); err != nil {
         return nil, fmt.Errorf("JSON inválido: %w", err)
     }
-    
+
     // Validar campos requeridos
     if _, ok := raw["server"]; !ok {
         return nil, fmt.Errorf("campo requerido 'server' no encontrado")
     }
-    
+
     // Parse a struct
     var cfg Config
     if err := json.Unmarshal(data, &cfg); err != nil {
         return nil, fmt.Errorf("error parseando config: %w", err)
     }
-    
+
     return &cfg, nil
 }
 ```
@@ -736,11 +736,11 @@ func (s *ServerConfig) UnmarshalJSON(data []byte) error {
             Port: 8080,
         },
     }
-    
+
     if err := json.Unmarshal(data, &aux); err != nil {
         return err
     }
-    
+
     *s = ServerConfig(*aux.Alias)
     return nil
 }
@@ -779,10 +779,10 @@ type Config struct {
 
 func main() {
     data, _ := os.ReadFile("config.yaml")
-    
+
     var cfg Config
     yaml.Unmarshal(data, &cfg)
-    
+
     fmt.Printf("DB Pool: %d\n", cfg.Database.Pool)
 }
 ```
@@ -952,20 +952,20 @@ func (cl *ConfigLoader) Load() (*Config, error) {
         },
         LogLevel: "info",
     }
-    
+
     // 1. Cargar valores por defecto (ya asignados arriba)
-    
+
     // 2. Override desde archivo
     if err := cl.loadFromFile(cfg); err != nil && !os.IsNotExist(err) {
         return nil, fmt.Errorf("error cargando config: %w", err)
     }
-    
+
     // 3. Override desde variables de entorno
     cl.overrideFromEnv(cfg)
-    
+
     // 4. Override desde flags CLI
     cl.overrideFromFlags(cfg)
-    
+
     return cfg, nil
 }
 
@@ -973,10 +973,10 @@ func (cl *ConfigLoader) loadFromFile(cfg *Config) error {
     if cl.configFile == "" {
         cl.configFile = fmt.Sprintf("config.%s.yaml", cl.env)
     }
-    
+
     viper.SetConfigFile(cl.configFile)
     viper.SetConfigType("yaml")
-    
+
     return viper.ReadInConfig()
 }
 
@@ -998,9 +998,9 @@ func (cl *ConfigLoader) overrideFromFlags(cfg *Config) {
     host := flag.String("server-host", cfg.Server.Host, "Host del servidor")
     port := flag.Int("server-port", cfg.Server.Port, "Puerto del servidor")
     logLevel := flag.String("log-level", cfg.LogLevel, "Nivel de logging")
-    
+
     flag.Parse()
-    
+
     cfg.Server.Host = *host
     cfg.Server.Port = *port
     cfg.LogLevel = *logLevel
@@ -1112,9 +1112,9 @@ func NewVaultClient(addr, token, secretPath string) (*VaultClient, error) {
     if err != nil {
         return nil, fmt.Errorf("error creando vault client: %w", err)
     }
-    
+
     client.SetToken(token)
-    
+
     return &VaultClient{
         client: client,
         path:   secretPath,
@@ -1126,16 +1126,16 @@ func (vc *VaultClient) GetSecret(key string) (string, error) {
     if err != nil {
         return "", fmt.Errorf("error leyendo secreto: %w", err)
     }
-    
+
     if secret == nil || secret.Data == nil {
         return "", fmt.Errorf("secreto no encontrado")
     }
-    
+
     value, ok := secret.Data["data"].(map[string]interface{})[key]
     if !ok {
         return "", fmt.Errorf("clave %s no encontrada en secreto", key)
     }
-    
+
     return value.(string), nil
 }
 
@@ -1149,12 +1149,12 @@ func main() {
     if err != nil {
         panic(err)
     }
-    
+
     dbPassword, err := vault.GetSecret("db_password")
     if err != nil {
         panic(err)
     }
-    
+
     fmt.Println("Password retrieved from Vault")
 }
 ```
@@ -1186,10 +1186,10 @@ import (
 func main() {
     // Cargar .env primero (valores por defecto/ejemplo)
     godotenv.Load(".env")
-    
+
     // Override con .env.local si existe
     godotenv.Load(".env.local")
-    
+
     // Las variables de entorno del sistema tienen prioridad máxima
     password := os.Getenv("DB_PASSWORD")
 }
@@ -1216,7 +1216,7 @@ type SecretManager struct {
     lastRefresh time.Time
 }
 
-func NewSecretManager(ttl time.Duration, 
+func NewSecretManager(ttl time.Duration,
     refreshFunc func() (map[string]string, error)) *SecretManager {
     return &SecretManager{
         secrets:     make(map[string]string),
@@ -1227,7 +1227,7 @@ func NewSecretManager(ttl time.Duration,
 
 func (sm *SecretManager) Get(key string) (string, error) {
     sm.mu.RLock()
-    
+
     // Verificar si necesita refresh
     if time.Since(sm.lastRefresh) > sm.ttl {
         sm.mu.RUnlock()
@@ -1236,14 +1236,14 @@ func (sm *SecretManager) Get(key string) (string, error) {
         }
         sm.mu.RLock()
     }
-    
+
     value, ok := sm.secrets[key]
     sm.mu.RUnlock()
-    
+
     if !ok {
         return "", fmt.Errorf("secreto %s no encontrado", key)
     }
-    
+
     return value, nil
 }
 
@@ -1252,12 +1252,12 @@ func (sm *SecretManager) Refresh() error {
     if err != nil {
         return fmt.Errorf("error refrescando secretos: %w", err)
     }
-    
+
     sm.mu.Lock()
     sm.secrets = secrets
     sm.lastRefresh = time.Now()
     sm.mu.Unlock()
-    
+
     return nil
 }
 ```
@@ -1316,7 +1316,7 @@ func (ff *FeatureFlags) IsEnabled(feature string) bool {
 func main() {
     features := New()
     features.LoadFromEnv()
-    
+
     if features.IsEnabled("new_dashboard") {
         // Cargar dashboard nuevo
     } else {
@@ -1345,7 +1345,7 @@ func (uff *UserFeatureFlags) IsEnabledForUser(feature string, userID string) boo
     if !uff.flags[feature] {
         return false
     }
-    
+
     rollout := uff.rolloutMap[feature]
     if rollout == 100 {
         return true // 100% rollout
@@ -1353,12 +1353,12 @@ func (uff *UserFeatureFlags) IsEnabledForUser(feature string, userID string) boo
     if rollout == 0 {
         return false // 0% rollout
     }
-    
+
     // Hash del userID para distribuir consistentemente
     hash := fnv.New32a()
     hash.Write([]byte(feature + userID))
     hashValue := hash.Sum32()
-    
+
     return (hashValue % 100) < uint32(rollout)
 }
 
@@ -1372,7 +1372,7 @@ func main() {
             "new_algorithm": 50, // 50% de usuarios
         },
     }
-    
+
     // Usuario "user123" puede obtener new_algorithm si hash cae en 50%
     if uff.IsEnabledForUser("new_algorithm", "user123") {
         // Usar nuevo algoritmo
@@ -1410,11 +1410,11 @@ func NewPersistentFlags(configFile string) (*PersistentFeatureFlags, error) {
         config: make(map[string]FeatureFlagConfig),
         file:   configFile,
     }
-    
+
     if err := pff.Load(); err != nil {
         return nil, err
     }
-    
+
     return pff, nil
 }
 
@@ -1423,19 +1423,19 @@ func (pff *PersistentFeatureFlags) Load() error {
     if err != nil {
         return err
     }
-    
+
     pff.mu.Lock()
     defer pff.mu.Unlock()
-    
+
     var flags []FeatureFlagConfig
     if err := json.Unmarshal(data, &flags); err != nil {
         return err
     }
-    
+
     for _, flag := range flags {
         pff.config[flag.Feature] = flag
     }
-    
+
     return nil
 }
 
@@ -1446,19 +1446,19 @@ func (pff *PersistentFeatureFlags) Save() error {
         flags = append(flags, flag)
     }
     pff.mu.RUnlock()
-    
+
     data, err := json.MarshalIndent(flags, "", "  ")
     if err != nil {
         return err
     }
-    
+
     return os.WriteFile(pff.file, data, 0644)
 }
 
 func (pff *PersistentFeatureFlags) IsEnabled(feature string) bool {
     pff.mu.RLock()
     defer pff.mu.RUnlock()
-    
+
     cfg, exists := pff.config[feature]
     return exists && cfg.Enabled
 }
@@ -1467,7 +1467,7 @@ func (pff *PersistentFeatureFlags) SetFeature(cfg FeatureFlagConfig) error {
     pff.mu.Lock()
     pff.config[cfg.Feature] = cfg
     pff.mu.Unlock()
-    
+
     return pff.Save()
 }
 ```
@@ -1523,17 +1523,17 @@ func (c *Config) Validate() error {
     if !isValidHost(c.Host) {
         return fmt.Errorf("Host inválido: %s", c.Host)
     }
-    
+
     // Validar Port
     if c.Port <= 0 || c.Port > 65535 {
         return fmt.Errorf("Puerto debe estar entre 1 y 65535, recibido: %d", c.Port)
     }
-    
+
     // Validar Timeout
     if c.Timeout < 0 {
         return fmt.Errorf("Timeout no puede ser negativo: %d", c.Timeout)
     }
-    
+
     // Validar LogLevel
     validLevels := map[string]bool{
         "debug": true,
@@ -1544,7 +1544,7 @@ func (c *Config) Validate() error {
     if !validLevels[strings.ToLower(c.LogLevel)] {
         return fmt.Errorf("LogLevel inválido: %s", c.LogLevel)
     }
-    
+
     return nil
 }
 
@@ -1600,7 +1600,7 @@ func main() {
             Max int
         }{Min: 5, Max: 20},
     }
-    
+
     if err := cfg.Validate(); err != nil {
         fmt.Println("Validación fallida:", err)
     }
@@ -1625,13 +1625,13 @@ type AppConfig struct {
 func main() {
     // Cargar configuración
     cfg := loadConfig()
-    
+
     // Validar al startup
     if err := cfg.Validate(); err != nil {
         fmt.Fprintf(os.Stderr, "Configuración inválida: %v\n", err)
         os.Exit(1)
     }
-    
+
     fmt.Println("Configuración válida. Iniciando aplicación...")
 }
 
@@ -1639,11 +1639,11 @@ func (ac *AppConfig) Validate() error {
     if err := ac.Server.Validate(); err != nil {
         return fmt.Errorf("validación server fallida: %w", err)
     }
-    
+
     if err := ac.Database.Validate(); err != nil {
         return fmt.Errorf("validación database fallida: %w", err)
     }
-    
+
     return nil
 }
 ```
@@ -1681,19 +1681,19 @@ func NewConfigWatcher(filePath string, onChange func(*AppConfig)) (*ConfigWatche
     if err != nil {
         return nil, fmt.Errorf("error creando watcher: %w", err)
     }
-    
+
     cw := &ConfigWatcher{
         watcher:  watcher,
         filePath: filePath,
         onChange: onChange,
     }
-    
+
     if err := watcher.Add(filePath); err != nil {
         return nil, fmt.Errorf("error watching file: %w", err)
     }
-    
+
     go cw.watch()
-    
+
     return cw, nil
 }
 
@@ -1704,34 +1704,34 @@ func (cw *ConfigWatcher) watch() {
             if !ok {
                 return
             }
-            
+
             if event.Op&fsnotify.Write == fsnotify.Write {
                 log.Println("Detectado cambio en config:", event.Name)
-                
+
                 // Recargar configuración
                 newConfig, err := loadConfigFromFile(cw.filePath)
                 if err != nil {
                     log.Println("Error recargando config:", err)
                     continue
                 }
-                
+
                 // Validar nueva configuración
                 if err := newConfig.Validate(); err != nil {
                     log.Println("Configuración inválida:", err)
                     continue
                 }
-                
+
                 // Actualizar
                 cw.mu.Lock()
                 cw.config = newConfig
                 cw.mu.Unlock()
-                
+
                 // Notificar cambio
                 if cw.onChange != nil {
                     cw.onChange(newConfig)
                 }
             }
-            
+
         case err, ok := <-cw.watcher.Errors:
             if !ok {
                 return
@@ -1776,12 +1776,12 @@ func (sc *SafeConfig) Update(newConfig *AppConfig) error {
     if err := newConfig.Validate(); err != nil {
         return fmt.Errorf("configuración inválida: %w", err)
     }
-    
+
     sc.mu.Lock()
     oldConfig := sc.config
     sc.config = newConfig
     sc.mu.Unlock()
-    
+
     // Ejecutar callbacks de forma segura
     for _, cb := range sc.callbacks {
         go func(callback func(*AppConfig)) {
@@ -1793,10 +1793,10 @@ func (sc *SafeConfig) Update(newConfig *AppConfig) error {
             callback(newConfig)
         }(cb)
     }
-    
+
     // Log de cambios
     printConfigDiff(oldConfig, newConfig)
-    
+
     return nil
 }
 
@@ -1833,16 +1833,16 @@ type ServerConfig struct {
 func (sc *SafeConfig) OnConfigChange(newCfg *AppConfig) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
-    
+
     // Graceful shutdown del handler antiguo
     oldHandler := sc.config.Server.Handler
-    
+
     // Crear nuevo handler
     newCfg.Server.Handler = createNewHandler(newCfg)
-    
+
     // Transition: Los nuevos requests usan newHandler
     // Los requests antiguos continúan en oldHandler
-    
+
     // Esperar a que terminen requests antiguos
     time.Sleep(5 * time.Second)
 }
@@ -1913,17 +1913,17 @@ server:
 func migrateConfigV1ToV2(v1Config map[string]interface{}) map[string]interface{} {
     v2Config := make(map[string]interface{})
     server := v1Config["server"].(map[string]interface{})
-    
+
     address := fmt.Sprintf("%s:%d",
         server["host"],
         server["port"],
     )
-    
+
     v2Config["version"] = "2.0"
     v2Config["server"] = map[string]interface{}{
         "address": address,
     }
-    
+
     return v2Config
 }
 ```
@@ -1948,10 +1948,10 @@ func migrateConfigV1ToV2(v1Config map[string]interface{}) map[string]interface{}
 type Config struct {
     // Server es la configuración del servidor HTTP
     Server ServerConfig `yaml:"server"`
-    
+
     // Database es la configuración de la base de datos
     Database DatabaseConfig `yaml:"database"`
-    
+
     // LogLevel puede ser: debug, info, warn, error
     LogLevel string `yaml:"log_level"`
 }
@@ -1960,7 +1960,7 @@ type Config struct {
 type ServerConfig struct {
     // Host es la dirección de bind (ej: 0.0.0.0, localhost)
     Host string `yaml:"host"`
-    
+
     // Port es el puerto TCP (1-65535)
     Port int `yaml:"port"`
 }
@@ -1984,9 +1984,9 @@ func TestLoadConfigFromEnv(t *testing.T) {
         os.Unsetenv("SERVER_HOST")
         os.Unsetenv("SERVER_PORT")
     }()
-    
+
     cfg := Load()
-    
+
     // Assertions
     if cfg.Server.Host != "0.0.0.0" {
         t.Errorf("Expected host 0.0.0.0, got %s", cfg.Server.Host)
@@ -2017,7 +2017,7 @@ func TestConfigValidation(t *testing.T) {
             wantErr: true,
         },
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             err := tt.config.Validate()

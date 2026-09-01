@@ -1,6 +1,7 @@
 # Capítulo 22: Channels - Comunicación entre goroutines
 
 ## Índice
+
 1. [¿Qué es un Channel?](#221-qué-es-un-channel)
 2. [Crear y Usar Channels](#222-crear-y-usar-channels)
 3. [Canales Buffered vs Unbuffered](#223-canales-buffered-vs-unbuffered)
@@ -22,6 +23,7 @@
 Un **channel** en Go es un primitivo de concurrencia que permite la **comunicación segura entre goroutines**. Es el mecanismo principal de sincronización en Go basado en el paradigma CSP (Communicating Sequential Processes).
 
 **Definición CSP (Communicating Sequential Processes):**
+
 - Concepto desarrollado por Tony Hoare en 1978
 - Define sistemas concurrentes como procesos independientes que se comunican
 - En Go, las goroutines son procesos y los channels son el mecanismo de comunicación
@@ -56,23 +58,28 @@ Imagina dos personas comunicándose a través de un tubo:
 ### 22.1.3 Características Clave de Channels
 
 **1. Tipados**
+
 - Cada channel transmite un tipo específico de dato
 - Seguridad de tipos en tiempo de compilación
 
 **2. Sincronización Implícita**
+
 - Enviar y recibir son operaciones que sincronización automáticamente
 - No requieren explícitamente locks o mutexes
 
 **3. Ordenamiento Garantizado**
+
 - Los datos se reciben en el orden que se enviaron (FIFO)
 - Comportamiento predecible
 
 **4. Bloqueo**
+
 - Sender se bloquea si el channel está lleno
 - Receiver se bloquea si el channel está vacío
 - Esto permite control de flujo automático
 
 **5. Seguridad de Concurrencia**
+
 - Múltiples goroutines pueden enviar/recibir simultáneamente
 - Go garantiza que no hay data races
 
@@ -103,6 +110,7 @@ Imagina dos personas comunicándose a través de un tubo:
 ### 22.2.1 Sintaxis Básica
 
 **Declaración:**
+
 ```go
 // Channel sin inicializar (nil)
 var ch chan int
@@ -123,11 +131,13 @@ ch := make(chan interface{})
 ### 22.2.2 Operaciones Básicas
 
 **Enviar (Send):**
+
 ```go
 ch <- valor  // Enviar valor al channel
 ```
 
 **Recibir (Receive):**
+
 ```go
 valor := <-ch  // Recibir valor del channel
 
@@ -136,6 +146,7 @@ valor := <-ch  // Recibir valor del channel
 ```
 
 **Regla de Direccionalidad:**
+
 - `<-ch` : flecha apuntando al channel = recibir
 - `ch <-` : flecha apuntando lejos del channel = enviar
 
@@ -145,29 +156,29 @@ valor := <-ch  // Recibir valor del channel
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// Crear channel unbuffered de integers
-	ch := make(chan int)
+ // Crear channel unbuffered de integers
+ ch := make(chan int)
 
-	// Lanzar goroutine que envía un valor
-	go func() {
-		fmt.Println("Sender: preparando valor...")
-		time.Sleep(1 * time.Second)
-		
-		fmt.Println("Sender: enviando 42 al channel...")
-		ch <- 42  // Enviar valor (se bloquea hasta que alguien reciba)
-		
-		fmt.Println("Sender: valor enviado!")
-	}()
+ // Lanzar goroutine que envía un valor
+ go func() {
+  fmt.Println("Sender: preparando valor...")
+  time.Sleep(1 * time.Second)
 
-	// Main goroutine recibe
-	fmt.Println("Main: esperando valor del channel...")
-	valor := <-ch  // Recibir valor (se bloquea hasta que haya algo que recibir)
-	fmt.Println("Main: recibido valor:", valor)
+  fmt.Println("Sender: enviando 42 al channel...")
+  ch <- 42  // Enviar valor (se bloquea hasta que alguien reciba)
+
+  fmt.Println("Sender: valor enviado!")
+ }()
+
+ // Main goroutine recibe
+ fmt.Println("Main: esperando valor del channel...")
+ valor := <-ch  // Recibir valor (se bloquea hasta que haya algo que recibir)
+ fmt.Println("Main: recibido valor:", valor)
 }
 
 // Output:
@@ -184,42 +195,42 @@ func main() {
 package main
 
 func main() {
-	// Channel de strings
-	strCh := make(chan string)
-	go func() {
-		strCh <- "Hola, Go!"
-	}()
-	msg := <-strCh
-	println(msg)
+ // Channel de strings
+ strCh := make(chan string)
+ go func() {
+  strCh <- "Hola, Go!"
+ }()
+ msg := <-strCh
+ println(msg)
 
-	// Channel de structs
-	type Usuario struct {
-		Nombre string
-		Edad   int
-	}
-	
-	userCh := make(chan Usuario)
-	go func() {
-		userCh <- Usuario{"Alice", 30}
-	}()
-	user := <-userCh
-	println(user.Nombre, user.Edad)
+ // Channel de structs
+ type Usuario struct {
+  Nombre string
+  Edad   int
+ }
 
-	// Channel de slices
-	sliceCh := make(chan []int)
-	go func() {
-		sliceCh <- []int{1, 2, 3, 4, 5}
-	}()
-	datos := <-sliceCh
-	println(len(datos))
+ userCh := make(chan Usuario)
+ go func() {
+  userCh <- Usuario{"Alice", 30}
+ }()
+ user := <-userCh
+ println(user.Nombre, user.Edad)
 
-	// Channel de functions
-	funcCh := make(chan func(int) int)
-	go func() {
-		funcCh <- func(x int) int { return x * 2 }
-	}()
-	fn := <-funcCh
-	println(fn(5))  // Output: 10
+ // Channel de slices
+ sliceCh := make(chan []int)
+ go func() {
+  sliceCh <- []int{1, 2, 3, 4, 5}
+ }()
+ datos := <-sliceCh
+ println(len(datos))
+
+ // Channel de functions
+ funcCh := make(chan func(int) int)
+ go func() {
+  funcCh <- func(x int) int { return x * 2 }
+ }()
+ fn := <-funcCh
+ println(fn(5))  // Output: 10
 }
 ```
 
@@ -229,27 +240,27 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan int)
+ ch := make(chan int)
 
-	// Múltiples goroutines enviando
-	for i := 1; i <= 3; i++ {
-		go func(id int) {
-			time.Sleep(time.Duration(id) * 100 * time.Millisecond)
-			fmt.Printf("Goroutine %d enviando...\n", id)
-			ch <- id * 10
-		}(i)
-	}
+ // Múltiples goroutines enviando
+ for i := 1; i <= 3; i++ {
+  go func(id int) {
+   time.Sleep(time.Duration(id) * 100 * time.Millisecond)
+   fmt.Printf("Goroutine %d enviando...\n", id)
+   ch <- id * 10
+  }(i)
+ }
 
-	// Recibir múltiples valores
-	for i := 0; i < 3; i++ {
-		valor := <-ch
-		fmt.Printf("Main recibió: %d\n", valor)
-	}
+ // Recibir múltiples valores
+ for i := 0; i < 3; i++ {
+  valor := <-ch
+  fmt.Printf("Main recibió: %d\n", valor)
+ }
 }
 
 // Output (orden puede variar):
@@ -268,6 +279,7 @@ func main() {
 ### 22.3.1 Canales Unbuffered
 
 **Definición:**
+
 - Capacidad = 0
 - Enviar y recibir deben estar listos simultáneamente
 - El sender se bloquea hasta que hay un receiver
@@ -312,6 +324,7 @@ Scenario 2: Receiver primero
 ### 22.3.2 Canales Buffered
 
 **Definición:**
+
 - Capacidad > 0
 - Enviar no se bloquea mientras haya espacio
 - Recibir no se bloquea mientras haya datos
@@ -362,59 +375,59 @@ valor := <-ch   // ← BLOQUEADO (buffer vacío)
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// ===== UNBUFFERED =====
-	fmt.Println("=== Unbuffered ===")
-	
-	unbufferedCh := make(chan int)
-	
-	go func() {
-		// Sin receiver esperando, sender se bloquea aquí
-		fmt.Println("Sender: enviando 1...")
-		unbufferedCh <- 1
-		fmt.Println("Sender: 1 enviado, continuando...")
-		
-		fmt.Println("Sender: enviando 2...")
-		unbufferedCh <- 2
-		fmt.Println("Sender: 2 enviado, continuando...")
-	}()
-	
-	time.Sleep(2 * time.Second)  // Receiver tarda
-	
-	fmt.Println("Main: recibiendo...")
-	fmt.Println("Main: recibió", <-unbufferedCh)
-	fmt.Println("Main: recibió", <-unbufferedCh)
-	
-	time.Sleep(1 * time.Second)
-	fmt.Println()
-	
-	// ===== BUFFERED =====
-	fmt.Println("=== Buffered (capacidad 2) ===")
-	
-	bufferedCh := make(chan int, 2)
-	
-	go func() {
-		// Sender no se bloquea, data va al buffer
-		fmt.Println("Sender: enviando 1...")
-		bufferedCh <- 1
-		fmt.Println("Sender: 1 enviado, continuando...")
-		
-		fmt.Println("Sender: enviando 2...")
-		bufferedCh <- 2
-		fmt.Println("Sender: 2 enviado, continuando...")
-		
-		fmt.Println("Sender: terminado (sin bloqueo)")
-	}()
-	
-	time.Sleep(2 * time.Second)  // Receiver tarda
-	
-	fmt.Println("Main: recibiendo...")
-	fmt.Println("Main: recibió", <-bufferedCh)
-	fmt.Println("Main: recibió", <-bufferedCh)
+ // ===== UNBUFFERED =====
+ fmt.Println("=== Unbuffered ===")
+
+ unbufferedCh := make(chan int)
+
+ go func() {
+  // Sin receiver esperando, sender se bloquea aquí
+  fmt.Println("Sender: enviando 1...")
+  unbufferedCh <- 1
+  fmt.Println("Sender: 1 enviado, continuando...")
+
+  fmt.Println("Sender: enviando 2...")
+  unbufferedCh <- 2
+  fmt.Println("Sender: 2 enviado, continuando...")
+ }()
+
+ time.Sleep(2 * time.Second)  // Receiver tarda
+
+ fmt.Println("Main: recibiendo...")
+ fmt.Println("Main: recibió", <-unbufferedCh)
+ fmt.Println("Main: recibió", <-unbufferedCh)
+
+ time.Sleep(1 * time.Second)
+ fmt.Println()
+
+ // ===== BUFFERED =====
+ fmt.Println("=== Buffered (capacidad 2) ===")
+
+ bufferedCh := make(chan int, 2)
+
+ go func() {
+  // Sender no se bloquea, data va al buffer
+  fmt.Println("Sender: enviando 1...")
+  bufferedCh <- 1
+  fmt.Println("Sender: 1 enviado, continuando...")
+
+  fmt.Println("Sender: enviando 2...")
+  bufferedCh <- 2
+  fmt.Println("Sender: 2 enviado, continuando...")
+
+  fmt.Println("Sender: terminado (sin bloqueo)")
+ }()
+
+ time.Sleep(2 * time.Second)  // Receiver tarda
+
+ fmt.Println("Main: recibiendo...")
+ fmt.Println("Main: recibió", <-bufferedCh)
+ fmt.Println("Main: recibió", <-bufferedCh)
 }
 
 // Output:
@@ -444,25 +457,25 @@ func main() {
 package main
 
 func main() {
-	// Regla: Make() con buffer size es "aspirational"
-	
-	// 1. Para control de flujo: tan pequeño como sea posible
-	//    Channel buffered con 1: productor envía al siguiente en pipelining
-	resultCh := make(chan Result, 1)
-	
-	// 2. Para worker pools: workers * promedio de trabajos en cola
-	numWorkers := 4
-	workCh := make(chan Job, numWorkers*10)  // 40 trabajos en espera máximo
-	
-	// 3. Para multiplicación (fan-out): número de receptores
-	numConsumers := 5
-	fanoutCh := make(chan Data, numConsumers)
-	
-	// 4. Unbuffered para sincronización estricta
-	syncCh := make(chan struct{})  // Común para señales, no datos
-	
-	// 5. Lo que casi nunca debes hacer:
-	// ❌ tooBigCh := make(chan int, 1000000)  // Desperdicio de memoria
+ // Regla: Make() con buffer size es "aspirational"
+
+ // 1. Para control de flujo: tan pequeño como sea posible
+ //    Channel buffered con 1: productor envía al siguiente en pipelining
+ resultCh := make(chan Result, 1)
+
+ // 2. Para worker pools: workers * promedio de trabajos en cola
+ numWorkers := 4
+ workCh := make(chan Job, numWorkers*10)  // 40 trabajos en espera máximo
+
+ // 3. Para multiplicación (fan-out): número de receptores
+ numConsumers := 5
+ fanoutCh := make(chan Data, numConsumers)
+
+ // 4. Unbuffered para sincronización estricta
+ syncCh := make(chan struct{})  // Común para señales, no datos
+
+ // 5. Lo que casi nunca debes hacer:
+ // ❌ tooBigCh := make(chan int, 1000000)  // Desperdicio de memoria
 }
 
 type Result struct{}
@@ -489,6 +502,7 @@ close(ch)
 ### 22.4.2 Regla de los 3: Quién Puede Cerrar
 
 **Regla fundamental:**
+
 - Solo el **sender** debe cerrar el channel
 - Si múltiples senders, ninguno debe cerrar (o coordinar)
 - El receiver **NUNCA** cierra
@@ -499,43 +513,43 @@ close(ch)
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func main() {
-	// ===== CORRECTO: Un sender que cierra =====
-	fmt.Println("=== Correcto: Un sender ===")
-	
-	ch := make(chan int)
-	
-	go func() {
-		for i := 1; i <= 3; i++ {
-			ch <- i
-		}
-		close(ch)  // ✓ OK - el único sender cierra
-	}()
-	
-	for val := range ch {
-		fmt.Println("Recibido:", val)
-	}
-	fmt.Println("Channel cerrado detectado")
-	fmt.Println()
-	
-	// ===== INCORRECTO: Receiver intenta cerrar =====
-	fmt.Println("=== Incorrecto: Receiver cierra ===")
-	
-	ch2 := make(chan int)
-	
-	go func() {
-		for i := 1; i <= 2; i++ {
-			ch2 <- i
-		}
-	}()
-	
-	val := <-ch2
-	fmt.Println("Recibido:", val)
-	// close(ch2)  // ✗ PANIC - receiver nunca debe cerrar
+ // ===== CORRECTO: Un sender que cierra =====
+ fmt.Println("=== Correcto: Un sender ===")
+
+ ch := make(chan int)
+
+ go func() {
+  for i := 1; i <= 3; i++ {
+   ch <- i
+  }
+  close(ch)  // ✓ OK - el único sender cierra
+ }()
+
+ for val := range ch {
+  fmt.Println("Recibido:", val)
+ }
+ fmt.Println("Channel cerrado detectado")
+ fmt.Println()
+
+ // ===== INCORRECTO: Receiver intenta cerrar =====
+ fmt.Println("=== Incorrecto: Receiver cierra ===")
+
+ ch2 := make(chan int)
+
+ go func() {
+  for i := 1; i <= 2; i++ {
+   ch2 <- i
+  }
+ }()
+
+ val := <-ch2
+ fmt.Println("Recibido:", val)
+ // close(ch2)  // ✗ PANIC - receiver nunca debe cerrar
 }
 ```
 
@@ -547,46 +561,46 @@ Cuando hay múltiples senders y quieres cerrar el channel:
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func main() {
-	const numSenders = 3
-	const numValues = 2
-	
-	// Buffer para evitar goroutine leak
-	resultCh := make(chan int, numSenders*numValues)
-	
-	var wg sync.WaitGroup
-	
-	// Lanzar múltiples senders
-	for i := 1; i <= numSenders; i++ {
-		wg.Add(1)
-		
-		go func(senderID int) {
-			defer wg.Done()
-			
-			for j := 1; j <= numValues; j++ {
-				value := senderID*10 + j
-				fmt.Printf("Sender %d enviando %d\n", senderID, value)
-				resultCh <- value
-			}
-		}(i)
-	}
-	
-	// Goroutine que espera a que terminen todos los senders
-	go func() {
-		wg.Wait()
-		close(resultCh)  // ✓ Solo después de que terminaron todos
-	}()
-	
-	// Recibir todos los valores
-	for val := range resultCh {
-		fmt.Println("Recibido:", val)
-	}
-	
-	fmt.Println("Todos los senders terminaron")
+ const numSenders = 3
+ const numValues = 2
+
+ // Buffer para evitar goroutine leak
+ resultCh := make(chan int, numSenders*numValues)
+
+ var wg sync.WaitGroup
+
+ // Lanzar múltiples senders
+ for i := 1; i <= numSenders; i++ {
+  wg.Add(1)
+
+  go func(senderID int) {
+   defer wg.Done()
+
+   for j := 1; j <= numValues; j++ {
+    value := senderID*10 + j
+    fmt.Printf("Sender %d enviando %d\n", senderID, value)
+    resultCh <- value
+   }
+  }(i)
+ }
+
+ // Goroutine que espera a que terminen todos los senders
+ go func() {
+  wg.Wait()
+  close(resultCh)  // ✓ Solo después de que terminaron todos
+ }()
+
+ // Recibir todos los valores
+ for val := range resultCh {
+  fmt.Println("Recibido:", val)
+ }
+
+ fmt.Println("Todos los senders terminaron")
 }
 ```
 
@@ -598,45 +612,45 @@ Para cerrar múltiples channels, usa un coordinator:
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	const numWorkers = 3
-	
-	// Channels
-	done := make(chan struct{})      // Signal para parar
-	results := make(chan string, 10) // Resultados
-	
-	// Workers que responden al signal
-	for id := 1; id <= numWorkers; id++ {
-		go func(workerID int) {
-			for {
-				select {
-				case <-done:  // Señal para terminar
-					fmt.Printf("Worker %d terminando\n", workerID)
-					return
-				default:
-					// Simular trabajo
-					fmt.Printf("Worker %d trabajando\n", workerID)
-					results <- fmt.Sprintf("Resultado %d", workerID)
-					time.Sleep(500 * time.Millisecond)
-				}
-			}
-		}(id)
-	}
-	
-	// Recopilar algunos resultados
-	for i := 0; i < 5; i++ {
-		fmt.Println("Main:", <-results)
-	}
-	
-	// Señal para terminar todos los workers
-	close(done)
-	
-	time.Sleep(1 * time.Second)
-	fmt.Println("Todos los workers terminaron")
+ const numWorkers = 3
+
+ // Channels
+ done := make(chan struct{})      // Signal para parar
+ results := make(chan string, 10) // Resultados
+
+ // Workers que responden al signal
+ for id := 1; id <= numWorkers; id++ {
+  go func(workerID int) {
+   for {
+    select {
+    case <-done:  // Señal para terminar
+     fmt.Printf("Worker %d terminando\n", workerID)
+     return
+    default:
+     // Simular trabajo
+     fmt.Printf("Worker %d trabajando\n", workerID)
+     results <- fmt.Sprintf("Resultado %d", workerID)
+     time.Sleep(500 * time.Millisecond)
+    }
+   }
+  }(id)
+ }
+
+ // Recopilar algunos resultados
+ for i := 0; i < 5; i++ {
+  fmt.Println("Main:", <-results)
+ }
+
+ // Señal para terminar todos los workers
+ close(done)
+
+ time.Sleep(1 * time.Second)
+ fmt.Println("Todos los workers terminaron")
 }
 ```
 
@@ -646,52 +660,52 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func main() {
-	ch := make(chan int, 2)
-	ch <- 1
-	ch <- 2
-	close(ch)
-	
-	fmt.Println("=== Recibir después de close ===")
-	
-	// Puedes seguir recibiendo valores del buffer
-	fmt.Println("Valor 1:", <-ch)
-	fmt.Println("Valor 2:", <-ch)
-	
-	// Después que se agota el buffer, recibe zero value
-	fmt.Println("Valor 3:", <-ch)  // 0 (zero value)
-	fmt.Println("Valor 4:", <-ch)  // 0 (zero value)
-	
-	fmt.Println()
-	fmt.Println("=== Comma-ok pattern ===")
-	
-	ch2 := make(chan int, 1)
-	ch2 <- 42
-	close(ch2)
-	
-	if val, ok := <-ch2; ok {
-		fmt.Println("Recibido:", val)
-	} else {
-		fmt.Println("Channel cerrado")
-	}
-	
-	if val, ok := <-ch2; ok {
-		fmt.Println("Recibido:", val)
-	} else {
-		fmt.Println("Channel cerrado")  // Imprime esto
-	}
-	
-	fmt.Println()
-	fmt.Println("=== Intentar enviar a channel cerrado ===")
-	
-	ch3 := make(chan int)
-	close(ch3)
-	
-	// ❌ Esto causa panic:
-	// ch3 <- 42  // panic: send on closed channel
+ ch := make(chan int, 2)
+ ch <- 1
+ ch <- 2
+ close(ch)
+
+ fmt.Println("=== Recibir después de close ===")
+
+ // Puedes seguir recibiendo valores del buffer
+ fmt.Println("Valor 1:", <-ch)
+ fmt.Println("Valor 2:", <-ch)
+
+ // Después que se agota el buffer, recibe zero value
+ fmt.Println("Valor 3:", <-ch)  // 0 (zero value)
+ fmt.Println("Valor 4:", <-ch)  // 0 (zero value)
+
+ fmt.Println()
+ fmt.Println("=== Comma-ok pattern ===")
+
+ ch2 := make(chan int, 1)
+ ch2 <- 42
+ close(ch2)
+
+ if val, ok := <-ch2; ok {
+  fmt.Println("Recibido:", val)
+ } else {
+  fmt.Println("Channel cerrado")
+ }
+
+ if val, ok := <-ch2; ok {
+  fmt.Println("Recibido:", val)
+ } else {
+  fmt.Println("Channel cerrado")  // Imprime esto
+ }
+
+ fmt.Println()
+ fmt.Println("=== Intentar enviar a channel cerrado ===")
+
+ ch3 := make(chan int)
+ close(ch3)
+
+ // ❌ Esto causa panic:
+ // ch3 <- 42  // panic: send on closed channel
 }
 ```
 
@@ -704,12 +718,13 @@ func main() {
 ```go
 // Sintaxis
 for value := range ch {
-	// value recibe cada elemento del channel
-	// Loop termina cuando channel se cierra
+ // value recibe cada elemento del channel
+ // Loop termina cuando channel se cierra
 }
 ```
 
 **Cómo funciona:**
+
 1. Bloquea esperando el siguiente valor del channel
 2. Si hay un valor, lo asigna a `value`
 3. Si el channel está cerrado, termina el loop
@@ -721,31 +736,31 @@ for value := range ch {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// Channel para números
-	numCh := make(chan int)
-	
-	// Productor: genera números
-	go func() {
-		for i := 1; i <= 5; i++ {
-			fmt.Printf("Productor: generando %d\n", i)
-			numCh <- i
-			time.Sleep(300 * time.Millisecond)
-		}
-		close(numCh)  // Productor cierra cuando termina
-	}()
-	
-	// Consumidor: procesa números con range
-	fmt.Println("Consumidor: esperando números...")
-	for num := range numCh {
-		fmt.Printf("Consumidor: procesa %d\n", num)
-	}
-	
-	fmt.Println("Consumidor: canal cerrado, terminando")
+ // Channel para números
+ numCh := make(chan int)
+
+ // Productor: genera números
+ go func() {
+  for i := 1; i <= 5; i++ {
+   fmt.Printf("Productor: generando %d\n", i)
+   numCh <- i
+   time.Sleep(300 * time.Millisecond)
+  }
+  close(numCh)  // Productor cierra cuando termina
+ }()
+
+ // Consumidor: procesa números con range
+ fmt.Println("Consumidor: esperando números...")
+ for num := range numCh {
+  fmt.Printf("Consumidor: procesa %d\n", num)
+ }
+
+ fmt.Println("Consumidor: canal cerrado, terminando")
 }
 
 // Output:
@@ -766,29 +781,29 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan int)
-	
-	go func() {
-		// Enviar solo 3 valores sin cerrar
-		for i := 1; i <= 3; i++ {
-			ch <- i
-		}
-		// ❌ Sin close(ch), range seguirá esperando
-	}()
-	
-	// Esto se BLOQUEA esperando más valores
-	for num := range ch {
-		fmt.Println("Recibido:", num)
-	}
-	
-	fmt.Println("Esto nunca se imprime")
-	
-	// ⏰ Programa se queda esperando infinitamente
+ ch := make(chan int)
+
+ go func() {
+  // Enviar solo 3 valores sin cerrar
+  for i := 1; i <= 3; i++ {
+   ch <- i
+  }
+  // ❌ Sin close(ch), range seguirá esperando
+ }()
+
+ // Esto se BLOQUEA esperando más valores
+ for num := range ch {
+  fmt.Println("Recibido:", num)
+ }
+
+ fmt.Println("Esto nunca se imprime")
+
+ // ⏰ Programa se queda esperando infinitamente
 }
 ```
 
@@ -798,24 +813,24 @@ func main() {
 package main
 
 func main() {
-	ch := make(chan int, 2)
-	ch <- 1
-	ch <- 2
-	close(ch)
-	
-	// Con range solo obtienes el valor
-	for val := range ch {
-		println(val)  // 1, luego 2
-	}
-	
-	// Si quieres el ok, usa receive explícito
-	ch2 := make(chan int, 1)
-	ch2 <- 42
-	close(ch2)
-	
-	if val, ok := <-ch2; ok {
-		println("Valor:", val, "OK:", ok)
-	}
+ ch := make(chan int, 2)
+ ch <- 1
+ ch <- 2
+ close(ch)
+
+ // Con range solo obtienes el valor
+ for val := range ch {
+  println(val)  // 1, luego 2
+ }
+
+ // Si quieres el ok, usa receive explícito
+ ch2 := make(chan int, 1)
+ ch2 <- 42
+ close(ch2)
+
+ if val, ok := <-ch2; ok {
+  println("Valor:", val, "OK:", ok)
+ }
 }
 ```
 
@@ -829,28 +844,28 @@ package main
 import "fmt"
 
 func main() {
-	// Stage 1: Generar números
-	numbers := make(chan int)
-	go func() {
-		for i := 1; i <= 5; i++ {
-			numbers <- i
-		}
-		close(numbers)
-	}()
-	
-	// Stage 2: Cuadrados (consume numbers, produce squares)
-	squares := make(chan int)
-	go func() {
-		for num := range numbers {  // Automático: close(numbers)
-			squares <- num * num
-		}
-		close(squares)
-	}()
-	
-	// Stage 3: Consumir cuadrados
-	for sq := range squares {
-		fmt.Println(sq)  // 1, 4, 9, 16, 25
-	}
+ // Stage 1: Generar números
+ numbers := make(chan int)
+ go func() {
+  for i := 1; i <= 5; i++ {
+   numbers <- i
+  }
+  close(numbers)
+ }()
+
+ // Stage 2: Cuadrados (consume numbers, produce squares)
+ squares := make(chan int)
+ go func() {
+  for num := range numbers {  // Automático: close(numbers)
+   squares <- num * num
+  }
+  close(squares)
+ }()
+
+ // Stage 3: Consumir cuadrados
+ for sq := range squares {
+  fmt.Println(sq)  // 1, 4, 9, 16, 25
+ }
 }
 ```
 
@@ -860,37 +875,37 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func main() {
-	tasks := make(chan int)
-	
-	// Lanzar múltiples workers
-	var wg sync.WaitGroup
-	for w := 1; w <= 3; w++ {
-		wg.Add(1)
-		
-		go func(workerID int) {
-			defer wg.Done()
-			
-			// Cada worker procesa tareas del canal
-			for task := range tasks {
-				fmt.Printf("Worker %d procesa tarea %d\n", workerID, task)
-			}
-			fmt.Printf("Worker %d terminó\n", workerID)
-		}(w)
-	}
-	
-	// Productor envia tareas
-	for i := 1; i <= 10; i++ {
-		tasks <- i
-	}
-	close(tasks)  // Workers se despiertan y terminan
-	
-	wg.Wait()
-	fmt.Println("Todos los workers terminaron")
+ tasks := make(chan int)
+
+ // Lanzar múltiples workers
+ var wg sync.WaitGroup
+ for w := 1; w <= 3; w++ {
+  wg.Add(1)
+
+  go func(workerID int) {
+   defer wg.Done()
+
+   // Cada worker procesa tareas del canal
+   for task := range tasks {
+    fmt.Printf("Worker %d procesa tarea %d\n", workerID, task)
+   }
+   fmt.Printf("Worker %d terminó\n", workerID)
+  }(w)
+ }
+
+ // Productor envia tareas
+ for i := 1; i <= 10; i++ {
+  tasks <- i
+ }
+ close(tasks)  // Workers se despiertan y terminan
+
+ wg.Wait()
+ fmt.Println("Todos los workers terminaron")
 }
 ```
 
@@ -900,30 +915,30 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func main() {
-	// Convertir channel a slice es una forma de contar
-	values := make(chan int, 3)
-	values <- 10
-	values <- 20
-	values <- 30
-	close(values)
-	
-	// Iterar con índice manual
-	index := 0
-	for val := range values {
-		fmt.Printf("[%d] = %d\n", index, val)
-		index++
-	}
-	
-	// O simplemente:
-	index2 := 0
-	for val := range values {
-		_ = val  // Ya cerrado, no funciona dos veces
-		index2++
-	}
+ // Convertir channel a slice es una forma de contar
+ values := make(chan int, 3)
+ values <- 10
+ values <- 20
+ values <- 30
+ close(values)
+
+ // Iterar con índice manual
+ index := 0
+ for val := range values {
+  fmt.Printf("[%d] = %d\n", index, val)
+  index++
+ }
+
+ // O simplemente:
+ index2 := 0
+ for val := range values {
+  _ = val  // Ya cerrado, no funciona dos veces
+  index2++
+ }
 }
 ```
 
@@ -957,35 +972,35 @@ val, ok := <-ch      // ok es false si channel cerrado
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan string)
-	
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		ch <- "primer mensaje"
-		
-		time.Sleep(500 * time.Millisecond)
-		ch <- "segundo mensaje"
-		
-		time.Sleep(500 * time.Millisecond)
-		close(ch)  // Cerrar después de enviar dos mensajes
-	}()
-	
-	// Recibir con comma-ok para detectar cierre
-	for {
-		msg, ok := <-ch
-		
-		if !ok {
-			fmt.Println("Channel cerrado, saliendo")
-			break
-		}
-		
-		fmt.Println("Recibido:", msg)
-	}
+ ch := make(chan string)
+
+ go func() {
+  time.Sleep(500 * time.Millisecond)
+  ch <- "primer mensaje"
+
+  time.Sleep(500 * time.Millisecond)
+  ch <- "segundo mensaje"
+
+  time.Sleep(500 * time.Millisecond)
+  close(ch)  // Cerrar después de enviar dos mensajes
+ }()
+
+ // Recibir con comma-ok para detectar cierre
+ for {
+  msg, ok := <-ch
+
+  if !ok {
+   fmt.Println("Channel cerrado, saliendo")
+   break
+  }
+
+  fmt.Println("Recibido:", msg)
+ }
 }
 
 // Output:
@@ -1002,38 +1017,38 @@ package main
 import "fmt"
 
 func demonstrateChannelReception() {
-	ch := make(chan int, 2)
-	ch <- 1
-	ch <- 2
-	close(ch)
-	
-	fmt.Println("=== Con range (automático) ===")
-	// range automáticamente detecta cierre
-	for val := range ch {
-		fmt.Println(val)
-	}
-	
-	fmt.Println()
-	fmt.Println("=== Con comma-ok (manual) ===")
-	
-	ch2 := make(chan int, 2)
-	ch2 <- 1
-	ch2 <- 2
-	close(ch2)
-	
-	// Comma-ok requiere loop manual
-	for {
-		val, ok := <-ch2
-		if !ok {
-			fmt.Println("Channel cerrado")
-			break
-		}
-		fmt.Println(val)
-	}
+ ch := make(chan int, 2)
+ ch <- 1
+ ch <- 2
+ close(ch)
+
+ fmt.Println("=== Con range (automático) ===")
+ // range automáticamente detecta cierre
+ for val := range ch {
+  fmt.Println(val)
+ }
+
+ fmt.Println()
+ fmt.Println("=== Con comma-ok (manual) ===")
+
+ ch2 := make(chan int, 2)
+ ch2 <- 1
+ ch2 <- 2
+ close(ch2)
+
+ // Comma-ok requiere loop manual
+ for {
+  val, ok := <-ch2
+  if !ok {
+   fmt.Println("Channel cerrado")
+   break
+  }
+  fmt.Println(val)
+ }
 }
 
 func main() {
-	demonstrateChannelReception()
+ demonstrateChannelReception()
 }
 ```
 
@@ -1045,29 +1060,29 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan string)
-	
-	go func() {
-		time.Sleep(2 * time.Second)
-		ch <- "dato"
-	}()
-	
-	// Esperar hasta 1 segundo
-	select {
-	case msg, ok := <-ch:
-		if ok {
-			fmt.Println("Recibido:", msg)
-		} else {
-			fmt.Println("Channel cerrado")
-		}
-	case <-time.After(1 * time.Second):
-		fmt.Println("Timeout: no hay dato")
-	}
+ ch := make(chan string)
+
+ go func() {
+  time.Sleep(2 * time.Second)
+  ch <- "dato"
+ }()
+
+ // Esperar hasta 1 segundo
+ select {
+ case msg, ok := <-ch:
+  if ok {
+   fmt.Println("Recibido:", msg)
+  } else {
+   fmt.Println("Channel cerrado")
+  }
+ case <-time.After(1 * time.Second):
+  fmt.Println("Timeout: no hay dato")
+ }
 }
 
 // Output:
@@ -1082,35 +1097,35 @@ package main
 import "fmt"
 
 func processMessages(ch chan string) {
-	for {
-		msg, ok := <-ch
-		
-		// ok es false cuando channel está cerrado
-		if !ok {
-			fmt.Println("Channel cerrado, procesamiento terminado")
-			return
-		}
-		
-		// Procesar mensaje
-		if msg == "exit" {
-			fmt.Println("Señal de salida recibida")
-			return
-		}
-		
-		fmt.Printf("Procesando: %s\n", msg)
-	}
+ for {
+  msg, ok := <-ch
+
+  // ok es false cuando channel está cerrado
+  if !ok {
+   fmt.Println("Channel cerrado, procesamiento terminado")
+   return
+  }
+
+  // Procesar mensaje
+  if msg == "exit" {
+   fmt.Println("Señal de salida recibida")
+   return
+  }
+
+  fmt.Printf("Procesando: %s\n", msg)
+ }
 }
 
 func main() {
-	ch := make(chan string)
-	
-	go processMessages(ch)
-	
-	ch <- "tarea1"
-	ch <- "tarea2"
-	ch <- "exit"
-	
-	close(ch)
+ ch := make(chan string)
+
+ go processMessages(ch)
+
+ ch <- "tarea1"
+ ch <- "tarea2"
+ ch <- "exit"
+
+ close(ch)
 }
 ```
 
@@ -1122,30 +1137,30 @@ package main
 import "fmt"
 
 func main() {
-	ch := make(chan int, 1)
-	ch <- 42
-	
-	// Intento de recibir sin bloquear (select con default)
-	select {
-	case val, ok := <-ch:
-		if ok {
-			fmt.Println("Valor disponible:", val)
-		}
-	default:
-		fmt.Println("No hay valor disponible")
-	}
-	
-	// Después de consumir
-	<-ch
-	
-	select {
-	case val, ok := <-ch:
-		if ok {
-			fmt.Println("Valor disponible:", val)
-		}
-	default:
-		fmt.Println("No hay valor disponible")  // Imprime esto
-	}
+ ch := make(chan int, 1)
+ ch <- 42
+
+ // Intento de recibir sin bloquear (select con default)
+ select {
+ case val, ok := <-ch:
+  if ok {
+   fmt.Println("Valor disponible:", val)
+  }
+ default:
+  fmt.Println("No hay valor disponible")
+ }
+
+ // Después de consumir
+ <-ch
+
+ select {
+ case val, ok := <-ch:
+  if ok {
+   fmt.Println("Valor disponible:", val)
+  }
+ default:
+  fmt.Println("No hay valor disponible")  // Imprime esto
+ }
 }
 ```
 
@@ -1163,8 +1178,8 @@ ch := make(chan int)
 
 // Funciones que aceptan bidireccionales
 func process(ch chan int) {
-	val := <-ch  // Recibir
-	ch <- 42     // Enviar
+ val := <-ch  // Recibir
+ ch <- 42     // Enviar
 }
 ```
 
@@ -1208,29 +1223,29 @@ package main
 import "fmt"
 
 func sender(out chan<- int) {
-	// Solo puede enviar
-	for i := 1; i <= 3; i++ {
-		out <- i
-	}
-	close(out)
+ // Solo puede enviar
+ for i := 1; i <= 3; i++ {
+  out <- i
+ }
+ close(out)
 }
 
 func receiver(in <-chan int) {
-	// Solo puede recibir
-	for val := range in {
-		fmt.Println("Recibido:", val)
-	}
+ // Solo puede recibir
+ for val := range in {
+  fmt.Println("Recibido:", val)
+ }
 }
 
 func main() {
-	// Channel bidireccional
-	ch := make(chan int)
-	
-	// Se convierte automáticamente a send-only
-	go sender(ch)
-	
-	// Se convierte automáticamente a receive-only
-	receiver(ch)
+ // Channel bidireccional
+ ch := make(chan int)
+
+ // Se convierte automáticamente a send-only
+ go sender(ch)
+
+ // Se convierte automáticamente a receive-only
+ receiver(ch)
 }
 
 // Output:
@@ -1250,28 +1265,28 @@ import "fmt"
 
 // API clara: solo envío
 func generateNumbers(out chan<- int) {
-	for i := 1; i <= 3; i++ {
-		out <- i
-	}
-	close(out)
+ for i := 1; i <= 3; i++ {
+  out <- i
+ }
+ close(out)
 }
 
 // API clara: solo recepción
 func sumNumbers(in <-chan int) int {
-	sum := 0
-	for val := range in {
-		sum += val
-	}
-	return sum
+ sum := 0
+ for val := range in {
+  sum += val
+ }
+ return sum
 }
 
 func main() {
-	ch := make(chan int)
-	
-	go generateNumbers(ch)
-	total := sumNumbers(ch)
-	
-	fmt.Println("Suma:", total)  // 6
+ ch := make(chan int)
+
+ go generateNumbers(ch)
+ total := sumNumbers(ch)
+
+ fmt.Println("Suma:", total)  // 6
 }
 ```
 
@@ -1280,17 +1295,17 @@ func main() {
 ```go
 // ✗ SIN direccionalidad (errores en runtime)
 func badFunction(ch chan int) {
-	// ¿Qué se espera? ¿Enviar o recibir?
-	// Ambos son posibles, confusión
+ // ¿Qué se espera? ¿Enviar o recibir?
+ // Ambos son posibles, confusión
 }
 
 // ✓ CON direccionalidad (errores en compilación)
 func goodSender(out chan<- int) {
-	// ✗ val := <-out  // Compile error - previene bug
+ // ✗ val := <-out  // Compile error - previene bug
 }
 
 func goodReceiver(in <-chan int) {
-	// ✗ in <- 42      // Compile error - previene bug
+ // ✗ in <- 42      // Compile error - previene bug
 }
 ```
 
@@ -1300,52 +1315,52 @@ func goodReceiver(in <-chan int) {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 // Pipeline stage 1: Generar números
 func numbers(out chan<- int) {
-	for i := 1; i <= 5; i++ {
-		out <- i
-	}
-	close(out)
+ for i := 1; i <= 5; i++ {
+  out <- i
+ }
+ close(out)
 }
 
 // Pipeline stage 2: Multiplicar por 2
 func double(in <-chan int, out chan<- int) {
-	for num := range in {
-		out <- num * 2
-	}
-	close(out)
+ for num := range in {
+  out <- num * 2
+ }
+ close(out)
 }
 
 // Pipeline stage 3: Sumar 10
 func addTen(in <-chan int, out chan<- int) {
-	for num := range in {
-		out <- num + 10
-	}
-	close(out)
+ for num := range in {
+  out <- num + 10
+ }
+ close(out)
 }
 
 // Pipeline stage 4: Consumir
 func display(in <-chan int) {
-	for result := range in {
-		fmt.Println(result)
-	}
+ for result := range in {
+  fmt.Println(result)
+ }
 }
 
 func main() {
-	// Conectar pipeline
-	nums := make(chan int)
-	doubled := make(chan int)
-	added := make(chan int)
-	
-	go numbers(nums)
-	go double(nums, doubled)
-	go addTen(doubled, added)
-	
-	display(added)  // Bloqueante, espera que se cierre
+ // Conectar pipeline
+ nums := make(chan int)
+ doubled := make(chan int)
+ added := make(chan int)
+
+ go numbers(nums)
+ go double(nums, doubled)
+ go addTen(doubled, added)
+
+ display(added)  // Bloqueante, espera que se cierre
 }
 
 // Output:
@@ -1366,19 +1381,20 @@ func main() {
 // Select es como switch pero para channel operations
 select {
 case <-ch1:
-	// ch1 tiene dato o cierra
+ // ch1 tiene dato o cierra
 case val := <-ch2:
-	// ch2 envía val
+ // ch2 envía val
 case ch3 <- dato:
-	// ch3 acepta dato
+ // ch3 acepta dato
 case <-time.After(timeout):
-	// Timeout
+ // Timeout
 default:
-	// Ninguno de arriba está listo (no-blocking)
+ // Ninguno de arriba está listo (no-blocking)
 }
 ```
 
 **Características:**
+
 - Bloquea hasta que UNA operación esté lista
 - Elige aleatoriamente si múltiples están listas (fairness)
 - Default es NO-BLOCKING (ejecuta siempre si otros no están listos)
@@ -1390,57 +1406,57 @@ default:
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// Dos channels con datos llegando en tiempos diferentes
-	ch1 := make(chan string)
-	ch2 := make(chan string)
-	
-	// Goroutine 1: envía cada 1 segundo
-	go func() {
-		for i := 1; i <= 3; i++ {
-			time.Sleep(1 * time.Second)
-			ch1 <- fmt.Sprintf("ch1: mensaje %d", i)
-		}
-		close(ch1)
-	}()
-	
-	// Goroutine 2: envía cada 1.5 segundos
-	go func() {
-		for i := 1; i <= 2; i++ {
-			time.Sleep(1500 * time.Millisecond)
-			ch2 <- fmt.Sprintf("ch2: mensaje %d", i)
-		}
-		close(ch2)
-	}()
-	
-	// Main: multiplexea ambos channels
-	active := 2  // Cuántos channels activos
-	
-	for active > 0 {
-		select {
-		case msg, ok := <-ch1:
-			if !ok {
-				fmt.Println("ch1 cerrado")
-				active--
-				ch1 = nil  // Poner a nil para evitar panic en futuros select
-			} else {
-				fmt.Println("Recibido de ch1:", msg)
-			}
-			
-		case msg, ok := <-ch2:
-			if !ok {
-				fmt.Println("ch2 cerrado")
-				active--
-				ch2 = nil
-			} else {
-				fmt.Println("Recibido de ch2:", msg)
-			}
-		}
-	}
+ // Dos channels con datos llegando en tiempos diferentes
+ ch1 := make(chan string)
+ ch2 := make(chan string)
+
+ // Goroutine 1: envía cada 1 segundo
+ go func() {
+  for i := 1; i <= 3; i++ {
+   time.Sleep(1 * time.Second)
+   ch1 <- fmt.Sprintf("ch1: mensaje %d", i)
+  }
+  close(ch1)
+ }()
+
+ // Goroutine 2: envía cada 1.5 segundos
+ go func() {
+  for i := 1; i <= 2; i++ {
+   time.Sleep(1500 * time.Millisecond)
+   ch2 <- fmt.Sprintf("ch2: mensaje %d", i)
+  }
+  close(ch2)
+ }()
+
+ // Main: multiplexea ambos channels
+ active := 2  // Cuántos channels activos
+
+ for active > 0 {
+  select {
+  case msg, ok := <-ch1:
+   if !ok {
+    fmt.Println("ch1 cerrado")
+    active--
+    ch1 = nil  // Poner a nil para evitar panic en futuros select
+   } else {
+    fmt.Println("Recibido de ch1:", msg)
+   }
+
+  case msg, ok := <-ch2:
+   if !ok {
+    fmt.Println("ch2 cerrado")
+    active--
+    ch2 = nil
+   } else {
+    fmt.Println("Recibido de ch2:", msg)
+   }
+  }
+ }
 }
 
 // Output (aprox):
@@ -1459,38 +1475,38 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan int)
-	
-	// Select con default: no se bloquea
-	select {
-	case val := <-ch:
-		fmt.Println("Recibido:", val)
-	default:
-		fmt.Println("No hay dato disponible (non-blocking)")
-	}
-	
-	// Enviar con non-blocking
-	select {
-	case ch <- 42:
-		fmt.Println("Dato enviado")
-	default:
-		fmt.Println("No se puede enviar (channel bloqueado)")  // Imprime esto
-	}
-	
-	// Con buffer, non-blocking send funciona
-	ch2 := make(chan int, 1)
-	
-	select {
-	case ch2 <- 42:
-		fmt.Println("Dato enviado a ch2")
-	default:
-		fmt.Println("No se puede enviar a ch2")
-	}
+ ch := make(chan int)
+
+ // Select con default: no se bloquea
+ select {
+ case val := <-ch:
+  fmt.Println("Recibido:", val)
+ default:
+  fmt.Println("No hay dato disponible (non-blocking)")
+ }
+
+ // Enviar con non-blocking
+ select {
+ case ch <- 42:
+  fmt.Println("Dato enviado")
+ default:
+  fmt.Println("No se puede enviar (channel bloqueado)")  // Imprime esto
+ }
+
+ // Con buffer, non-blocking send funciona
+ ch2 := make(chan int, 1)
+
+ select {
+ case ch2 <- 42:
+  fmt.Println("Dato enviado a ch2")
+ default:
+  fmt.Println("No se puede enviar a ch2")
+ }
 }
 
 // Output:
@@ -1505,44 +1521,44 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	ch := make(chan string)
-	
-	// Simular que el dato llega en 2 segundos
-	go func() {
-		time.Sleep(2 * time.Second)
-		ch <- "dato importante"
-	}()
-	
-	// Esperar máximo 1 segundo
-	select {
-	case msg := <-ch:
-		fmt.Println("Recibido:", msg)
-	case <-time.After(1 * time.Second):
-		fmt.Println("Timeout: no hay dato en 1 segundo")
-	}
-	
-	fmt.Println()
-	fmt.Println("=== Esperando suficiente tiempo ===")
-	
-	ch2 := make(chan string)
-	
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		ch2 <- "dato"
-	}()
-	
-	// Esperar máximo 2 segundos
-	select {
-	case msg := <-ch2:
-		fmt.Println("Recibido:", msg)
-	case <-time.After(2 * time.Second):
-		fmt.Println("Timeout")
-	}
+ ch := make(chan string)
+
+ // Simular que el dato llega en 2 segundos
+ go func() {
+  time.Sleep(2 * time.Second)
+  ch <- "dato importante"
+ }()
+
+ // Esperar máximo 1 segundo
+ select {
+ case msg := <-ch:
+  fmt.Println("Recibido:", msg)
+ case <-time.After(1 * time.Second):
+  fmt.Println("Timeout: no hay dato en 1 segundo")
+ }
+
+ fmt.Println()
+ fmt.Println("=== Esperando suficiente tiempo ===")
+
+ ch2 := make(chan string)
+
+ go func() {
+  time.Sleep(500 * time.Millisecond)
+  ch2 <- "dato"
+ }()
+
+ // Esperar máximo 2 segundos
+ select {
+ case msg := <-ch2:
+  fmt.Println("Recibido:", msg)
+ case <-time.After(2 * time.Second):
+  fmt.Println("Timeout")
+ }
 }
 
 // Output:
@@ -1558,43 +1574,43 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
+ "fmt"
+ "math/rand"
+ "time"
 )
 
 // Worker simula goroutines que hacen trabajo
 func worker(id int, out chan<- string) {
-	for {
-		delay := time.Duration(rand.Intn(1000)) * time.Millisecond
-		time.Sleep(delay)
-		out <- fmt.Sprintf("Worker %d: completó tarea", id)
-	}
+ for {
+  delay := time.Duration(rand.Intn(1000)) * time.Millisecond
+  time.Sleep(delay)
+  out <- fmt.Sprintf("Worker %d: completó tarea", id)
+ }
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-	
-	// Múltiples workers enviando al mismo channel
-	work1 := make(chan string)
-	work2 := make(chan string)
-	work3 := make(chan string)
-	
-	go worker(1, work1)
-	go worker(2, work2)
-	go worker(3, work3)
-	
-	// Select multiplexea todos
-	for i := 0; i < 6; i++ {
-		select {
-		case msg := <-work1:
-			fmt.Println(msg)
-		case msg := <-work2:
-			fmt.Println(msg)
-		case msg := <-work3:
-			fmt.Println(msg)
-		}
-	}
+ rand.Seed(time.Now().UnixNano())
+
+ // Múltiples workers enviando al mismo channel
+ work1 := make(chan string)
+ work2 := make(chan string)
+ work3 := make(chan string)
+
+ go worker(1, work1)
+ go worker(2, work2)
+ go worker(3, work3)
+
+ // Select multiplexea todos
+ for i := 0; i < 6; i++ {
+  select {
+  case msg := <-work1:
+   fmt.Println(msg)
+  case msg := <-work2:
+   fmt.Println(msg)
+  case msg := <-work3:
+   fmt.Println(msg)
+  }
+ }
 }
 
 // Output (orden variante):
@@ -1616,14 +1632,14 @@ func main() {
 package main
 
 func main() {
-	// ❌ DEADLOCK
-	ch := make(chan int)
-	
-	// Intenta enviar, pero no hay quien reciba
-	ch <- 42  // Se bloquea indefinidamente
-	
-	val := <-ch  // Nunca se alcanza
-	println(val)
+ // ❌ DEADLOCK
+ ch := make(chan int)
+
+ // Intenta enviar, pero no hay quien reciba
+ ch <- 42  // Se bloquea indefinidamente
+
+ val := <-ch  // Nunca se alcanza
+ println(val)
 }
 
 // Error: fatal error: all goroutines are asleep - deadlock!
@@ -1635,16 +1651,16 @@ func main() {
 package main
 
 func main() {
-	// ✓ CORRECTO
-	ch := make(chan int)
-	
-	// Usar goroutine para evitar bloqueo
-	go func() {
-		ch <- 42
-	}()
-	
-	val := <-ch
-	println(val)  // 42
+ // ✓ CORRECTO
+ ch := make(chan int)
+
+ // Usar goroutine para evitar bloqueo
+ go func() {
+  ch <- 42
+ }()
+
+ val := <-ch
+ println(val)  // 42
 }
 ```
 
@@ -1654,12 +1670,12 @@ func main() {
 package main
 
 func main() {
-	// ❌ DEADLOCK
-	ch := make(chan int)
-	
-	// Intenta recibir, pero no hay quien envíe
-	val := <-ch  // Se bloquea indefinidamente
-	println(val)
+ // ❌ DEADLOCK
+ ch := make(chan int)
+
+ // Intenta recibir, pero no hay quien envíe
+ val := <-ch  // Se bloquea indefinidamente
+ println(val)
 }
 
 // Error: fatal error: all goroutines are asleep - deadlock!
@@ -1671,15 +1687,15 @@ func main() {
 package main
 
 func main() {
-	// ✓ CORRECTO
-	ch := make(chan int)
-	
-	go func() {
-		ch <- 42
-	}()
-	
-	val := <-ch
-	println(val)
+ // ✓ CORRECTO
+ ch := make(chan int)
+
+ go func() {
+  ch <- 42
+ }()
+
+ val := <-ch
+ println(val)
 }
 ```
 
@@ -1689,23 +1705,23 @@ func main() {
 package main
 
 func main() {
-	// ❌ DEADLOCK
-	ch1 := make(chan int)
-	ch2 := make(chan int)
-	
-	// Goroutine 1: espera a ch1, envia a ch2
-	go func() {
-		val := <-ch1
-		ch2 <- val
-	}()
-	
-	// Goroutine 2: espera a ch2, envia a ch1
-	go func() {
-		val := <-ch2
-		ch1 <- val
-	}()
-	
-	// Main espera indefinidamente
+ // ❌ DEADLOCK
+ ch1 := make(chan int)
+ ch2 := make(chan int)
+
+ // Goroutine 1: espera a ch1, envia a ch2
+ go func() {
+  val := <-ch1
+  ch2 <- val
+ }()
+
+ // Goroutine 2: espera a ch2, envia a ch1
+ go func() {
+  val := <-ch2
+  ch1 <- val
+ }()
+
+ // Main espera indefinidamente
 }
 
 // Error: fatal error: all goroutines are asleep - deadlock!
@@ -1719,27 +1735,27 @@ package main
 import "fmt"
 
 func main() {
-	// ✓ CORRECTO
-	ch1 := make(chan int)
-	ch2 := make(chan int)
-	
-	go func() {
-		val := <-ch1
-		fmt.Println("Goroutine1 recibió:", val)
-		ch2 <- val + 10
-	}()
-	
-	go func() {
-		val := <-ch2
-		fmt.Println("Goroutine2 recibió:", val)
-		ch1 <- val  // Esta línea nunca se alcanza (ya está en la cadena)
-	}()
-	
-	// Iniciar la cadena
-	ch1 <- 1
-	
-	// Esperar a que terminen
-	fmt.Println("Goroutine1 envió:", <-ch2)
+ // ✓ CORRECTO
+ ch1 := make(chan int)
+ ch2 := make(chan int)
+
+ go func() {
+  val := <-ch1
+  fmt.Println("Goroutine1 recibió:", val)
+  ch2 <- val + 10
+ }()
+
+ go func() {
+  val := <-ch2
+  fmt.Println("Goroutine2 recibió:", val)
+  ch1 <- val  // Esta línea nunca se alcanza (ya está en la cadena)
+ }()
+
+ // Iniciar la cadena
+ ch1 <- 1
+
+ // Esperar a que terminen
+ fmt.Println("Goroutine1 envió:", <-ch2)
 }
 ```
 
@@ -1749,12 +1765,12 @@ func main() {
 package main
 
 func main() {
-	// ❌ PANIC
-	ch := make(chan int)
-	close(ch)
-	
-	// Enviar a canal cerrado causa panic
-	ch <- 42  // panic: send on closed channel
+ // ❌ PANIC
+ ch := make(chan int)
+ close(ch)
+
+ // Enviar a canal cerrado causa panic
+ ch <- 42  // panic: send on closed channel
 }
 ```
 
@@ -1766,21 +1782,21 @@ package main
 import "fmt"
 
 func main() {
-	// ✓ CORRECTO
-	ch := make(chan int)
-	
-	go func() {
-		ch <- 42
-		close(ch)  // Sender cierra
-	}()
-	
-	val := <-ch
-	fmt.Println(val)
-	
-	// Verificar cierre
-	if val, ok := <-ch; !ok {
-		fmt.Println("Channel cerrado")
-	}
+ // ✓ CORRECTO
+ ch := make(chan int)
+
+ go func() {
+  ch <- 42
+  close(ch)  // Sender cierra
+ }()
+
+ val := <-ch
+ fmt.Println(val)
+
+ // Verificar cierre
+ if val, ok := <-ch; !ok {
+  fmt.Println("Channel cerrado")
+ }
 }
 ```
 
@@ -1790,31 +1806,31 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func main() {
-	// ❌ DEADLOCK
-	ch := make(chan int)
-	
-	var wg sync.WaitGroup
-	
-	// 3 goroutines esperando
-	for i := 0; i < 3; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			// Todas esperan un valor
-			val := <-ch
-			fmt.Println("Recibido:", val)
-		}()
-	}
-	
-	// Enviar solo 1 valor
-	ch <- 42
-	
-	wg.Wait()  // DEADLOCK: dos goroutines siguen esperando
+ // ❌ DEADLOCK
+ ch := make(chan int)
+
+ var wg sync.WaitGroup
+
+ // 3 goroutines esperando
+ for i := 0; i < 3; i++ {
+  wg.Add(1)
+  go func() {
+   defer wg.Done()
+   // Todas esperan un valor
+   val := <-ch
+   fmt.Println("Recibido:", val)
+  }()
+ }
+
+ // Enviar solo 1 valor
+ ch <- 42
+
+ wg.Wait()  // DEADLOCK: dos goroutines siguen esperando
 }
 
 // Error: fatal error: all goroutines are asleep - deadlock!
@@ -1826,31 +1842,31 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func main() {
-	// ✓ CORRECTO: Usar broadcast (enviar a todos)
-	ch := make(chan int, 3)  // Buffer para 3 valores
-	
-	var wg sync.WaitGroup
-	
-	for i := 0; i < 3; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			val := <-ch
-			fmt.Println("Recibido:", val)
-		}()
-	}
-	
-	// Enviar un valor a cada goroutine
-	for i := 0; i < 3; i++ {
-		ch <- i
-	}
-	
-	wg.Wait()
+ // ✓ CORRECTO: Usar broadcast (enviar a todos)
+ ch := make(chan int, 3)  // Buffer para 3 valores
+
+ var wg sync.WaitGroup
+
+ for i := 0; i < 3; i++ {
+  wg.Add(1)
+  go func() {
+   defer wg.Done()
+   val := <-ch
+   fmt.Println("Recibido:", val)
+  }()
+ }
+
+ // Enviar un valor a cada goroutine
+ for i := 0; i < 3; i++ {
+  ch <- i
+ }
+
+ wg.Wait()
 }
 ```
 
@@ -1860,35 +1876,35 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"runtime"
-	"time"
+ "fmt"
+ "runtime"
+ "time"
 )
 
 func main() {
-	// Técnica 1: Timeout global
-	done := make(chan bool)
-	
-	go func() {
-		// Código que podría deadlock
-		ch := make(chan int)
-		val := <-ch  // Potencial deadlock
-		fmt.Println(val)
-		
-		done <- true
-	}()
-	
-	select {
-	case <-done:
-		fmt.Println("Completado exitosamente")
-	case <-time.After(2 * time.Second):
-		fmt.Println("DEADLOCK DETECTADO después de 2 segundos")
-		// Imprimir stack traces
-		buf := make([]byte, 1<<20)
-		stackSize := runtime.Stack(buf, true)
-		fmt.Println("\nStack traces:")
-		fmt.Println(string(buf[:stackSize]))
-	}
+ // Técnica 1: Timeout global
+ done := make(chan bool)
+
+ go func() {
+  // Código que podría deadlock
+  ch := make(chan int)
+  val := <-ch  // Potencial deadlock
+  fmt.Println(val)
+
+  done <- true
+ }()
+
+ select {
+ case <-done:
+  fmt.Println("Completado exitosamente")
+ case <-time.After(2 * time.Second):
+  fmt.Println("DEADLOCK DETECTADO después de 2 segundos")
+  // Imprimir stack traces
+  buf := make([]byte, 1<<20)
+  stackSize := runtime.Stack(buf, true)
+  fmt.Println("\nStack traces:")
+  fmt.Println(string(buf[:stackSize]))
+ }
 }
 ```
 
@@ -1902,34 +1918,34 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// Channel entre productor y consumidor
-	items := make(chan int, 5)  // Buffered para desacoplamiento
-	
-	// Productor: genera datos
-	go func() {
-		for i := 1; i <= 10; i++ {
-			fmt.Printf("Productor: generando %d\n", i)
-			items <- i * 10
-			time.Sleep(100 * time.Millisecond)
-		}
-		close(items)  // Señal de fin
-	}()
-	
-	// Consumidor: procesa datos
-	fmt.Println("Consumidor: esperando items...")
-	total := 0
-	for item := range items {
-		fmt.Printf("Consumidor: procesa %d\n", item)
-		total += item
-		time.Sleep(200 * time.Millisecond)  // Procesamiento lento
-	}
-	
-	fmt.Printf("Consumidor: completado. Total = %d\n", total)
+ // Channel entre productor y consumidor
+ items := make(chan int, 5)  // Buffered para desacoplamiento
+
+ // Productor: genera datos
+ go func() {
+  for i := 1; i <= 10; i++ {
+   fmt.Printf("Productor: generando %d\n", i)
+   items <- i * 10
+   time.Sleep(100 * time.Millisecond)
+  }
+  close(items)  // Señal de fin
+ }()
+
+ // Consumidor: procesa datos
+ fmt.Println("Consumidor: esperando items...")
+ total := 0
+ for item := range items {
+  fmt.Printf("Consumidor: procesa %d\n", item)
+  total += item
+  time.Sleep(200 * time.Millisecond)  // Procesamiento lento
+ }
+
+ fmt.Printf("Consumidor: completado. Total = %d\n", total)
 }
 ```
 
@@ -1939,54 +1955,54 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 // Etapa 1: Generar números
 func generate(out chan<- int) {
-	for i := 1; i <= 5; i++ {
-		out <- i
-	}
-	close(out)
+ for i := 1; i <= 5; i++ {
+  out <- i
+ }
+ close(out)
 }
 
 // Etapa 2: Procesar (transformar)
 func square(in <-chan int, out chan<- int) {
-	for num := range in {
-		out <- num * num
-	}
-	close(out)
+ for num := range in {
+  out <- num * num
+ }
+ close(out)
 }
 
 // Etapa 3: Procesar (filtrar)
 func filterEven(in <-chan int, out chan<- int) {
-	for num := range in {
-		if num%2 == 0 {
-			out <- num
-		}
-	}
-	close(out)
+ for num := range in {
+  if num%2 == 0 {
+   out <- num
+  }
+ }
+ close(out)
 }
 
 // Etapa 4: Consumir
 func display(in <-chan int) {
-	fmt.Println("Resultados finales:")
-	for num := range in {
-		fmt.Printf("  %d\n", num)
-	}
+ fmt.Println("Resultados finales:")
+ for num := range in {
+  fmt.Printf("  %d\n", num)
+ }
 }
 
 func main() {
-	// Conectar pipeline
-	nums := make(chan int)
-	squares := make(chan int)
-	evens := make(chan int)
-	
-	go generate(nums)              // Etapa 1
-	go square(nums, squares)       // Etapa 2
-	go filterEven(squares, evens)  // Etapa 3
-	display(evens)                 // Etapa 4 (bloqueante)
+ // Conectar pipeline
+ nums := make(chan int)
+ squares := make(chan int)
+ evens := make(chan int)
+
+ go generate(nums)              // Etapa 1
+ go square(nums, squares)       // Etapa 2
+ go filterEven(squares, evens)  // Etapa 3
+ display(evens)                 // Etapa 4 (bloqueante)
 }
 
 // Output:
@@ -2001,65 +2017,65 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
-	"time"
+ "fmt"
+ "sync"
+ "time"
 )
 
 // Fan-out: distribuir trabajo a múltiples workers
 func distribute(jobs <-chan int, workers int) <-chan int {
-	results := make(chan int)
-	
-	// Lanzar workers
-	var wg sync.WaitGroup
-	for w := 0; w < workers; w++ {
-		wg.Add(1)
-		
-		go func(workerID int) {
-			defer wg.Done()
-			
-			for job := range jobs {
-				fmt.Printf("Worker %d procesa job %d\n", workerID, job)
-				// Simular trabajo
-				time.Sleep(500 * time.Millisecond)
-				
-				// Enviar resultado
-				results <- job * 2
-			}
-		}(w)
-	}
-	
-	// Cuando terminan todos los workers, cerrar results
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-	
-	return results
+ results := make(chan int)
+
+ // Lanzar workers
+ var wg sync.WaitGroup
+ for w := 0; w < workers; w++ {
+  wg.Add(1)
+
+  go func(workerID int) {
+   defer wg.Done()
+
+   for job := range jobs {
+    fmt.Printf("Worker %d procesa job %d\n", workerID, job)
+    // Simular trabajo
+    time.Sleep(500 * time.Millisecond)
+
+    // Enviar resultado
+    results <- job * 2
+   }
+  }(w)
+ }
+
+ // Cuando terminan todos los workers, cerrar results
+ go func() {
+  wg.Wait()
+  close(results)
+ }()
+
+ return results
 }
 
 func main() {
-	// Generar jobs
-	jobs := make(chan int, 10)
-	
-	go func() {
-		for i := 1; i <= 10; i++ {
-			jobs <- i
-		}
-		close(jobs)
-	}()
-	
-	// Fan-out a 3 workers, recopilar resultados (fan-in)
-	results := distribute(jobs, 3)
-	
-	// Mostrar resultados
-	fmt.Println("Resultados:")
-	total := 0
-	for result := range results {
-		fmt.Printf("  Resultado: %d\n", result)
-		total += result
-	}
-	fmt.Printf("Total: %d\n", total)
+ // Generar jobs
+ jobs := make(chan int, 10)
+
+ go func() {
+  for i := 1; i <= 10; i++ {
+   jobs <- i
+  }
+  close(jobs)
+ }()
+
+ // Fan-out a 3 workers, recopilar resultados (fan-in)
+ results := distribute(jobs, 3)
+
+ // Mostrar resultados
+ fmt.Println("Resultados:")
+ total := 0
+ for result := range results {
+  fmt.Printf("  Resultado: %d\n", result)
+  total += result
+ }
+ fmt.Printf("Total: %d\n", total)
 }
 ```
 
@@ -2069,43 +2085,43 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 // Generador que produce números en sequence
 func fibonacci(n int) <-chan int {
-	out := make(chan int)
-	
-	go func() {
-		a, b := 0, 1
-		for i := 0; i < n; i++ {
-			out <- a
-			a, b = b, a+b
-		}
-		close(out)
-	}()
-	
-	return out
+ out := make(chan int)
+
+ go func() {
+  a, b := 0, 1
+  for i := 0; i < n; i++ {
+   out <- a
+   a, b = b, a+b
+  }
+  close(out)
+ }()
+
+ return out
 }
 
 func main() {
-	// Usar generador con range
-	fmt.Println("Fibonacci (primeros 10):")
-	for num := range fibonacci(10) {
-		fmt.Printf("%d ", num)
-	}
-	fmt.Println()
-	
-	// Uso tipo filter
-	fmt.Println("\nFilbonacci par (primeros 6):")
-	count := 0
-	for num := range fibonacci(20) {
-		if num%2 == 0 && count < 6 {
-			fmt.Printf("%d ", num)
-			count++
-		}
-	}
-	fmt.Println()
+ // Usar generador con range
+ fmt.Println("Fibonacci (primeros 10):")
+ for num := range fibonacci(10) {
+  fmt.Printf("%d ", num)
+ }
+ fmt.Println()
+
+ // Uso tipo filter
+ fmt.Println("\nFilbonacci par (primeros 6):")
+ count := 0
+ for num := range fibonacci(20) {
+  if num%2 == 0 && count < 6 {
+   fmt.Printf("%d ", num)
+   count++
+  }
+ }
+ fmt.Println()
 }
 
 // Output:
@@ -2122,71 +2138,71 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 // Merge combina múltiples channels en uno
 func merge(channels ...<-chan int) <-chan int {
-	out := make(chan int)
-	var wg sync.WaitGroup
-	
-	// Función que copia valores de un channel al output
-	output := func(ch <-chan int) {
-		defer wg.Done()
-		for val := range ch {
-			out <- val
-		}
-	}
-	
-	// Lanzar goroutine para cada channel
-	wg.Add(len(channels))
-	for _, ch := range channels {
-		go output(ch)
-	}
-	
-	// Cerrar output cuando todas las goroutines terminen
-	go func() {
-		wg.Wait()
-		close(out)
-	}()
-	
-	return out
+ out := make(chan int)
+ var wg sync.WaitGroup
+
+ // Función que copia valores de un channel al output
+ output := func(ch <-chan int) {
+  defer wg.Done()
+  for val := range ch {
+   out <- val
+  }
+ }
+
+ // Lanzar goroutine para cada channel
+ wg.Add(len(channels))
+ for _, ch := range channels {
+  go output(ch)
+ }
+
+ // Cerrar output cuando todas las goroutines terminen
+ go func() {
+  wg.Wait()
+  close(out)
+ }()
+
+ return out
 }
 
 func main() {
-	// Crear múltiples productores
-	ch1 := make(chan int)
-	ch2 := make(chan int)
-	ch3 := make(chan int)
-	
-	go func() {
-		ch1 <- 1
-		ch1 <- 4
-		close(ch1)
-	}()
-	
-	go func() {
-		ch2 <- 2
-		ch2 <- 5
-		close(ch2)
-	}()
-	
-	go func() {
-		ch3 <- 3
-		ch3 <- 6
-		close(ch3)
-	}()
-	
-	// Merge en uno
-	results := merge(ch1, ch2, ch3)
-	
-	// Consumir
-	fmt.Println("Merged results:")
-	for val := range results {
-		fmt.Printf("%d ", val)
-	}
-	fmt.Println()
+ // Crear múltiples productores
+ ch1 := make(chan int)
+ ch2 := make(chan int)
+ ch3 := make(chan int)
+
+ go func() {
+  ch1 <- 1
+  ch1 <- 4
+  close(ch1)
+ }()
+
+ go func() {
+  ch2 <- 2
+  ch2 <- 5
+  close(ch2)
+ }()
+
+ go func() {
+  ch3 <- 3
+  ch3 <- 6
+  close(ch3)
+ }()
+
+ // Merge en uno
+ results := merge(ch1, ch2, ch3)
+
+ // Consumir
+ fmt.Println("Merged results:")
+ for val := range results {
+  fmt.Printf("%d ", val)
+ }
+ fmt.Println()
 }
 
 // Output:
@@ -2208,24 +2224,24 @@ package main
 
 // ✓ CORRECTO: Creador owna y cierra
 func goodProducerConsumer() <-chan int {
-	// Esta función owna el channel
-	out := make(chan int)
-	
-	go func() {
-		for i := 1; i <= 3; i++ {
-			out <- i
-		}
-		close(out)  // Owner cierra
-	}()
-	
-	return out
+ // Esta función owna el channel
+ out := make(chan int)
+
+ go func() {
+  for i := 1; i <= 3; i++ {
+   out <- i
+  }
+  close(out)  // Owner cierra
+ }()
+
+ return out
 }
 
 func main() {
-	// Receiver no puede cerrar
-	for val := range goodProducerConsumer() {
-		println(val)
-	}
+ // Receiver no puede cerrar
+ for val := range goodProducerConsumer() {
+  println(val)
+ }
 }
 ```
 
@@ -2235,36 +2251,36 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 // ❌ INCORRECTO: Múltiples senders tratando de cerrar
 func badMultipleSenders() {
-	ch := make(chan int)
-	
-	var wg sync.WaitGroup
-	for s := 0; s < 3; s++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			ch <- s
-			// close(ch)  // ✗ PANIC si múltiples cierran
-		}()
-	}
-	
-	go func() {
-		wg.Wait()
-		close(ch)  // ✓ Solo un closer
-	}()
-	
-	for val := range ch {
-		fmt.Println(val)
-	}
+ ch := make(chan int)
+
+ var wg sync.WaitGroup
+ for s := 0; s < 3; s++ {
+  wg.Add(1)
+  go func() {
+   defer wg.Done()
+   ch <- s
+   // close(ch)  // ✗ PANIC si múltiples cierran
+  }()
+ }
+
+ go func() {
+  wg.Wait()
+  close(ch)  // ✓ Solo un closer
+ }()
+
+ for val := range ch {
+  fmt.Println(val)
+ }
 }
 
 func main() {
-	badMultipleSenders()
+ badMultipleSenders()
 }
 ```
 
@@ -2274,44 +2290,44 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// ❌ ANTIPATRON: Buffer demasiado grande
-	// tooBig := make(chan Task, 1000000)  // Desperdicio de memoria
-	
-	// ✓ BUENO: Buffer pequeño o calculado
-	
-	// Caso 1: Sin buffer (sincronización estricta)
-	syncCh := make(chan struct{})  // 0 buffer
-	
-	// Caso 2: Buffer de 1 (patrón común en pipelining)
-	pipelineCh := make(chan Result, 1)
-	
-	// Caso 3: Buffer para N workers
-	numWorkers := 4
-	workCh := make(chan Job, numWorkers)  // Suficiente para 1 job per worker
-	
-	// Caso 4: Timeout receiver
-	fmt.Println("=== Buffer Sizing ===")
-	
-	// Productor rápido, consumidor lento
-	results := make(chan int, 1)  // Pequeño buffer ayuda
-	
-	go func() {
-		for i := 1; i <= 5; i++ {
-			fmt.Printf("Produce %d\n", i)
-			results <- i
-		}
-		close(results)
-	}()
-	
-	for val := range results {
-		fmt.Printf("Consume %d\n", val)
-		time.Sleep(100 * time.Millisecond)  // Lento
-	}
+ // ❌ ANTIPATRON: Buffer demasiado grande
+ // tooBig := make(chan Task, 1000000)  // Desperdicio de memoria
+
+ // ✓ BUENO: Buffer pequeño o calculado
+
+ // Caso 1: Sin buffer (sincronización estricta)
+ syncCh := make(chan struct{})  // 0 buffer
+
+ // Caso 2: Buffer de 1 (patrón común en pipelining)
+ pipelineCh := make(chan Result, 1)
+
+ // Caso 3: Buffer para N workers
+ numWorkers := 4
+ workCh := make(chan Job, numWorkers)  // Suficiente para 1 job per worker
+
+ // Caso 4: Timeout receiver
+ fmt.Println("=== Buffer Sizing ===")
+
+ // Productor rápido, consumidor lento
+ results := make(chan int, 1)  // Pequeño buffer ayuda
+
+ go func() {
+  for i := 1; i <= 5; i++ {
+   fmt.Printf("Produce %d\n", i)
+   results <- i
+  }
+  close(results)
+ }()
+
+ for val := range results {
+  fmt.Printf("Consume %d\n", val)
+  time.Sleep(100 * time.Millisecond)  // Lento
+ }
 }
 
 type Task struct{}
@@ -2325,57 +2341,57 @@ type Job struct{}
 package main
 
 import (
-	"fmt"
-	"sync"
-	"time"
+ "fmt"
+ "sync"
+ "time"
 )
 
 func main() {
-	// ✓ BUENO: Usar channel de cierre para señal
-	
-	// Channel para work
-	work := make(chan string)
-	
-	// Channel para señal de cierre
-	done := make(chan struct{})
-	
-	// Workers
-	var wg sync.WaitGroup
-	for w := 1; w <= 2; w++ {
-		wg.Add(1)
-		
-		go func(id int) {
-			defer wg.Done()
-			
-			for {
-				select {
-				case task, ok := <-work:
-					if !ok {
-						fmt.Printf("Worker %d: work channel cerrado\n", id)
-						return
-					}
-					fmt.Printf("Worker %d procesa: %s\n", id, task)
-				
-				case <-done:
-					fmt.Printf("Worker %d: recibió señal done\n", id)
-					return
-				}
-			}
-		}(w)
-	}
-	
-	// Enviar trabajo
-	for i := 1; i <= 3; i++ {
-		work <- fmt.Sprintf("tarea-%d", i)
-	}
-	
-	// Después de cierto tiempo, enviar señal de parada
-	time.Sleep(1 * time.Second)
-	
-	close(done)  // Señal para que los workers se detengan
-	
-	wg.Wait()
-	fmt.Println("Todos los workers terminaron")
+ // ✓ BUENO: Usar channel de cierre para señal
+
+ // Channel para work
+ work := make(chan string)
+
+ // Channel para señal de cierre
+ done := make(chan struct{})
+
+ // Workers
+ var wg sync.WaitGroup
+ for w := 1; w <= 2; w++ {
+  wg.Add(1)
+
+  go func(id int) {
+   defer wg.Done()
+
+   for {
+    select {
+    case task, ok := <-work:
+     if !ok {
+      fmt.Printf("Worker %d: work channel cerrado\n", id)
+      return
+     }
+     fmt.Printf("Worker %d procesa: %s\n", id, task)
+
+    case <-done:
+     fmt.Printf("Worker %d: recibió señal done\n", id)
+     return
+    }
+   }
+  }(w)
+ }
+
+ // Enviar trabajo
+ for i := 1; i <= 3; i++ {
+  work <- fmt.Sprintf("tarea-%d", i)
+ }
+
+ // Después de cierto tiempo, enviar señal de parada
+ time.Sleep(1 * time.Second)
+
+ close(done)  // Señal para que los workers se detengan
+
+ wg.Wait()
+ fmt.Println("Todos los workers terminaron")
 }
 ```
 
@@ -2386,14 +2402,14 @@ func main() {
 ```go
 // ❌ ANTIPATRON: Usar Mutex en lugar de Channels
 type SharedData struct {
-	mu    sync.Mutex
-	value int
+ mu    sync.Mutex
+ value int
 }
 
 // ✓ CORRECTO: Usar Channels para comunicación
 // (El canal maneja la sincronización automáticamente)
 func goodCommunication(out chan<- int) {
-	out <- 42  // Seguro por diseño
+ out <- 42  // Seguro por diseño
 }
 ```
 
@@ -2402,18 +2418,18 @@ func goodCommunication(out chan<- int) {
 ```go
 // ❌ ANTIPATRON
 func badReceiverClose(ch <-chan int) {
-	for val := range ch {
-		println(val)
-	}
-	// close(ch)  // ✗ PANIC - Receiver no puede cerrar
+ for val := range ch {
+  println(val)
+ }
+ // close(ch)  // ✗ PANIC - Receiver no puede cerrar
 }
 
 // ✓ CORRECTO
 func goodReceiverDone(ch <-chan int) {
-	for val := range ch {
-		// Channel puede estar cerrado, range detecto
-		println(val)
-	}
+ for val := range ch {
+  // Channel puede estar cerrado, range detecto
+  println(val)
+ }
 }
 ```
 
@@ -2422,28 +2438,28 @@ func goodReceiverDone(ch <-chan int) {
 ```go
 // ❌ ANTIPATRON: No cerrar channel (goroutine leak)
 func badNoClose() <-chan int {
-	out := make(chan int)
-	
-	go func() {
-		out <- 1
-		out <- 2
-		// ❌ Sin close(out), range nunca termina
-	}()
-	
-	return out
+ out := make(chan int)
+
+ go func() {
+  out <- 1
+  out <- 2
+  // ❌ Sin close(out), range nunca termina
+ }()
+
+ return out
 }
 
 // ✓ CORRECTO
 func goodWithClose() <-chan int {
-	out := make(chan int)
-	
-	go func() {
-		defer close(out)  // Siempre cerrar
-		out <- 1
-		out <- 2
-	}()
-	
-	return out
+ out := make(chan int)
+
+ go func() {
+  defer close(out)  // Siempre cerrar
+  out <- 1
+  out <- 2
+ }()
+
+ return out
 }
 ```
 
@@ -2452,19 +2468,19 @@ func goodWithClose() <-chan int {
 ```go
 // ❌ ANTIPATRON: Redundante
 func badSelectRedundant(ch <-chan int) {
-	select {
-	case val := <-ch:
-		println(val)
-	case val := <-ch:  // ✗ Redundante, nunca se elige
-		println(val)
-	}
+ select {
+ case val := <-ch:
+  println(val)
+ case val := <-ch:  // ✗ Redundante, nunca se elige
+  println(val)
+ }
 }
 
 // ✓ CORRECTO: Si necesitas múltiples, usa range
 func goodMultipleValues(ch <-chan int) {
-	for val := range ch {
-		println(val)  // Procesa todos
-	}
+ for val := range ch {
+  println(val)  // Procesa todos
+ }
 }
 ```
 
@@ -2506,24 +2522,24 @@ CHECKLIST: Canales en Go
 */
 
 func checklistExample() {
-	// Buen ejemplo que sigue el checklist
-	
-	numbers := make(chan int, 5)  // (1) Buffered, tamaño justificado
-	
-	go func() {  // (2) En goroutine separada
-		for i := 1; i <= 10; i++ {
-			numbers <- i
-		}
-		close(numbers)  // (4) Sender cierra
-	}()
-	
-	// (3) Usar range
-	sum := 0
-	for num := range numbers {
-		sum += num
-	}
-	
-	println("Sum:", sum)  // (6) Se completó limpiamente
+ // Buen ejemplo que sigue el checklist
+
+ numbers := make(chan int, 5)  // (1) Buffered, tamaño justificado
+
+ go func() {  // (2) En goroutine separada
+  for i := 1; i <= 10; i++ {
+   numbers <- i
+  }
+  close(numbers)  // (4) Sender cierra
+ }()
+
+ // (3) Usar range
+ sum := 0
+ for num := range numbers {
+  sum += num
+ }
+
+ println("Sum:", sum)  // (6) Se completó limpiamente
 }
 ```
 
@@ -2539,25 +2555,25 @@ func checklistExample() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func main() {
-	// TODO: Completar el programa
-	
-	// 1. Crear un channel de strings
-	// greetingCh := make(chan string)
-	
-	// 2. Lanzar una goroutine que envía un saludo
-	// go func() {
-	//     greetingCh <- "Hola desde goroutine!"
-	// }()
-	
-	// 3. Recibir el saludo en main
-	// mensaje := <-greetingCh
-	
-	// 4. Imprimir el mensaje
-	// fmt.Println(mensaje)
+ // TODO: Completar el programa
+
+ // 1. Crear un channel de strings
+ // greetingCh := make(chan string)
+
+ // 2. Lanzar una goroutine que envía un saludo
+ // go func() {
+ //     greetingCh <- "Hola desde goroutine!"
+ // }()
+
+ // 3. Recibir el saludo en main
+ // mensaje := <-greetingCh
+
+ // 4. Imprimir el mensaje
+ // fmt.Println(mensaje)
 }
 
 // Salida esperada:
@@ -2570,22 +2586,23 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func main() {
-	greetingCh := make(chan string)
-	
-	go func() {
-		greetingCh <- "Hola desde goroutine!"
-	}()
-	
-	mensaje := <-greetingCh
-	fmt.Println(mensaje)
+ greetingCh := make(chan string)
+
+ go func() {
+  greetingCh <- "Hola desde goroutine!"
+ }()
+
+ mensaje := <-greetingCh
+ fmt.Println(mensaje)
 }
 ```
 
 **Conceptos probados:**
+
 - Sintaxis make(chan Type)
 - Operadores <- para send/receive
 - Goroutines y channels
@@ -2601,38 +2618,38 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	// TODO: Completar el programa
-	
-	// Crear channel buffered con capacidad 3
-	// dataCh := make(chan int, 3)
-	
-	// Enviar 3 valores SIN bloqueo (buffer tiene espacio)
-	// dataCh <- 10
-	// dataCh <- 20
-	// dataCh <- 30
-	
-	// Esto SÍ se bloquearía (4to valor, buffer lleno)
-	// dataCh <- 40  // Bloquea aquí
-	
-	// Resolver: antes de enviar el 4to, recibir uno
-	// go func() {
-	//     time.Sleep(1 * time.Second)
-	//     val := <-dataCh  // Libera espacio en buffer
-	//     fmt.Println("Recibido:", val)
-	// }()
-	
-	// Ahora puedo enviar sin bloqueo
-	// dataCh <- 40
-	
-	// TODO: Recibir los otros 3 valores
-	// for i := 0; i < 3; i++ {
-	//     fmt.Println("Recibido:", <-dataCh)
-	// }
+ // TODO: Completar el programa
+
+ // Crear channel buffered con capacidad 3
+ // dataCh := make(chan int, 3)
+
+ // Enviar 3 valores SIN bloqueo (buffer tiene espacio)
+ // dataCh <- 10
+ // dataCh <- 20
+ // dataCh <- 30
+
+ // Esto SÍ se bloquearía (4to valor, buffer lleno)
+ // dataCh <- 40  // Bloquea aquí
+
+ // Resolver: antes de enviar el 4to, recibir uno
+ // go func() {
+ //     time.Sleep(1 * time.Second)
+ //     val := <-dataCh  // Libera espacio en buffer
+ //     fmt.Println("Recibido:", val)
+ // }()
+
+ // Ahora puedo enviar sin bloqueo
+ // dataCh <- 40
+
+ // TODO: Recibir los otros 3 valores
+ // for i := 0; i < 3; i++ {
+ //     fmt.Println("Recibido:", <-dataCh)
+ // }
 }
 
 // Salida esperada:
@@ -2648,32 +2665,33 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"time"
+ "fmt"
+ "time"
 )
 
 func main() {
-	dataCh := make(chan int, 3)
-	
-	dataCh <- 10
-	dataCh <- 20
-	dataCh <- 30
-	
-	go func() {
-		time.Sleep(1 * time.Second)
-		val := <-dataCh
-		fmt.Println("Recibido:", val)
-	}()
-	
-	dataCh <- 40
-	
-	for i := 0; i < 3; i++ {
-		fmt.Println("Recibido:", <-dataCh)
-	}
+ dataCh := make(chan int, 3)
+
+ dataCh <- 10
+ dataCh <- 20
+ dataCh <- 30
+
+ go func() {
+  time.Sleep(1 * time.Second)
+  val := <-dataCh
+  fmt.Println("Recibido:", val)
+ }()
+
+ dataCh <- 40
+
+ for i := 0; i < 3; i++ {
+  fmt.Println("Recibido:", <-dataCh)
+ }
 }
 ```
 
 **Conceptos probados:**
+
 - Buffer size y capacidad
 - Bloqueo condicional
 - Non-blocking send/receive con buffer
@@ -2688,7 +2706,7 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 // TODO: Implementar estas funciones
@@ -2706,14 +2724,14 @@ import (
 // }
 
 func main() {
-	// TODO: Conectar el pipeline
-	
-	// nums := make(chan int)
-	// squares := make(chan int)
-	
-	// go generate(nums)
-	// go square(nums, squares)
-	// print(squares)
+ // TODO: Conectar el pipeline
+
+ // nums := make(chan int)
+ // squares := make(chan int)
+
+ // go generate(nums)
+ // go square(nums, squares)
+ // print(squares)
 }
 
 // Salida esperada:
@@ -2730,40 +2748,41 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func generate(out chan<- int) {
-	for i := 1; i <= 5; i++ {
-		out <- i
-	}
-	close(out)
+ for i := 1; i <= 5; i++ {
+  out <- i
+ }
+ close(out)
 }
 
 func square(in <-chan int, out chan<- int) {
-	for num := range in {
-		out <- num * num
-	}
-	close(out)
+ for num := range in {
+  out <- num * num
+ }
+ close(out)
 }
 
 func print(in <-chan int) {
-	for result := range in {
-		fmt.Println(result)
-	}
+ for result := range in {
+  fmt.Println(result)
+ }
 }
 
 func main() {
-	nums := make(chan int)
-	squares := make(chan int)
-	
-	go generate(nums)
-	go square(nums, squares)
-	print(squares)
+ nums := make(chan int)
+ squares := make(chan int)
+
+ go generate(nums)
+ go square(nums, squares)
+ print(squares)
 }
 ```
 
 **Conceptos probados:**
+
 - Direccionalidad de channels (send-only, receive-only)
 - Múltiples etapas
 - close() y range
@@ -2779,8 +2798,8 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 // TODO: Implementar worker
@@ -2789,40 +2808,40 @@ import (
 // }
 
 func main() {
-	// TODO: Implementar fan-out/fan-in
-	
-	// Crear channels
-	// jobs := make(chan int, 10)
-	// results := make(chan int, 10)
-	
-	// Lanzar 3 workers con WaitGroup
-	// var wg sync.WaitGroup
-	// numWorkers := 3
-	
-	// for w := 1; w <= numWorkers; w++ {
-	//     wg.Add(1)
-	//     go func(id int) {
-	//         defer wg.Done()
-	//         worker(id, jobs, results)
-	//     }(w)
-	// }
-	
-	// Enviar jobs
-	// for i := 1; i <= 10; i++ {
-	//     jobs <- i
-	// }
-	// close(jobs)
-	
-	// Esperar a que terminen y cerrar results
-	// go func() {
-	//     wg.Wait()
-	//     close(results)
-	// }()
-	
-	// Recopilar resultados
-	// for result := range results {
-	//     fmt.Println("Resultado:", result)
-	// }
+ // TODO: Implementar fan-out/fan-in
+
+ // Crear channels
+ // jobs := make(chan int, 10)
+ // results := make(chan int, 10)
+
+ // Lanzar 3 workers con WaitGroup
+ // var wg sync.WaitGroup
+ // numWorkers := 3
+
+ // for w := 1; w <= numWorkers; w++ {
+ //     wg.Add(1)
+ //     go func(id int) {
+ //         defer wg.Done()
+ //         worker(id, jobs, results)
+ //     }(w)
+ // }
+
+ // Enviar jobs
+ // for i := 1; i <= 10; i++ {
+ //     jobs <- i
+ // }
+ // close(jobs)
+
+ // Esperar a que terminen y cerrar results
+ // go func() {
+ //     wg.Wait()
+ //     close(results)
+ // }()
+
+ // Recopilar resultados
+ // for result := range results {
+ //     fmt.Println("Resultado:", result)
+ // }
 }
 
 // Salida esperada:
@@ -2837,49 +2856,50 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"sync"
+ "fmt"
+ "sync"
 )
 
 func worker(id int, jobs <-chan int, results chan<- int) {
-	for job := range jobs {
-		fmt.Printf("Worker %d procesa job %d\n", id, job)
-		results <- job * 2
-	}
+ for job := range jobs {
+  fmt.Printf("Worker %d procesa job %d\n", id, job)
+  results <- job * 2
+ }
 }
 
 func main() {
-	jobs := make(chan int, 10)
-	results := make(chan int, 10)
-	
-	var wg sync.WaitGroup
-	numWorkers := 3
-	
-	for w := 1; w <= numWorkers; w++ {
-		wg.Add(1)
-		go func(id int) {
-			defer wg.Done()
-			worker(id, jobs, results)
-		}(w)
-	}
-	
-	for i := 1; i <= 10; i++ {
-		jobs <- i
-	}
-	close(jobs)
-	
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-	
-	for result := range results {
-		fmt.Println("Resultado:", result)
-	}
+ jobs := make(chan int, 10)
+ results := make(chan int, 10)
+
+ var wg sync.WaitGroup
+ numWorkers := 3
+
+ for w := 1; w <= numWorkers; w++ {
+  wg.Add(1)
+  go func(id int) {
+   defer wg.Done()
+   worker(id, jobs, results)
+  }(w)
+ }
+
+ for i := 1; i <= 10; i++ {
+  jobs <- i
+ }
+ close(jobs)
+
+ go func() {
+  wg.Wait()
+  close(results)
+ }()
+
+ for result := range results {
+  fmt.Println("Resultado:", result)
+ }
 }
 ```
 
 **Conceptos probados:**
+
 - sync.WaitGroup
 - Múltiples goroutines enviando al mismo channel
 - Fan-out de jobs
@@ -2895,7 +2915,7 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 // TODO: Implementar generador de Fibonacci
@@ -2904,28 +2924,28 @@ import (
 // }
 
 func main() {
-	// TODO: Usar el generador con range
-	
-	// Generar primeros 10 números Fibonacci
-	// fmt.Println("Fibonacci (primeros 10):")
-	// for num := range fibonacci(10) {
-	//     fmt.Printf("%d ", num)
-	// }
-	// fmt.Println()
-	
-	// Bonus: Filtrar solo números pares
-	// fmt.Println("\nFibonacci pares (primeros 6):")
-	// count := 0
-	// for num := range fibonacci(20) {
-	//     if num%2 == 0 {
-	//         fmt.Printf("%d ", num)
-	//         count++
-	//         if count == 6 {
-	//             break
-	//         }
-	//     }
-	// }
-	// fmt.Println()
+ // TODO: Usar el generador con range
+
+ // Generar primeros 10 números Fibonacci
+ // fmt.Println("Fibonacci (primeros 10):")
+ // for num := range fibonacci(10) {
+ //     fmt.Printf("%d ", num)
+ // }
+ // fmt.Println()
+
+ // Bonus: Filtrar solo números pares
+ // fmt.Println("\nFibonacci pares (primeros 6):")
+ // count := 0
+ // for num := range fibonacci(20) {
+ //     if num%2 == 0 {
+ //         fmt.Printf("%d ", num)
+ //         count++
+ //         if count == 6 {
+ //             break
+ //         }
+ //     }
+ // }
+ // fmt.Println()
 }
 
 // Salida esperada:
@@ -2942,48 +2962,49 @@ func main() {
 package main
 
 import (
-	"fmt"
+ "fmt"
 )
 
 func fibonacci(n int) <-chan int {
-	out := make(chan int)
-	
-	go func() {
-		defer close(out)  // Cerrar cuando termina
-		
-		a, b := 0, 1
-		for i := 0; i < n; i++ {
-			out <- a
-			a, b = b, a+b
-		}
-	}()
-	
-	return out
+ out := make(chan int)
+
+ go func() {
+  defer close(out)  // Cerrar cuando termina
+
+  a, b := 0, 1
+  for i := 0; i < n; i++ {
+   out <- a
+   a, b = b, a+b
+  }
+ }()
+
+ return out
 }
 
 func main() {
-	fmt.Println("Fibonacci (primeros 10):")
-	for num := range fibonacci(10) {
-		fmt.Printf("%d ", num)
-	}
-	fmt.Println()
-	
-	fmt.Println("\nFibonacci pares (primeros 6):")
-	count := 0
-	for num := range fibonacci(20) {
-		if num%2 == 0 {
-			fmt.Printf("%d ", num)
-			count++
-			if count == 6 {
-				break
-			}
-		}
-	}
-	fmt.Println()
+ fmt.Println("Fibonacci (primeros 10):")
+ for num := range fibonacci(10) {
+  fmt.Printf("%d ", num)
+ }
+ fmt.Println()
+
+ fmt.Println("\nFibonacci pares (primeros 6):")
+ count := 0
+ for num := range fibonacci(20) {
+  if num%2 == 0 {
+   fmt.Printf("%d ", num)
+   count++
+   if count == 6 {
+    break
+   }
+  }
+ }
+ fmt.Println()
 }
 ```
 
 **Conceptos probados:**
+
 - Generadores que devuelven `<-chan`
 - defer close()
 - range para iterar generadores
@@ -2994,15 +3015,18 @@ func main() {
 ## REFERENCIAS Y RECURSOS
 
 **Documentación Oficial:**
+
 - [Go Concurrency Patterns](https://go.dev/blog/pipelines)
 - [Effective Go - Concurrency](https://go.dev/doc/effective_go#concurrency)
 - [Channel axioms](https://github.com/golang/go/wiki/CodeReviewComments#chan)
 
 **Libros Recomendados:**
+
 - "The Go Programming Language" - Donovan & Kernighan (Capítulo 8)
 - "Concurrency in Go" - Katherine Cox-Buday
 
 **Patrones:**
+
 - Rob Pike's "Concurrency Patterns" talks
 - Go Concurrency Patterns: Pipeline, Fan-out/Fan-in
 - Advanced Go Concurrency Patterns

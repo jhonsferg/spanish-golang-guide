@@ -1,6 +1,7 @@
 # Capítulo 56: HTTP frameworks - Comparativa de frameworks web
 
 ## Tabla de Contenidos
+
 1. Historia & Evolución de Web Frameworks en Go
 2. Criterios de Comparación  
 3. Gin Framework
@@ -24,6 +25,7 @@ La historia de los web frameworks en Go es relativamente joven. Go fue lanzado p
 En los primeros años, los desarrolladores de Go enfrentaban una pregunta fundamental: ¿necesitaban realmente un framework? A diferencia de Ruby on Rails o Django, Go proporcionaba un paquete `net/http` muy poderoso en su librería estándar.
 
 **Filosofía A: "Go es suficiente"**
+
 ```
 Enfoque: Usar net/http directamente
 Ventajas: Control total, performance, simpleza
@@ -31,6 +33,7 @@ Desventajas: Código repetitivo, falta de convenciones
 ```
 
 **Filosofía B: "Necesitamos abstracciones"**
+
 ```
 Enfoque: Construir frameworks sobre net/http
 Ventajas: Productividad, convenciones, features
@@ -45,6 +48,7 @@ Los primeros frameworks surgieron alrededor de 2010-2011:
 - **Beego** (2012): Framework chino con paradigma MVC
 
 **Línea de Tiempo:**
+
 ```
 2009 │ Go released     Web.go lanzado
 2010 │ Gorilla surge   (composable middleware)
@@ -66,6 +70,7 @@ A mediados de los 2010s, la comunidad enfocó en características específicas:
 3. **Composabilidad**: Elegir componentes individuales
 
 **Gin Framework (2014)**
+
 ```
 - Enfoque: Ultra-ligero + máxima performance
 - Filosofía: "Pequeño es hermoso"
@@ -75,6 +80,7 @@ A mediados de los 2010s, la comunidad enfocó en características específicas:
 Gin fue revolucionario porque probó que se podía tener performance moderna sin sacrificar performance.
 
 **Echo Framework (2015)**
+
 ```
 - Enfoque: Feature-rich pero performante
 - Filosofía: "Flexibilidad sin compromiso"
@@ -84,6 +90,7 @@ Gin fue revolucionario porque probó que se podía tener performance moderna sin
 ### 56.1.3 ¿Por Qué Tantos Frameworks en Go?
 
 Comparativa:
+
 - **Python**: Django, Flask (~2 principales)
 - **Node.js**: Express, Fastify, Hapi (~3-4 principales)
 - **Go**: Gin, Echo, Fiber, Chi, Revel, Beego (~10+ activos)
@@ -133,6 +140,7 @@ Comparativa:
    - Garbage collection overhead
 
 **Matriz de Performance:**
+
 ```
 Framework    │ P50 (μs) │ P99 (μs) │ RPS (K) │ Memory (MB)
 clear
@@ -158,7 +166,7 @@ JSON Rendering       │ ✅ │  ✅  │  ✅   │ ✅  │    ✅
 Template Engine      │ ❌ │  ✅  │  ✅   │ ❌  │    ❌
 File Upload          │ ✅ │  ✅  │  ✅   │ ✅  │    ✅
 CORS Built-in        │ ❌ │  ✅  │  ✅   │ ❌  │    ❌
-  ✅  │  ✅   │ ❌  │    ❌WebSockets           │ ❌ 
+  ✅  │  ✅   │ ❌  │    ❌WebSockets           │ ❌
 ```
 
 ### 56.2.3 Community & Ecosystem
@@ -167,11 +175,11 @@ CORS Built-in        │ ❌ │  ✅  │  ✅   │ ❌  │    ❌
 Framework │ Stars   │ Contribuidores │ Status   │ Empresas
 clear
 Gin       │ 75K+    │ 300+           │ Activo   │ Muy usado
- 30K+    │ 150+           │ Activo   │ UsadoEcho      
+ 30K+    │ 150+           │ Activo   │ UsadoEcho  
 Fiber     │ 30K+    │ 200+           │ Activo   │ Creciendo
 Chi       │ 17K+    │ 80+            │ Estable  │ Nicho
 httprouter│ 14K+    │ 20+            │ Estable  │ Legacy
-Revel     │ 12K+    50+  Declina  │ Legacy│            
+Revel     │ 12K+    50+  Declina  │ Legacy│  
 ```
 
 ### 56.2.4 Learning Curve
@@ -180,11 +188,11 @@ Revel     │ 12K+    50+  Declina  │ Legacy│
 Complejidad
     ^
     │      Revel  
-    │           
+    │  
     │    Echo
-            
+
     │   Gin      Fiber
-    │      
+    │  
     │   Chi
     └─────────────────────────→ Tiempo
 ```
@@ -198,6 +206,7 @@ Complejidad
 Gin es un web framework ultra-minimalista construido sobre `net/http` que maximiza performance.
 
 **Principios de Diseño:**
+
 1. Performance First: No hay reflexión en la ruta crítica
 2. Simplicity: API minimal (~20 funciones principales)
 3. Convention over Configuration: Decisiones sensatas por defecto
@@ -292,6 +301,7 @@ func main() {
 Echo es un framework web de alto performance con enfoque en **características y flexibilidad**.
 
 **Features principales:**
+
 - Binder automático
 - Validador integrado
 - Renderer (JSON, XML, HTML)
@@ -364,6 +374,7 @@ func main() {
  Middleware más composable
 
 **Cuándo elegir Echo:**
+
 - Necesitas features adicionales
 - Quieres validación integrada
 - Valoras documentación exhaustiva
@@ -380,12 +391,13 @@ Fiber es revolucionario porque transporta el paradigma de Express.js a Go.
 Fiber NO crea una goroutine por request. En cambio reutiliza conexiones, reduciendo overhead.
 
 **Performance:**
+
 ```
 Framework    │ P50   │ P95   │ P99   │ RPS    │ Memory
 clear
 Fiber        │ 38μs  │  95μs │ 125μs │ 95K    │ 7.8MB
 Echo         │ 50μs  │ 145μs │ 210μs │ 80K    │ 9.1MBGin          │ 45
-Node/Express │ 120μs │ 250μs 400μs  35K    │ 45MB│ 
+Node/Express │ 120μs │ 250μs 400μs  35K    │ 45MB│
 ```
 
 Fiber es ~2.7x más rápido que Node/Express.
@@ -465,6 +477,7 @@ Filosofía Chi:
 ```
 
 NO incluye:
+
 - Data binding automático
 - Validación
 - Rendering específico
@@ -519,6 +532,7 @@ func main() {
  Bajo footprint (6.5MB)
 
 **Cuándo elegir Chi:**
+
 - Necesitas máximo control
 - Tienes arquitectura clara
 - APIs pequeñas a medianas
@@ -644,6 +658,7 @@ No estás seguro                             →  Gin (default)
 ### 56.9.2 Casos de Uso Específicos
 
 **Caso 1: API REST Microservicios**
+
 ```
 Requisitos:
  Performance crítica
@@ -656,6 +671,7 @@ Razones: Performance, comunidad Go nativa
 ```
 
 **Caso 2: API Alto Volumen (10K+ RPS)**
+
 ```
 Requisitos:
  Máxima latencia baja
@@ -667,6 +683,7 @@ Razones: 15% más RPS, connection reuse
 ```
 
 **Caso 3: Servicio Crítico DDD/Hexagonal**
+
 ```
 Requisitos:
  Arquitectura limpia
@@ -678,6 +695,7 @@ Razones: No impone estructura, std handlers
 ```
 
 **Caso 4: MVP Rápido (Node.js team)**
+
 ```
 Requisitos:
  Time to market crítico
@@ -809,6 +827,7 @@ v.Struct(user)
 ### 56.10.3 Serialization
 
 **JSON (built-in)**
+
 ```go
 c.JSON(200, data)        // Gin
 c.JSON(data)             // Echo  
@@ -817,6 +836,7 @@ json.NewEncoder(w).Encode(data)  // Chi
 ```
 
 **Protocol Buffers**
+
 ```go
 data, _ := proto.Marshal(user)
 c.Data(200, "application/x-protobuf", data)
@@ -829,6 +849,7 @@ c.Data(200, "application/x-protobuf", data)
 ### 56.11.1 Anti-patterns ❌ vs Best Practices ✅
 
 **Anti-Pattern 1: Cambiar Framework Mid-Project**
+
 ```
  Mes 1: Elegir sin análisis
  Mes 3: "Cambio a otro"
@@ -840,6 +861,7 @@ c.Data(200, "application/x-protobuf", data)
 ```
 
 **Anti-Pattern 2: Framework Equivocado**
+
 ```
  Requisito: "API ultra-performance"
  Selección: Revel
@@ -851,6 +873,7 @@ c.Data(200, "application/x-protobuf", data)
 ```
 
 **Anti-Pattern 3: No Documentar Routing**
+
 ```
  MALO:
 func setupRoutes(e *echo.Echo) {
@@ -867,6 +890,7 @@ POST /api/v1/users - Create user
 ```
 
 **Anti-Pattern 4: Middleware Caótico**
+
 ```
  MALO:
 r.Use(M1, M2, M3, M4, M5, M6)
@@ -883,6 +907,7 @@ api.Use(middleware.JWT())     // Auth for API
 ```
 
 **Anti-Pattern 5: Error Handling Inconsistente**
+
 ```
  MALO:
 func GetUser(c *echo.Context) error {
@@ -911,6 +936,7 @@ func GetUser(c *echo.Context) error {
 ### 56.11.2 Escalabilidad y Performance
 
 **Principios:**
+
 ```
 1. Benchmark primero
    └─ No optimices sin medidas
@@ -930,6 +956,7 @@ func GetUser(c *echo.Context) error {
 ```
 
 **Endpoint Escalable:**
+
 ```go
 // ❌ MALO - Nueva conexión cada request
 func GetUserPoor(c *echo.Context) error {
@@ -966,6 +993,7 @@ func GetUserBest(c *echo.Context) error {
 ### 56.11.3 Case Studies Reales
 
 **Case Study 1: Migración Uber**
+
 ```
 2012-2014: Crecimiento 100K a 1M req/día
 Problema: Latency lineal
@@ -975,6 +1003,7 @@ Outcome: Gin se convirtió en standard interno
 ```
 
 **Case Study 2: CloudFlare**
+
 ```
 2016-2018: Edge caching, DNS, security
 Requisito: P99 latency < 50ms
@@ -984,6 +1013,7 @@ Lección: Balance features + performance
 ```
 
 **Case Study 3: Startup MVP Fiber**
+
 ```
 Team: 5 devs Node.js
 Goal: MVP en 4 semanas
@@ -1004,6 +1034,7 @@ Response: {"message": "Hello, John!"}
 ```
 
 **Gin:**
+
 ```go
 r := gin.Default()
 r.GET("/hello", func(c *gin.Context) {
@@ -1014,6 +1045,7 @@ r.Run(":8001")
 ```
 
 **Echo:**
+
 ```go
 e := echo.New()
 e.GET("/hello", func(c echo.Context) error {
@@ -1029,6 +1061,7 @@ e.Start(":8002")
 ```
 
 **Fiber:**
+
 ```go
 app := fiber.New()
 app.Get("/hello", func(c *fiber.Ctx) error {
@@ -1041,6 +1074,7 @@ app.Listen(":8003")
 ```
 
 **Chi:**
+
 ```go
 r := chi.NewRouter()
 r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
@@ -1084,6 +1118,7 @@ wrk -t12 -c400 -d30s http://localhost:8080/users
 Implementar Blog API seleccionando framework apropiado.
 
 Requisitos:
+
 - CRUD de posts
 - Data validation
 - Error handling
@@ -1128,7 +1163,6 @@ Go ofrece un ecosistema fragmentado pero rico de frameworks web. Para el 90% de 
 - **CHI**: Clean architecture + Composability
 
 El framework perfecto no existe; existe el framework perfecto para tu caso.
-
 
 ---
 
@@ -1397,13 +1431,13 @@ import "github.com/stretchr/testify/assert"
 
 func TestUserAPI(t *testing.T) {
     r := setupTestRouter()
-    
+
     req, _ := http.NewRequest("GET", "/users/1", nil)
     w := httptest.NewRecorder()
     r.ServeHTTP(w, req)
-    
+
     assert.Equal(t, 200, w.Code)
-    
+
     var result map[string]interface{}
     json.Unmarshal(w.Body.Bytes(), &result)
     assert.Equal(t, "John", result["name"])
@@ -1416,13 +1450,13 @@ func TestUserAPI(t *testing.T) {
 func TestUserAPI(t *testing.T) {
     e := echo.New()
     e.GET("/users/:id", GetUser)
-    
+
     req := httptest.NewRequest(http.MethodGet, "/users/1", nil)
     rec := httptest.NewRecorder()
     c := e.NewContext(req, rec)
-    
+
     GetUser(c)
-    
+
     assert.Equal(t, http.StatusOK, rec.Code)
 }
 ```
@@ -1508,7 +1542,7 @@ tracer := otel.Tracer("api")
 func GetUser(c *gin.Context) {
     ctx, span := tracer.Start(c.Request.Context(), "get_user")
     defer span.End()
-    
+
     // Handler logic with tracing
 }
 ```
@@ -1636,7 +1670,7 @@ myapp/
    └── admin.go
 
  middleware/
- auth.go   
+ auth.go  
    ├── logger.go
    └── cors.go
 
@@ -1645,7 +1679,7 @@ myapp/
    └── post_handler.go
 
  models/
- user.go   
+ user.go  
    └── post.go
 
  services/
@@ -1666,7 +1700,7 @@ import "runtime"
 func init() {
     // Ajustar garbage collection
     debug.SetGCPercent(50)  // Default: 100
-    
+
     // Preallocar goroutines
     runtime.GOMAXPROCS(runtime.NumCPU())
 }
@@ -1709,13 +1743,13 @@ func GetUserWithCache(id string) (*User, error) {
     if x, found := cache.Get(id); found {
         return x.(*User), nil
     }
-    
+
     // Fetch from DB
     user, err := db.GetUser(id)
     if err != nil {
         return nil, err
     }
-    
+
     // Store in cache
     cache.Set(id, user, cache.DefaultExpiration)
     return user, nil
@@ -1883,17 +1917,17 @@ ESCENARIO 3: Arquitectura Limpia (DDD)
  - Composable middleware                        │
  - Fácil testing                                │
  - Escalabilidad de código                      │
-                                                 
+
  RECOMENDACIÓN: CHI                             │
                                                  │
  Por qué Chi:                                   │
  - Standalone router, no es framework           │
- - Standard everywhere http.Handler             
+ - Standard everywhere http.Handler  
  - Middleware composable sin magia              │
  - Perfecto para DDD/Hexagonal                  │
                                                  │
  RESULTADO ESPERADO:                             │
- - limpia Arquitectura ✅                       
+ - limpia Arquitectura ✅  
  - Testabilidad: Excelente ✅                   │
  - Performance: Competitivo ✅                  │
  - Escalabilidad de código: Óptima ✅           │
@@ -2016,6 +2050,7 @@ ESCENARIO 6: Serverless/Lambda
 5. **Otros**: Principalmente legacy (Revel, Beego) o nicho (Kratos, Iris).
 
 **Tendencias 2024-2025:**
+
 - ✅ Consolidación alrededor de Gin/Echo
 - ✅ Crecimiento de Fiber (especialmente Node devs)
 - ✅ Chi estable en su nicho
@@ -2026,7 +2061,6 @@ ESCENARIO 6: Serverless/Lambda
 Para el 90% de nuevos proyectos, elige entre **Gin, Echo o Fiber**. Todos son production-ready, bien mantenidos, y tienen comunidades activas.
 
 La elección perfecta no existe; existe la elección perfecta para tu caso específico.
-
 
 ---
 

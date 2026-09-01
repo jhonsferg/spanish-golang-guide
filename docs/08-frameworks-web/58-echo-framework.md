@@ -1,6 +1,7 @@
 # Capítulo 58: Echo - Servidor web listo para producción
 
 ## Tabla de Contenidos
+
 1. [Introducción a Echo](#introducción)
 2. [Setup y Primeros Pasos](#setup)
 3. [Routing & Path Matching](#routing)
@@ -42,6 +43,7 @@ Echo es un framework web ultrarrápido y minimalista para Go, lanzado en 2014. S
 ### 58.1.2 Features Principales
 
 **Core Features:**
+
 - Routing rápido con Radix Tree
 - Middleware potente y composable
 - Binding automático (JSON, XML, Form, Query)
@@ -51,6 +53,7 @@ Echo es un framework web ultrarrápido y minimalista para Go, lanzado en 2014. S
 - TLS automático con Let's Encrypt
 
 **Enterprise Features:**
+
 - Context management eficiente
 - Logging estructurado
 - Error handling sofisticado
@@ -61,6 +64,7 @@ Echo es un framework web ultrarrápido y minimalista para Go, lanzado en 2014. S
 ### 58.1.3 Enterprise Adoption
 
 Echo es utilizado en producción por:
+
 - **Alibaba**: Servicios de backend a escala
 - **Xiaomi**: APIs internas de IoT
 - **SoundCloud**: Microservicios
@@ -69,6 +73,7 @@ Echo es utilizado en producción por:
 ### 58.1.4 Casos de Uso en Producción
 
 **Ideal para:**
+
 ```go
 // 1. REST APIs de alto rendimiento
 GET /api/v1/users/:id
@@ -91,6 +96,7 @@ CORS management
 ```
 
 **NO es ideal para:**
+
 - Aplicaciones monolíticas muy grandes (mejor Gin o framework completo)
 - Aplicaciones que necesitan ORM integrado (usar GORM + Echo)
 - Proyectos que requieren scaffolding automático
@@ -120,21 +126,21 @@ go get github.com/go-playground/validator/v10
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 func main() {
-	// 1. Crear instancia
-	e := echo.New()
+ // 1. Crear instancia
+ e := echo.New()
 
-	// 2. Definir rutas
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "¡Hola, Echo!")
-	})
+ // 2. Definir rutas
+ e.GET("/", func(c echo.Context) error {
+  return c.String(http.StatusOK, "¡Hola, Echo!")
+ })
 
-	// 3. Iniciar servidor
-	e.Logger.Fatal(e.Start(":1323"))
+ // 3. Iniciar servidor
+ e.Logger.Fatal(e.Start(":1323"))
 }
 ```
 
@@ -185,48 +191,48 @@ e.Match([]string{"GET", "POST"}, "/flexible", handler)
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"time"
+ "github.com/labstack/echo/v4"
+ "time"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Start básico
-	e.Start(":1323")
+ // 1. Start básico
+ e.Start(":1323")
 
-	// 2. Con puerto customizado
-	e.Start(":8080")
+ // 2. Con puerto customizado
+ e.Start(":8080")
 
-	// 3. Con configuración detallada
-	e.Server.Addr = ":1323"
-	e.Server.ReadTimeout = time.Second * 15
-	e.Server.WriteTimeout = time.Second * 15
-	e.Logger.Fatal(e.Start(":1323"))
+ // 3. Con configuración detallada
+ e.Server.Addr = ":1323"
+ e.Server.ReadTimeout = time.Second * 15
+ e.Server.WriteTimeout = time.Second * 15
+ e.Logger.Fatal(e.Start(":1323"))
 
-	// 4. Escuchar en todas las interfaces
-	e.Start(":0") // OS asigna puerto disponible
+ // 4. Escuchar en todas las interfaces
+ e.Start(":0") // OS asigna puerto disponible
 
-	// 5. HTTPS
-	e.Logger.Fatal(e.StartTLS(":443", "cert.pem", "key.pem"))
+ // 5. HTTPS
+ e.Logger.Fatal(e.StartTLS(":443", "cert.pem", "key.pem"))
 
-	// 6. Graceful shutdown
-	go func() {
-		if err := e.Start(":1323"); err != nil {
-			e.Logger.Info("Servidor detenido")
-		}
-	}()
+ // 6. Graceful shutdown
+ go func() {
+  if err := e.Start(":1323"); err != nil {
+   e.Logger.Info("Servidor detenido")
+  }
+ }()
 
-	// Graceful shutdown en Ctrl+C
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM)
-	<-sigterm
+ // Graceful shutdown en Ctrl+C
+ sigterm := make(chan os.Signal, 1)
+ signal.Notify(sigterm, syscall.SIGTERM)
+ <-sigterm
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
-	}
+ ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+ defer cancel()
+ if err := e.Shutdown(ctx); err != nil {
+  e.Logger.Fatal(err)
+ }
 }
 ```
 
@@ -236,18 +242,18 @@ El `echo.Context` es la pieza central:
 
 ```go
 func handler(c echo.Context) error {
-	// Acceder a:
-	c.Request()           // *http.Request
-	c.Response()          // http.ResponseWriter
-	c.Path()              // Ruta registrada
-	c.Param("id")         // Parámetro de ruta
-	c.QueryParam("name")  // Query string
-	c.Bind(&user)         // Binding automático
-	c.Validate(user)      // Validación
-	c.JSON(200, data)     // Respuesta JSON
-	c.Error(err)          // Error handling
+ // Acceder a:
+ c.Request()           // *http.Request
+ c.Response()          // http.ResponseWriter
+ c.Path()              // Ruta registrada
+ c.Param("id")         // Parámetro de ruta
+ c.QueryParam("name")  // Query string
+ c.Bind(&user)         // Binding automático
+ c.Validate(user)      // Validación
+ c.JSON(200, data)     // Respuesta JSON
+ c.Error(err)          // Error handling
 
-	return nil
+ return nil
 }
 ```
 
@@ -261,29 +267,29 @@ func handler(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Ruta simple
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Inicio")
-	})
+ // 1. Ruta simple
+ e.GET("/", func(c echo.Context) error {
+  return c.String(http.StatusOK, "Inicio")
+ })
 
-	// 2. Ruta con prefijo
-	e.GET("/api/users", getUsers)
+ // 2. Ruta con prefijo
+ e.GET("/api/users", getUsers)
 
-	// 3. Registro y ejecución
-	e.Start(":1323")
+ // 3. Registro y ejecución
+ e.Start(":1323")
 }
 
 func getUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Lista de usuarios",
-	})
+ return c.JSON(http.StatusOK, map[string]string{
+  "message": "Lista de usuarios",
+ })
 }
 ```
 
@@ -294,30 +300,30 @@ e := echo.New()
 
 // 1. Parámetro simple
 e.GET("/users/:id", func(c echo.Context) error {
-	id := c.Param("id")
-	return c.String(http.StatusOK, "Usuario "+id)
+ id := c.Param("id")
+ return c.String(http.StatusOK, "Usuario "+id)
 })
 
 // 2. Múltiples parámetros
 e.GET("/users/:id/posts/:postId", func(c echo.Context) error {
-	userID := c.Param("id")
-	postID := c.Param("postId")
-	return c.JSON(http.StatusOK, map[string]string{
-		"user": userID,
-		"post": postID,
-	})
+ userID := c.Param("id")
+ postID := c.Param("postId")
+ return c.JSON(http.StatusOK, map[string]string{
+  "user": userID,
+  "post": postID,
+ })
 })
 
 // 3. Path catch-all (*)
 e.GET("/files/*", func(c echo.Context) error {
-	filepath := c.Param("*")
-	return c.String(http.StatusOK, "Archivo: "+filepath)
+ filepath := c.Param("*")
+ return c.String(http.StatusOK, "Archivo: "+filepath)
 })
 
 // 4. Regex matching (opcional)
 e.GET("/users/:id", func(c echo.Context) error {
-	// Echo automáticamente valida el parámetro
-	return c.String(http.StatusOK, "OK")
+ // Echo automáticamente valida el parámetro
+ return c.String(http.StatusOK, "OK")
 })
 ```
 
@@ -356,54 +362,54 @@ e := echo.New()
 
 // 1. Query string simple
 e.GET("/search", func(c echo.Context) error {
-	name := c.QueryParam("name")
-	page := c.QueryParam("page")
+ name := c.QueryParam("name")
+ page := c.QueryParam("page")
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"name": name,
-		"page": page,
-	})
+ return c.JSON(http.StatusOK, map[string]string{
+  "name": name,
+  "page": page,
+ })
 })
 
 // 2. Query string con múltiples valores
 e.GET("/tags", func(c echo.Context) error {
-	// URL: /tags?tag=go&tag=web&tag=api
-	tags := c.QueryParams()["tag"]
-	return c.JSON(http.StatusOK, tags)
+ // URL: /tags?tag=go&tag=web&tag=api
+ tags := c.QueryParams()["tag"]
+ return c.JSON(http.StatusOK, tags)
 })
 
 // 3. Query con valor por defecto
 e.GET("/products", func(c echo.Context) error {
-	category := c.QueryParam("category")
-	if category == "" {
-		category = "all"
-	}
+ category := c.QueryParam("category")
+ if category == "" {
+  category = "all"
+ }
 
-	limit := c.QueryParam("limit")
-	if limit == "" {
-		limit = "10"
-	}
+ limit := c.QueryParam("limit")
+ if limit == "" {
+  limit = "10"
+ }
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"category": category,
-		"limit":    limit,
-	})
+ return c.JSON(http.StatusOK, map[string]string{
+  "category": category,
+  "limit":    limit,
+ })
 })
 
 // 4. Query param con validación
 e.GET("/users", func(c echo.Context) error {
-	page := c.QueryParam("page")
-	pageNum := 1
+ page := c.QueryParam("page")
+ pageNum := 1
 
-	if p, err := strconv.Atoi(page); err == nil && p > 0 {
-		pageNum = p
-	}
+ if p, err := strconv.Atoi(page); err == nil && p > 0 {
+  pageNum = p
+ }
 
-	offset := (pageNum - 1) * 10
-	return c.JSON(http.StatusOK, map[string]int{
-		"offset": offset,
-		"limit":  10,
-	})
+ offset := (pageNum - 1) * 10
+ return c.JSON(http.StatusOK, map[string]int{
+  "offset": offset,
+  "limit":  10,
+ })
 })
 ```
 
@@ -457,58 +463,58 @@ v2.POST("/users", createUserV2)
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
+ "net/http"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Middleware global
-	e.Use(middleware.Logger())
+ // 1. Middleware global
+ e.Use(middleware.Logger())
 
-	// 2. Middleware para grupo
-	public := e.Group("")
-	public.GET("/", Home)
+ // 2. Middleware para grupo
+ public := e.Group("")
+ public.GET("/", Home)
 
-	api := e.Group("/api")
-	api.Use(middleware.AuthMiddleware)
-	api.GET("/users", GetUsers)
+ api := e.Group("/api")
+ api.Use(middleware.AuthMiddleware)
+ api.GET("/users", GetUsers)
 
-	// 3. Middleware por ruta individual
-	e.GET("/public", Home)
-	e.GET("/protected", Protected,
-		middleware.JWTWithConfig(middleware.JWTConfig{
-			SigningKey: []byte("secret"),
-		}),
-	)
+ // 3. Middleware por ruta individual
+ e.GET("/public", Home)
+ e.GET("/protected", Protected,
+  middleware.JWTWithConfig(middleware.JWTConfig{
+   SigningKey: []byte("secret"),
+  }),
+ )
 
-	// 4. Multiple middleware para ruta
-	e.POST("/admin/users",
-		CreateUser,
-		middleware.AuthMiddleware,
-		middleware.AdminMiddleware,
-		middleware.LoggerMiddleware,
-	)
+ // 4. Multiple middleware para ruta
+ e.POST("/admin/users",
+  CreateUser,
+  middleware.AuthMiddleware,
+  middleware.AdminMiddleware,
+  middleware.LoggerMiddleware,
+ )
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 func Home(c echo.Context) error {
-	return c.String(http.StatusOK, "Home")
+ return c.String(http.StatusOK, "Home")
 }
 
 func GetUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK, []string{"user1", "user2"})
+ return c.JSON(http.StatusOK, []string{"user1", "user2"})
 }
 
 func Protected(c echo.Context) error {
-	return c.String(http.StatusOK, "Protegido")
+ return c.String(http.StatusOK, "Protegido")
 }
 
 func CreateUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{"status": "created"})
+ return c.JSON(http.StatusOK, map[string]string{"status": "created"})
 }
 ```
 
@@ -534,13 +540,13 @@ e.File("/sitemap.xml", "public/sitemap.xml")
 
 // 4. Custom static handler
 e.GET("/download/:file", func(c echo.Context) error {
-	filename := c.Param("file")
-	return c.File("downloads/" + filename)
+ filename := c.Param("file")
+ return c.File("downloads/" + filename)
 })
 
 // 5. Inline file serving
 e.GET("/data", func(c echo.Context) error {
-	return c.File("path/to/file.json")
+ return c.File("path/to/file.json")
 })
 ```
 
@@ -551,15 +557,15 @@ e := echo.New()
 
 // Asignar nombre a rutas
 userRoute := e.GET("/users/:id", func(c echo.Context) error {
-	return c.String(http.StatusOK, "Usuario")
+ return c.String(http.StatusOK, "Usuario")
 })
 userRoute.Name = "getUser"
 
 // Generar URL (útil en templates)
 e.GET("/", func(c echo.Context) error {
-	url, _ := e.Reverse("getUser", "123")
-	return c.String(http.StatusOK, "URL: "+url)
-	// Salida: URL: /users/123
+ url, _ := e.Reverse("getUser", "123")
+ return c.String(http.StatusOK, "URL: "+url)
+ // Salida: URL: /users/123
 })
 ```
 
@@ -573,56 +579,56 @@ e.GET("/", func(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Logger Middleware
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `${time_rfc3339} | ${status} | ${method} ${path} | ${latency_human}` + "\n",
-	}))
+ // 1. Logger Middleware
+ e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+  Format: `${time_rfc3339} | ${status} | ${method} ${path} | ${latency_human}` + "\n",
+ }))
 
-	// 2. Recover Middleware (maneja panics)
-	e.Use(middleware.Recover())
+ // 2. Recover Middleware (maneja panics)
+ e.Use(middleware.Recover())
 
-	// 3. CORS Middleware
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"https://example.com"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"X-Total-Count"},
-		MaxAge:           300,
-	}))
+ // 3. CORS Middleware
+ e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+  AllowOrigins:     []string{"https://example.com"},
+  AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+  AllowHeaders:     []string{"Content-Type", "Authorization"},
+  ExposeHeaders:    []string{"X-Total-Count"},
+  MaxAge:           300,
+ }))
 
-	// 4. Gzip Compression
-	e.Use(middleware.Gzip())
+ // 4. Gzip Compression
+ e.Use(middleware.Gzip())
 
-	// 5. Request ID Middleware
-	e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
-		TargetHeader: "X-Request-ID",
-	}))
+ // 5. Request ID Middleware
+ e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+  TargetHeader: "X-Request-ID",
+ }))
 
-	// 6. Rate Limiter
-	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(
-		100,
-	)))
+ // 6. Rate Limiter
+ e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(
+  100,
+ )))
 
-	// 7. Body Limit
-	e.Use(middleware.BodyLimit("1M"))
+ // 7. Body Limit
+ e.Use(middleware.BodyLimit("1M"))
 
-	// 8. Request Timeout
-	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-		Timeout: "30s",
-	}))
+ // 8. Request Timeout
+ e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+  Timeout: "30s",
+ }))
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "OK")
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -632,105 +638,105 @@ func main() {
 package middleware
 
 import (
-	"github.com/labstack/echo/v4"
-	"time"
+ "github.com/labstack/echo/v4"
+ "time"
 )
 
 // 1. Middleware simple
 func SimpleMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Antes
-		c.Set("user", "john")
+ return func(c echo.Context) error {
+  // Antes
+  c.Set("user", "john")
 
-		// Ejecutar siguiente middleware/handler
-		err := next(c)
+  // Ejecutar siguiente middleware/handler
+  err := next(c)
 
-		// Después
-		return err
-	}
+  // Después
+  return err
+ }
 }
 
 // 2. Middleware con parámetros
 func TimingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		start := time.Now()
+ return func(c echo.Context) error {
+  start := time.Now()
 
-		err := next(c)
+  err := next(c)
 
-		duration := time.Since(start)
-		c.Response().Header().Set("X-Response-Time", duration.String())
+  duration := time.Since(start)
+  c.Response().Header().Set("X-Response-Time", duration.String())
 
-		return err
-	}
+  return err
+ }
 }
 
 // 3. Middleware de autenticación
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		token := c.Request().Header.Get("Authorization")
+ return func(c echo.Context) error {
+  token := c.Request().Header.Get("Authorization")
 
-		if token == "" {
-			return c.JSON(401, map[string]string{
-				"error": "Token requerido",
-			})
-		}
+  if token == "" {
+   return c.JSON(401, map[string]string{
+    "error": "Token requerido",
+   })
+  }
 
-		// Validar token (simplificado)
-		if !isValidToken(token) {
-			return c.JSON(401, map[string]string{
-				"error": "Token inválido",
-			})
-		}
+  // Validar token (simplificado)
+  if !isValidToken(token) {
+   return c.JSON(401, map[string]string{
+    "error": "Token inválido",
+   })
+  }
 
-		c.Set("user_id", extractUserID(token))
-		return next(c)
-	}
+  c.Set("user_id", extractUserID(token))
+  return next(c)
+ }
 }
 
 // 4. Middleware de logging
 func LoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		start := time.Now()
+ return func(c echo.Context) error {
+  start := time.Now()
 
-		req := c.Request()
-		res := c.Response()
+  req := c.Request()
+  res := c.Response()
 
-		err := next(c)
+  err := next(c)
 
-		log.Printf(
-			"%s | %s %s %d | %v\n",
-			time.Now().Format("15:04:05"),
-			req.Method,
-			req.RequestURI,
-			res.Status,
-			time.Since(start),
-		)
+  log.Printf(
+   "%s | %s %s %d | %v\n",
+   time.Now().Format("15:04:05"),
+   req.Method,
+   req.RequestURI,
+   res.Status,
+   time.Since(start),
+  )
 
-		return err
-	}
+  return err
+ }
 }
 
 // 5. Middleware de headers seguros
 func SecurityMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
-		c.Response().Header().Set("X-Frame-Options", "DENY")
-		c.Response().Header().Set("X-XSS-Protection", "1; mode=block")
-		c.Response().Header().Set("Strict-Transport-Security",
-			"max-age=31536000; includeSubDomains")
+ return func(c echo.Context) error {
+  c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+  c.Response().Header().Set("X-Frame-Options", "DENY")
+  c.Response().Header().Set("X-XSS-Protection", "1; mode=block")
+  c.Response().Header().Set("Strict-Transport-Security",
+   "max-age=31536000; includeSubDomains")
 
-		return next(c)
-	}
+  return next(c)
+ }
 }
 
 func isValidToken(token string) bool {
-	// Implementar validación real
-	return token != ""
+ // Implementar validación real
+ return token != ""
 }
 
 func extractUserID(token string) string {
-	// Implementar extracción real
-	return "user123"
+ // Implementar extracción real
+ return "user123"
 }
 ```
 
@@ -740,82 +746,82 @@ func extractUserID(token string) string {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"log"
-	"time"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
+ "log"
+ "time"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Global middleware (ejecutados en orden)
-	e.Use(middleware.Logger())      // 1er
-	e.Use(middleware.Recover())     // 2do
-	e.Use(SecurityMiddleware)       // 3ro
+ // 1. Global middleware (ejecutados en orden)
+ e.Use(middleware.Logger())      // 1er
+ e.Use(middleware.Recover())     // 2do
+ e.Use(SecurityMiddleware)       // 3ro
 
-	// 2. Group middleware
-	admin := e.Group("/admin")
-	admin.Use(middleware.AuthMiddleware)
-	admin.Use(middleware.AdminMiddleware)
+ // 2. Group middleware
+ admin := e.Group("/admin")
+ admin.Use(middleware.AuthMiddleware)
+ admin.Use(middleware.AdminMiddleware)
 
-	admin.GET("/users", getAdminUsers)
-	admin.DELETE("/users/:id", deleteUser)
+ admin.GET("/users", getAdminUsers)
+ admin.DELETE("/users/:id", deleteUser)
 
-	// 3. Route-specific middleware
-	e.GET("/public", publicHandler)
-	e.GET("/protected", protectedHandler,
-		middleware.AuthMiddleware,
-		middleware.LoggerMiddleware,
-	)
+ // 3. Route-specific middleware
+ e.GET("/public", publicHandler)
+ e.GET("/protected", protectedHandler,
+  middleware.AuthMiddleware,
+  middleware.LoggerMiddleware,
+ )
 
-	// 4. Pipeline completo
-	api := e.Group("/api")
+ // 4. Pipeline completo
+ api := e.Group("/api")
 
-	// Middleware global → Group middleware → Route middleware
-	api.Use(middleware.CORSWithConfig(
-		middleware.CORSConfig{
-			AllowOrigins: []string{"*"},
-		},
-	))
-	api.Use(middleware.RequestIDWithConfig(
-		middleware.RequestIDConfig{
-			TargetHeader: "X-Request-ID",
-		},
-	))
+ // Middleware global → Group middleware → Route middleware
+ api.Use(middleware.CORSWithConfig(
+  middleware.CORSConfig{
+   AllowOrigins: []string{"*"},
+  },
+ ))
+ api.Use(middleware.RequestIDWithConfig(
+  middleware.RequestIDConfig{
+   TargetHeader: "X-Request-ID",
+  },
+ ))
 
-	api.GET("/data", func(c echo.Context) error {
-		requestID := c.Request().Header.Get("X-Request-ID")
-		return c.JSON(200, map[string]string{
-			"request_id": requestID,
-		})
-	})
+ api.GET("/data", func(c echo.Context) error {
+  requestID := c.Request().Header.Get("X-Request-ID")
+  return c.JSON(200, map[string]string{
+   "request_id": requestID,
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 func SecurityMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
-		return next(c)
-	}
+ return func(c echo.Context) error {
+  c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+  return next(c)
+ }
 }
 
 func getAdminUsers(c echo.Context) error {
-	return c.JSON(200, []string{"admin1", "admin2"})
+ return c.JSON(200, []string{"admin1", "admin2"})
 }
 
 func deleteUser(c echo.Context) error {
-	id := c.Param("id")
-	return c.JSON(200, map[string]string{"deleted": id})
+ id := c.Param("id")
+ return c.JSON(200, map[string]string{"deleted": id})
 }
 
 func publicHandler(c echo.Context) error {
-	return c.String(200, "Público")
+ return c.String(200, "Público")
 }
 
 func protectedHandler(c echo.Context) error {
-	return c.String(200, "Protegido")
+ return c.String(200, "Protegido")
 }
 
 // Visalizar flujo de middleware:
@@ -842,39 +848,39 @@ func protectedHandler(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Middleware que guarda datos en context
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set("user_id", 123)
-			c.Set("username", "john")
-			return next(c)
-		}
-	})
+ // Middleware que guarda datos en context
+ e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+  return func(c echo.Context) error {
+   c.Set("user_id", 123)
+   c.Set("username", "john")
+   return next(c)
+  }
+ })
 
-	e.GET("/user", func(c echo.Context) error {
-		// Recuperar datos del context
-		userID := c.Get("user_id")
-		username := c.Get("username")
+ e.GET("/user", func(c echo.Context) error {
+  // Recuperar datos del context
+  userID := c.Get("user_id")
+  username := c.Get("username")
 
-		// Type assertion
-		id, ok := userID.(int)
-		if !ok {
-			return c.JSON(400, map[string]string{"error": "invalid user_id"})
-		}
+  // Type assertion
+  id, ok := userID.(int)
+  if !ok {
+   return c.JSON(400, map[string]string{"error": "invalid user_id"})
+  }
 
-		return c.JSON(200, map[string]interface{}{
-			"id":       id,
-			"username": username,
-		})
-	})
+  return c.JSON(200, map[string]interface{}{
+   "id":       id,
+   "username": username,
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -884,57 +890,57 @@ func main() {
 package middleware
 
 import (
-	"bytes"
-	"github.com/labstack/echo/v4"
-	"io"
-	"log"
+ "bytes"
+ "github.com/labstack/echo/v4"
+ "io"
+ "log"
 )
 
 // Middleware para inspeccionar request
 func RequestInspectorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Leer y reguardar body
-		bodyBytes, _ := io.ReadAll(c.Request().Body)
-		c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+ return func(c echo.Context) error {
+  // Leer y reguardar body
+  bodyBytes, _ := io.ReadAll(c.Request().Body)
+  c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-		log.Printf("Request: %s %s\n", c.Request().Method, c.Request().URL.Path)
-		log.Printf("Headers: %v\n", c.Request().Header)
-		log.Printf("Body: %s\n", string(bodyBytes))
+  log.Printf("Request: %s %s\n", c.Request().Method, c.Request().URL.Path)
+  log.Printf("Headers: %v\n", c.Request().Header)
+  log.Printf("Body: %s\n", string(bodyBytes))
 
-		return next(c)
-	}
+  return next(c)
+ }
 }
 
 // Middleware para inspeccionar response
 func ResponseInspectorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Capturar respuesta
-		originalWriter := c.Response().Writer
+ return func(c echo.Context) error {
+  // Capturar respuesta
+  originalWriter := c.Response().Writer
 
-		// Custom writer para capturar response
-		buf := new(bytes.Buffer)
-		c.Response().Writer = &responseWriter{
-			ResponseWriter: originalWriter,
-			buf:            buf,
-		}
+  // Custom writer para capturar response
+  buf := new(bytes.Buffer)
+  c.Response().Writer = &responseWriter{
+   ResponseWriter: originalWriter,
+   buf:            buf,
+  }
 
-		err := next(c)
+  err := next(c)
 
-		log.Printf("Response Status: %d\n", c.Response().Status)
-		log.Printf("Response Body: %s\n", buf.String())
+  log.Printf("Response Status: %d\n", c.Response().Status)
+  log.Printf("Response Body: %s\n", buf.String())
 
-		return err
-	}
+  return err
+ }
 }
 
 type responseWriter struct {
-	echo.ResponseWriter
-	buf *bytes.Buffer
+ echo.ResponseWriter
+ buf *bytes.Buffer
 }
 
 func (w *responseWriter) Write(b []byte) (int, error) {
-	w.buf.Write(b)
-	return w.ResponseWriter.Write(b)
+ w.buf.Write(b)
+ return w.ResponseWriter.Write(b)
 }
 ```
 
@@ -948,72 +954,72 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type User struct {
-	ID    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+ ID    int    `json:"id"`
+ Name  string `json:"name"`
+ Email string `json:"email"`
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Binding JSON simple
-	e.POST("/users", func(c echo.Context) error {
-		user := new(User)
+ // 1. Binding JSON simple
+ e.POST("/users", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Invalid JSON",
-			})
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, map[string]string{
+    "error": "Invalid JSON",
+   })
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	// 2. Binding con validación
-	e.POST("/users/validated", func(c echo.Context) error {
-		user := new(User)
+ // 2. Binding con validación
+ e.POST("/users/validated", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		if user.Name == "" || user.Email == "" {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Name y Email son requeridos",
-			})
-		}
+  if user.Name == "" || user.Email == "" {
+   return c.JSON(http.StatusBadRequest, map[string]string{
+    "error": "Name y Email son requeridos",
+   })
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	// 3. Binding a slice
-	e.POST("/users/batch", func(c echo.Context) error {
-		var users []User
+ // 3. Binding a slice
+ e.POST("/users/batch", func(c echo.Context) error {
+  var users []User
 
-		if err := c.Bind(&users); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(&users); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.JSON(http.StatusCreated, users)
-	})
+  return c.JSON(http.StatusCreated, users)
+ })
 
-	// 4. Binding y BindJSON explícito
-	e.POST("/users/explicit", func(c echo.Context) error {
-		user := new(User)
+ // 4. Binding y BindJSON explícito
+ e.POST("/users/explicit", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.BindJSON(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.BindJSON(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1030,67 +1036,67 @@ curl -X POST http://localhost:1323/users \
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type LoginForm struct {
-	Username string `form:"username"`
-	Password string `form:"password"`
-	Remember string `form:"remember"`
+ Username string `form:"username"`
+ Password string `form:"password"`
+ Remember string `form:"remember"`
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Form binding
-	e.POST("/login", func(c echo.Context) error {
-		form := new(LoginForm)
+ // 1. Form binding
+ e.POST("/login", func(c echo.Context) error {
+  form := new(LoginForm)
 
-		if err := c.Bind(form); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(form); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.JSON(http.StatusOK, form)
-	})
+  return c.JSON(http.StatusOK, form)
+ })
 
-	// 2. Form file upload
-	e.POST("/upload", func(c echo.Context) error {
-		file, err := c.FormFile("file")
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+ // 2. Form file upload
+ e.POST("/upload", func(c echo.Context) error {
+  file, err := c.FormFile("file")
+  if err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		// Guardar archivo
-		src, err := file.Open()
-		if err != nil {
-			return err
-		}
-		defer src.Close()
+  // Guardar archivo
+  src, err := file.Open()
+  if err != nil {
+   return err
+  }
+  defer src.Close()
 
-		// Aquí guardar el archivo
-		return c.JSON(http.StatusOK, map[string]string{
-			"filename": file.Filename,
-			"size":     string(rune(file.Size)),
-		})
-	})
+  // Aquí guardar el archivo
+  return c.JSON(http.StatusOK, map[string]string{
+   "filename": file.Filename,
+   "size":     string(rune(file.Size)),
+  })
+ })
 
-	// 3. Multiple file upload
-	e.POST("/upload-multiple", func(c echo.Context) error {
-		form, err := c.MultipartForm()
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+ // 3. Multiple file upload
+ e.POST("/upload-multiple", func(c echo.Context) error {
+  form, err := c.MultipartForm()
+  if err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		files := form.File["files"]
+  files := form.File["files"]
 
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"count": len(files),
-			"files": files,
-		})
-	})
+  return c.JSON(http.StatusOK, map[string]interface{}{
+   "count": len(files),
+   "files": files,
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1100,33 +1106,33 @@ func main() {
 package main
 
 import (
-	"encoding/xml"
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "encoding/xml"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type Product struct {
-	XMLName xml.Name `xml:"product"`
-	ID      int      `xml:"id"`
-	Name    string   `xml:"name"`
-	Price   float64  `xml:"price"`
+ XMLName xml.Name `xml:"product"`
+ ID      int      `xml:"id"`
+ Name    string   `xml:"name"`
+ Price   float64  `xml:"price"`
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. XML Binding
-	e.POST("/products", func(c echo.Context) error {
-		product := new(Product)
+ // 1. XML Binding
+ e.POST("/products", func(c echo.Context) error {
+  product := new(Product)
 
-		if err := c.BindXML(product); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.BindXML(product); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.XML(http.StatusCreated, product)
-	})
+  return c.XML(http.StatusCreated, product)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1142,58 +1148,58 @@ curl -X POST http://localhost:1323/products \
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
-	"time"
+ "github.com/labstack/echo/v4"
+ "net/http"
+ "time"
 )
 
 type CustomData struct {
-	Date  time.Time
-	Count int
+ Date  time.Time
+ Count int
 }
 
 // Custom binder
 type customBinder struct{}
 
 func (cb *customBinder) Bind(req *http.Request, i interface{}) error {
-	if err := req.ParseForm(); err != nil {
-		return err
-	}
+ if err := req.ParseForm(); err != nil {
+  return err
+ }
 
-	// Binding custom
-	data := i.(*CustomData)
-	dateStr := req.FormValue("date")
+ // Binding custom
+ data := i.(*CustomData)
+ dateStr := req.FormValue("date")
 
-	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return err
-	}
+ date, err := time.Parse("2006-01-02", dateStr)
+ if err != nil {
+  return err
+ }
 
-	data.Date = date
-	return nil
+ data.Date = date
+ return nil
 }
 
 func (cb *customBinder) BindPathParams(c echo.Context, i interface{}) error {
-	return nil
+ return nil
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Registrar custom binder
-	e.Binder = &customBinder{}
+ // Registrar custom binder
+ e.Binder = &customBinder{}
 
-	e.POST("/custom", func(c echo.Context) error {
-		data := new(CustomData)
+ e.POST("/custom", func(c echo.Context) error {
+  data := new(CustomData)
 
-		if err := c.Bind(data); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(data); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.JSON(http.StatusOK, data)
-	})
+  return c.JSON(http.StatusOK, data)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1203,76 +1209,76 @@ func main() {
 package main
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/go-playground/validator/v10"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type User struct {
-	Name  string `json:"name" validate:"required,min=3,max=50"`
-	Email string `json:"email" validate:"required,email"`
-	Age   int    `json:"age" validate:"required,min=18,max=120"`
+ Name  string `json:"name" validate:"required,min=3,max=50"`
+ Email string `json:"email" validate:"required,email"`
+ Age   int    `json:"age" validate:"required,min=18,max=120"`
 }
 
 type CustomValidator struct {
-	validator *validator.Validate
+ validator *validator.Validate
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return err
-	}
-	return nil
+ if err := cv.validator.Struct(i); err != nil {
+  return err
+ }
+ return nil
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Registrar validador
-	e.Validator = &CustomValidator{
-		validator: validator.New(),
-	}
+ // Registrar validador
+ e.Validator = &CustomValidator{
+  validator: validator.New(),
+ }
 
-	// 1. Validación básica
-	e.POST("/users", func(c echo.Context) error {
-		user := new(User)
+ // 1. Validación básica
+ e.POST("/users", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		if err := c.Validate(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Validate(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	// 2. Validación manual
-	e.POST("/users-manual", func(c echo.Context) error {
-		user := new(User)
+ // 2. Validación manual
+ e.POST("/users-manual", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		// Validar manualmente
-		if len(user.Name) < 3 {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Name debe tener al menos 3 caracteres",
-			})
-		}
+  // Validar manualmente
+  if len(user.Name) < 3 {
+   return c.JSON(http.StatusBadRequest, map[string]string{
+    "error": "Name debe tener al menos 3 caracteres",
+   })
+  }
 
-		if user.Age < 18 {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "Debe ser mayor de 18 años",
-			})
-		}
+  if user.Age < 18 {
+   return c.JSON(http.StatusBadRequest, map[string]string{
+    "error": "Debe ser mayor de 18 años",
+   })
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1282,84 +1288,84 @@ func main() {
 package main
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/go-playground/validator/v10"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
+ Field   string `json:"field"`
+ Message string `json:"message"`
 }
 
 func formatValidationErrors(err error) []ValidationError {
-	var errors []ValidationError
+ var errors []ValidationError
 
-	if validationErrors, ok := err.(validator.ValidationErrors); ok {
-		for _, fieldError := range validationErrors {
-			errors = append(errors, ValidationError{
-				Field: fieldError.Field(),
-				Message: formatErrorMessage(fieldError),
-			})
-		}
-	}
+ if validationErrors, ok := err.(validator.ValidationErrors); ok {
+  for _, fieldError := range validationErrors {
+   errors = append(errors, ValidationError{
+    Field: fieldError.Field(),
+    Message: formatErrorMessage(fieldError),
+   })
+  }
+ }
 
-	return errors
+ return errors
 }
 
 func formatErrorMessage(fieldError validator.FieldError) string {
-	switch fieldError.ActualTag() {
-	case "required":
-		return fieldError.Field() + " es requerido"
-	case "email":
-		return fieldError.Field() + " debe ser un email válido"
-	case "min":
-		return fieldError.Field() + " debe tener mínimo " + fieldError.Param() + " caracteres"
-	case "max":
-		return fieldError.Field() + " debe tener máximo " + fieldError.Param() + " caracteres"
-	default:
-		return "Validación inválida en " + fieldError.Field()
-	}
+ switch fieldError.ActualTag() {
+ case "required":
+  return fieldError.Field() + " es requerido"
+ case "email":
+  return fieldError.Field() + " debe ser un email válido"
+ case "min":
+  return fieldError.Field() + " debe tener mínimo " + fieldError.Param() + " caracteres"
+ case "max":
+  return fieldError.Field() + " debe tener máximo " + fieldError.Param() + " caracteres"
+ default:
+  return "Validación inválida en " + fieldError.Field()
+ }
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	type User struct {
-		Name  string `json:"name" validate:"required,min=3"`
-		Email string `json:"email" validate:"required,email"`
-	}
+ type User struct {
+  Name  string `json:"name" validate:"required,min=3"`
+  Email string `json:"email" validate:"required,email"`
+ }
 
-	e.Validator = &CustomValidator{
-		validator: validator.New(),
-	}
+ e.Validator = &CustomValidator{
+  validator: validator.New(),
+ }
 
-	e.POST("/users", func(c echo.Context) error {
-		user := new(User)
+ e.POST("/users", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, err)
+  }
 
-		if err := c.Validate(user); err != nil {
-			validationErrors := formatValidationErrors(err)
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"errors": validationErrors,
-			})
-		}
+  if err := c.Validate(user); err != nil {
+   validationErrors := formatValidationErrors(err)
+   return c.JSON(http.StatusBadRequest, map[string]interface{}{
+    "errors": validationErrors,
+   })
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 type CustomValidator struct {
-	validator *validator.Validate
+ validator *validator.Validate
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
+ return cv.validator.Struct(i)
 }
 ```
 
@@ -1373,49 +1379,49 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type Response struct {
-	Status  string      `json:"status"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+ Status  string      `json:"status"`
+ Message string      `json:"message"`
+ Data    interface{} `json:"data,omitempty"`
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. JSON simple
-	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, Response{
-			Status:  "success",
-			Message: "OK",
-		})
-	})
+ // 1. JSON simple
+ e.GET("/", func(c echo.Context) error {
+  return c.JSON(http.StatusOK, Response{
+   Status:  "success",
+   Message: "OK",
+  })
+ })
 
-	// 2. JSON con datos
-	e.GET("/users", func(c echo.Context) error {
-		users := []map[string]string{
-			{"id": "1", "name": "John"},
-			{"id": "2", "name": "Jane"},
-		}
+ // 2. JSON con datos
+ e.GET("/users", func(c echo.Context) error {
+  users := []map[string]string{
+   {"id": "1", "name": "John"},
+   {"id": "2", "name": "Jane"},
+  }
 
-		return c.JSON(http.StatusOK, Response{
-			Status: "success",
-			Data:   users,
-		})
-	})
+  return c.JSON(http.StatusOK, Response{
+   Status: "success",
+   Data:   users,
+  })
+ })
 
-	// 3. JSON con headers personalizados
-	e.GET("/with-headers", func(c echo.Context) error {
-		c.Response().Header().Set("X-Total-Count", "100")
-		return c.JSON(http.StatusOK, map[string]string{
-			"message": "Con headers",
-		})
-	})
+ // 3. JSON con headers personalizados
+ e.GET("/with-headers", func(c echo.Context) error {
+  c.Response().Header().Set("X-Total-Count", "100")
+  return c.JSON(http.StatusOK, map[string]string{
+   "message": "Con headers",
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1425,17 +1431,17 @@ func main() {
 e := echo.New()
 
 type Item struct {
-	ID   int    `xml:"id"`
-	Name string `xml:"name"`
+ ID   int    `xml:"id"`
+ Name string `xml:"name"`
 }
 
 e.GET("/items", func(c echo.Context) error {
-	items := []Item{
-		{ID: 1, Name: "Item 1"},
-		{ID: 2, Name: "Item 2"},
-	}
+ items := []Item{
+  {ID: 1, Name: "Item 1"},
+  {ID: 2, Name: "Item 2"},
+ }
 
-	return c.XML(http.StatusOK, items)
+ return c.XML(http.StatusOK, items)
 })
 ```
 
@@ -1445,57 +1451,57 @@ e.GET("/items", func(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"html/template"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "html/template"
+ "net/http"
 )
 
 type Page struct {
-	Title string
-	Items []string
+ Title string
+ Items []string
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Template simple
-	t := template.Must(template.New("").Parse(`
-		<h1>{{.Title}}</h1>
-		<ul>
-		{{range .Items}}
-			<li>{{.}}</li>
-		{{end}}
-		</ul>
-	`))
+ // 1. Template simple
+ t := template.Must(template.New("").Parse(`
+  <h1>{{.Title}}</h1>
+  <ul>
+  {{range .Items}}
+   <li>{{.}}</li>
+  {{end}}
+  </ul>
+ `))
 
-	e.Renderer = &TemplateRenderer{
-		templates: t,
-	}
+ e.Renderer = &TemplateRenderer{
+  templates: t,
+ }
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "template", Page{
-			Title: "Mi Página",
-			Items: []string{"Item 1", "Item 2"},
-		})
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.Render(http.StatusOK, "template", Page{
+   Title: "Mi Página",
+   Items: []string{"Item 1", "Item 2"},
+  })
+ })
 
-	// 2. Template desde archivo
-	htmlFile := template.Must(template.ParseFiles("views/index.html"))
+ // 2. Template desde archivo
+ htmlFile := template.Must(template.ParseFiles("views/index.html"))
 
-	e.GET("/page", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "index", nil)
-	})
+ e.GET("/page", func(c echo.Context) error {
+  return c.Render(http.StatusOK, "index", nil)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 type TemplateRenderer struct {
-	templates *template.Template
+ templates *template.Template
 }
 
 func (t *TemplateRenderer) Render(w http.ResponseWriter, name string,
-	data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+ data interface{}, c echo.Context) error {
+ return t.templates.ExecuteTemplate(w, name, data)
 }
 ```
 
@@ -1506,17 +1512,17 @@ e := echo.New()
 
 // 1. Servir archivo
 e.GET("/download", func(c echo.Context) error {
-	return c.File("path/to/file.pdf")
+ return c.File("path/to/file.pdf")
 })
 
 // 2. Servir con nombre personalizado
 e.GET("/export", func(c echo.Context) error {
-	return c.Attachment("path/to/data.csv", "export.csv")
+ return c.Attachment("path/to/data.csv", "export.csv")
 })
 
 // 3. Inline file
 e.GET("/view", func(c echo.Context) error {
-	return c.Inline("path/to/image.jpg", "image.jpg")
+ return c.Inline("path/to/image.jpg", "image.jpg")
 })
 ```
 
@@ -1527,32 +1533,32 @@ e := echo.New()
 
 // 1. Stream simple
 e.GET("/stream", func(c echo.Context) error {
-	c.Response().Header().Set("Content-Type", "text/event-stream")
+ c.Response().Header().Set("Content-Type", "text/event-stream")
 
-	for i := 0; i < 10; i++ {
-		c.Response().Write([]byte("data: chunk " + string(rune(i)) + "\n\n"))
-	}
+ for i := 0; i < 10; i++ {
+  c.Response().Write([]byte("data: chunk " + string(rune(i)) + "\n\n"))
+ }
 
-	return nil
+ return nil
 })
 
 // 2. Server-Sent Events
 e.GET("/events", func(c echo.Context) error {
-	c.Response().Header().Set("Content-Type", "text/event-stream")
-	c.Response().Header().Set("Cache-Control", "no-cache")
+ c.Response().Header().Set("Content-Type", "text/event-stream")
+ c.Response().Header().Set("Cache-Control", "no-cache")
 
-	done := make(chan bool)
+ done := make(chan bool)
 
-	go func() {
-		for i := 0; i < 5; i++ {
-			c.Response().Write([]byte("data: " + string(rune(i)) + "\n\n"))
-			time.Sleep(1 * time.Second)
-		}
-		done <- true
-	}()
+ go func() {
+  for i := 0; i < 5; i++ {
+   c.Response().Write([]byte("data: " + string(rune(i)) + "\n\n"))
+   time.Sleep(1 * time.Second)
+  }
+  done <- true
+ }()
 
-	<-done
-	return nil
+ <-done
+ return nil
 })
 ```
 
@@ -1562,20 +1568,20 @@ e.GET("/events", func(c echo.Context) error {
 type CustomRenderer struct{}
 
 func (cr *CustomRenderer) Render(w http.ResponseWriter, name string,
-	data interface{}, c echo.Context) error {
+ data interface{}, c echo.Context) error {
 
-	// Renderizar customizado
-	w.Header().Set("Content-Type", "application/custom")
-	w.Write([]byte("Custom: " + name))
+ // Renderizar customizado
+ w.Header().Set("Content-Type", "application/custom")
+ w.Write([]byte("Custom: " + name))
 
-	return nil
+ return nil
 }
 
 e := echo.New()
 e.Renderer = &CustomRenderer{}
 
 e.GET("/custom", func(c echo.Context) error {
-	return c.Render(http.StatusOK, "test", nil)
+ return c.Render(http.StatusOK, "test", nil)
 })
 ```
 
@@ -1589,39 +1595,39 @@ e.GET("/custom", func(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type Data struct {
-	Message string `json:"message" xml:"message"`
+ Message string `json:"message" xml:"message"`
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/data", func(c echo.Context) error {
-		data := Data{Message: "Hello"}
+ e.GET("/data", func(c echo.Context) error {
+  data := Data{Message: "Hello"}
 
-		// Content negotiation automática
-		return c.JSON(http.StatusOK, data)
-		// Responde con JSON si el client lo solicita
-	})
+  // Content negotiation automática
+  return c.JSON(http.StatusOK, data)
+  // Responde con JSON si el client lo solicita
+ })
 
-	// Manual content negotiation
-	e.GET("/flexible", func(c echo.Context) error {
-		data := Data{Message: "Hello"}
+ // Manual content negotiation
+ e.GET("/flexible", func(c echo.Context) error {
+  data := Data{Message: "Hello"}
 
-		accept := c.Request().Header.Get("Accept")
+  accept := c.Request().Header.Get("Accept")
 
-		if accept == "application/xml" {
-			return c.XML(http.StatusOK, data)
-		}
+  if accept == "application/xml" {
+   return c.XML(http.StatusOK, data)
+  }
 
-		return c.JSON(http.StatusOK, data)
-	})
+  return c.JSON(http.StatusOK, data)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1631,28 +1637,28 @@ func main() {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Gzip compression
-	e.Use(middleware.Gzip())
+ // 1. Gzip compression
+ e.Use(middleware.Gzip())
 
-	// 2. Con configuración
-	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Level: 5, // 1-9, por defecto 6
-	}))
+ // 2. Con configuración
+ e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+  Level: 5, // 1-9, por defecto 6
+ }))
 
-	e.GET("/data", func(c echo.Context) error {
-		return c.JSON(200, map[string]string{
-			"data": "Será comprimido automáticamente",
-		})
-	})
+ e.GET("/data", func(c echo.Context) error {
+  return c.JSON(200, map[string]string{
+   "data": "Será comprimido automáticamente",
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 // Test:
@@ -1665,11 +1671,11 @@ func main() {
 e := echo.New()
 
 e.GET("/video", func(c echo.Context) error {
-	// HTTP 206 Partial Content
-	// Útil para descargas de archivos grandes
+ // HTTP 206 Partial Content
+ // Útil para descargas de archivos grandes
 
-	return c.File("video.mp4")
-	// Echo maneja Range requests automáticamente
+ return c.File("video.mp4")
+ // Echo maneja Range requests automáticamente
 })
 ```
 
@@ -1681,23 +1687,23 @@ import "crypto/md5"
 e := echo.New()
 
 e.GET("/data", func(c echo.Context) error {
-	data := "Este es el contenido"
+ data := "Este es el contenido"
 
-	// 1. Generar ETag
-	hash := md5.Sum([]byte(data))
-	etag := fmt.Sprintf("%x", hash)
+ // 1. Generar ETag
+ hash := md5.Sum([]byte(data))
+ etag := fmt.Sprintf("%x", hash)
 
-	// Comparar con cliente
-	if c.Request().Header.Get("If-None-Match") == etag {
-		return c.NoContent(http.StatusNotModified)
-	}
+ // Comparar con cliente
+ if c.Request().Header.Get("If-None-Match") == etag {
+  return c.NoContent(http.StatusNotModified)
+ }
 
-	// 2. Establecer headers de cache
-	c.Response().Header().Set("ETag", etag)
-	c.Response().Header().Set("Cache-Control", "public, max-age=3600")
-	c.Response().Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+ // 2. Establecer headers de cache
+ c.Response().Header().Set("ETag", etag)
+ c.Response().Header().Set("Cache-Control", "public, max-age=3600")
+ c.Response().Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
 
-	return c.String(http.StatusOK, data)
+ return c.String(http.StatusOK, data)
 })
 ```
 
@@ -1707,48 +1713,48 @@ e.GET("/data", func(c echo.Context) error {
 package main
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
-	"log"
+ "github.com/gorilla/websocket"
+ "github.com/labstack/echo/v4"
+ "log"
 )
 
 var (
-	upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
+ upgrader = websocket.Upgrader{
+  CheckOrigin: func(r *http.Request) bool {
+   return true
+  },
+ }
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/ws", func(c echo.Context) error {
-		ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-		if err != nil {
-			return err
-		}
-		defer ws.Close()
+ e.GET("/ws", func(c echo.Context) error {
+  ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+  if err != nil {
+   return err
+  }
+  defer ws.Close()
 
-		// Echo loop
-		for {
-			var msg string
-			if err := ws.ReadMessage(&msg); err != nil {
-				log.Println(err)
-				break
-			}
+  // Echo loop
+  for {
+   var msg string
+   if err := ws.ReadMessage(&msg); err != nil {
+    log.Println(err)
+    break
+   }
 
-			if err := ws.WriteMessage(websocket.TextMessage,
-				[]byte("Echo: "+msg)); err != nil {
-				log.Println(err)
-				break
-			}
-		}
+   if err := ws.WriteMessage(websocket.TextMessage,
+    []byte("Echo: "+msg)); err != nil {
+    log.Println(err)
+    break
+   }
+  }
 
-		return nil
-	})
+  return nil
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 // Client test
@@ -1767,22 +1773,22 @@ func main() {
 e := echo.New()
 
 e.GET("/events", func(c echo.Context) error {
-	// Headers de SSE
-	c.Response().Header().Set("Content-Type", "text/event-stream")
-	c.Response().Header().Set("Cache-Control", "no-cache")
-	c.Response().Header().Set("Connection", "keep-alive")
-	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+ // Headers de SSE
+ c.Response().Header().Set("Content-Type", "text/event-stream")
+ c.Response().Header().Set("Cache-Control", "no-cache")
+ c.Response().Header().Set("Connection", "keep-alive")
+ c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 
-	// Stream de eventos
-	for i := 0; i < 10; i++ {
-		msg := fmt.Sprintf("data: Evento %d\n\n", i)
-		c.Response().Write([]byte(msg))
-		c.Response().Flush()
+ // Stream de eventos
+ for i := 0; i < 10; i++ {
+  msg := fmt.Sprintf("data: Evento %d\n\n", i)
+  c.Response().Write([]byte(msg))
+  c.Response().Flush()
 
-		time.Sleep(1 * time.Second)
-	}
+  time.Sleep(1 * time.Second)
+ }
 
-	return nil
+ return nil
 })
 ```
 
@@ -1796,60 +1802,60 @@ e.GET("/events", func(c echo.Context) error {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"log"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "log"
+ "net/http"
 )
 
 type CustomError struct {
-	Code    int
-	Message string
-	Details interface{}
+ Code    int
+ Message string
+ Details interface{}
 }
 
 func (ce *CustomError) Error() string {
-	return ce.Message
+ return ce.Message
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// 1. Error handler global
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		code := http.StatusInternalServerError
-		message := "Error interno del servidor"
+ // 1. Error handler global
+ e.HTTPErrorHandler = func(err error, c echo.Context) {
+  code := http.StatusInternalServerError
+  message := "Error interno del servidor"
 
-		if he, ok := err.(*echo.HTTPError); ok {
-			code = he.Code
-			message = he.Message.(string)
-		}
+  if he, ok := err.(*echo.HTTPError); ok {
+   code = he.Code
+   message = he.Message.(string)
+  }
 
-		if ce, ok := err.(*CustomError); ok {
-			code = ce.Code
-			message = ce.Message
-		}
+  if ce, ok := err.(*CustomError); ok {
+   code = ce.Code
+   message = ce.Message
+  }
 
-		c.JSON(code, map[string]interface{}{
-			"error":   message,
-			"status":  code,
-		})
-	}
+  c.JSON(code, map[string]interface{}{
+   "error":   message,
+   "status":  code,
+  })
+ }
 
-	// 2. Lanzar errores
-	e.GET("/error", func(c echo.Context) error {
-		return &CustomError{
-			Code:    http.StatusNotFound,
-			Message: "Usuario no encontrado",
-			Details: map[string]string{"id": "123"},
-		}
-	})
+ // 2. Lanzar errores
+ e.GET("/error", func(c echo.Context) error {
+  return &CustomError{
+   Code:    http.StatusNotFound,
+   Message: "Usuario no encontrado",
+   Details: map[string]string{"id": "123"},
+  }
+ })
 
-	// 3. Echo built-in errors
-	e.GET("/notfound", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusNotFound, "Recurso no encontrado")
-	})
+ // 3. Echo built-in errors
+ e.GET("/notfound", func(c echo.Context) error {
+  return echo.NewHTTPError(http.StatusNotFound, "Recurso no encontrado")
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -1857,39 +1863,39 @@ func main() {
 
 ```go
 func customHTTPErrorHandler(err error, c echo.Context) {
-	code := http.StatusInternalServerError
-	message := "Error interno del servidor"
-	var details interface{}
+ code := http.StatusInternalServerError
+ message := "Error interno del servidor"
+ var details interface{}
 
-	// Tipo de error
-	if he, ok := err.(*echo.HTTPError); ok {
-		code = he.Code
-		if m, ok := he.Message.(string); ok {
-			message = m
-		}
-	} else if _, ok := err.(*json.SyntaxError); ok {
-		code = http.StatusBadRequest
-		message = "JSON inválido"
-	} else if _, ok := err.(*strconv.NumError); ok {
-		code = http.StatusBadRequest
-		message = "Número inválido"
-	} else {
-		log.Printf("Error desconocido: %v", err)
-	}
+ // Tipo de error
+ if he, ok := err.(*echo.HTTPError); ok {
+  code = he.Code
+  if m, ok := he.Message.(string); ok {
+   message = m
+  }
+ } else if _, ok := err.(*json.SyntaxError); ok {
+  code = http.StatusBadRequest
+  message = "JSON inválido"
+ } else if _, ok := err.(*strconv.NumError); ok {
+  code = http.StatusBadRequest
+  message = "Número inválido"
+ } else {
+  log.Printf("Error desconocido: %v", err)
+ }
 
-	// Respuesta de error estructurada
-	resp := map[string]interface{}{
-		"status":  code,
-		"error":   message,
-		"details": details,
-	}
+ // Respuesta de error estructurada
+ resp := map[string]interface{}{
+  "status":  code,
+  "error":   message,
+  "details": details,
+ }
 
-	// En desarrollo, incluir stack trace
-	if os.Getenv("ENV") == "development" {
-		resp["stack"] = fmt.Sprintf("%+v", err)
-	}
+ // En desarrollo, incluir stack trace
+ if os.Getenv("ENV") == "development" {
+  resp["stack"] = fmt.Sprintf("%+v", err)
+ }
 
-	c.JSON(code, resp)
+ c.JSON(code, resp)
 }
 
 e := echo.New()
@@ -1902,42 +1908,42 @@ e.HTTPErrorHandler = customHTTPErrorHandler
 package main
 
 import (
-	"context"
-	"github.com/labstack/echo/v4"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+ "context"
+ "github.com/labstack/echo/v4"
+ "os"
+ "os/signal"
+ "syscall"
+ "time"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "OK")
+ })
 
-	// Iniciar servidor en goroutine
-	go func() {
-		if err := e.Start(":1323"); err != nil {
-			e.Logger.Info("Servidor cerrado")
-		}
-	}()
+ // Iniciar servidor en goroutine
+ go func() {
+  if err := e.Start(":1323"); err != nil {
+   e.Logger.Info("Servidor cerrado")
+  }
+ }()
 
-	// Esperar signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+ // Esperar signal
+ quit := make(chan os.Signal, 1)
+ signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+ <-quit
 
-	// Graceful shutdown con timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+ // Graceful shutdown con timeout
+ ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+ defer cancel()
 
-	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
-	}
+ if err := e.Shutdown(ctx); err != nil {
+  e.Logger.Fatal(err)
+ }
 
-	println("Servidor cerrado correctamente")
+ println("Servidor cerrado correctamente")
 }
 ```
 
@@ -1971,40 +1977,40 @@ e.Start(":1323")
 package main
 
 import (
-	"crypto/tls"
-	"github.com/labstack/echo/v4"
+ "crypto/tls"
+ "github.com/labstack/echo/v4"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "HTTPS OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "HTTPS OK")
+ })
 
-	// 1. StartTLS con archivos
-	e.Logger.Fatal(e.StartTLS(
-		":443",
-		"path/to/cert.pem",
-		"path/to/key.pem",
-	))
+ // 1. StartTLS con archivos
+ e.Logger.Fatal(e.StartTLS(
+  ":443",
+  "path/to/cert.pem",
+  "path/to/key.pem",
+ ))
 
-	// 2. Con configuración TLS
-	tlsConfig := &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
-	}
+ // 2. Con configuración TLS
+ tlsConfig := &tls.Config{
+  MinVersion:               tls.VersionTLS12,
+  PreferServerCipherSuites: true,
+  CipherSuites: []uint16{
+   tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+   tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+  },
+ }
 
-	e.Server.TLSConfig = tlsConfig
-	e.Logger.Fatal(e.StartTLS(
-		":443",
-		"cert.pem",
-		"key.pem",
-	))
+ e.Server.TLSConfig = tlsConfig
+ e.Logger.Fatal(e.StartTLS(
+  ":443",
+  "cert.pem",
+  "key.pem",
+ ))
 }
 ```
 
@@ -2032,31 +2038,31 @@ e.Logger.Fatal(e.StartTLS(":443", "cert.pem", "key.pem"))
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+ "github.com/labstack/echo/v4"
+ "github.com/stretchr/testify/assert"
+ "net/http"
+ "net/http/httptest"
+ "testing"
 )
 
 func TestGET(t *testing.T) {
-	// Setup
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	w := httptest.NewRecorder()
-	c := e.NewContext(req, w)
+ // Setup
+ e := echo.New()
+ req := httptest.NewRequest(http.MethodGet, "/", nil)
+ w := httptest.NewRecorder()
+ c := e.NewContext(req, w)
 
-	// Define handler
-	handler := func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello")
-	}
+ // Define handler
+ handler := func(c echo.Context) error {
+  return c.String(http.StatusOK, "Hello")
+ }
 
-	// Ejecutar
-	handler(c)
+ // Ejecutar
+ handler(c)
 
-	// Assert
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, "Hello", w.Body.String())
+ // Assert
+ assert.Equal(t, http.StatusOK, w.Code)
+ assert.Equal(t, "Hello", w.Body.String())
 }
 ```
 
@@ -2066,52 +2072,52 @@ func TestGET(t *testing.T) {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
-	"net/http/httptest"
+ "github.com/labstack/echo/v4"
+ "net/http"
+ "net/http/httptest"
 )
 
 func setupTestServer() *echo.Echo {
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "Home")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "Home")
+ })
 
-	e.GET("/users/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		return c.JSON(200, map[string]string{
-			"id": id,
-		})
-	})
+ e.GET("/users/:id", func(c echo.Context) error {
+  id := c.Param("id")
+  return c.JSON(200, map[string]string{
+   "id": id,
+  })
+ })
 
-	e.POST("/users", func(c echo.Context) error {
-		return c.JSON(201, map[string]string{
-			"status": "created",
-		})
-	})
+ e.POST("/users", func(c echo.Context) error {
+  return c.JSON(201, map[string]string{
+   "status": "created",
+  })
+ })
 
-	return e
+ return e
 }
 
 func makeRequest(e *echo.Echo, method, path string) *http.Response {
-	req := httptest.NewRequest(method, path, nil)
-	w := httptest.NewRecorder()
-	e.ServeHTTP(w, req)
-	return w.Result()
+ req := httptest.NewRequest(method, path, nil)
+ w := httptest.NewRecorder()
+ e.ServeHTTP(w, req)
+ return w.Result()
 }
 
 // Uso en tests
 func TestRouter(t *testing.T) {
-	e := setupTestServer()
+ e := setupTestServer()
 
-	// Test GET /
-	resp := makeRequest(e, "GET", "/")
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+ // Test GET /
+ resp := makeRequest(e, "GET", "/")
+ assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	// Test GET /users/:id
-	resp = makeRequest(e, "GET", "/users/123")
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+ // Test GET /users/:id
+ resp = makeRequest(e, "GET", "/users/123")
+ assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 ```
 
@@ -2121,49 +2127,49 @@ func TestRouter(t *testing.T) {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/mock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+ "github.com/labstack/echo/v4"
+ "github.com/stretchr/testify/mock"
+ "net/http"
+ "net/http/httptest"
+ "testing"
 )
 
 // Mock de servicio
 type MockUserService struct {
-	mock.Mock
+ mock.Mock
 }
 
 func (m *MockUserService) GetUser(id string) (map[string]string, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(map[string]string), args.Error(1)
+ args := m.Called(id)
+ if args.Get(0) == nil {
+  return nil, args.Error(1)
+ }
+ return args.Get(0).(map[string]string), args.Error(1)
 }
 
 func TestUserHandler(t *testing.T) {
-	// Crear mock
-	mockService := new(MockUserService)
-	mockService.On("GetUser", "123").Return(
-		map[string]string{"id": "123", "name": "John"},
-		nil,
-	)
+ // Crear mock
+ mockService := new(MockUserService)
+ mockService.On("GetUser", "123").Return(
+  map[string]string{"id": "123", "name": "John"},
+  nil,
+ )
 
-	// Setup handler
-	e := echo.New()
-	e.GET("/users/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		user, _ := mockService.GetUser(id)
-		return c.JSON(http.StatusOK, user)
-	})
+ // Setup handler
+ e := echo.New()
+ e.GET("/users/:id", func(c echo.Context) error {
+  id := c.Param("id")
+  user, _ := mockService.GetUser(id)
+  return c.JSON(http.StatusOK, user)
+ })
 
-	// Test
-	req := httptest.NewRequest(http.MethodGet, "/users/123", nil)
-	w := httptest.NewRecorder()
-	e.ServeHTTP(w, req)
+ // Test
+ req := httptest.NewRequest(http.MethodGet, "/users/123", nil)
+ w := httptest.NewRecorder()
+ e.ServeHTTP(w, req)
 
-	// Assert
-	mockService.AssertCalled(t, "GetUser", "123")
+ // Assert
+ mockService.AssertCalled(t, "GetUser", "123")
 }
 ```
 
@@ -2171,54 +2177,54 @@ func TestUserHandler(t *testing.T) {
 
 ```go
 func TestHandlers(t *testing.T) {
-	tests := []struct {
-		name           string
-		method         string
-		path           string
-		expectedStatus int
-		expectedBody   string
-	}{
-		{
-			name:           "GET /",
-			method:         http.MethodGet,
-			path:           "/",
-			expectedStatus: http.StatusOK,
-			expectedBody:   "Home",
-		},
-		{
-			name:           "GET /users/123",
-			method:         http.MethodGet,
-			path:           "/users/123",
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name:           "POST /users",
-			method:         http.MethodPost,
-			path:           "/users",
-			expectedStatus: http.StatusCreated,
-		},
-		{
-			name:           "GET /notfound",
-			method:         http.MethodGet,
-			path:           "/notfound",
-			expectedStatus: http.StatusNotFound,
-		},
-	}
+ tests := []struct {
+  name           string
+  method         string
+  path           string
+  expectedStatus int
+  expectedBody   string
+ }{
+  {
+   name:           "GET /",
+   method:         http.MethodGet,
+   path:           "/",
+   expectedStatus: http.StatusOK,
+   expectedBody:   "Home",
+  },
+  {
+   name:           "GET /users/123",
+   method:         http.MethodGet,
+   path:           "/users/123",
+   expectedStatus: http.StatusOK,
+  },
+  {
+   name:           "POST /users",
+   method:         http.MethodPost,
+   path:           "/users",
+   expectedStatus: http.StatusCreated,
+  },
+  {
+   name:           "GET /notfound",
+   method:         http.MethodGet,
+   path:           "/notfound",
+   expectedStatus: http.StatusNotFound,
+  },
+ }
 
-	e := setupTestServer()
+ e := setupTestServer()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, tt.path, nil)
-			w := httptest.NewRecorder()
-			e.ServeHTTP(w, req)
+ for _, tt := range tests {
+  t.Run(tt.name, func(t *testing.T) {
+   req := httptest.NewRequest(tt.method, tt.path, nil)
+   w := httptest.NewRecorder()
+   e.ServeHTTP(w, req)
 
-			assert.Equal(t, tt.expectedStatus, w.Code)
-			if tt.expectedBody != "" {
-				assert.Contains(t, w.Body.String(), tt.expectedBody)
-			}
-		})
-	}
+   assert.Equal(t, tt.expectedStatus, w.Code)
+   if tt.expectedBody != "" {
+    assert.Contains(t, w.Body.String(), tt.expectedBody)
+   }
+  })
+ }
 }
 ```
 
@@ -2228,54 +2234,54 @@ func TestHandlers(t *testing.T) {
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+ "bytes"
+ "encoding/json"
+ "github.com/labstack/echo/v4"
+ "github.com/stretchr/testify/assert"
+ "net/http"
+ "net/http/httptest"
+ "testing"
 )
 
 func createTestApp() *echo.Echo {
-	e := echo.New()
+ e := echo.New()
 
-	e.POST("/users", func(c echo.Context) error {
-		var user struct {
-			Name string `json:"name"`
-		}
-		if err := c.Bind(&user); err != nil {
-			return err
-		}
-		return c.JSON(201, user)
-	})
+ e.POST("/users", func(c echo.Context) error {
+  var user struct {
+   Name string `json:"name"`
+  }
+  if err := c.Bind(&user); err != nil {
+   return err
+  }
+  return c.JSON(201, user)
+ })
 
-	return e
+ return e
 }
 
 func TestCreateUser(t *testing.T) {
-	e := createTestApp()
+ e := createTestApp()
 
-	// Crear request con JSON
-	body := []byte(`{"name":"John"}`)
-	req := httptest.NewRequest(
-		http.MethodPost,
-		"/users",
-		bytes.NewReader(body),
-	)
-	req.Header.Set("Content-Type", "application/json")
+ // Crear request con JSON
+ body := []byte(`{"name":"John"}`)
+ req := httptest.NewRequest(
+  http.MethodPost,
+  "/users",
+  bytes.NewReader(body),
+ )
+ req.Header.Set("Content-Type", "application/json")
 
-	// Ejecutar
-	w := httptest.NewRecorder()
-	e.ServeHTTP(w, req)
+ // Ejecutar
+ w := httptest.NewRecorder()
+ e.ServeHTTP(w, req)
 
-	// Assert
-	assert.Equal(t, http.StatusCreated, w.Code)
+ // Assert
+ assert.Equal(t, http.StatusCreated, w.Code)
 
-	// Validar respuesta
-	var resp map[string]string
-	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, "John", resp["name"])
+ // Validar respuesta
+ var resp map[string]string
+ json.Unmarshal(w.Body.Bytes(), &resp)
+ assert.Equal(t, "John", resp["name"])
 }
 ```
 
@@ -2326,33 +2332,33 @@ Ventajas de Echo:
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	_ "net/http/pprof"
-	"runtime"
-	"runtime/pprof"
-	"os"
+ "github.com/labstack/echo/v4"
+ _ "net/http/pprof"
+ "runtime"
+ "runtime/pprof"
+ "os"
 )
 
 func main() {
-	// CPU profiling
-	cpuProfile, _ := os.Create("cpu.prof")
-	defer cpuProfile.Close()
-	pprof.StartCPUProfile(cpuProfile)
-	defer pprof.StopCPUProfile()
+ // CPU profiling
+ cpuProfile, _ := os.Create("cpu.prof")
+ defer cpuProfile.Close()
+ pprof.StartCPUProfile(cpuProfile)
+ defer pprof.StopCPUProfile()
 
-	e := echo.New()
+ e := echo.New()
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "OK")
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 
-	// Memory profiling
-	memProfile, _ := os.Create("mem.prof")
-	defer memProfile.Close()
-	runtime.GC()
-	pprof.WriteHeapProfile(memProfile)
+ // Memory profiling
+ memProfile, _ := os.Create("mem.prof")
+ defer memProfile.Close()
+ runtime.GC()
+ pprof.WriteHeapProfile(memProfile)
 }
 
 // Análisis:
@@ -2368,49 +2374,49 @@ func main() {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type HealthStatus struct {
-	Status string `json:"status"`
-	Uptime int64  `json:"uptime"`
+ Status string `json:"status"`
+ Uptime int64  `json:"uptime"`
 }
 
 func main() {
-	e := echo.New()
-	startTime := time.Now()
+ e := echo.New()
+ startTime := time.Now()
 
-	// Health check
-	e.GET("/health", func(c echo.Context) error {
-		uptime := time.Since(startTime).Milliseconds()
+ // Health check
+ e.GET("/health", func(c echo.Context) error {
+  uptime := time.Since(startTime).Milliseconds()
 
-		return c.JSON(http.StatusOK, HealthStatus{
-			Status: "healthy",
-			Uptime: uptime,
-		})
-	})
+  return c.JSON(http.StatusOK, HealthStatus{
+   Status: "healthy",
+   Uptime: uptime,
+  })
+ })
 
-	// Readiness check (BD, etc.)
-	e.GET("/ready", func(c echo.Context) error {
-		// Verificar dependencias
-		if !checkDatabase() {
-			return c.JSON(http.StatusServiceUnavailable, map[string]string{
-				"status": "not ready",
-			})
-		}
+ // Readiness check (BD, etc.)
+ e.GET("/ready", func(c echo.Context) error {
+  // Verificar dependencias
+  if !checkDatabase() {
+   return c.JSON(http.StatusServiceUnavailable, map[string]string{
+    "status": "not ready",
+   })
+  }
 
-		return c.JSON(http.StatusOK, map[string]string{
-			"status": "ready",
-		})
-	})
+  return c.JSON(http.StatusOK, map[string]string{
+   "status": "ready",
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 func checkDatabase() bool {
-	// Implementar verificación real
-	return true
+ // Implementar verificación real
+ return true
 }
 ```
 
@@ -2420,69 +2426,69 @@ func checkDatabase() bool {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "github.com/prometheus/client_golang/prometheus"
+ "github.com/prometheus/client_golang/prometheus/promhttp"
+ "net/http"
 )
 
 var (
-	requestCount = prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "http_requests_total",
-			Help: "Total de requests HTTP",
-		},
-		[]string{"method", "path", "status"},
-	)
+ requestCount = prometheus.NewCounterVec(
+  prometheus.CounterOpts{
+   Name: "http_requests_total",
+   Help: "Total de requests HTTP",
+  },
+  []string{"method", "path", "status"},
+ )
 
-	requestDuration = prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name: "http_request_duration_seconds",
-			Help: "Duración de requests en segundos",
-		},
-		[]string{"method", "path"},
-	)
+ requestDuration = prometheus.NewHistogramVec(
+  prometheus.HistogramOpts{
+   Name: "http_request_duration_seconds",
+   Help: "Duración de requests en segundos",
+  },
+  []string{"method", "path"},
+ )
 )
 
 func init() {
-	prometheus.MustRegister(requestCount)
-	prometheus.MustRegister(requestDuration)
+ prometheus.MustRegister(requestCount)
+ prometheus.MustRegister(requestDuration)
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Middleware de métricas
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			start := time.Now()
+ // Middleware de métricas
+ e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+  return func(c echo.Context) error {
+   start := time.Now()
 
-			err := next(c)
+   err := next(c)
 
-			duration := time.Since(start).Seconds()
-			requestCount.WithLabelValues(
-				c.Request().Method,
-				c.Request().URL.Path,
-				string(rune(c.Response().Status)),
-			).Inc()
+   duration := time.Since(start).Seconds()
+   requestCount.WithLabelValues(
+    c.Request().Method,
+    c.Request().URL.Path,
+    string(rune(c.Response().Status)),
+   ).Inc()
 
-			requestDuration.WithLabelValues(
-				c.Request().Method,
-				c.Request().URL.Path,
-			).Observe(duration)
+   requestDuration.WithLabelValues(
+    c.Request().Method,
+    c.Request().URL.Path,
+   ).Observe(duration)
 
-			return err
-		}
-	})
+   return err
+  }
+ })
 
-	// Endpoint de métricas
-	e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
+ // Endpoint de métricas
+ e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(http.StatusOK, "OK")
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -2492,40 +2498,40 @@ func main() {
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
-	"os"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
+ "github.com/labstack/gommon/log"
+ "os"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Logger
-	logFile, err := os.OpenFile("app.log",
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
-		0666,
-	)
-	if err != nil {
-		panic(err)
-	}
-	defer logFile.Close()
+ // Logger
+ logFile, err := os.OpenFile("app.log",
+  os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+  0666,
+ )
+ if err != nil {
+  panic(err)
+ }
+ defer logFile.Close()
 
-	e.Logger.SetOutput(logFile)
-	e.Logger.SetLevel(log.INFO)
+ e.Logger.SetOutput(logFile)
+ e.Logger.SetLevel(log.INFO)
 
-	// Logger middleware
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `${time_rfc3339} | ${status} | ${method} ${path} ` +
-			`| ${latency_human} | ${error}` + "\n",
-		Output: logFile,
-	}))
+ // Logger middleware
+ e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+  Format: `${time_rfc3339} | ${status} | ${method} ${path} ` +
+   `| ${latency_human} | ${error}` + "\n",
+  Output: logFile,
+ }))
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "OK")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(200, "OK")
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -2574,7 +2580,7 @@ services:
       - PORT=1323
     depends_on:
       - db
-  
+
   db:
     image: postgres:15
     environment:
@@ -2687,6 +2693,7 @@ e.Start(":1323")
 ```
 
 **Resultados:**
+
 - Latency: p99 < 100ms
 - Throughput: 50k RPS sostenido
 - Memory: 250MB
@@ -2726,10 +2733,10 @@ e.Start(":1323")
 // - User-specific messages
 
 var (
-	clients = make(map[*Client]bool)
-	broadcast = make(chan *Message, 256)
-	register = make(chan *Client)
-	unregister = make(chan *Client)
+ clients = make(map[*Client]bool)
+ broadcast = make(chan *Message, 256)
+ register = make(chan *Client)
+ unregister = make(chan *Client)
 )
 
 e.GET("/ws/:user_id", handleWebSocket)
@@ -2748,14 +2755,14 @@ go runHub()
 // Gin
 router := gin.Default()
 router.GET("/users/:id", func(c *gin.Context) {
-	id := c.Param("id")
+ id := c.Param("id")
 })
 
 // Echo (muy similar)
 e := echo.New()
 e.GET("/users/:id", func(c echo.Context) error {
-	id := c.Param("id")
-	return nil
+ id := c.Param("id")
+ return nil
 })
 
 // Key differences:
@@ -2770,17 +2777,17 @@ e.GET("/users/:id", func(c echo.Context) error {
 // Fiber
 app := fiber.New()
 app.Post("/users", func(c *fiber.Ctx) error {
-	var user User
-	c.BodyParser(&user)
-	return c.JSON(user)
+ var user User
+ c.BodyParser(&user)
+ return c.JSON(user)
 })
 
 // Echo
 e := echo.New()
 e.POST("/users", func(c echo.Context) error {
-	user := new(User)
-	c.Bind(user)
-	return c.JSON(200, user)
+ user := new(User)
+ c.Bind(user)
+ return c.JSON(200, user)
 })
 
 // Principales cambios:
@@ -2801,19 +2808,19 @@ db.SetConnMaxLifetime(5 * time.Minute)
 // Problema 2: Memory leak en middleware
 // Solución: Limpiar resources
 func memoryLeakMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		defer func() {
-			// Cleanup
-			c.Set("user", nil)
-		}()
-		return next(c)
-	}
+ return func(c echo.Context) error {
+  defer func() {
+   // Cleanup
+   c.Set("user", nil)
+  }()
+  return next(c)
+ }
 }
 
 // Problema 3: Slow requests
 // Solución: Timeout middleware
 e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-	Timeout: "30s",
+ Timeout: "30s",
 }))
 
 // Problema 4: High CPU usage
@@ -2824,9 +2831,9 @@ import _ "net/http/pprof"
 // Problema 5: CORS errors
 // Solución: Configurar CORS correctamente
 e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	AllowOrigins: []string{"https://example.com"},
-	AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-	AllowHeaders: []string{"Content-Type", "Authorization"},
+ AllowOrigins: []string{"https://example.com"},
+ AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+ AllowHeaders: []string{"Content-Type", "Authorization"},
 }))
 ```
 
@@ -2842,114 +2849,114 @@ e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"net/http"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
+ "net/http"
 )
 
 type Book struct {
-	ID       int    `json:"id"`
-	Title    string `json:"title" validate:"required"`
-	Author   string `json:"author" validate:"required"`
-	Year     int    `json:"year"`
-	Pages    int    `json:"pages"`
+ ID       int    `json:"id"`
+ Title    string `json:"title" validate:"required"`
+ Author   string `json:"author" validate:"required"`
+ Year     int    `json:"year"`
+ Pages    int    `json:"pages"`
 }
 
 var books = []Book{
-	{ID: 1, Title: "Go Programming", Author: "John Doe", Year: 2020, Pages: 500},
-	{ID: 2, Title: "Web Development", Author: "Jane Smith", Year: 2021, Pages: 450},
+ {ID: 1, Title: "Go Programming", Author: "John Doe", Year: 2020, Pages: 500},
+ {ID: 2, Title: "Web Development", Author: "Jane Smith", Year: 2021, Pages: 450},
 }
 
 var nextID = 3
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-	}))
+ // Middleware
+ e.Use(middleware.Logger())
+ e.Use(middleware.Recover())
+ e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+  AllowOrigins: []string{"*"},
+ }))
 
-	// Routes
-	e.GET("/books", getBooks)
-	e.GET("/books/:id", getBook)
-	e.POST("/books", createBook)
-	e.PUT("/books/:id", updateBook)
-	e.DELETE("/books/:id", deleteBook)
+ // Routes
+ e.GET("/books", getBooks)
+ e.GET("/books/:id", getBook)
+ e.POST("/books", createBook)
+ e.PUT("/books/:id", updateBook)
+ e.DELETE("/books/:id", deleteBook)
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 func getBooks(c echo.Context) error {
-	return c.JSON(http.StatusOK, books)
+ return c.JSON(http.StatusOK, books)
 }
 
 func getBook(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+ id, _ := strconv.Atoi(c.Param("id"))
 
-	for _, b := range books {
-		if b.ID == id {
-			return c.JSON(http.StatusOK, b)
-		}
-	}
+ for _, b := range books {
+  if b.ID == id {
+   return c.JSON(http.StatusOK, b)
+  }
+ }
 
-	return c.JSON(http.StatusNotFound, map[string]string{
-		"error": "Libro no encontrado",
-	})
+ return c.JSON(http.StatusNotFound, map[string]string{
+  "error": "Libro no encontrado",
+ })
 }
 
 func createBook(c echo.Context) error {
-	book := new(Book)
+ book := new(Book)
 
-	if err := c.Bind(book); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
+ if err := c.Bind(book); err != nil {
+  return c.JSON(http.StatusBadRequest, err)
+ }
 
-	book.ID = nextID
-	nextID++
-	books = append(books, *book)
+ book.ID = nextID
+ nextID++
+ books = append(books, *book)
 
-	return c.JSON(http.StatusCreated, book)
+ return c.JSON(http.StatusCreated, book)
 }
 
 func updateBook(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-	book := new(Book)
+ id, _ := strconv.Atoi(c.Param("id"))
+ book := new(Book)
 
-	if err := c.Bind(book); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
+ if err := c.Bind(book); err != nil {
+  return c.JSON(http.StatusBadRequest, err)
+ }
 
-	for i, b := range books {
-		if b.ID == id {
-			book.ID = id
-			books[i] = *book
-			return c.JSON(http.StatusOK, book)
-		}
-	}
+ for i, b := range books {
+  if b.ID == id {
+   book.ID = id
+   books[i] = *book
+   return c.JSON(http.StatusOK, book)
+  }
+ }
 
-	return c.JSON(http.StatusNotFound, map[string]string{
-		"error": "Libro no encontrado",
-	})
+ return c.JSON(http.StatusNotFound, map[string]string{
+  "error": "Libro no encontrado",
+ })
 }
 
 func deleteBook(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+ id, _ := strconv.Atoi(c.Param("id"))
 
-	for i, b := range books {
-		if b.ID == id {
-			books = append(books[:i], books[i+1:]...)
-			return c.JSON(http.StatusOK, map[string]string{
-				"message": "Libro eliminado",
-			})
-		}
-	}
+ for i, b := range books {
+  if b.ID == id {
+   books = append(books[:i], books[i+1:]...)
+   return c.JSON(http.StatusOK, map[string]string{
+    "message": "Libro eliminado",
+   })
+  }
+ }
 
-	return c.JSON(http.StatusNotFound, map[string]string{
-		"error": "Libro no encontrado",
-	})
+ return c.JSON(http.StatusNotFound, map[string]string{
+  "error": "Libro no encontrado",
+ })
 }
 ```
 
@@ -2961,109 +2968,109 @@ func deleteBook(c echo.Context) error {
 package main
 
 import (
-	"fmt"
-	"github.com/labstack/echo/v4"
-	"log"
-	"net/http"
-	"time"
+ "fmt"
+ "github.com/labstack/echo/v4"
+ "log"
+ "net/http"
+ "time"
 )
 
 // Middleware de autenticación
 func authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		token := c.Request().Header.Get("Authorization")
+ return func(c echo.Context) error {
+  token := c.Request().Header.Get("Authorization")
 
-		if token == "" {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "Token requerido",
-			})
-		}
+  if token == "" {
+   return c.JSON(http.StatusUnauthorized, map[string]string{
+    "error": "Token requerido",
+   })
+  }
 
-		// Validar token (simplificado)
-		if !isValidToken(token) {
-			return c.JSON(http.StatusUnauthorized, map[string]string{
-				"error": "Token inválido",
-			})
-		}
+  // Validar token (simplificado)
+  if !isValidToken(token) {
+   return c.JSON(http.StatusUnauthorized, map[string]string{
+    "error": "Token inválido",
+   })
+  }
 
-		c.Set("user_id", "123")
-		return next(c)
-	}
+  c.Set("user_id", "123")
+  return next(c)
+ }
 }
 
 // Middleware de logging
 func loggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		start := time.Now()
-		req := c.Request()
+ return func(c echo.Context) error {
+  start := time.Now()
+  req := c.Request()
 
-		err := next(c)
+  err := next(c)
 
-		duration := time.Since(start)
-		log.Printf(
-			"%s | %s %s | %d | %v\n",
-			time.Now().Format("15:04:05"),
-			req.Method,
-			req.URL.Path,
-			c.Response().Status,
-			duration,
-		)
+  duration := time.Since(start)
+  log.Printf(
+   "%s | %s %s | %d | %v\n",
+   time.Now().Format("15:04:05"),
+   req.Method,
+   req.URL.Path,
+   c.Response().Status,
+   duration,
+  )
 
-		return err
-	}
+  return err
+ }
 }
 
 // Middleware de rate limiting
 func rateLimitMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	var count int
-	var resetTime time.Time
+ var count int
+ var resetTime time.Time
 
-	return func(c echo.Context) error {
-		if time.Now().After(resetTime) {
-			count = 0
-			resetTime = time.Now().Add(1 * time.Minute)
-		}
+ return func(c echo.Context) error {
+  if time.Now().After(resetTime) {
+   count = 0
+   resetTime = time.Now().Add(1 * time.Minute)
+  }
 
-		if count >= 100 {
-			return c.JSON(http.StatusTooManyRequests, map[string]string{
-				"error": "Rate limit excedido",
-			})
-		}
+  if count >= 100 {
+   return c.JSON(http.StatusTooManyRequests, map[string]string{
+    "error": "Rate limit excedido",
+   })
+  }
 
-		count++
-		return next(c)
-	}
+  count++
+  return next(c)
+ }
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Aplicar middleware global
-	e.Use(loggingMiddleware)
+ // Aplicar middleware global
+ e.Use(loggingMiddleware)
 
-	// Rutas públicas
-	e.POST("/login", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"token": "abc123",
-		})
-	})
+ // Rutas públicas
+ e.POST("/login", func(c echo.Context) error {
+  return c.JSON(http.StatusOK, map[string]string{
+   "token": "abc123",
+  })
+ })
 
-	// Rutas protegidas
-	api := e.Group("/api")
-	api.Use(authMiddleware)
+ // Rutas protegidas
+ api := e.Group("/api")
+ api.Use(authMiddleware)
 
-	api.GET("/profile", func(c echo.Context) error {
-		userID := c.Get("user_id")
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"user_id": userID,
-		})
-	})
+ api.GET("/profile", func(c echo.Context) error {
+  userID := c.Get("user_id")
+  return c.JSON(http.StatusOK, map[string]interface{}{
+   "user_id": userID,
+  })
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 
 func isValidToken(token string) bool {
-	return token == "Bearer abc123"
+ return token == "Bearer abc123"
 }
 ```
 
@@ -3075,97 +3082,97 @@ func isValidToken(token string) bool {
 package main
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"net/http"
+ "github.com/go-playground/validator/v10"
+ "github.com/labstack/echo/v4"
+ "net/http"
 )
 
 type User struct {
-	Name     string `json:"name" validate:"required,min=3,max=50"`
-	Email    string `json:"email" validate:"required,email"`
-	Age      int    `json:"age" validate:"required,min=18,max=120"`
-	Phone    string `json:"phone" validate:"omitempty,len=10"`
-	Password string `json:"password" validate:"required,min=8"`
+ Name     string `json:"name" validate:"required,min=3,max=50"`
+ Email    string `json:"email" validate:"required,email"`
+ Age      int    `json:"age" validate:"required,min=18,max=120"`
+ Phone    string `json:"phone" validate:"omitempty,len=10"`
+ Password string `json:"password" validate:"required,min=8"`
 }
 
 type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
+ Field   string `json:"field"`
+ Message string `json:"message"`
 }
 
 type ErrorResponse struct {
-	Status string            `json:"status"`
-	Errors []ValidationError `json:"errors"`
+ Status string            `json:"status"`
+ Errors []ValidationError `json:"errors"`
 }
 
 type CustomValidator struct {
-	validator *validator.Validate
+ validator *validator.Validate
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
+ return cv.validator.Struct(i)
 }
 
 func formatValidationErrors(err error) []ValidationError {
-	var errors []ValidationError
+ var errors []ValidationError
 
-	if validationErrors, ok := err.(validator.ValidationErrors); ok {
-		for _, fieldError := range validationErrors {
-			errors = append(errors, ValidationError{
-				Field:   fieldError.Field(),
-				Message: getErrorMessage(fieldError),
-			})
-		}
-	}
+ if validationErrors, ok := err.(validator.ValidationErrors); ok {
+  for _, fieldError := range validationErrors {
+   errors = append(errors, ValidationError{
+    Field:   fieldError.Field(),
+    Message: getErrorMessage(fieldError),
+   })
+  }
+ }
 
-	return errors
+ return errors
 }
 
 func getErrorMessage(fe validator.FieldError) string {
-	switch fe.ActualTag() {
-	case "required":
-		return fe.Field() + " es requerido"
-	case "email":
-		return "Email inválido"
-	case "min":
-		return fe.Field() + " debe tener al menos " + fe.Param() + " caracteres"
-	case "max":
-		return fe.Field() + " no puede exceder " + fe.Param() + " caracteres"
-	case "len":
-		return fe.Field() + " debe tener exactamente " + fe.Param() + " caracteres"
-	default:
-		return "Validación inválida en " + fe.Field()
-	}
+ switch fe.ActualTag() {
+ case "required":
+  return fe.Field() + " es requerido"
+ case "email":
+  return "Email inválido"
+ case "min":
+  return fe.Field() + " debe tener al menos " + fe.Param() + " caracteres"
+ case "max":
+  return fe.Field() + " no puede exceder " + fe.Param() + " caracteres"
+ case "len":
+  return fe.Field() + " debe tener exactamente " + fe.Param() + " caracteres"
+ default:
+  return "Validación inválida en " + fe.Field()
+ }
 }
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	e.Validator = &CustomValidator{
-		validator: validator.New(),
-	}
+ e.Validator = &CustomValidator{
+  validator: validator.New(),
+ }
 
-	e.POST("/users", func(c echo.Context) error {
-		user := new(User)
+ e.POST("/users", func(c echo.Context) error {
+  user := new(User)
 
-		if err := c.Bind(user); err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{
-				"error": "JSON inválido",
-			})
-		}
+  if err := c.Bind(user); err != nil {
+   return c.JSON(http.StatusBadRequest, map[string]string{
+    "error": "JSON inválido",
+   })
+  }
 
-		if err := c.Validate(user); err != nil {
-			errors := formatValidationErrors(err)
-			return c.JSON(http.StatusBadRequest, ErrorResponse{
-				Status: "error",
-				Errors: errors,
-			})
-		}
+  if err := c.Validate(user); err != nil {
+   errors := formatValidationErrors(err)
+   return c.JSON(http.StatusBadRequest, ErrorResponse{
+    Status: "error",
+    Errors: errors,
+   })
+  }
 
-		return c.JSON(http.StatusCreated, user)
-	})
+  return c.JSON(http.StatusCreated, user)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -3177,126 +3184,126 @@ func main() {
 package main
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
-	"log"
-	"net/http"
+ "github.com/gorilla/websocket"
+ "github.com/labstack/echo/v4"
+ "log"
+ "net/http"
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+ CheckOrigin: func(r *http.Request) bool {
+  return true
+ },
 }
 
 type Hub struct {
-	clients    map[*Client]bool
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
+ clients    map[*Client]bool
+ broadcast  chan []byte
+ register   chan *Client
+ unregister chan *Client
 }
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+ hub  *Hub
+ conn *websocket.Conn
+ send chan []byte
 }
 
 func newHub() *Hub {
-	return &Hub{
-		clients:    make(map[*Client]bool),
-		broadcast:  make(chan []byte, 256),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-	}
+ return &Hub{
+  clients:    make(map[*Client]bool),
+  broadcast:  make(chan []byte, 256),
+  register:   make(chan *Client),
+  unregister: make(chan *Client),
+ }
 }
 
 func (h *Hub) run() {
-	for {
-		select {
-		case client := <-h.register:
-			h.clients[client] = true
-			log.Printf("Cliente conectado. Total: %d\n", len(h.clients))
+ for {
+  select {
+  case client := <-h.register:
+   h.clients[client] = true
+   log.Printf("Cliente conectado. Total: %d\n", len(h.clients))
 
-		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
-				log.Printf("Cliente desconectado. Total: %d\n", len(h.clients))
-			}
+  case client := <-h.unregister:
+   if _, ok := h.clients[client]; ok {
+    delete(h.clients, client)
+    close(client.send)
+    log.Printf("Cliente desconectado. Total: %d\n", len(h.clients))
+   }
 
-		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
-			}
-		}
-	}
+  case message := <-h.broadcast:
+   for client := range h.clients {
+    select {
+    case client.send <- message:
+    default:
+     close(client.send)
+     delete(h.clients, client)
+    }
+   }
+  }
+ }
 }
 
 func (c *Client) readPump() {
-	defer func() {
-		c.hub.unregister <- c
-		c.conn.Close()
-	}()
+ defer func() {
+  c.hub.unregister <- c
+  c.conn.Close()
+ }()
 
-	for {
-		_, message, err := c.conn.ReadMessage()
-		if err != nil {
-			break
-		}
+ for {
+  _, message, err := c.conn.ReadMessage()
+  if err != nil {
+   break
+  }
 
-		c.hub.broadcast <- message
-	}
+  c.hub.broadcast <- message
+ }
 }
 
 func (c *Client) writePump() {
-	for {
-		select {
-		case message, ok := <-c.send:
-			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
+ for {
+  select {
+  case message, ok := <-c.send:
+   if !ok {
+    c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+    return
+   }
 
-			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
-				return
-			}
-		}
-	}
+   if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+    return
+   }
+  }
+ }
 }
 
 func main() {
-	e := echo.New()
-	hub := newHub()
-	go hub.run()
+ e := echo.New()
+ hub := newHub()
+ go hub.run()
 
-	e.GET("/ws", func(c echo.Context) error {
-		conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-		if err != nil {
-			return err
-		}
+ e.GET("/ws", func(c echo.Context) error {
+  conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+  if err != nil {
+   return err
+  }
 
-		client := &Client{
-			hub:  hub,
-			conn: conn,
-			send: make(chan []byte, 256),
-		}
+  client := &Client{
+   hub:  hub,
+   conn: conn,
+   send: make(chan []byte, 256),
+  }
 
-		hub.register <- client
+  hub.register <- client
 
-		go client.readPump()
-		go client.writePump()
+  go client.readPump()
+  go client.writePump()
 
-		return nil
-	})
+  return nil
+ })
 
-	e.GET("/", func(c echo.Context) error {
-		return c.HTML(http.StatusOK, `
+ e.GET("/", func(c echo.Context) error {
+  return c.HTML(http.StatusOK, `
 <!DOCTYPE html>
 <html>
 <body>
@@ -3306,21 +3313,21 @@ func main() {
 <script>
 const ws = new WebSocket('ws://localhost:1323/ws');
 ws.onmessage = e => {
-	document.getElementById('output').innerHTML += 
-		'<p>' + e.data + '</p>';
+ document.getElementById('output').innerHTML +=
+  '<p>' + e.data + '</p>';
 };
 function send() {
-	const msg = document.getElementById('msg').value;
-	ws.send(msg);
-	document.getElementById('msg').value = '';
+ const msg = document.getElementById('msg').value;
+ ws.send(msg);
+ document.getElementById('msg').value = '';
 }
 </script>
 </body>
 </html>
-		`)
-	})
+  `)
+ })
 
-	e.Start(":1323")
+ e.Start(":1323")
 }
 ```
 
@@ -3334,54 +3341,54 @@ function send() {
 package main
 
 import (
-	"context"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+ "context"
+ "github.com/labstack/echo/v4"
+ "github.com/labstack/echo/v4/middleware"
+ "net/http"
+ "os"
+ "os/signal"
+ "syscall"
+ "time"
 )
 
 func main() {
-	e := echo.New()
+ e := echo.New()
 
-	// Middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-	}))
+ // Middleware
+ e.Use(middleware.Logger())
+ e.Use(middleware.Recover())
+ e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+  AllowOrigins: []string{"*"},
+ }))
 
-	// Routes
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"status": "healthy",
-		})
-	})
+ // Routes
+ e.GET("/health", func(c echo.Context) error {
+  return c.JSON(http.StatusOK, map[string]string{
+   "status": "healthy",
+  })
+ })
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Echo API v1.0")
-	})
+ e.GET("/", func(c echo.Context) error {
+  return c.String(http.StatusOK, "Echo API v1.0")
+ })
 
-	// Graceful shutdown
-	go func() {
-		if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatal(err)
-		}
-	}()
+ // Graceful shutdown
+ go func() {
+  if err := e.Start(":1323"); err != nil && err != http.ErrServerClosed {
+   e.Logger.Fatal(err)
+  }
+ }()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+ quit := make(chan os.Signal, 1)
+ signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+ <-quit
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+ ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+ defer cancel()
 
-	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
-	}
+ if err := e.Shutdown(ctx); err != nil {
+  e.Logger.Fatal(err)
+ }
 }
 ```
 
@@ -3412,7 +3419,7 @@ WORKDIR /root/
 COPY --from=builder /app/app .
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 \
-	CMD wget --no-verbose --tries=1 --spider http://localhost:1323/health || exit 1
+ CMD wget --no-verbose --tries=1 --spider http://localhost:1323/health || exit 1
 
 EXPOSE 1323
 CMD ["./app"]
@@ -3487,22 +3494,22 @@ kubectl logs deployment/echo-app
 ```go
 // ❌ MAL: Manual parsing
 e.POST("/users", func(c echo.Context) error {
-	data, _ := ioutil.ReadAll(c.Request().Body)
-	var user map[string]interface{}
-	json.Unmarshal(data, &user)
-	return c.JSON(200, user)
+ data, _ := ioutil.ReadAll(c.Request().Body)
+ var user map[string]interface{}
+ json.Unmarshal(data, &user)
+ return c.JSON(200, user)
 })
 
 // ✅ BIEN: Echo binding
 e.POST("/users", func(c echo.Context) error {
-	user := new(User)
-	if err := c.Bind(user); err != nil {
-		return c.JSON(400, err)
-	}
-	if err := c.Validate(user); err != nil {
-		return c.JSON(400, err)
-	}
-	return c.JSON(201, user)
+ user := new(User)
+ if err := c.Bind(user); err != nil {
+  return c.JSON(400, err)
+ }
+ if err := c.Validate(user); err != nil {
+  return c.JSON(400, err)
+ }
+ return c.JSON(201, user)
 })
 ```
 
@@ -3511,21 +3518,21 @@ e.POST("/users", func(c echo.Context) error {
 ```go
 // ❌ MAL: Sin manejo de errores
 e.GET("/users/:id", func(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-	return c.JSON(200, getUser(id))
+ id, _ := strconv.Atoi(c.Param("id"))
+ return c.JSON(200, getUser(id))
 })
 
 // ✅ BIEN: Con manejo de errores
 e.GET("/users/:id", func(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(400, map[string]string{"error": "Invalid ID"})
-	}
-	user, err := getUser(id)
-	if err != nil {
-		return c.JSON(500, map[string]string{"error": err.Error()})
-	}
-	return c.JSON(200, user)
+ id, err := strconv.Atoi(c.Param("id"))
+ if err != nil {
+  return c.JSON(400, map[string]string{"error": "Invalid ID"})
+ }
+ user, err := getUser(id)
+ if err != nil {
+  return c.JSON(500, map[string]string{"error": err.Error()})
+ }
+ return c.JSON(200, user)
 })
 ```
 
@@ -3534,22 +3541,22 @@ e.GET("/users/:id", func(c echo.Context) error {
 ```go
 // ❌ MAL: Lógica mezclada en handlers
 e.GET("/protected", func(c echo.Context) error {
-	token := c.Request().Header.Get("Authorization")
-	if token == "" {
-		return c.JSON(401, "Unauthorized")
-	}
-	// ... verificar token
-	// ... lógica del handler
-	return c.JSON(200, "OK")
+ token := c.Request().Header.Get("Authorization")
+ if token == "" {
+  return c.JSON(401, "Unauthorized")
+ }
+ // ... verificar token
+ // ... lógica del handler
+ return c.JSON(200, "OK")
 })
 
 // ✅ BIEN: Middleware separado
 e.GET("/protected", protectedHandler,
-	middleware.AuthMiddleware,
+ middleware.AuthMiddleware,
 )
 
 func protectedHandler(c echo.Context) error {
-	return c.JSON(200, "OK")
+ return c.JSON(200, "OK")
 }
 ```
 
@@ -3558,30 +3565,30 @@ func protectedHandler(c echo.Context) error {
 ```go
 // ❌ MAL: Guardar todo en context
 e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Set("user", user)
-		c.Set("roles", roles)
-		c.Set("permissions", perms)
-		return next(c)
-	}
+ return func(c echo.Context) error {
+  c.Set("user", user)
+  c.Set("roles", roles)
+  c.Set("permissions", perms)
+  return next(c)
+ }
 })
 
 // ✅ BIEN: Usar struct para datos relacionados
 type UserContext struct {
-	User        *User
-	Roles       []string
-	Permissions []string
+ User        *User
+ Roles       []string
+ Permissions []string
 }
 
 e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Set("user_ctx", UserContext{
-			User: user,
-			Roles: roles,
-			Permissions: perms,
-		})
-		return next(c)
-	}
+ return func(c echo.Context) error {
+  c.Set("user_ctx", UserContext{
+   User: user,
+   Roles: roles,
+   Permissions: perms,
+  })
+  return next(c)
+ }
 })
 ```
 
@@ -3590,22 +3597,24 @@ e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 ## CONCLUSIÓN
 
 Echo es un framework enterprise-grade que combina:
+
 - **Performance**: 120k+ RPS
 - **Simplicidad**: API coherente y bien diseñada
 - **Extensibilidad**: Middleware pattern flexible
 - **Madureza**: Usado en producción por grandes empresas
 
 Es la elección ideal para:
+
 - APIs REST de alto rendimiento
 - Microservicios internos
 - Aplicaciones real-time con WebSocket
 - Proyectos que requieren TLS/HTTP2 nativo
 
 **Recursos adicionales:**
-- Documentación: https://echo.labstack.com
-- GitHub: https://github.com/labstack/echo
-- Community: Discord, GitHub Discussions
 
+- Documentación: <https://echo.labstack.com>
+- GitHub: <https://github.com/labstack/echo>
+- Community: Discord, GitHub Discussions
 
 ---
 

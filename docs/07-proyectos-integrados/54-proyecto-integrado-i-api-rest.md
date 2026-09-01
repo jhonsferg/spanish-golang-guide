@@ -330,6 +330,7 @@ require (
 ### 54.2.4 - Environment Configuration
 
 **`.env.example`**:
+
 ```env
 # Server
 SERVER_PORT=8080
@@ -365,6 +366,7 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
 ```
 
 **`internal/config/config.go`**:
+
 ```go
 package config
 
@@ -479,6 +481,7 @@ func getEnvInt(key string, defaultVal int) int {
 ### 54.2.5 - Docker Compose para Development
 
 **`docker-compose.yml`**:
+
 ```yaml
 version: '3.9'
 
@@ -553,79 +556,80 @@ networks:
 ### 54.2.6 - Makefile para Comandos Comunes
 
 **`Makefile`**:
+
 ```makefile
 .PHONY: help build run test docker-up docker-down migrate clean lint fmt
 
 help:
-	@echo "Task Management API - Available Commands"
-	@echo "========================================="
-	@echo "make build          - Build the application"
-	@echo "make run            - Run the application"
-	@echo "make test           - Run tests"
-	@echo "make test-coverage  - Run tests with coverage report"
-	@echo "make lint           - Run linter"
-	@echo "make fmt            - Format code"
-	@echo "make docker-up      - Start Docker containers"
-	@echo "make docker-down    - Stop Docker containers"
-	@echo "make migrate        - Run database migrations"
-	@echo "make clean          - Clean build artifacts"
-	@echo "make deps           - Download dependencies"
+ @echo "Task Management API - Available Commands"
+ @echo "========================================="
+ @echo "make build          - Build the application"
+ @echo "make run            - Run the application"
+ @echo "make test           - Run tests"
+ @echo "make test-coverage  - Run tests with coverage report"
+ @echo "make lint           - Run linter"
+ @echo "make fmt            - Format code"
+ @echo "make docker-up      - Start Docker containers"
+ @echo "make docker-down    - Stop Docker containers"
+ @echo "make migrate        - Run database migrations"
+ @echo "make clean          - Clean build artifacts"
+ @echo "make deps           - Download dependencies"
 
 build:
-	@echo "Building application..."
-	go build -o bin/api cmd/api/main.go
+ @echo "Building application..."
+ go build -o bin/api cmd/api/main.go
 
 run: build
-	@echo "Running application..."
-	./bin/api
+ @echo "Running application..."
+ ./bin/api
 
 test:
-	@echo "Running tests..."
-	go test -v ./...
+ @echo "Running tests..."
+ go test -v ./...
 
 test-coverage:
-	@echo "Running tests with coverage..."
-	go test -v -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
-	@echo "Coverage report: coverage.html"
+ @echo "Running tests with coverage..."
+ go test -v -coverprofile=coverage.out ./...
+ go tool cover -html=coverage.out -o coverage.html
+ @echo "Coverage report: coverage.html"
 
 lint:
-	@echo "Running golangci-lint..."
-	golangci-lint run ./...
+ @echo "Running golangci-lint..."
+ golangci-lint run ./...
 
 fmt:
-	@echo "Formatting code..."
-	go fmt ./...
-	gofmt -s -w .
+ @echo "Formatting code..."
+ go fmt ./...
+ gofmt -s -w .
 
 docker-up:
-	@echo "Starting Docker containers..."
-	docker-compose up -d
-	@echo "Waiting for services to be healthy..."
-	sleep 5
-	@echo "Services are ready!"
+ @echo "Starting Docker containers..."
+ docker-compose up -d
+ @echo "Waiting for services to be healthy..."
+ sleep 5
+ @echo "Services are ready!"
 
 docker-down:
-	@echo "Stopping Docker containers..."
-	docker-compose down
+ @echo "Stopping Docker containers..."
+ docker-compose down
 
 docker-logs:
-	docker-compose logs -f api
+ docker-compose logs -f api
 
 migrate:
-	@echo "Running migrations..."
-	psql -h localhost -U taskuser -d task_management -f migrations/001_create_users.sql
-	psql -h localhost -U taskuser -d task_management -f migrations/002_create_tasks.sql
-	psql -h localhost -U taskuser -d task_management -f migrations/003_create_indexes.sql
+ @echo "Running migrations..."
+ psql -h localhost -U taskuser -d task_management -f migrations/001_create_users.sql
+ psql -h localhost -U taskuser -d task_management -f migrations/002_create_tasks.sql
+ psql -h localhost -U taskuser -d task_management -f migrations/003_create_indexes.sql
 
 clean:
-	@echo "Cleaning build artifacts..."
-	rm -f bin/api coverage.out coverage.html
+ @echo "Cleaning build artifacts..."
+ rm -f bin/api coverage.out coverage.html
 
 deps:
-	@echo "Downloading dependencies..."
-	go mod download
-	go mod tidy
+ @echo "Downloading dependencies..."
+ go mod download
+ go mod tidy
 ```
 
 ---
@@ -635,6 +639,7 @@ deps:
 ### 54.3.1 - User Model con Password Hashing
 
 **`internal/domain/models.go`**:
+
 ```go
 package domain
 
@@ -750,6 +755,7 @@ type AuditLog struct {
 ### 54.3.2 - Database Migrations
 
 **`migrations/001_create_users.sql`**:
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -772,6 +778,7 @@ CREATE INDEX idx_users_username ON users(username);
 ```
 
 **`migrations/002_create_tasks.sql`**:
+
 ```sql
 CREATE TABLE tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -796,6 +803,7 @@ CREATE INDEX idx_tasks_created_at ON tasks(created_at DESC);
 ```
 
 **`migrations/003_create_indexes.sql`**:
+
 ```sql
 -- Additional performance indexes
 CREATE INDEX idx_tasks_created_at_status ON tasks(created_at DESC, status);
@@ -820,6 +828,7 @@ CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
 ### 54.3.3 - GORM Setup y Connection
 
 **`internal/database/connection.go`**:
+
 ```go
 package database
 
@@ -857,7 +866,7 @@ func InitDB(cfg *config.DatabaseConfig) error {
 
 func connectDB(cfg *config.DatabaseConfig) (*gorm.DB, error) {
     dsn := cfg.DSN()
-    
+
     gormConfig := &gorm.Config{
         Logger: logger.Default.LogMode(logger.Info),
     }
@@ -915,6 +924,7 @@ func Close() error {
 ### 54.3.4 - Repository Pattern
 
 **`internal/repository/user.go`** (fragment):
+
 ```go
 package repository
 
@@ -965,6 +975,7 @@ func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
 ```
 
 **`internal/repository/task.go`** (fragment):
+
 ```go
 package repository
 
@@ -1031,6 +1042,7 @@ func (r *taskRepository) List(userID string, filters map[string]interface{}, lim
 ### 54.4.1 - JWT Token Management
 
 **`internal/domain/jwt.go`**:
+
 ```go
 package domain
 
@@ -1125,6 +1137,7 @@ func (ts *TokenService) RefreshToken(oldToken string) (string, error) {
 ### 54.4.2 - Middleware de Autenticación
 
 **`internal/handler/middleware.go`**:
+
 ```go
 package handler
 
@@ -1231,6 +1244,7 @@ func GetUserClaims(c *gin.Context) (*domain.TokenClaims, error) {
 ### 54.4.3 - Roles y Permisos
 
 **`internal/domain/permissions.go`**:
+
 ```go
 package domain
 
@@ -1308,6 +1322,7 @@ func HasPermission(role Role, permission Permission) bool {
 ### 54.5.1 - HTTP Handler Structure
 
 **`internal/handler/auth.go`** (Auth Handlers):
+
 ```go
 package handler
 
@@ -1444,6 +1459,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 ### 54.5.2 - Task Handler - CRUD Operations
 
 **`internal/handler/task.go`**:
+
 ```go
 package handler
 
@@ -1732,6 +1748,7 @@ func (h *TaskHandler) AssignTask(c *gin.Context) {
 ### 54.5.3 - Routes Setup
 
 **`internal/handler/router.go`**:
+
 ```go
 package handler
 
@@ -1805,6 +1822,7 @@ func SetupRoutes(
 ### 54.6.1 - Auth Service
 
 **`internal/service/auth.go`**:
+
 ```go
 package service
 
@@ -1887,6 +1905,7 @@ func (s *authService) UpdateLastLogin(userID string) error {
 ### 54.6.2 - Task Service
 
 **`internal/service/task.go`**:
+
 ```go
 package service
 
@@ -2022,6 +2041,7 @@ func (s *taskService) AssignTask(taskID, assignedToID string) error {
 ### 54.6.3 - Custom Errors
 
 **`internal/domain/errors.go`**:
+
 ```go
 package domain
 
@@ -2073,6 +2093,7 @@ func (e *APIError) WithDetails(details map[string]interface{}) *APIError {
 ### 54.7.1 - Logging Estructurado (Cap 37)
 
 **`internal/logger/logger.go`**:
+
 ```go
 package logger
 
@@ -2145,6 +2166,7 @@ func Sync() error {
 ### 54.7.2 - Monitoring con Prometheus (Cap 49)
 
 **`internal/handler/metrics.go`**:
+
 ```go
 package handler
 
@@ -2225,6 +2247,7 @@ func RecordCacheMiss(cacheType string) {
 ### 54.7.3 - Caching con Redis (Cap 52)
 
 **`internal/repository/cache.go`**:
+
 ```go
 package repository
 
@@ -2302,6 +2325,7 @@ func (r *CacheRepository) Close() error {
 ### 54.8.1 - Unit Tests para Services
 
 **`tests/services_test.go`**:
+
 ```go
 package tests
 
@@ -2445,6 +2469,7 @@ func TestTaskStatusTransitions(t *testing.T) {
 ### 54.8.2 - Integration Tests
 
 **`tests/handlers_test.go`** (fragment):
+
 ```go
 package tests
 
@@ -2554,6 +2579,7 @@ func TestLoginEndpoint(t *testing.T) {
 ### 54.8.3 - Test Fixtures
 
 **`tests/fixtures/test_data.go`**:
+
 ```go
 package fixtures
 
@@ -2622,6 +2648,7 @@ go test -bench=. -benchmem ./...
 ### 54.9.1 - Dockerfile Multi-stage
 
 **`Dockerfile`**:
+
 ```dockerfile
 # Build stage
 FROM golang:1.21-alpine AS builder
@@ -2676,6 +2703,7 @@ ENTRYPOINT ["./api"]
 ### 54.9.2 - Entry Point Main
 
 **`cmd/api/main.go`**:
+
 ```go
 package main
 
@@ -2761,6 +2789,7 @@ func main() {
 ### 54.9.3 - Database Migrations Script
 
 **`internal/database/migrations.go`**:
+
 ```go
 package database
 
@@ -2775,7 +2804,7 @@ import (
 // RunMigrations applies all database migrations
 func RunMigrations() error {
     db := GetDB()
-    
+
     log.Println("Running database migrations...")
 
     // Auto-migrate models
@@ -2789,7 +2818,7 @@ func RunMigrations() error {
 
     // Create custom indexes
     if err := db.Exec(`
-        CREATE INDEX IF NOT EXISTS idx_tasks_user_status 
+        CREATE INDEX IF NOT EXISTS idx_tasks_user_status
         ON tasks(user_id, status);
     `).Error; err != nil {
         return fmt.Errorf("failed to create index: %w", err)
@@ -2897,12 +2926,14 @@ tasks, err := repo.db.
 #### **Milestone 1: Basic CRUD sin Autenticación (Semana 1)**
 
 Objetivos:
+
 - Setup básico del proyecto
 - Models y database
 - CRUD endpoints simples
 - Tests unitarios básicos
 
 Código inicial:
+
 ```bash
 git checkout milestone-1
 # ~200 líneas de código
@@ -2913,6 +2944,7 @@ git checkout milestone-1
 #### **Milestone 2: JWT Authentication (Semana 2)**
 
 Objetivos:
+
 - Registro e login
 - JWT tokens
 - Protected routes
@@ -2928,6 +2960,7 @@ git checkout milestone-2
 #### **Milestone 3: Full REST API (Semana 3)**
 
 Objetivos:
+
 - Todos los endpoints implementados
 - Validación completa
 - Error handling robusto
@@ -2943,6 +2976,7 @@ git checkout milestone-3
 #### **Milestone 4: Testing Completo (Semana 4)**
 
 Objetivos:
+
 - 80%+ coverage
 - Integration tests
 - Test fixtures
@@ -2958,6 +2992,7 @@ git checkout milestone-4
 #### **Milestone 5: Production Ready (Semana 5)**
 
 Objetivos:
+
 - Logging estructurado
 - Monitoring con Prometheus
 - Docker deployment
@@ -3202,7 +3237,7 @@ Performance:
 
 ---
 
-**Fin del Capítulo 54** 
+**Fin del Capítulo 54**
 
 Este capítulo proporciona una base sólida y production-ready para construir APIs REST profesionales en Go. Los conceptos, patrones y código aquí presentados pueden ser escalados a sistemas más grandes siguiendo los mismos principios de arquitectura limpia, testing riguroso y operaciones profesionales.
 

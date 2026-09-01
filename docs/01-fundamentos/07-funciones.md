@@ -39,7 +39,7 @@ CON funciones:
     func saludar(nombre string) {
         fmt.Printf("Hola, %s!\n", nombre)
     }
-    
+
     saludar("Juan")
     saludar("María")
     saludar("Carlos")
@@ -431,7 +431,7 @@ func(nombre string) {
 ```go
 func crearContador() func() int {
     contador := 0
-    
+
     // Función interna que captura 'contador'
     return func() int {
         contador++
@@ -690,7 +690,7 @@ func procesar(archivo string) error {
         return err
     }
     defer f.Close()     // Se ejecuta al final, aunque haya error
-    
+
     // Procesar archivo
     // Si hay error aquí, defer aún se ejecuta
     return nil
@@ -784,6 +784,7 @@ func procesarDatos() error {
 ### Ejercicio 1: Calculadora Funcional
 
 Crea programa que:
+
 1. Defina funciones: sumar, restar, multiplicar, dividir
 2. Cada función tome dos números
 3. Cree función "calcular" que acepte operación y dos números
@@ -793,6 +794,7 @@ Crea programa que:
 ### Ejercicio 2: Procesador de Listas
 
 Crea programa que:
+
 1. Defina función "mapear(nums []int, fn func(int) int) []int"
 2. Defina función "filtrar(nums []int, predicado func(int) bool) []int"
 3. Defina función "reducir(nums []int, inicial int, fn func(int, int) int) int"
@@ -801,6 +803,7 @@ Crea programa que:
 ### Ejercicio 3: Generador de Contadores
 
 Crea programa que:
+
 1. Función "crearContador(inicio int) func() int" que retorna closure
 2. Cada closure incrementa su contador independientemente
 3. Crea 3 contadores diferentes
@@ -809,6 +812,7 @@ Crea programa que:
 ### Ejercicio 4: Traverse de Estructuras
 
 Crea programa que:
+
 1. Defina estructura Carpeta con nombre, subcarpetas y archivos
 2. Función recursiva para contar total de archivos
 3. Función recursiva para buscar archivo por nombre
@@ -817,6 +821,7 @@ Crea programa que:
 ### Ejercicio 5: Recursión vs Iteración
 
 Crea programa que:
+
 1. Fibonacci recursivo
 2. Fibonacci iterativo
 3. Mide tiempo de ejecución de ambos (para n=35)
@@ -828,7 +833,6 @@ Crea programa que:
 **Fin del Capítulo 7**
 
 ---
-
 
 ---
 

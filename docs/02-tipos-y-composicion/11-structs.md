@@ -71,7 +71,7 @@ CON Structs:
         Email  string
         Activo bool
     }
-    
+
     usuario := Usuario{
         Nombre: "Juan",
         Edad: 25,
@@ -103,6 +103,7 @@ type Usuario struct {
 ```
 
 **Componentes:**
+
 ```
 type Usuario struct {
   ↑    ↑       ↑
@@ -435,8 +436,8 @@ u := Usuario{Nombre: "Juan", Edad: 25}
 t := reflect.TypeOf(u)
 for i := 0; i < t.NumField(); i++ {
     field := t.Field(i)
-    fmt.Printf("Campo: %s, JSON tag: %s\n", 
-        field.Name, 
+    fmt.Printf("Campo: %s, JSON tag: %s\n",
+        field.Name,
         field.Tag.Get("json"))
 }
 
@@ -632,6 +633,7 @@ fmt.Println(u.Nombre)   // María (cambió)
 ```
 
 **Regla de oro:**
+
 ```
  Si el método MODIFICA el struct → receiver *Tipo
  Si el método SOLO LEE → receiver Tipo (o *Tipo si prefieres)
@@ -785,10 +787,10 @@ if err != nil {
 type Usuario struct {
     // Nombre del usuario
     Nombre string
-    
+
     // Edad en años
     Edad int
-    
+
     // Dirección de email
     Email string
 }
@@ -818,6 +820,7 @@ fmt.Println(u)      // Usa método String() automáticamente
 ### Ejercicio 1: Gestor de Tareas
 
 Crea programa que:
+
 1. Defina struct Tarea (ID, Título, Descripción, Completada, FechaCreacion)
 2. Implemente constructores NewTarea()
 3. Implemente método String()
@@ -827,6 +830,7 @@ Crea programa que:
 ### Ejercicio 2: Sistema de Cuentas Bancarias
 
 Crea programa que:
+
 1. Defina struct CuentaBancaria (Tituar, Saldo, NumeroCuenta, Tipo)
 2. Implemente NewCuenta() con validaciones
 3. Implemente métodos Depositar() y Retirar()
@@ -836,6 +840,7 @@ Crea programa que:
 ### Ejercicio 3: Directorio de Contactos
 
 Crea programa que:
+
 1. Defina struct Contacto (Nombre, Email, Teléfono, Dirección)
 2. Use embedding: Dirección struct dentro de Contacto
 3. Implemente método String()
@@ -845,6 +850,7 @@ Crea programa que:
 ### Ejercicio 4: Carrito de Compras
 
 Crea programa que:
+
 1. Defina struct Producto (ID, Nombre, Precio, Cantidad)
 2. Defina struct Carrito (items []Producto)
 3. Implemente método AgregarProducto()
@@ -854,6 +860,7 @@ Crea programa que:
 ### Ejercicio 5: Sistema de Vehículos
 
 Crea programa que:
+
 1. Defina struct Vehicle base (Marca, Modelo, Año)
 2. Defina structs Auto, Moto, Camion con embedding
 3. Implemente método String() en cada uno
@@ -865,7 +872,6 @@ Crea programa que:
 **Fin del Capítulo 11**
 
 ---
-
 
 ---
 

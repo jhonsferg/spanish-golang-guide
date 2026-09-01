@@ -189,7 +189,7 @@ func main() {             // 3. Define función main()
                           //    DEBE ser en package main
                           //    NO recibe argumentos
                           //    NO retorna valores
-                          
+
     fmt.Println(...)      // 4. Llama función Println del package fmt
                           //    Imprime texto + newline
 }
@@ -267,7 +267,7 @@ $ go run main.go
  Paso 2: TYPE CHECKING (Verificación de Tipos)      │
  └─ Verifica que tipos sean válidos                  │
  └─ fmt.Println existe y acepta string? ✓            │
- Si hay error de tipos: FALLA aquí                │ 
+ Si hay error de tipos: FALLA aquí                │
 
  Paso 3: COMPILATION (Compilación)                   │
  └─ Convierte Go a código máquina intermedio (SSA)   │
@@ -326,7 +326,7 @@ Cuando tu programa comienza, ANTES de que `main()` sea llamada:
 func init() {
     // Go ejecuta TODOS los init() de todos los packages
     // Orden: Dependencias primero
-    
+
     // Tipicamente usado para:
     // ├─ Inicializar variables globales complejas
     // ├─ Registrar drivers (database/sql)
@@ -422,11 +422,11 @@ import (
 
 func main() {
     fmt.Println("Haciendo algo...")
-    
+
     // Si todo OK
     fmt.Println("Éxito!")
     os.Exit(0)      // 0 = OK
-    
+
     // Si hay error
     fmt.Println("Error ocurrió")
     os.Exit(1)      // 1 = Error genérico
@@ -458,14 +458,14 @@ func main() {
         fmt.Println("Uso: programa <nombre>")
         os.Exit(2)      // Mal uso
     }
-    
+
     nombre := os.Args[1]
-    
+
     if nombre == "" {
         fmt.Println("Error: nombre vacío")
         os.Exit(1)      // Error
     }
-    
+
     fmt.Printf("Hola, %s!\n", nombre)
     os.Exit(0)          // OK
 }
@@ -739,11 +739,13 @@ go run main.go
 ```
 
 **Ventajas:**
+
 - Rápido para testing
 - No deja archivos temporales
 - Perfecto para scripts
 
 **Desventajas:**
+
 - Compila cada vez (lento si se ejecuta múltiples veces)
 - No creas binario distribuible
 
@@ -824,7 +826,7 @@ func main() {
     // Obtener variable de entorno
     home := os.Getenv("HOME")      // Retorna string, vacío si no existe
     fmt.Println("HOME:", home)
-    
+
     // Obtener variable O valor default
     user, ok := os.LookupEnv("USER")
     if !ok {
@@ -881,7 +883,7 @@ func main() {
     // os.Args es []string
     // os.Args[0] es el nombre del programa
     // os.Args[1], os.Args[2], etc. son argumentos
-    
+
     fmt.Println("Nombre del programa:", os.Args[0])
     fmt.Println("Total de argumentos:", len(os.Args)-1)
     fmt.Println("Todos:", os.Args)
@@ -915,11 +917,11 @@ func main() {
         fmt.Println("Uso: suma <num1> <num2>")
         os.Exit(1)
     }
-    
+
     // Convertir string a int
     num1, _ := strconv.Atoi(os.Args[1])
     num2, _ := strconv.Atoi(os.Args[2])
-    
+
     resultado := num1 + num2
     fmt.Printf("%d + %d = %d\n", num1, num2, resultado)
 }
@@ -949,12 +951,12 @@ func main() {
     // Definir flags
     nombre := flag.String("nombre", "Mundo", "Nombre a saludar")
     verbose := flag.Bool("verbose", false, "Modo verbose")
-    
+
     // Parsear argumentos
     flag.Parse()
-    
+
     fmt.Printf("Hola, %s!\n", *nombre)
-    
+
     if *verbose {
         fmt.Println("Modo verbose habilitado")
     }
@@ -977,6 +979,7 @@ go run main.go -nombre Juan -verbose
 ### Requisitos
 
 Crear una aplicación que:
+
 1. Pida nombre al usuario
 2. Pida edad del usuario
 3. Valide que edad sea número
@@ -997,28 +1000,28 @@ import (
 
 func main() {
     reader := bufio.NewReader(os.Stdin)
-    
+
     // Pedir nombre
     fmt.Print("¿Cuál es tu nombre? ")
     nombre, _ := reader.ReadString('\n')
     nombre = strings.TrimSpace(nombre)  // Remover newline
-    
+
     // Pedir edad
     fmt.Print("¿Cuál es tu edad? ")
     edadStr, _ := reader.ReadString('\n')
     edadStr = strings.TrimSpace(edadStr)
-    
+
     // Convertir edad a número
     edad, err := strconv.Atoi(edadStr)
     if err != nil {
         fmt.Println("Error: edad debe ser un número")
         os.Exit(1)
     }
-    
+
     // Mostrar información
     fmt.Printf("\nHola, %s!\n", nombre)
     fmt.Printf("Tienes %d años.\n", edad)
-    
+
     // Calcular algo
     if edad >= 18 {
         fmt.Println("Eres mayor de edad.")
@@ -1058,17 +1061,17 @@ import (
 
 func main() {
     reader := bufio.NewReader(os.Stdin)
-    
+
     // Pedir nombre
     nombre := leerLinea(reader, "¿Cuál es tu nombre? ")
     if nombre == "" {
         fmt.Println("Error: nombre no puede estar vacío")
         os.Exit(1)
     }
-    
+
     // Pedir edad válida
     edad := leerEdad(reader)
-    
+
     // Mostrar información
     mostrarInfo(nombre, edad)
 }
@@ -1082,18 +1085,18 @@ func leerLinea(reader *bufio.Reader, prompt string) string {
 func leerEdad(reader *bufio.Reader) int {
     for {
         edadStr := leerLinea(reader, "¿Cuál es tu edad? ")
-        
+
         edad, err := strconv.Atoi(edadStr)
         if err != nil {
             fmt.Println("Error: debe ser un número entero")
             continue
         }
-        
+
         if edad < 0 || edad > 150 {
             fmt.Println("Error: edad debe estar entre 0 y 150")
             continue
         }
-        
+
         return edad
     }
 }
@@ -1102,13 +1105,13 @@ func mostrarInfo(nombre string, edad int) {
     fmt.Printf("\n=== INFORMACIÓN ===\n")
     fmt.Printf("Nombre: %s\n", nombre)
     fmt.Printf("Edad: %d años\n", edad)
-    
+
     if edad >= 18 {
         fmt.Println("Estado: Mayor de edad")
     } else {
         fmt.Println("Estado: Menor de edad")
     }
-    
+
     generacion := determinarGeneracion(edad)
     fmt.Printf("Generación: %s\n", generacion)
 }
@@ -1169,6 +1172,7 @@ Los próximos capítulos profundizarán en cada uno.
 ### Ejercicio 1: Calculadora Simple
 
 Crea programa que:
+
 1. Pida 2 números
 2. Pida operación (+, -, *, /)
 3. Muestre resultado
@@ -1177,6 +1181,7 @@ Crea programa que:
 ### Ejercicio 2: Conversor de Temperaturas
 
 Crea programa que:
+
 1. Pida temperatura en Celsius
 2. Muestre equivalentes en Fahrenheit y Kelvin
 3. Use funciones helper
@@ -1184,6 +1189,7 @@ Crea programa que:
 ### Ejercicio 3: Validador de Contraseña
 
 Crea programa que:
+
 1. Pida contraseña al usuario
 2. Valide:
    - Mínimo 8 caracteres
@@ -1194,6 +1200,7 @@ Crea programa que:
 ### Ejercicio 4: Adivina el Número
 
 Crea programa que:
+
 1. Genere número aleatorio 1-100
 2. Pida al usuario que adivine
 3. Diga "más alto" o "más bajo"
@@ -1205,7 +1212,6 @@ Crea programa que:
 **Fin del Capítulo 3**
 
 ---
-
 
 ---
 

@@ -32,6 +32,7 @@ Una **Command Line Interface (CLI)** es una aplicación que se ejecuta en termin
 - **API (Application Programming Interface):** Interfaz programática para otros servicios
 
 Las CLIs son ideales para:
+
 - Automatización (scripts, CI/CD)
 - Herramientas de desarrollo (compiladores, gestores de código)
 - Administración de sistemas (DevOps)
@@ -70,36 +71,44 @@ Go destaca en desarrollo de CLIs por:
 ### 51.1.3 Casos de Uso Reales en Producción
 
 #### **kubectl** - Orquestación de Kubernetes
+
 ```bash
 # Herramienta CLI escrita en Go (1.5M líneas)
 $ kubectl get pods --namespace prod
 $ kubectl apply -f deployment.yaml
 ```
+
 - **Características:** Subcomandos complejos, config file hierarchy, plugins
 - **Lecciones:** Context management, structured output, extensive help
 
 #### **Hugo** - Static Site Generator
+
 ```bash
-$ hugo new site myblog
-$ hugo server --watch --port 1313
-$ hugo build --minify
+hugo new site myblog
+hugo server --watch --port 1313
+hugo build --minify
 ```
+
 - **Características:** Múltiples flags, server embebido, watch mode
 - **Lecciones:** Real-time interaction, verbose logging
 
 #### **Docker CLI**
+
 ```bash
-$ docker container run -it --name myapp alpine
-$ docker compose up -d
+docker container run -it --name myapp alpine
+docker compose up -d
 ```
+
 - **Características:** Subcomandos, context switching, plugin system
 - **Lecciones:** UX intuitivo, progressive disclosure
 
 #### **Terraform CLI**
+
 ```bash
-$ terraform plan -var="env=prod"
-$ terraform apply -auto-approve
+terraform plan -var="env=prod"
+terraform apply -auto-approve
 ```
+
 - **Características:** Complex state management, interactive modes, debug output
 
 ### 51.1.4 Ecosistema Go de Herramientas CLI
@@ -167,6 +176,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go -name Alice -age 30 -verbose
 Hello, Alice (age: 30)
@@ -198,7 +208,7 @@ func main() {
     uint64Flag := flag.Uint64("uint64", 0, "uint64 value")
     floatFlag := flag.Float64("float", 0.0, "float value")
     boolFlag := flag.Bool("bool", false, "bool value")
-    
+
     // Duración (formato: "300ms", "1h30m")
     durationFlag := flag.Duration("timeout", 10*time.Second, "timeout duration")
 
@@ -213,6 +223,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go -string hello -int 42 -float 3.14 -bool -timeout 5s
 String: hello
@@ -282,6 +293,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go -tag prod -tag important -server example.com:443
 Tags: [prod important]
@@ -335,6 +347,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go add -name "Task 1"
 Added: Task 1
@@ -358,6 +371,7 @@ Removed ID: 5
 | Parsing manual complejo | Propenso a errores | Cobra maneja complexity |
 
 **Cuándo usar Flag estándar:**
+
 - ✅ Herramientas muy simples (< 3 subcomandos)
 - ✅ Máxima portabilidad (sin dependencias externas)
 - ✅ Proyectos internos con pocos usuarios
@@ -399,12 +413,14 @@ Removed ID: 5
 ### 51.3.2 Setup Básico de Cobra
 
 **Instalación:**
+
 ```bash
 go get -u github.com/spf13/cobra@latest
 go install github.com/spf13/cobra-cli@latest
 ```
 
 **Inicializar proyecto:**
+
 ```bash
 cobra-cli init myapp
 cd myapp
@@ -415,6 +431,7 @@ cobra-cli add admin add  # sub-subcommand
 ```
 
 **Estructura generada:**
+
 ```
 myapp/
 ├── cmd/
@@ -536,6 +553,7 @@ func init() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go serve -p 9000 -h 0.0.0.0
 Starting server on 0.0.0.0:9000
@@ -626,6 +644,7 @@ func init() {
 ```
 
 **Orden de ejecución:**
+
 ```
 parent child:
 1. [Parent] PersistentPreRun  <- ejecutado primero
@@ -734,6 +753,7 @@ func init() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go deploy prod 2
 Deploying v2 to prod
@@ -893,6 +913,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go -v serve -p 9000
 Verbose mode enabled
@@ -961,6 +982,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go deploy --env prod --version 2.1 file.txt
 Deploying v2.1 to prod
@@ -1035,6 +1057,7 @@ func main() {
 ```
 
 **Ayuda resultante:**
+
 ```
 COMMANDS:
   Database:
@@ -1132,15 +1155,15 @@ func main() {
     // Flags booleanos pueden ser usados de varias formas
     flag.Bool("debug", false, "debug mode")
     // Uso: -debug, -debug=true, -debug=false
-    
+
     // String flags
     flag.String("output", "-", "output file (- = stdout)")
     // Uso: -output file.txt, -output=file.txt
-    
+
     // Short form
     flag.String("o", "", "output file (shorthand)")
     // Uso: -o file.txt
-    
+
     flag.Parse()
 
     // Acceder a argumentos posicionales
@@ -1149,10 +1172,11 @@ func main() {
 ```
 
 **Uso avanzado:**
+
 ```bash
-$ go run main.go -debug -output result.txt arg1 arg2
-$ go run main.go -debug=true -o=result.txt
-$ go run main.go -- -not-a-flag file.txt
+go run main.go -debug -output result.txt arg1 arg2
+go run main.go -debug=true -o=result.txt
+go run main.go -- -not-a-flag file.txt
 ```
 
 ### 51.5.2 Stdin/Stdout/Stderr
@@ -1171,7 +1195,7 @@ import (
 
 func main() {
     // === LECTURA ===
-    
+
     // Leer línea completa desde stdin
     reader := bufio.NewReader(os.Stdin)
     fmt.Print("Enter your name: ")
@@ -1203,7 +1227,7 @@ func main() {
     fmt.Fprintln(os.Stderr, "Another error")
 
     // === REDIRECCIÓN ===
-    
+
     // Abrir archivo para escritura
     f, _ := os.Create("output.txt")
     defer f.Close()
@@ -1217,12 +1241,13 @@ func main() {
 ```
 
 **Uso con pipes:**
+
 ```bash
-$ echo "Hello" | go run main.go  # stdin -> programa -> stdout
-$ go run main.go > output.txt    # stdout -> archivo
-$ go run main.go 2> error.txt    # stderr -> archivo
-$ go run main.go < input.txt     # archivo -> stdin
-$ cmd1 | go run main.go | cmd2   # pipeline
+echo "Hello" | go run main.go  # stdin -> programa -> stdout
+go run main.go > output.txt    # stdout -> archivo
+go run main.go 2> error.txt    # stderr -> archivo
+go run main.go < input.txt     # archivo -> stdin
+cmd1 | go run main.go | cmd2   # pipeline
 ```
 
 ### 51.5.3 Interactive Prompts
@@ -1297,6 +1322,7 @@ func main() {
 ```
 
 **Ejecución interactiva:**
+
 ```
 $ go run main.go
 Enter your name: Alice
@@ -1387,6 +1413,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 100 / 100 [████████████████████████████] 100 %
 
@@ -1437,6 +1464,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 ⠙ Loading...  [después de 3s] Done!
 ⣾ Processing  [después de 2s] Finished!
@@ -1510,6 +1538,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 NAME     AGE  CITY           OCCUPATION
 ----     ---  ----           ----------
@@ -1564,6 +1593,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 +-------+-----+-----------+
 | Name  | Age |      City |
@@ -1627,6 +1657,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go
 Name       | Host         | Port   | Enabled  | Tags
@@ -1688,7 +1719,7 @@ func main() {
     multiColor.Println("Cyan, bold, white background")
 
     // === LIPGLOSS (más sofisticado) ===
-    
+
     // Estilos
     header := lipgloss.NewStyle().
         Bold(true).
@@ -1724,6 +1755,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```
 [MAGENTA] Error: something went wrong
 [GREEN] Success: operation completed
@@ -1828,6 +1860,7 @@ type AppConfig struct {
 ```
 
 **config.yaml:**
+
 ```yaml
 server:
   host: 0.0.0.0
@@ -1841,6 +1874,7 @@ logging:
 ```
 
 **Precedencia (mayor a menor):**
+
 1. Flags CLI: `--log-level debug`
 2. Environment variables: `MYAPP_LOGGING_LEVEL=debug`
 3. Config file: `config.yaml`
@@ -1911,6 +1945,7 @@ func main() {
 ```
 
 **Búsqueda automática:**
+
 ```bash
 # 1. Intenta ~/.config/myapp/config.yaml
 $ myapp
@@ -2000,6 +2035,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go
 CLI Error [4]: filename is required
@@ -2070,6 +2106,7 @@ func main() {
 ```
 
 **Salida:**
+
 ```json
 {
   "level": "info",
@@ -2161,6 +2198,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go
 Warning message (always shown)
@@ -2237,6 +2275,7 @@ func TestMainOutput(t *testing.T) {
 ```
 
 **Ejecutar:**
+
 ```bash
 $ go test -v
 === RUN   TestGreeting
@@ -2283,6 +2322,7 @@ func TestFormatOutput(t *testing.T) {
 ```
 
 **Ejecutar:**
+
 ```bash
 $ go test -v -run TestFormatOutput
 === RUN   TestFormatOutput
@@ -2468,6 +2508,7 @@ func main() {
 ```
 
 **Build con versión:**
+
 ```bash
 #!/bin/bash
 VERSION="1.0.0"
@@ -2491,6 +2532,7 @@ go install github.com/goreleaser/goreleaser@latest
 ```
 
 **.goreleaser.yaml:**
+
 ```yaml
 project_name: myapp
 
@@ -2525,6 +2567,7 @@ changelog:
 ```
 
 **Uso:**
+
 ```bash
 # Taggear release
 git tag -a v1.0.0 -m "Release 1.0.0"
@@ -2545,6 +2588,7 @@ cd homebrew-myapp
 ```
 
 **Formula (myapp.rb):**
+
 ```ruby
 class Myapp < Formula
   desc "My awesome CLI application"
@@ -2564,6 +2608,7 @@ end
 ```
 
 **Uso:**
+
 ```bash
 # Agregar tap
 brew tap myuser/myapp
@@ -2580,6 +2625,7 @@ brew uninstall myapp
 Distribuir en Docker:
 
 **Dockerfile (multi-stage):**
+
 ```dockerfile
 # Build stage
 FROM golang:1.21-alpine AS builder
@@ -2599,6 +2645,7 @@ CMD ["serve", "--port", "8080"]
 ```
 
 **Build y push:**
+
 ```bash
 docker build -t myuser/myapp:1.0.0 .
 docker tag myuser/myapp:1.0.0 myuser/myapp:latest
@@ -2677,6 +2724,7 @@ Configuration can be provided via flags, environment variables, or config file.`
 ```
 
 **Salida de ayuda:**
+
 ```
 $ app serve --help
 Start the application server on the specified host and port.
@@ -2711,6 +2759,7 @@ cobra-cli generate-docs --doc-dir=docs
 ```
 
 **Uso:**
+
 ```bash
 man app              # Página del programa
 man app-serve        # Subcomando
@@ -2826,6 +2875,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ kctl get pods
 Getting pods in namespace default
@@ -2954,6 +3004,7 @@ func main() {
 ```
 
 **Uso:**
+
 ```bash
 $ go run main.go add
 Task name: Buy groceries
@@ -2978,6 +3029,7 @@ $ go run main.go list
 **Objetivo:** Aprender parsing básico de flags con flag package estándar
 
 **Especificación:**
+
 - Convertir entre °C, °F, K
 - Flags: `--from`, `--to`, `--value`
 - Soportar múltiples conversiones en un comando
@@ -2992,6 +3044,7 @@ $ go run converter.go --from celsius --to kelvin --value 0
 ```
 
 **Solución:**
+
 ```go
 package main
 
@@ -3079,11 +3132,13 @@ func main() {
 **Objetivo:** Implementar CLI con subcomandos jerárquicos
 
 **Especificación:**
+
 - Comandos: `add`, `list`, `complete`, `delete`
 - Flags: `--priority` (high|medium|low), `--due`, `--filter`
 - Persistir en JSON
 
 **Estructura esperada:**
+
 ```
 myapp/
 ├── cmd/
@@ -3104,6 +3159,7 @@ myapp/
 **Objetivo:** Crear form interactiva con validación
 
 **Especificación:**
+
 - Preguntar: nombre, email, edad, país (select)
 - Validar email con regex
 - Validar edad (18-120)
@@ -3123,6 +3179,7 @@ Data saved to form_response.json
 ```
 
 **Solución:**
+
 ```go
 package main
 
@@ -3227,6 +3284,7 @@ func main() {
 **Objetivo:** Crear herramienta de monitoreo con salida formateada
 
 **Especificación:**
+
 - Listar procesos/servicios con estado
 - Tabla con colores (verde=running, rojo=stopped, amarillo=warning)
 - Filtrar por nombre o estado
@@ -3244,6 +3302,7 @@ $ go run monitor.go --filter running --json
 ```
 
 **Solución:**
+
 ```go
 package main
 
@@ -3330,6 +3389,7 @@ func main() {
 **Objetivo:** Crear CLI lista para distribución con versioning, auto-updates, docs
 
 **Especificación:**
+
 - Comando `version` mostrando información detallada
 - Archivo `VERSION` que se lee en build
 - Self-update mechanism (check updates en GitHub)
@@ -3338,6 +3398,7 @@ func main() {
 - Release en GitHub con goreleaser
 
 **Estructura:**
+
 ```
 myapp/
 ├── .goreleaser.yaml
@@ -3353,6 +3414,7 @@ myapp/
 ```
 
 **Makefile:**
+
 ```makefile
 VERSION := $(shell cat VERSION)
 BUILD := $(shell git rev-parse --short HEAD)
@@ -3380,6 +3442,7 @@ test:
 Este capítulo ha cubierto todo lo necesario para crear CLIs profesionales en Go:
 
 **Hemos aprendido:**
+
 - ✅ Frameworks (Flag, Cobra, Urfave)
 - ✅ I/O avanzado (prompts, progress, colors)
 - ✅ Formatting (tablas, JSON, colores)
@@ -3390,6 +3453,7 @@ Este capítulo ha cubierto todo lo necesario para crear CLIs profesionales en Go
 - ✅ UX principles y case studies
 
 **Próximos pasos:**
+
 - Explorar bubbletea para TUIs interactivas
 - Estudiar sistemas de plugins
 - Investigar CLI en contexto de DevOps (kubernetes, terraform)
@@ -3399,11 +3463,13 @@ Este capítulo ha cubierto todo lo necesario para crear CLIs profesionales en Go
 ## REFERENCIAS Y RECURSOS
 
 **Documentación Oficial:**
+
 - [Flag Package](https://golang.org/pkg/flag/)
 - [Cobra Documentation](https://cobra.dev/)
 - [Urfave/CLI](https://cli.urfave.org/)
 
 **Librerías Recomendadas:**
+
 - [Viper](https://github.com/spf13/viper) - Configuration
 - [Promptui](https://github.com/manifoldco/promptui) - Interactive prompts
 - [Tablewriter](https://github.com/olekukonko/tablewriter) - Tables
@@ -3411,6 +3477,7 @@ Este capítulo ha cubierto todo lo necesario para crear CLIs profesionales en Go
 - [GoReleaser](https://goreleaser.com/) - Automation
 
 **Ejemplos Reales:**
+
 - kubectl: github.com/kubernetes/kubectl
 - Hugo: github.com/gohugoio/hugo
 - Docker CLI: github.com/docker/cli

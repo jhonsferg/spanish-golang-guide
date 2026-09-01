@@ -20,11 +20,13 @@
 ### Definiciones
 
 **Arreglo (Array):**
+
 - Colección de elementos del **MISMO TIPO**
 - Tamaño **FIJO**, conocido en compile time
 - Elemento accesible por **ÍNDICE**
 
 **Slice (Porción):**
+
 - Colección de elementos del **MISMO TIPO**
 - Tamaño **DINÁMICO**, puede crecer
 - Elemento accesible por **ÍNDICE**
@@ -793,6 +795,7 @@ SLICE:
 ### Ejercicio 1: Manipulador de Números
 
 Crea programa que:
+
 1. Cree slice de 10 números aleatorios
 2. Encuentre máximo y mínimo
 3. Calcule promedio
@@ -803,6 +806,7 @@ Crea programa que:
 ### Ejercicio 2: Gestor de Tareas
 
 Crea programa que:
+
 1. Mantenga slice de tareas (strings)
 2. Permitir agregar, remover, listar
 3. Buscar tarea por nombre
@@ -812,6 +816,7 @@ Crea programa que:
 ### Ejercicio 3: Matriz de Puntuaciones
 
 Crea programa que:
+
 1. Cree matriz 3x3 de puntuaciones
 2. Calcule suma total
 3. Calcule suma por fila
@@ -822,6 +827,7 @@ Crea programa que:
 ### Ejercicio 4: Transformador de Slices
 
 Crea programa que:
+
 1. Cree slice de números
 2. Duplique cada elemento: [1,2,3] → [1,1,2,2,3,3]
 3. Intercale dos slices: [1,3,5] y [2,4,6] → [1,2,3,4,5,6]
@@ -831,6 +837,7 @@ Crea programa que:
 ### Ejercicio 5: Comparador y Analizador
 
 Crea programa que:
+
 1. Cree dos slices de números
 2. Determine si son iguales (mismo contenido)
 3. Encuentre elementos en común
@@ -843,7 +850,6 @@ Crea programa que:
 **Fin del Capítulo 8**
 
 ---
-
 
 ---
 

@@ -67,7 +67,7 @@ func TestUserEntity(t *testing.T) {
 func TestCreateUserUseCase(t *testing.T) {
     mockRepo := new(MockUserRepository)
     mockRepo.On("Save").Return(nil)
-    
+
     useCase := usecases.NewCreateUserUseCase(mockRepo)
     err := useCase.Execute(&CreateUserRequest{})
     assert.NoError(t, err)
@@ -116,11 +116,11 @@ func NewUser(email, name string) (*User, error) {
     if !isValidEmail(email) {
         return nil, fmt.Errorf("email inválido: %s", email)
     }
-    
+
     if len(name) < 3 {
         return nil, fmt.Errorf("nombre debe tener al menos 3 caracteres")
     }
-    
+
     return &User{
         Email:     email,
         Name:      name,
@@ -132,8 +132,8 @@ func NewUser(email, name string) (*User, error) {
 
 // IsValid verifica si la entidad es válida
 func (u *User) IsValid() bool {
-    return isValidEmail(u.Email) && 
-           len(u.Name) >= 3 && 
+    return isValidEmail(u.Email) &&
+           len(u.Name) >= 3 &&
            u.Email != "" &&
            u.Active
 }
@@ -251,13 +251,13 @@ func (o *Order) AddItem(productID string, quantity int, price float64) error {
     if o.Status != OrderStatusPending {
         return fmt.Errorf("no se puede agregar items a pedido %s", o.Status)
     }
-    
+
     o.Items = append(o.Items, &OrderItem{
         ProductID: productID,
         Quantity:  quantity,
         Price:     price,
     })
-    
+
     o.recalculateTotal()
     return nil
 }
@@ -344,29 +344,29 @@ func (uc *CreateUserUseCase) Execute(
     if req.Email == "" || req.Name == "" {
         return nil, errors.New("email y nombre requeridos")
     }
-    
+
     // Verificar que no exista
     existing, _ := uc.userRepo.FindByEmail(req.Email)
     if existing != nil {
         return nil, errors.New("usuario ya existe")
     }
-    
+
     // Crear entidad
     user, err := domain.NewUser(req.Email, req.Name)
     if err != nil {
         return nil, err
     }
-    
+
     // Guardar
     if err := uc.userRepo.Save(user); err != nil {
         return nil, err
     }
-    
+
     // Enviar email (sin bloquear)
     go func() {
         uc.emailService.SendWelcomeEmail(user.Email, user.Name)
     }()
-    
+
     return &CreateUserResponse{
         ID:    user.ID,
         Email: user.Email,
@@ -407,28 +407,28 @@ func (uc *TransferMoneyUseCase) Execute(req *TransferRequest) error {
     if err != nil {
         return err
     }
-    
+
     to, err := uc.accountRepo.FindByID(req.ToAccountID)
     if err != nil {
         return err
     }
-    
+
     // Validar
     if from.Balance < req.Amount {
         return errors.New("saldo insuficiente")
     }
-    
+
     // Ejecutar transacción
     txn := uc.transactionSvc.Begin()
-    
+
     from.Withdraw(req.Amount)
     to.Deposit(req.Amount)
-    
+
     if err := txn.Commit(from, to); err != nil {
         txn.Rollback()
         return err
     }
-    
+
     return nil
 }
 ```
@@ -483,31 +483,31 @@ type UserController struct {
 // CreateUser maneja POST /users
 func (uc *UserController) CreateUser(c *gin.Context) {
     var req usecases.CreateUserRequest
-    
+
     if err := c.ShouldBindJSON(&req); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    
+
     resp, err := uc.createUserUseCase.Execute(&req)
     if err != nil {
         c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
         return
     }
-    
+
     c.JSON(http.StatusCreated, resp)
 }
 
 // GetUser maneja GET /users/:id
 func (uc *UserController) GetUser(c *gin.Context) {
     userID := c.Param("id")
-    
+
     user, err := uc.getUserUseCase.Execute(userID)
     if err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "usuario no encontrado"})
         return
     }
-    
+
     c.JSON(http.StatusOK, user)
 }
 ```
@@ -579,20 +579,20 @@ func (g *EmailGateway) SendWelcomeEmail(email, name string) error {
         Subject: "Bienvenido a nuestro servicio",
         Body:    "Hola " + name,
     }
-    
+
     body, _ := json.Marshal(req)
-    httpReq, _ := http.NewRequest("POST", g.apiURL+"/send", 
+    httpReq, _ := http.NewRequest("POST", g.apiURL+"/send",
         bytes.NewBuffer(body))
-    
+
     resp, err := g.client.Do(httpReq)
     if err != nil {
         return err
     }
-    
+
     if resp.StatusCode != http.StatusOK {
         return fmt.Errorf("error enviando email: %d", resp.StatusCode)
     }
-    
+
     return nil
 }
 ```
@@ -622,7 +622,7 @@ func (r *SQLUserRepository) Save(user *domain.User) error {
         INSERT INTO users (id, email, name, password, created_at, updated_at, active)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
-    
+
     err := r.db.QueryRow(
         query,
         user.ID,
@@ -633,13 +633,13 @@ func (r *SQLUserRepository) Save(user *domain.User) error {
         user.UpdatedAt,
         user.Active,
     ).Scan()
-    
+
     return err
 }
 
 func (r *SQLUserRepository) FindByEmail(email string) (*domain.User, error) {
     query := `SELECT id, email, name, password, created_at, updated_at, active FROM users WHERE email = $1`
-    
+
     var user domain.User
     err := r.db.QueryRow(query, email).Scan(
         &user.ID,
@@ -650,14 +650,14 @@ func (r *SQLUserRepository) FindByEmail(email string) (*domain.User, error) {
         &user.UpdatedAt,
         &user.Active,
     )
-    
+
     if err == sql.ErrNoRows {
         return nil, nil
     }
     if err != nil {
         return nil, err
     }
-    
+
     return &user, nil
 }
 ```
@@ -690,11 +690,11 @@ func SetupDatabase(connString string) (*sql.DB, error) {
     if err != nil {
         return nil, err
     }
-    
+
     if err := db.Ping(); err != nil {
         return nil, err
     }
-    
+
     return db, nil
 }
 ```
@@ -714,24 +714,24 @@ func main() {
     // Configurar BD
     db, _ := infrastructure.SetupDatabase("postgres://user:pass@localhost/db")
     defer db.Close()
-    
+
     // Repositorios concretos
     userRepo := infrastructure.NewSQLUserRepository(db)
-    
+
     // Servicios
     emailGateway := adapters.NewEmailGateway("https://api.email.com")
-    
+
     // Use cases
     createUserUC := usecases.NewCreateUserUseCase(userRepo, emailGateway)
     getUserUC := usecases.NewGetUserUseCase(userRepo)
-    
+
     // Controllers
     userController := adapters.NewUserController(createUserUC, getUserUC)
-    
+
     // Framework HTTP
     engine := gin.Default()
     infrastructure.SetupRoutes(engine, userController)
-    
+
     engine.Run(":8080")
 }
 ```
@@ -786,7 +786,7 @@ package main
 // El main decide qué implementación usar
 func main() {
     var repo services.UserRepository
-    
+
     // Usa PostgreSQL en producción
     if os.Getenv("ENV") == "prod" {
         repo = infrastructure.NewPostgresUserRepository(db)
@@ -794,7 +794,7 @@ func main() {
         // Usa in-memory en tests
         repo = infrastructure.NewInMemoryUserRepository()
     }
-    
+
     userService := services.NewUserService(repo)
     // userService funciona igual con cualquier implementación
 }
@@ -816,10 +816,10 @@ func (m *MockUserRepository) Save(user *domain.User) error {
 func TestUserService(t *testing.T) {
     mockRepo := new(MockUserRepository)
     mockRepo.On("Save", mock.Anything).Return(nil)
-    
+
     service := services.NewUserService(mockRepo)
     err := service.CreateUser("john@example.com", "John")
-    
+
     assert.NoError(t, err)
     mockRepo.AssertCalled(t, "Save", mock.Anything)
 }
@@ -864,14 +864,14 @@ func (ua *UserAggregate) AddRole(role *Role) error {
     if len(ua.Roles) >= 5 {
         return fmt.Errorf("usuario no puede tener más de 5 roles")
     }
-    
+
     // Validación: no roles duplicados
     for _, r := range ua.Roles {
         if r.ID == role.ID {
             return fmt.Errorf("rol ya asignado")
         }
     }
-    
+
     ua.Roles = append(ua.Roles, role)
     return nil
 }
@@ -921,7 +921,7 @@ type User struct {
 func (u *User) Create(email, name string) {
     u.ID = generateID()
     u.Email = email
-    
+
     u.events = append(u.events, &UserCreatedEvent{
         userID:    u.ID,
         email:     email,
@@ -963,12 +963,12 @@ func (r *SQLUserAggregateRepository) Save(user *User) error {
     if err != nil {
         return err
     }
-    
+
     // Guardar eventos de dominio
     for _, event := range user.GetEvents() {
         r.saveEvent(event)
     }
-    
+
     user.ClearEvents()
     return nil
 }
@@ -1025,14 +1025,14 @@ func (um *UserManager) CreateUser(name string) error {
     if len(name) < 3 {
         return errors.New("name too short")
     }
-    
+
     // Guardar en BD
     query := "INSERT INTO users (name) VALUES ($1)"
     _, err := um.db.Exec(query, name)
-    
+
     // Enviar email
     sendEmailTo("admin@example.com", "New user: "+name)
-    
+
     return err
 }
 
@@ -1102,15 +1102,15 @@ func TestOrderService_CreateOrder(t *testing.T) {
     mockRepo := &MockOrderRepository{}
     mockTax := &MockTaxCalculator{}
     mockPayment := &MockPaymentProcessor{}
-    
+
     mockTax.On("Calculate").Return(10.0)
     mockPayment.On("Process").Return(nil)
-    
+
     svc := OrderService{mockRepo, mockTax, mockPayment}
-    
+
     // Test solo la lógica de OrderService
     err := svc.CreateOrder(&OrderRequest{Amount: 100})
-    
+
     assert.NoError(t, err)
     mockTax.AssertCalled(t, "Calculate")
     mockPayment.AssertCalled(t, "Process")
@@ -1217,20 +1217,20 @@ func main() {
     // Adapters de entrada (Driven)
     httpAdapter := adapters.NewHTTPAdapter()
     grpcAdapter := adapters.NewGrpcAdapter()
-    
+
     // Adapters de salida (Driving)
     userRepo := infrastructure.NewPostgresUserRepository()
     emailSvc := infrastructure.NewGmailEmailService()
     cacheSvc := infrastructure.NewRedisCacheService()
-    
+
     // Aplicación (core)
     createUserUC := usecases.NewCreateUserUseCase(userRepo, emailSvc)
     getUserUC := usecases.NewGetUserUseCase(userRepo, cacheSvc)
-    
+
     // Conectar puertos al core
     httpAdapter.RegisterUseCase(createUserUC, getUserUC)
     grpcAdapter.RegisterUseCase(createUserUC, getUserUC)
-    
+
     // Iniciar servidores
     go httpAdapter.Start()
     go grpcAdapter.Start()
@@ -1346,7 +1346,7 @@ func NewService(db Database) *Service {
     repo := adapter.NewPostgresUserRepository(db)
     createUC := application.NewCreateUserUseCase(repo)
     controller := adapter.NewUserController(createUC)
-    
+
     return &Service{
         createUserUC: createUC,
         controller:   controller,
@@ -1447,7 +1447,7 @@ func TestCreateUserUseCase_WithDB(t *testing.T) {
     db := setupTestDB()
     repo := NewPostgresUserRepository(db)
     uc := NewCreateUserUseCase(repo)
-    
+
     resp, err := uc.Execute(&CreateUserRequest{...})
     assert.NoError(t, err)
 }
@@ -1456,7 +1456,7 @@ func TestCreateUserUseCase_WithDB(t *testing.T) {
 func TestUserCreationFlow(t *testing.T) {
     apiServer := startServer()
     client := newHTTPClient()
-    
+
     resp := client.POST("/api/users", struct{...}{})
     assert.Equal(t, 201, resp.StatusCode)
 }
@@ -1515,7 +1515,7 @@ Equipo grande (10+):
 
 ```go
 // ❌ ANTI-PATRÓN 1: Demasiadas capas
-// domain → entities → services → application → usecase → 
+// domain → entities → services → application → usecase →
 // handler → presenter → formatter → serializer
 // (Simplifica, las capas son conceptuales no físicas)
 
@@ -1574,6 +1574,7 @@ type UserSecurity struct {
 Implementa una aplicación simple de TODO con 3 capas:
 
 **Requisitos:**
+
 - Capa de Dominio: Entidad `Task`
 - Capa de Aplicación: Use case `CreateTask`
 - Capa de Presentación: HTTP handler
@@ -1625,11 +1626,11 @@ func (uc *CreateTaskUseCase) Execute(title string) (*Task, error) {
     if err != nil {
         return nil, err
     }
-    
+
     if err := uc.repo.Save(task); err != nil {
         return nil, err
     }
-    
+
     return task, nil
 }
 
@@ -1655,13 +1656,14 @@ func (r *InMemoryTaskRepository) GetAll() []*Task {
 func main() {
     repo := &InMemoryTaskRepository{tasks: make(map[string]*Task)}
     uc := NewCreateTaskUseCase(repo)
-    
+
     task, _ := uc.Execute("Aprender Clean Architecture")
     fmt.Printf("Tarea creada: %s (ID: %s)\n", task.Title, task.ID)
 }
 ```
 
 **Tu tarea:** Agrega:
+
 - Método para marcar tarea como completada
 - HTTP handler usando net/http
 - Tests unitarios para la entidad
@@ -1722,6 +1724,7 @@ func (o *OrderOrchestrator) Execute(req OrderRequest) error {
 ```
 
 **Tu tarea:**
+
 - Implementa cada use case
 - Crea tests para cada uno
 - Implementa el orquestador
@@ -1785,18 +1788,18 @@ func (uc *CreateUserUseCase) Execute(user *User) error {
 // Prueba
 func main() {
     var repo UserRepository
-    
+
     // Usa PostgreSQL
     repo = NewPostgresUserRepository(db)
-    
+
     // O MongoDB
     repo = NewMongoUserRepository(client)
-    
+
     // O Mock
     repo = &MockUserRepository{
         SaveFunc: func(u *User) error { return nil },
     }
-    
+
     // El use case no sabe la diferencia
     uc := NewCreateUserUseCase(repo)
     uc.Execute(user)
@@ -1877,7 +1880,7 @@ func TestShoppingCart(t *testing.T) {
         Items:  make([]*CartItem, 0),
         Status: StatusActive,
     }
-    
+
     // Tu tarea: Escribir tests
     // - Agregar item
     // - Remover item
@@ -1893,6 +1896,7 @@ func TestShoppingCart(t *testing.T) {
 Implementa un sistema de reservas de restaurante con Clean Architecture completa:
 
 **Requisitos:**
+
 1. Entidades: Restaurant, Reservation, User
 2. Use Cases: CreateReservation, CancelReservation, ListAvailableTimes
 3. Adaptadores: HTTP Controllers, PostgreSQL Repositories
@@ -1984,7 +1988,6 @@ Clean Architecture en Go proporciona:
 - Combinar con patrones de concurrencia de Go
 
 Clean Architecture no es dogma, sino guidelines. Adapta a tu contexto, pero mantén los principios fundamentales.
-
 
 ---
 

@@ -695,6 +695,7 @@ sub3 := string(runes[0:4])  // "Hola" (correcto)
 ### Ejercicio 1: Analizador de Texto
 
 Crea programa que:
+
 1. Reciba texto
 2. Cuente palabras, caracteres (real), bytes
 3. Encuentre palabra más larga
@@ -704,6 +705,7 @@ Crea programa que:
 ### Ejercicio 2: Formateador de Strings
 
 Crea programa que:
+
 1. Implemente función `center(s string, width int) string`
 2. Implemente `pad(s string, char rune, width int) string`
 3. Implemente `repeat(s string, times int) string`
@@ -713,6 +715,7 @@ Crea programa que:
 ### Ejercicio 3: Validador con Regex
 
 Crea programa que valide:
+
 1. Email válido
 2. Teléfono formato 123-456-7890
 3. Contraseña: 8+ caracteres, al menos 1 mayúscula, 1 minúscula, 1 número
@@ -722,6 +725,7 @@ Crea programa que valide:
 ### Ejercicio 4: Codificador/Decodificador
 
 Crea programa que:
+
 1. Implemente ROT13 (desplazar letras)
 2. Implemente cifrado de sustitución simple
 3. Implemente Base64 encoding/decoding
@@ -731,6 +735,7 @@ Crea programa que:
 ### Ejercicio 5: Procesador de Archivos de Texto
 
 Crea programa que:
+
 1. Lea línea de archivo
 2. Cuente líneas, palabras, caracteres
 3. Encuentre línea más larga
@@ -742,7 +747,6 @@ Crea programa que:
 **Fin del Capítulo 10**
 
 ---
-
 
 ---
 

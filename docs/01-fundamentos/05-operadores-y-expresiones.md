@@ -707,7 +707,7 @@ x--             // ✅ OK: postfix solo
 
 ```go
 x := 5
-y :=  ERROR: x++ no retorna valorx++        // 
+y :=  ERROR: x++ no retorna valorx++        //
 
 // Correcto
 y := x
@@ -720,7 +720,7 @@ x++             // ✅ Dos líneas
 C++:           Go:
 i++            i++             // Postfix OK
 ++i            ++i             // ❌ ERROR
-y = i++        y =  ERRORi++         // 
+y = i++        y =  ERRORi++         //
 i += 1         i += 1          // ✅ OK
 ```
 
@@ -842,6 +842,7 @@ y := 5.0 / 0.0  // +Inf (sin error)
 ### Ejercicio 1: Calculadora de Expresiones
 
 Crea programa que:
+
 1. Pida dos números
 2. Pida operador (+, -, *, /, %)
 3. Valide división por cero
@@ -851,6 +852,7 @@ Crea programa que:
 ### Ejercicio 2: Validador de Edad y Estado
 
 Crea programa que:
+
 1. Pida edad
 2. Pida ingresos
 3. Pida si tiene licencia
@@ -863,6 +865,7 @@ Crea programa que:
 ### Ejercicio 3: Manipulador de Bits
 
 Crea programa que:
+
 1. Pida número (0-255)
 2. Muestre su representación binaria
 3. Realice operaciones:
@@ -874,6 +877,7 @@ Crea programa que:
 ### Ejercicio 4: Comparador de Strings y Números
 
 Crea programa que:
+
 1. Pida dos valores (como strings)
 2. Intente convertir a números
 3. Si ambos son números: compara numéricamente
@@ -884,6 +888,7 @@ Crea programa que:
 ### Ejercicio 5: Detector de Números Especiales
 
 Crea programa que:
+
 1. Pida número flotante
 2. Valide si es:
    - Normal (número válido)
@@ -900,7 +905,6 @@ Crea programa que:
 **Fin del Capítulo 5**
 
 ---
-
 
 ---
 

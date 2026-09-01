@@ -112,6 +112,7 @@ Go tiene varias restricciones sobre punteros comparado con C:
 ```
 
 **Beneficios de los punteros "seguros" de Go:**
+
 - No hay punteros colgantes (dangling pointers)
 - No hay aritmética de punteros accidental
 - Garbage collection automático
@@ -236,7 +237,7 @@ func swap(a, b *int) {
 func main() {
     x := 10
     y := 20
-    
+
     fmt.Printf("Antes: x=%d, y=%d\n", x, y)  // Antes: x=10, y=20
     swap(&x, &y)
     fmt.Printf("Después: x=%d, y=%d\n", x, y) // Después: x=20, y=10
@@ -367,7 +368,7 @@ func procesar(p *int) error {
     if p == nil {
         return errors.New("puntero es nil")
     }
-    
+
     fmt.Println(*p)  // Seguro ahora
     return nil
 }
@@ -386,14 +387,14 @@ func mostrarUsuario(u *Usuario) {
         fmt.Println("Usuario es nil")
         return
     }
-    
+
     fmt.Printf("Usuario: %s (%s)\n", u.nombre, u.email)
 }
 
 func main() {
     var u *Usuario        // nil
     mostrarUsuario(u)     // Imprime: Usuario es nil
-    
+
     u = &Usuario{
         nombre: "Alice",
         email:  "alice@example.com",
@@ -456,14 +457,14 @@ func encontrarUsuario(id int) (*Usuario, error) {
     if id < 0 {
         return nil, errors.New("ID inválido")
     }
-    
+
     // Buscar en base de datos
     // ...
-    
+
     if noEncontrado {
         return nil, errors.New("usuario no encontrado")
     }
-    
+
     return &Usuario{id: id, nombre: "Alice"}, nil
 }
 
@@ -706,6 +707,7 @@ func correcto(s []int) {       // ✓ Claro
 Usar puntero a array cuando:
 
 1. **Necesitas cambiar la longitud del array** (aunque raro):
+
 ```go
 func intercambiarArrays(p1, p2 *[3]int) {
     temp := p1
@@ -716,6 +718,7 @@ func intercambiarArrays(p1, p2 *[3]int) {
 ```
 
 2. **Pasas arrays muy grandes y quieres evitar copias**:
+
 ```go
 // Forma 1: Copia el array completo
 func procesarArray(arr [1000000]int) {}   // ✗ Copia
@@ -728,6 +731,7 @@ func procesarArray(s []int) {}            // ✓ Mejor aún
 ```
 
 3. **Necesitas comparar arrays** (arrays grandes):
+
 ```go
 arr1 := [5]int{1, 2, 3, 4, 5}
 arr2 := [5]int{1, 2, 3, 4, 5}
@@ -764,7 +768,7 @@ func main() {
     arr := [5]int{1, 2, 3, 4, 5}
     duplicarElementos(&arr)
     fmt.Println(arr)  // [2 4 6 8 10]
-    
+
     // Con slice
     s := []int{1, 2, 3, 4, 5}
     duplicarElementos(s)
@@ -900,14 +904,14 @@ func procesarConPuntero(p *DatosGrandes) int {
 
 func main() {
     d := DatosGrandes{}
-    
+
     // Tiempo 1: 10ms (copia lenta)
     start := time.Now()
     for i := 0; i < 1000; i++ {
         procesarSinPuntero(d)
     }
     fmt.Println("Sin puntero:", time.Since(start))
-    
+
     // Tiempo 2: 1ms (sin copias)
     start = time.Now()
     for i := 0; i < 1000; i++ {
@@ -924,11 +928,11 @@ func saludar(p *Persona) error {
     if p == nil {
         return errors.New("persona es nil")
     }
-    
+
     if p.nombre == "" {
         return errors.New("nombre vacío")
     }
-    
+
     fmt.Printf("Hola, %s!\n", p.nombre)
     return nil
 }
@@ -992,7 +996,7 @@ func (p Punto) Trasladar(dx, dy float64) Punto {
 
 func main() {
     pt := Punto{3, 4}
-    
+
     fmt.Println(pt.Distancia())        // 5
     pt2 := pt.Trasladar(1, 1)
     fmt.Println(pt)                    // {3 4} (sin cambios)
@@ -1026,10 +1030,10 @@ func (s *Saldo) Retirar(monto float64) error {
 
 func main() {
     saldo := &Saldo{cantidad: 1000}
-    
+
     saldo.Depositar(500)       // Modifica el original
     fmt.Println(saldo.cantidad) // 1500
-    
+
     saldo.Retirar(200)         // Modifica el original
     fmt.Println(saldo.cantidad) // 1300
 }
@@ -1057,12 +1061,12 @@ func main() {
     p := &Persona{nombre: "Alice"}
     p.SaludarPuntero()      // ✓ Funciona
     p.SaludarValor()        // ✓ Go dereferencia automáticamente
-    
+
     // Con valor
     v := Persona{nombre: "Bob"}
     v.SaludarPuntero()      // ✓ Go toma dirección automáticamente
     v.SaludarValor()        // ✓ Funciona
-    
+
     // Equivalencias:
     // p.SaludarPuntero() ≡ (*p).SaludarPuntero()
     // p.SaludarValor() ≡ (*p).SaludarValor()
@@ -1073,6 +1077,7 @@ func main() {
 ### Regla: Elige Receiver por Puntero Cuando
 
 **1. El método modifica el receptor:**
+
 ```go
 func (p *Persona) CambiarNombre(nombre string) {
     p.nombre = nombre  // Modifica el original
@@ -1080,6 +1085,7 @@ func (p *Persona) CambiarNombre(nombre string) {
 ```
 
 **2. La estructura es grande (evitar copias):**
+
 ```go
 type DatosGrandes struct {
     array [10000]int
@@ -1093,6 +1099,7 @@ func (d DatosGrandes) Procesar() {}
 ```
 
 **3. Consistencia en el tipo:**
+
 ```go
 type Usuario struct {
     nombre string
@@ -1164,11 +1171,11 @@ func main() {
     lista := nuevaListaTareas()
     lista.Agregar("Estudiar Go")
     lista.Agregar("Hacer ejercicio")
-    
+
     fmt.Printf("Tareas: %d\n", lista.Contar())  // 2
-    
+
     lista.Completar(1)
-    
+
     for _, t := range lista.tareas {
         estado := "Pendiente"
         if t.completa {
@@ -1337,7 +1344,7 @@ func main() {
         &Imagen{nombre: "foto.jpg"},
         &PDF{nombre: "reporte.pdf"},
     }
-    
+
     if err := procesarArchivos(archivos); err != nil {
         log.Fatal(err)
     }
@@ -1396,16 +1403,16 @@ func main() {
     fmt.Println(unsafe.Sizeof(int(0)))        // 8 (en 64-bit)
     fmt.Println(unsafe.Sizeof(float64(0)))    // 8
     fmt.Println(unsafe.Sizeof(bool(false)))   // 1
-    
+
     // Structs
     type Usuario struct {
         id    int      // 8 bytes
         edad  int      // 8 bytes
         ativo bool     // 1 byte
     }
-    
+
     fmt.Println(unsafe.Sizeof(Usuario{}))     // 24 (con padding)
-    
+
     // Nota: El tamaño incluye padding para alineación
 }
 ```
@@ -1421,7 +1428,7 @@ type Persona struct {
 
 func main() {
     p := Persona{}
-    
+
     // Offset desde el inicio
     fmt.Println(unsafe.Offsetof(p.nombre))  // 0
     fmt.Println(unsafe.Offsetof(p.edad))    // 16
@@ -1440,18 +1447,18 @@ import (
 func main() {
     // Array
     arr := [5]int{10, 20, 30, 40, 50}
-    
+
     // Puntero al primer elemento
     p := &arr[0]
     fmt.Println(*p)  // 10
-    
+
     // Aritmética con unsafe
     // Obtener el siguiente elemento
     p2 := (*int)(unsafe.Pointer(
         uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(int(0)),
     ))
     fmt.Println(*p2)  // 20
-    
+
     // El tercer elemento
     p3 := (*int)(unsafe.Pointer(
         uintptr(unsafe.Pointer(p)) + 2*unsafe.Sizeof(int(0)),
@@ -1483,14 +1490,14 @@ func main() {
     // Crear instancia
     cuser := CUser{id: 42}
     copy(cuser.name[:], "Alice")
-    
+
     // Obtener puntero para pasar a C
     ptr := unsafe.Pointer(&cuser)
-    
+
     // En Go no podemos llamar C directamente aquí
     // Pero así se haría en cgo:
     // C.procesarUsuario((*C.CUser)(ptr))
-    
+
     fmt.Println("Puntero para C:", ptr)
 }
 ```
@@ -1508,16 +1515,16 @@ func main() {
 
     // Obtener los bytes que forman el entero
     p := &x
-    
+
     // Convertir a puntero de bytes
     bp := (*[4]byte)(unsafe.Pointer(p))
-    
+
     fmt.Printf("Bytes de %x: ", x)
     for _, b := range bp {
         fmt.Printf("%02x ", b)
     }
     fmt.Println()
-    
+
     // Salida en máquina little-endian:
     // Bytes de 12345678: 78 56 34 12
 }
@@ -1529,17 +1536,17 @@ func main() {
 func main() {
     // Convertir float64 a int64 de manera fea
     f := 3.14
-    
+
     // Forma segura:
     i := int64(f)  // 3
-    
+
     // Forma unsafe (cambiar representación binaria):
     fp := unsafe.Pointer(&f)
     ip := (*int64)(fp)
-    
+
     fmt.Println("Seguro:", i)        // 3
     fmt.Println("Unsafe:", *ip)      // 4614256656552045286 (basura)
-    
+
     // ✗ Los datos se interpretan de manera diferente
 }
 ```
@@ -1569,37 +1576,37 @@ func nuevoPool(tamaño int) *Pool {
     p := &Pool{
         objects: make([]*Objeto, tamaño),
     }
-    
+
     // Preallocar objetos
     for i := 0; i < tamaño; i++ {
         p.objects[i] = &Objeto{id: i}
     }
-    
+
     fmt.Printf("Pool: %d objetos prealloc, ~%d KB total\n",
         tamaño,
         (tamaño*int(unsafe.Sizeof(Objeto{})))/1024,
     )
-    
+
     return p
 }
 
 func (p *Pool) Obtener() *Objeto {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     if p.current >= len(p.objects) {
         p.current = 0  // Circular
     }
-    
+
     obj := p.objects[p.current]
     p.current++
-    
+
     return obj
 }
 
 func main() {
     pool := nuevoPool(100)
-    
+
     for i := 0; i < 5; i++ {
         obj := pool.Obtener()
         fmt.Printf("Objeto %d\n", obj.id)
@@ -1621,15 +1628,15 @@ type Usuario struct {
 func main() {
     u1 := Usuario{nombre: "Alice"}
     u2 := Usuario{nombre: "Alice"}
-    
+
     p1 := &u1
     p2 := &u2
     p3 := &u1
-    
+
     fmt.Println(p1 == p2)  // false (direcciones diferentes)
     fmt.Println(p1 == p3)  // true (misma dirección)
     fmt.Println(p1 != p2)  // true
-    
+
     // Comparar con nil
     var p *Usuario
     fmt.Println(p == nil)      // true
@@ -1644,16 +1651,16 @@ func main() {
 func main() {
     u1 := Usuario{nombre: "Alice"}
     u2 := Usuario{nombre: "Alice"}
-    
+
     p1 := &u1
     p2 := &u2
-    
+
     // Comparar punteros (dirección)
     fmt.Println(p1 == p2)      // false
-    
+
     // Comparar contenido
     fmt.Println(*p1 == *p2)    // true
-    
+
     // Para structs grandes, mejor usar reflect o métodos custom
     fmt.Println(reflect.DeepEqual(*p1, *p2))  // true
 }
@@ -1667,19 +1674,19 @@ func procesarUsuario(u *Usuario) error {
     if u == nil {
         return errors.New("usuario es nil")
     }
-    
+
     // Ahora es seguro desreferenciar
     if u.nombre == "" {
         return errors.New("nombre vacío")
     }
-    
+
     fmt.Println(u.nombre)
     return nil
 }
 
 func main() {
     var u *Usuario
-    
+
     if err := procesarUsuario(u); err != nil {
         fmt.Println("Error:", err)  // Error: usuario es nil
     }
@@ -1703,7 +1710,7 @@ func main() {
         &Usuario{id: 1, nombre: "Alice"},
         &Usuario{id: 2, nombre: "Bob"},
     }
-    
+
     u := encontrarUsuario(usuarios, 1)
     if u != nil {
         fmt.Println(u.nombre)
@@ -1808,11 +1815,11 @@ func guardarEnArchivo(ruta string, datos *[]byte) error {
     if datos == nil {
         return errors.New("datos nil")
     }
-    
+
     if len(*datos) == 0 {
         return errors.New("datos vacíos")
     }
-    
+
     return os.WriteFile(ruta, *datos, 0644)
 }
 
@@ -1821,7 +1828,7 @@ func guardarEnArchivo(ruta string, datos interface{}) error {
     if datos == nil {
         return errors.New("datos nil")
     }
-    
+
     // ...
     return nil
 }
@@ -1938,7 +1945,7 @@ func compararPunteros(p1, p2 *int) bool {
 
 // ✗ ANTI-PATRÓN: Aritmética de punteros innecesaria
 func siguienteElemento(arr *[10]int, idx int) *int {
-    p := (*int)(unsafe.Pointer(uintptr(unsafe.Pointer(&arr[0])) + 
+    p := (*int)(unsafe.Pointer(uintptr(unsafe.Pointer(&arr[0])) +
         uintptr(idx)*unsafe.Sizeof(int(0))))
     return p
 }
@@ -2005,12 +2012,14 @@ DEFAULT: Usa valor, añade puntero solo si lo necesitas
 **Objetivo:** Implementar una función que intercambie dos variables usando punteros.
 
 **Requisitos:**
+
 - Función `Swap(a, b *int)` que intercambia valores
 - Función `SwapStrings(a, b *string)` que intercambia strings
 - Función genérica usando `interface{}`
 - Pruebas con valores iniciales diferentes
 
 **Código Base:**
+
 ```go
 package main
 
@@ -2051,14 +2060,16 @@ func main() {
 **Objetivo:** Implementar una lista enlazada con inserción y eliminación.
 
 **Requisitos:**
+
 - Estructura `Nodo` con valor y puntero al siguiente
 - Estructura `Lista` que gestiona el inicio
-- Método `Agregar(valor int)` 
+- Método `Agregar(valor int)`
 - Método `Eliminar(valor int) bool`
 - Método `Imprimir()` que muestra todos los valores
 - Método `Buscar(valor int) *Nodo`
 
 **Código Base:**
+
 ```go
 package main
 
@@ -2091,16 +2102,16 @@ func (l *Lista) Buscar(valor int) *Nodo {
 
 func main() {
     lista := &Lista{}
-    
+
     lista.Agregar(10)
     lista.Agregar(20)
     lista.Agregar(30)
-    
+
     lista.Imprimir()  // 10 -> 20 -> 30 -> nil
-    
+
     lista.Eliminar(20)
     lista.Imprimir()  // 10 -> 30 -> nil
-    
+
     nodo := lista.Buscar(30)
     if nodo != nil {
         fmt.Printf("Encontrado: %d\n", nodo.valor)
@@ -2117,6 +2128,7 @@ func main() {
 **Objetivo:** Funciones que modifican structs complejos usando punteros.
 
 **Requisitos:**
+
 - Estructura `Empleado` con campos anidados
 - Función `ActualizarSalario(e *Empleado, nuevo float64) error`
 - Función `CambiarDepartamento(e *Empleado, dept string) error`
@@ -2124,6 +2136,7 @@ func main() {
 - Validación de datos (salario > 0, departamento válido)
 
 **Código Base:**
+
 ```go
 package main
 
@@ -2158,12 +2171,12 @@ func (e *Empleado) Mostrar() {
 func main() {
     emp := &Empleado{id: 1, nombre: "Alice", salario: 50000, departamento: "IT"}
     emp.Mostrar()
-    
+
     if err := ActualizarSalario(emp, 55000); err != nil {
         fmt.Println("Error:", err)
     }
     emp.Mostrar()
-    
+
     if err := emp.Incrementar(10); err != nil {
         fmt.Println("Error:", err)
     }
@@ -2180,6 +2193,7 @@ func main() {
 **Objetivo:** Usar `unsafe` para leer la representación binaria de una estructura.
 
 **Requisitos:**
+
 - Leer tamaño de estructura con `unsafe.Sizeof`
 - Leer offset de campos con `unsafe.Offsetof`
 - Convertir struct a bytes usando `unsafe.Pointer`
@@ -2187,6 +2201,7 @@ func main() {
 - IMPORTANTE: Documenta el peligro de unsafe
 
 **Código Base:**
+
 ```go
 package main
 
@@ -2211,19 +2226,19 @@ func estructuraABytes(r *Registro) []byte {
     // TODO: Convertir struct a bytes usando unsafe
     size := unsafe.Sizeof(*r)
     b := make([]byte, size)
-    
+
     // PELIGRO: Esta es una operación unsafe
     // No uses esto en código de producción
-    
+
     return b
 }
 
 func main() {
     inspeccionarEstructura()
-    
+
     reg := &Registro{id: 42, precio: 19.99, activo: true}
     bytes := estructuraABytes(reg)
-    
+
     fmt.Println("Bytes:", bytes)
     fmt.Printf("Tamaño: %d bytes\n", len(bytes))
 }
@@ -2240,6 +2255,7 @@ func main() {
 **Objetivo:** Crear un gestor de pool de objetos para evitar allocaciones repetidas.
 
 **Requisitos:**
+
 - Estructura `Pool` que prealoca N objetos
 - Estructura `Item` (simple, con datos simulados)
 - Método `Obtener()` que devuelve un Item del pool
@@ -2249,6 +2265,7 @@ func main() {
 - Mostrar comparación de performance: con pool vs sin pool
 
 **Código Base:**
+
 ```go
 package main
 
@@ -2276,9 +2293,9 @@ func NewPool(tamaño int) *Pool {
         disponibles: make(chan *Item, tamaño),
         total:       tamaño,
     }
-    
+
     // TODO: Preallocar items
-    
+
     return p
 }
 
@@ -2294,7 +2311,7 @@ func (p *Pool) Devolver(item *Item) {
 func (p *Pool) Estadísticas() {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     fmt.Printf("Pool: Total=%d, Usado=%d, Disponibles=%d, "+
         "Tamaño=~%dKB\n",
         p.total, p.usado, len(p.disponibles),
@@ -2305,15 +2322,15 @@ func (p *Pool) Estadísticas() {
 func main() {
     pool := NewPool(100)
     pool.Estadísticas()
-    
+
     // Simular múltiples goroutines
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 10; i++ {
         wg.Add(1)
         go func(id int) {
             defer wg.Done()
-            
+
             item := pool.Obtener()
             if item != nil {
                 item.id = id
@@ -2322,7 +2339,7 @@ func main() {
             }
         }(i)
     }
-    
+
     wg.Wait()
     pool.Estadísticas()
 }
@@ -2361,6 +2378,7 @@ Los punteros son herramientas poderosas en Go que permiten:
 4. **Interoperación con C** a través de cgo
 
 **Principios clave:**
+
 - Usa punteros solo cuando sea necesario
 - Verifica `nil` antes de desreferenciar
 - Prefiere value receivers por defecto

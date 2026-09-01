@@ -206,6 +206,7 @@ fmt.Println(edades["Carlos"])   // 0 (cero valor, sin panic)
 ```
 
 **Importante:**
+
 - NO hay panic si la clave no existe
 - Retorna cero valor del tipo de valor
 - Puede ser confuso: ¿existe clave con valor 0, o no existe?
@@ -557,6 +558,7 @@ fmt.Println(edades)  // map[Juan:25 María:30]
 ### Cuándo Usar Map
 
 **Usa Map cuando:**
+
 ```
  Estructura de datos es dinámica/flexible
  Las claves son desconocidas en advance
@@ -578,6 +580,7 @@ respuesta := map[string]interface{}{
 ### Cuándo Usar Struct
 
 **Usa Struct cuando:**
+
 ```
  Estructura de datos es FIJA/conocida
  Campos específicos con tipos específicos
@@ -806,6 +809,7 @@ delete(visitado, "María")
 ### Ejercicio 1: Gestor de Inventario
 
 Crea programa que:
+
 1. Use map[string]int para productos → cantidad
 2. Permitir: agregar, remover, vender producto
 3. Mostrar inventario total
@@ -815,6 +819,7 @@ Crea programa que:
 ### Ejercicio 2: Analizador de Frecuencia
 
 Crea programa que:
+
 1. Reciba texto
 2. Cuente frecuencia de cada palabra
 3. Ignore mayúsculas/minúsculas
@@ -824,6 +829,7 @@ Crea programa que:
 ### Ejercicio 3: Traductor de Idiomas
 
 Crea programa que:
+
 1. Use map[string]map[string]string para idiomas
 2. Estructura: idioma → (palabra_origen → palabra_traducida)
 3. Traducir frase palabra por palabra
@@ -833,6 +839,7 @@ Crea programa que:
 ### Ejercicio 4: Caché Simple
 
 Crea programa que:
+
 1. Implemente caché con map[string]interface{}
 2. Funciones: Get, Set, Delete, Clear, Exists
 3. Simule cálculos costosos almacenando resultados
@@ -842,6 +849,7 @@ Crea programa que:
 ### Ejercicio 5: Análisis de JSON Dinámico
 
 Crea programa que:
+
 1. Decodifique JSON en map[string]interface{}
 2. Navegue estructura (puede ser anidada)
 3. Busque clave específica recursivamente
@@ -853,7 +861,6 @@ Crea programa que:
 **Fin del Capítulo 9**
 
 ---
-
 
 ---
 

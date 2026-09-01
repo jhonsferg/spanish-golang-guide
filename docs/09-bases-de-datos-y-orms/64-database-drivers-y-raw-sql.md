@@ -64,7 +64,7 @@ El paquete `database/sql` actúa como un adaptador universal, permitiendo que tu
 
 ```go
 // ============ RAW SQL (database/sql) ============
-row := db.QueryRowContext(ctx, 
+row := db.QueryRowContext(ctx,
     "SELECT id, name, email FROM users WHERE id = $1", userID)
 var u User
 if err := row.Scan(&u.ID, &u.Name, &u.Email); err != nil {
@@ -117,7 +117,7 @@ u, err := q.GetUserByID(ctx, userID)
  • Múltiples drivers de DB                    │
  • Modelo de datos complejo                   │
  • Prototipado rápido                        │
- Equipo sin expertise en SQL               │ 
+ Equipo sin expertise en SQL               │
  • CRUD straightforward                       │
 
 
@@ -159,18 +159,18 @@ u, err := q.GetUserByID(ctx, userID)
 // ✅ Con raw SQL:
 const complexQuery = `
 WITH user_stats AS (
-    SELECT 
+    SELECT
         u.id,
         u.name,
         COUNT(DISTINCT o.id) as total_orders,
-        SUM(o.total) FILTER (WHERE o.created_at > NOW() - INTERVAL '30 days') 
+        SUM(o.total) FILTER (WHERE o.created_at > NOW() - INTERVAL '30 days')
             as recent_spend,
         ROW_NUMBER() OVER (ORDER BY SUM(o.total) DESC) as rank
     FROM users u
     LEFT JOIN orders o ON o.user_id = u.id
     GROUP BY u.id, u.name
 )
-SELECT 
+SELECT
     s.id,
     s.name,
     s.total_orders,
@@ -200,13 +200,13 @@ rows, err := db.QueryContext(ctx, complexQuery)
 // Driver pq (github.com/lib/pq)
 import _ "github.com/lib/pq"
 
-db, err := sql.Open("postgres", 
+db, err := sql.Open("postgres",
     "user=postgres password=pass dbname=mydb sslmode=disable")
 
 // Driver pgx (github.com/jackc/pgx/v5)
 import _ "github.com/jackc/pgx/v5/stdlib"
 
-db, err := sql.Open("pgx", 
+db, err := sql.Open("pgx",
     "postgres://user:pass@localhost/mydb")
 ```
 
@@ -227,7 +227,7 @@ db, err := sql.Open("pgx",
 // Driver github.com/go-sql-driver/mysql
 import _ "github.com/go-sql-driver/mysql"
 
-db, err := sql.Open("mysql", 
+db, err := sql.Open("mysql",
     "user:password@tcp(localhost:3306)/mydb?parseTime=true")
 ```
 
@@ -289,13 +289,13 @@ import (
 func main() {
     // Connection string completo
     connStr := "postgres://user:password@localhost:5432/mydb?sslmode=disable"
-    
+
     db, err := sql.Open("postgres", connStr)
     if err != nil {
         log.Fatal(err)
     }
     defer db.Close()
-    
+
     // Verificar conexión
     if err := db.Ping(); err != nil {
         log.Fatal(err)
@@ -314,18 +314,18 @@ func main() {
 // Trabajar con arrays PostgreSQL
 var tags []string
 err := db.QueryRow(
-    "SELECT tags FROM articles WHERE id = $1", 
+    "SELECT tags FROM articles WHERE id = $1",
     articleID).Scan(pq.Array(&tags))
 
 // Trabajar con JSON
 var metadata map[string]interface{}
 err := db.QueryRow(
-    "SELECT metadata FROM users WHERE id = $1", 
+    "SELECT metadata FROM users WHERE id = $1",
     userID).Scan(pq.JSONArray(&metadata))
 
 // UNNEST para expandir arrays
 rows, err := db.Query(
-    "SELECT unnest($1::text[]) as tag", 
+    "SELECT unnest($1::text[]) as tag",
     pq.Array([]string{"go", "rust", "python"}))
 ```
 
@@ -384,24 +384,24 @@ type User struct {
 }
 
 func main() {
-    conn, err := pgx.Connect(context.Background(), 
+    conn, err := pgx.Connect(context.Background(),
         "postgres://user:pass@localhost/mydb")
     if err != nil {
         panic(err)
     }
     defer conn.Close(context.Background())
-    
+
     // QueryRow
     var u User
     err = conn.QueryRow(context.Background(),
         "SELECT id, name, email FROM users WHERE id = $1", 42).
         Scan(&u.ID, &u.Name, &u.Email)
-    
+
     // Query con rows.Next()
     rows, err := conn.Query(context.Background(),
         "SELECT id, name FROM users")
     defer rows.Close()
-    
+
     for rows.Next() {
         var id int
         var name string
@@ -409,12 +409,12 @@ func main() {
             panic(err)
         }
     }
-    
+
     // Batch operations (muy rpido)
     batch := &pgx.Batch{}
     batch.Queue("INSERT INTO users(name) VALUES($1)", "Alice")
     batch.Queue("INSERT INTO users(name) VALUES($1)", "Bob")
-    
+
     results := conn.SendBatch(context.Background(), batch)
     defer results.Close()
 }
@@ -430,11 +430,11 @@ rows := [][]interface{}{
 }
 
 _, err := conn.CopyFromRows(ctx, pgx.Identifier{"public", "users"},
-    []string{"id", "name", "email"}, 
+    []string{"id", "name", "email"},
     pgx.CopyFromRows(rows))
 
 // Prepared statements con mejor caching
-stmt, err := conn.Prepare(ctx, "select_user", 
+stmt, err := conn.Prepare(ctx, "select_user",
     "SELECT * FROM users WHERE id = $1")
 row := conn.QueryRow(ctx, stmt, userID)
 
@@ -457,7 +457,7 @@ import (
 
 // Connection string
 // [username[:password]@][protocol[(address)]]/dbname[?param=value]
-db, err := sql.Open("mysql", 
+db, err := sql.Open("mysql",
     "root:password@tcp(localhost:3306)/mydb?parseTime=true")
 ```
 
@@ -489,22 +489,22 @@ type Article struct {
 }
 
 func main() {
-    db, err := sql.Open("mysql", 
+    db, err := sql.Open("mysql",
         "user:pass@tcp(localhost:3306)/mydb?parseTime=true")
     if err != nil {
         log.Fatal(err)
     }
     defer db.Close()
-    
+
     var a Article
     row := db.QueryRow(
         "SELECT id, title, created_at FROM articles WHERE id = ?", 1)
-    
+
     // Nota: MySQL usa ? para placeholders, no $1
     if err := row.Scan(&a.ID, &a.Title, &a.CreatedAt); err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("%+v\n", a)
 }
 ```
@@ -845,7 +845,7 @@ defer cancel()
 row := db.QueryRowContext(ctx, "SELECT * FROM users WHERE id = $1", id)
 
 // Exec con timeout
-_, err := db.ExecContext(ctx, 
+_, err := db.ExecContext(ctx,
     "INSERT INTO logs(message) VALUES($1)", msg)
 
 // Timeout para toda una transacción
@@ -884,7 +884,7 @@ func startHealthCheck(db *sql.DB, interval time.Duration) {
     go func() {
         ticker := time.NewTicker(interval)
         defer ticker.Stop()
-        
+
         for range ticker.C {
             if err := healthCheck(db); err != nil {
                 log.Printf("Health check failed: %v", err)
@@ -937,11 +937,11 @@ defer rows.Close()
 for rows.Next() {
     var id int
     var name, email string
-    
+
     if err := rows.Scan(&id, &name, &email); err != nil {
         return err
     }
-    
+
     fmt.Printf("User: %d, %s, %s\n", id, name, email)
 }
 
@@ -957,7 +957,7 @@ if err = rows.Err(); err != nil {
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 defer cancel()
 
-row := db.QueryRowContext(ctx, 
+row := db.QueryRowContext(ctx,
     "SELECT name FROM users WHERE id = $1", id)
 var name string
 if err := row.Scan(&name); err != nil {
@@ -1048,7 +1048,7 @@ for _, id := range []int{1, 2, 3, 4, 5} {
 **Con Context:**
 
 ```go
-stmt, err := db.PrepareContext(ctx, 
+stmt, err := db.PrepareContext(ctx,
     "INSERT INTO users(name, email) VALUES($1, $2)")
 if err != nil {
     return err
@@ -1133,7 +1133,7 @@ err := db.QueryRow(
 ```go
 // INNER JOIN
 const query = `
-SELECT 
+SELECT
     u.id, u.name,
     COUNT(DISTINCT o.id) as order_count,
     SUM(o.total) as total_spent
@@ -1155,13 +1155,13 @@ for rows.Next() {
     var name string
     var orderCount int
     var totalSpent float64
-    
+
     err := rows.Scan(&id, &name, &orderCount, &totalSpent)
     if err != nil {
         log.Println(err)
         continue
     }
-    
+
     fmt.Printf("%s has %d orders totaling $%.2f\n",
         name, orderCount, totalSpent)
 }
@@ -1171,7 +1171,7 @@ for rows.Next() {
 
 ```go
 const query = `
-SELECT 
+SELECT
     u.id,
     u.name,
     COUNT(DISTINCT o.id)::INTEGER as order_count
@@ -1208,7 +1208,7 @@ return rows.Err()
 // Common Table Expressions para queries complejas
 const query = `
 WITH ranked_users AS (
-    SELECT 
+    SELECT
         id,
         name,
         email,
@@ -1218,7 +1218,7 @@ WITH ranked_users AS (
     WHERE active = true
 ),
 top_spenders AS (
-    SELECT 
+    SELECT
         u.id,
         u.name,
         SUM(o.total) as total_spent
@@ -1228,7 +1228,7 @@ top_spenders AS (
     ORDER BY total_spent DESC
     LIMIT 100
 )
-SELECT 
+SELECT
     ru.id,
     ru.name,
     ru.email,
@@ -1268,30 +1268,30 @@ return rows.Err()
 ```go
 // Window functions para análisis avanzado
 const query = `
-SELECT 
+SELECT
     order_id,
     customer_id,
     amount,
     order_date,
     -- Running total
     SUM(amount) OVER (
-        PARTITION BY customer_id 
-        ORDER BY order_date 
+        PARTITION BY customer_id
+        ORDER BY order_date
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) as running_total,
-    
+
     -- Rank within customer
     RANK() OVER (
-        PARTITION BY customer_id 
+        PARTITION BY customer_id
         ORDER BY amount DESC
     ) as amount_rank,
-    
+
     -- Year-over-year comparison
     LAG(amount) OVER (
         PARTITION BY customer_id, DATE_TRUNC('month', order_date)::DATE
         ORDER BY order_date
     ) as previous_month_amount,
-    
+
     -- Percentile
     PERCENT_RANK() OVER (
         ORDER BY amount
@@ -1340,7 +1340,7 @@ type Document struct {
 
 // JSON extract
 const queryJSON = `
-SELECT 
+SELECT
     id,
     title,
     data,
@@ -1356,19 +1356,19 @@ defer rows.Close()
 for rows.Next() {
     var d Document
     var tagsJSON []byte
-    
+
     err := rows.Scan(&d.ID, &d.Title, &d.Data, &tagsJSON)
     if err != nil {
         return err
     }
-    
+
     // Unmarshaling JSON
     json.Unmarshal(tagsJSON, &d.Tags)
 }
 
 // JSON aggregation
 const aggregateJSON = `
-SELECT 
+SELECT
     category,
     jsonb_agg(jsonb_build_object(
         'id', id,
@@ -1417,7 +1417,7 @@ err := db.QueryRow(
 
 // Array operations en SQL
 const query = `
-SELECT 
+SELECT
     id,
     title,
     tags,
@@ -1524,16 +1524,16 @@ import "fmt"
 
 func GetUser(db *sql.DB, id int) (*User, error) {
     row := db.QueryRow("SELECT id, name FROM users WHERE id = $1", id)
-    
+
     var u User
     if err := row.Scan(&u.ID, &u.Name); err != nil {
         if err == sql.ErrNoRows {
-            return nil, fmt.Errorf("getting user: %w", 
+            return nil, fmt.Errorf("getting user: %w",
                 fmt.Errorf("user not found"))
         }
         return nil, fmt.Errorf("getting user: %w", err)
     }
-    
+
     return &u, nil
 }
 
@@ -1541,7 +1541,7 @@ func GetUser(db *sql.DB, id int) (*User, error) {
 u, err := GetUser(db, 1)
 if err != nil {
     log.Printf("Error: %v", err)  // Error: getting user: user not found
-    
+
     // Unwrap para checking
     if errors.Is(err, sql.ErrNoRows) {
         // ...
@@ -1558,45 +1558,45 @@ import (
 
 func queryWithRetry(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
     var rows *sql.Rows
-    
+
     // Exponential backoff retry
     err := backoff.Retry(func() error {
         var err error
         rows, err = db.Query(query, args...)
         return err
     }, backoff.NewExponentialBackOff())
-    
+
     return rows, err
 }
 
 // Manual retry con jitter
-func queryWithManualRetry(db *sql.DB, maxRetries int, 
+func queryWithManualRetry(db *sql.DB, maxRetries int,
     query string, args ...interface{}) (*sql.Rows, error) {
-    
+
     var rows *sql.Rows
     var lastErr error
-    
+
     for i := 0; i < maxRetries; i++ {
         var err error
         rows, err = db.Query(query, args...)
-        
+
         if err == nil {
             return rows, nil
         }
-        
+
         lastErr = err
-        
+
         // Solo retry en ciertos errores
         if !isRetryableError(err) {
             return nil, err
         }
-        
+
         // Exponential backoff con jitter
         backoffDuration := time.Duration(math.Pow(2, float64(i))) * time.Second
         jitter := time.Duration(rand.Intn(100)) * time.Millisecond
         time.Sleep(backoffDuration + jitter)
     }
-    
+
     return nil, fmt.Errorf("retry exceeded: %w", lastErr)
 }
 
@@ -1606,7 +1606,7 @@ func isRetryableError(err error) bool {
     if errors.As(err, &netErr) && netErr.Timeout() {
         return true
     }
-    
+
     errStr := err.Error()
     retryableErrors := []string{
         "connection refused",
@@ -1614,13 +1614,13 @@ func isRetryableError(err error) bool {
         "i/o timeout",
         "EOF",
     }
-    
+
     for _, pattern := range retryableErrors {
         if strings.Contains(strings.ToLower(errStr), pattern) {
             return true
         }
     }
-    
+
     return false
 }
 ```
@@ -1632,7 +1632,7 @@ func isRetryableError(err error) bool {
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 defer cancel()
 
-row := db.QueryRowContext(ctx, 
+row := db.QueryRowContext(ctx,
     "SELECT id FROM users WHERE id = $1", userID)
 
 var id int
@@ -1667,20 +1667,20 @@ defer tx.Rollback()
 ### 64.7.1 BeginTx Pattern
 
 ```go
-func TransferMoney(ctx context.Context, db *sql.DB, 
+func TransferMoney(ctx context.Context, db *sql.DB,
     fromUserID int, toUserID int, amount float64) error {
-    
+
     tx, err := db.BeginTx(ctx, &sql.TxOptions{})
     if err != nil {
         return fmt.Errorf("begin tx: %w", err)
     }
-    
+
     defer func() {
         if err != nil {
             tx.Rollback()
         }
     }()
-    
+
     // Debit from source account
     _, err = tx.ExecContext(ctx,
         "UPDATE accounts SET balance = balance - $1 WHERE user_id = $2",
@@ -1688,7 +1688,7 @@ func TransferMoney(ctx context.Context, db *sql.DB,
     if err != nil {
         return fmt.Errorf("debit: %w", err)
     }
-    
+
     // Credit to destination account
     _, err = tx.ExecContext(ctx,
         "UPDATE accounts SET balance = balance + $1 WHERE user_id = $2",
@@ -1696,7 +1696,7 @@ func TransferMoney(ctx context.Context, db *sql.DB,
     if err != nil {
         return fmt.Errorf("credit: %w", err)
     }
-    
+
     // Record transaction
     _, err = tx.ExecContext(ctx,
         "INSERT INTO transaction_log(from_user, to_user, amount) VALUES($1, $2, $3)",
@@ -1704,12 +1704,12 @@ func TransferMoney(ctx context.Context, db *sql.DB,
     if err != nil {
         return fmt.Errorf("record transaction: %w", err)
     }
-    
+
     // Commit
     if err = tx.Commit(); err != nil {
         return fmt.Errorf("commit: %w", err)
     }
-    
+
     return nil
 }
 ```
@@ -1788,9 +1788,9 @@ tx, _ := db.BeginTx(ctx, &sql.TxOptions{
  • Performance: Excelente                                    │
                                                               │
  READ COMMITTED (PostgreSQL default):                         │
- Dirty reads: NO                                           │ 
+ Dirty reads: NO                                           │
  • Non-repeatable reads: SÍ                                  │
- Phantom reads: SÍ                                         │ 
+ Phantom reads: SÍ                                         │
  • Performance: Muy bueno                                    │
                                                               │
  REPEATABLE READ:                                             │
@@ -1799,11 +1799,11 @@ tx, _ := db.BeginTx(ctx, &sql.TxOptions{
  • Phantom reads: SÍ (en teoría, PostgreSQL previene)        │
  • Performance: Bueno                                        │
                                                               │
- SERIALIZABLE:                                                
+ SERIALIZABLE:  
  • Dirty reads: NO                                           │
- • Non-repeatable NO reads:                                  
+ • Non-repeatable NO reads:  
  • Phantom reads: NO                                         │
- • Performance: Puede lento ser                              
+ • Performance: Puede lento ser  
                                                               │
 
 ```
@@ -1844,22 +1844,22 @@ return tx.Commit().Error
 ### 64.7.5 Deadlock Handling
 
 ```go
-func withDeadlockRetry(ctx context.Context, db *sql.DB, 
+func withDeadlockRetry(ctx context.Context, db *sql.DB,
     fn func(*sql.Tx) error) error {
-    
+
     const maxRetries = 3
     var lastErr error
-    
+
     for i := 0; i < maxRetries; i++ {
         tx, err := db.BeginTx(ctx, nil)
         if err != nil {
             return err
         }
-        
+
         err = fn(tx)
         if err != nil {
             tx.Rollback()
-            
+
             // Detectar deadlock (PostgreSQL error code 40P01)
             if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "40P01" {
                 lastErr = err
@@ -1868,10 +1868,10 @@ func withDeadlockRetry(ctx context.Context, db *sql.DB,
                 time.Sleep(backoff)
                 continue
             }
-            
+
             return err
         }
-        
+
         if err = tx.Commit(); err != nil {
             // Si commit falló por deadlock, retry
             if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "40P01" {
@@ -1880,10 +1880,10 @@ func withDeadlockRetry(ctx context.Context, db *sql.DB,
             }
             return err
         }
-        
+
         return nil
     }
-    
+
     return fmt.Errorf("deadlock retry exceeded: %w", lastErr)
 }
 
@@ -1961,7 +1961,7 @@ CREATE INDEX idx_orders_user_date ON orders(user_id, created_at DESC);
 
 // Índice para búsqueda full-text (PostgreSQL)
 _, err = db.Exec(`
-CREATE INDEX idx_articles_title_tsvector ON articles 
+CREATE INDEX idx_articles_title_tsvector ON articles
 USING GIN(to_tsvector('english', title));
 `)
 
@@ -2005,7 +2005,7 @@ import (
 func benchmarkPoolConfig(db *sql.DB, concurrency int) time.Duration {
     start := time.Now()
     var wg sync.WaitGroup
-    
+
     for i := 0; i < concurrency; i++ {
         wg.Add(1)
         go func() {
@@ -2016,7 +2016,7 @@ func benchmarkPoolConfig(db *sql.DB, concurrency int) time.Duration {
             }
         }()
     }
-    
+
     wg.Wait()
     return time.Since(start)
 }
@@ -2067,7 +2067,7 @@ for i := 0; i < 1000; i++ {
     rows[i] = []interface{}{i, fmt.Sprintf("User %d", i)}
 }
 
-_, err := conn.CopyFromRows(ctx, pgx.Identifier{"users"}, 
+_, err := conn.CopyFromRows(ctx, pgx.Identifier{"users"},
     []string{"id", "name"}, pgx.CopyFromRows(rows))
 ```
 
@@ -2107,24 +2107,24 @@ import (
     "database/sql"
     "fmt"
     "testing"
-    
+
     _ "github.com/lib/pq"
 )
 
 // Helper para crear DB de test
 func setupTestDB(t *testing.T) *sql.DB {
     connStr := "postgres://test:test@localhost:5432/testdb"
-    
+
     db, err := sql.Open("postgres", connStr)
     if err != nil {
         t.Fatalf("Cannot connect to test database: %v", err)
     }
-    
+
     // Verificar conexión
     if err := db.Ping(); err != nil {
         t.Fatalf("Test database unreachable: %v", err)
     }
-    
+
     // Limpiar tables existentes
     cleanupSQL := `
     DROP TABLE IF EXISTS users CASCADE;
@@ -2133,7 +2133,7 @@ func setupTestDB(t *testing.T) *sql.DB {
     if _, err := db.Exec(cleanupSQL); err != nil {
         t.Fatalf("Failed to cleanup: %v", err)
     }
-    
+
     // Crear schema
     schemaSQL := `
     CREATE TABLE users (
@@ -2142,7 +2142,7 @@ func setupTestDB(t *testing.T) *sql.DB {
         email VARCHAR(100) UNIQUE NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
     );
-    
+
     CREATE TABLE orders (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id),
@@ -2150,22 +2150,22 @@ func setupTestDB(t *testing.T) *sql.DB {
         created_at TIMESTAMP DEFAULT NOW()
     );
     `
-    
+
     if _, err := db.Exec(schemaSQL); err != nil {
         t.Fatalf("Failed to create schema: %v", err)
     }
-    
+
     t.Cleanup(func() {
         db.Close()
     })
-    
+
     return db
 }
 
 // Test example
 func TestGetUser(t *testing.T) {
     db := setupTestDB(t)
-    
+
     // Insert test data
     _, err := db.Exec(
         "INSERT INTO users(name, email) VALUES($1, $2)",
@@ -2173,12 +2173,12 @@ func TestGetUser(t *testing.T) {
     if err != nil {
         t.Fatalf("Failed to insert test data: %v", err)
     }
-    
+
     // Test the function
     var name string
     err = db.QueryRow("SELECT name FROM users WHERE email = $1",
         "alice@example.com").Scan(&name)
-    
+
     if err != nil || name != "Alice" {
         t.Errorf("GetUser failed: got %s, want Alice", name)
     }
@@ -2195,7 +2195,7 @@ import (
     "database/sql"
     "fmt"
     "testing"
-    
+
     "github.com/testcontainers/testcontainers-go"
     "github.com/testcontainers/testcontainers-go/wait"
 )
@@ -2212,8 +2212,8 @@ func setupPostgresContainer(ctx context.Context, t *testing.T) *sql.DB {
         },
         WaitingFor: wait.ForListeningPort("5432/tcp"),
     }
-    
-    container, err := testcontainers.GenericContainer(ctx, 
+
+    container, err := testcontainers.GenericContainer(ctx,
         testcontainers.GenericContainerRequest{
             ContainerRequest: req,
             Started:          true,
@@ -2221,28 +2221,28 @@ func setupPostgresContainer(ctx context.Context, t *testing.T) *sql.DB {
     if err != nil {
         t.Fatalf("Failed to create container: %v", err)
     }
-    
+
     t.Cleanup(func() {
         container.Terminate(ctx)
     })
-    
+
     // Get connection string
     host, _ := container.Host(ctx)
     port, _ := container.MappedPort(ctx, "5432")
-    
+
     connStr := fmt.Sprintf(
         "postgres://test:test@%s:%s/testdb?sslmode=disable",
         host, port.Port())
-    
+
     db, _ := sql.Open("postgres", connStr)
-    
+
     // Wait for DB to be ready
     for i := 0; i < 10; i++ {
         if err := db.Ping(); err == nil {
             return db
         }
     }
-    
+
     t.Fatal("Database never became ready")
     return nil
 }
@@ -2251,7 +2251,7 @@ func TestWithContainer(t *testing.T) {
     ctx := context.Background()
     db := setupPostgresContainer(ctx, t)
     defer db.Close()
-    
+
     // Your tests here
 }
 ```
@@ -2277,11 +2277,11 @@ func (f *Fixture) InsertUser(name, email string) int {
     err := f.DB.QueryRow(
         "INSERT INTO users(name, email) VALUES($1, $2) RETURNING id",
         name, email).Scan(&id)
-    
+
     if err != nil {
         f.t.Fatalf("Failed to insert user: %v", err)
     }
-    
+
     return id
 }
 
@@ -2290,11 +2290,11 @@ func (f *Fixture) InsertOrder(userID int, total float64) int {
     err := f.DB.QueryRow(
         "INSERT INTO orders(user_id, total) VALUES($1, $2) RETURNING id",
         userID, total).Scan(&id)
-    
+
     if err != nil {
         f.t.Fatalf("Failed to insert order: %v", err)
     }
-    
+
     return id
 }
 
@@ -2302,11 +2302,11 @@ func (f *Fixture) GetUserOrders(userID int) int {
     var count int
     err := f.DB.QueryRow(
         "SELECT COUNT(*) FROM orders WHERE user_id = $1", userID).Scan(&count)
-    
+
     if err != nil {
         f.t.Fatalf("Failed to get order count: %v", err)
     }
-    
+
     return count
 }
 
@@ -2314,11 +2314,11 @@ func (f *Fixture) GetUserOrders(userID int) int {
 func TestUserOrders(t *testing.T) {
     db := setupTestDB(t)
     fixture := &Fixture{DB: db, t: t}
-    
+
     userID := fixture.InsertUser("Bob", "bob@example.com")
     fixture.InsertOrder(userID, 100.00)
     fixture.InsertOrder(userID, 200.00)
-    
+
     if count := fixture.GetUserOrders(userID); count != 2 {
         t.Errorf("Expected 2 orders, got %d", count)
     }
@@ -2340,28 +2340,28 @@ import (
 // Integration test con transacción completa
 func TestTransferMoney(t *testing.T) {
     db := setupTestDB(t)
-    
+
     // Setup
     db.Exec("INSERT INTO users(name, email) VALUES($1, $2)", "Alice", "alice@example.com")
     db.Exec("INSERT INTO users(name, email) VALUES($1, $2)", "Bob", "bob@example.com")
-    
+
     _, _ = db.Exec("ALTER TABLE users ADD COLUMN balance DECIMAL(10,2) DEFAULT 0")
     _, _ = db.Exec("UPDATE users SET balance = 1000 WHERE name = 'Alice'")
     _, _ = db.Exec("UPDATE users SET balance = 0 WHERE name = 'Bob'")
-    
+
     // Test transaction
     ctx := context.Background()
     tx, _ := db.BeginTx(ctx, nil)
-    
+
     tx.ExecContext(ctx, "UPDATE users SET balance = balance - $1 WHERE name = $2", 100, "Alice")
     tx.ExecContext(ctx, "UPDATE users SET balance = balance + $1 WHERE name = $2", 100, "Bob")
     tx.Commit()
-    
+
     // Verify
     var aliceBalance, bobBalance float64
     db.QueryRow("SELECT balance FROM users WHERE name = 'Alice'").Scan(&aliceBalance)
     db.QueryRow("SELECT balance FROM users WHERE name = 'Bob'").Scan(&bobBalance)
-    
+
     if aliceBalance != 900 || bobBalance != 100 {
         t.Errorf("Transfer failed: Alice=%v, Bob=%v", aliceBalance, bobBalance)
     }
@@ -2370,19 +2370,19 @@ func TestTransferMoney(t *testing.T) {
 // Stress test con concurrencia
 func TestConcurrentInserts(t *testing.T) {
     db := setupTestDB(t)
-    
+
     numGoroutines := 10
     insertsPerGoroutine := 100
-    
+
     done := make(chan error, numGoroutines)
-    
+
     for i := 0; i < numGoroutines; i++ {
         go func(id int) {
             for j := 0; j < insertsPerGoroutine; j++ {
                 _, err := db.Exec(
                     "INSERT INTO users(name, email) VALUES($1, $2)",
                     "User", "user@example.com")
-                
+
                 if err != nil {
                     done <- err
                     return
@@ -2391,16 +2391,16 @@ func TestConcurrentInserts(t *testing.T) {
             done <- nil
         }(i)
     }
-    
+
     for i := 0; i < numGoroutines; i++ {
         if err := <-done; err != nil {
             t.Fatalf("Insert error: %v", err)
         }
     }
-    
+
     var count int
     db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
-    
+
     expected := numGoroutines * insertsPerGoroutine
     if count != expected {
         t.Errorf("Expected %d users, got %d", expected, count)
@@ -2416,7 +2416,7 @@ package data
 import (
     "database/sql/driver"
     "testing"
-    
+
     "github.com/DATA-DOG/go-sqlmock"
 )
 
@@ -2427,29 +2427,29 @@ func TestQueryWithMock(t *testing.T) {
         t.Fatalf("Failed to create mock: %v", err)
     }
     defer db.Close()
-    
+
     // Expect a query
     rows := sqlmock.NewRows([]string{"id", "name", "email"}).
         AddRow(1, "Alice", "alice@example.com").
         AddRow(2, "Bob", "bob@example.com")
-    
+
     mock.ExpectQuery("SELECT id, name, email FROM users").
         WillReturnRows(rows)
-    
+
     // Execute query
     sqlRows, err := db.Query("SELECT id, name, email FROM users")
     if err != nil {
         t.Fatalf("Query failed: %v", err)
     }
     defer sqlRows.Close()
-    
+
     // Verify
     users := []struct {
         ID    int
         Name  string
         Email string
     }{}
-    
+
     for sqlRows.Next() {
         var u struct {
             ID    int
@@ -2459,11 +2459,11 @@ func TestQueryWithMock(t *testing.T) {
         sqlRows.Scan(&u.ID, &u.Name, &u.Email)
         users = append(users, u)
     }
-    
+
     if len(users) != 2 {
         t.Errorf("Expected 2 users, got %d", len(users))
     }
-    
+
     // Ensure expectations were met
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Errorf("Unfulfilled expectations: %v", err)
@@ -2474,24 +2474,24 @@ func TestQueryWithMock(t *testing.T) {
 func TestTransactionWithMock(t *testing.T) {
     db, mock, _ := sqlmock.New()
     defer db.Close()
-    
+
     // Expect BEGIN
     mock.ExpectBegin()
-    
+
     // Expect INSERT
     mock.ExpectExec("INSERT INTO users").
         WithArgs("Alice", "alice@example.com").
         WillReturnResult(driver.NewResult(1, 1))
-    
+
     // Expect COMMIT
     mock.ExpectCommit()
-    
+
     // Run transaction
     tx, _ := db.Begin()
-    tx.Exec("INSERT INTO users(name, email) VALUES(?, ?)", 
+    tx.Exec("INSERT INTO users(name, email) VALUES(?, ?)",
         "Alice", "alice@example.com")
     tx.Commit()
-    
+
     if err := mock.ExpectationsWereMet(); err != nil {
         t.Errorf("Mock expectations failed: %v", err)
     }
@@ -2510,7 +2510,7 @@ var id int
 var name string
 var email string
 
-err := db.QueryRow("SELECT id, name, email FROM users WHERE id = $1", 
+err := db.QueryRow("SELECT id, name, email FROM users WHERE id = $1",
     1).Scan(&id, &name, &email)
 
 if err != nil {
@@ -2533,12 +2533,12 @@ var (
 )
 
 err := db.QueryRow(`
-SELECT id, name, balance, created_at, active 
+SELECT id, name, balance, created_at, active
 FROM users WHERE id = $1`, 1).Scan(&id, &name, &balance, &created, &active)
 
 // Conversiones con casting
 const castQuery = `
-SELECT 
+SELECT
     CAST(id AS TEXT) as id_text,
     CAST(balance AS INTEGER) as balance_int,
     EXTRACT(YEAR FROM created_at) as year_created
@@ -2567,7 +2567,7 @@ var (
 )
 
 err := db.QueryRow(`
-SELECT 
+SELECT
     id,
     phone,
     is_premium,
@@ -2712,24 +2712,24 @@ func LoadMigrations() ([]Migration, error) {
     if err != nil {
         return nil, err
     }
-    
+
     var migs []Migration
     for _, entry := range entries {
         if entry.IsDir() {
             continue
         }
-        
+
         content, err := migrations.ReadFile("migrations/" + entry.Name())
         if err != nil {
             return nil, err
         }
-        
+
         migs = append(migs, Migration{
             Version: entry.Name(),
             SQL:     string(content),
         })
     }
-    
+
     return migs, nil
 }
 
@@ -2744,38 +2744,38 @@ func ApplyMigrations(db *sql.DB) error {
     if err != nil {
         return err
     }
-    
+
     // Load and apply migrations
     migs, err := LoadMigrations()
     if err != nil {
         return err
     }
-    
+
     for _, mig := range migs {
         // Check if already applied
         var exists bool
         err := db.QueryRow(
             "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version = $1)",
             mig.Version).Scan(&exists)
-        
+
         if err != nil {
             return err
         }
-        
+
         if !exists {
             log.Printf("Applying migration: %s", mig.Version)
-            
+
             tx, err := db.Begin()
             if err != nil {
                 return err
             }
-            
+
             // Apply SQL
             if _, err := tx.Exec(mig.SQL); err != nil {
                 tx.Rollback()
                 return err
             }
-            
+
             // Mark as applied
             _, err = tx.Exec(
                 "INSERT INTO schema_migrations(version) VALUES($1)",
@@ -2784,13 +2784,13 @@ func ApplyMigrations(db *sql.DB) error {
                 tx.Rollback()
                 return err
             }
-            
+
             if err := tx.Commit(); err != nil {
                 return err
             }
         }
     }
-    
+
     return nil
 }
 ```
@@ -2806,38 +2806,38 @@ func getConnString() string {
     if conn := os.Getenv("DATABASE_URL"); conn != "" {
         return conn
     }
-    
+
     // Build from components
     host := os.Getenv("DB_HOST")
     if host == "" {
         host = "localhost"
     }
-    
+
     port := os.Getenv("DB_PORT")
     if port == "" {
         port = "5432"
     }
-    
+
     user := os.Getenv("DB_USER")
     if user == "" {
         user = "postgres"
     }
-    
+
     password := os.Getenv("DB_PASSWORD")
     if password == "" {
         password = "postgres"
     }
-    
+
     dbname := os.Getenv("DB_NAME")
     if dbname == "" {
         dbname = "mydb"
     }
-    
+
     sslMode := os.Getenv("DB_SSLMODE")
     if sslMode == "" {
         sslMode = "disable"  // Production: use "require"
     }
-    
+
     return fmt.Sprintf(
         "postgres://%s:%s@%s:%s/%s?sslmode=%s",
         user, password, host, port, dbname, sslMode)
@@ -2866,20 +2866,20 @@ type QueryLogger struct {
 // Log con timing
 func (ql *QueryLogger) QueryWithLogging(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
     start := time.Now()
-    
+
     rows, err := ql.db.QueryContext(ctx, query, args...)
-    
+
     duration := time.Since(start)
-    
+
     if err != nil {
         log.Printf("Query error after %v: %s [%v]", duration, query, args)
         return nil, err
     }
-    
+
     if duration > 1*time.Second {
         log.Printf("SLOW QUERY (%v): %s", duration, query)
     }
-    
+
     return rows, nil
 }
 
@@ -2887,10 +2887,10 @@ func (ql *QueryLogger) QueryWithLogging(ctx context.Context, query string, args 
 func (ql *QueryLogger) LogPoolStats() {
     ticker := time.NewTicker(10 * time.Second)
     defer ticker.Stop()
-    
+
     for range ticker.C {
         stats := ql.db.Stats()
-        
+
         log.Printf("DB Pool Stats: OpenConns=%d, InUse=%d, Idle=%d, MaxOpen=%d, MaxLifetime=%v",
             stats.OpenConnections,
             stats.InUse,
@@ -2906,15 +2906,15 @@ func CategorizeError(err error) string {
     if err == sql.ErrNoRows {
         return "not_found"
     }
-    
+
     if err == context.DeadlineExceeded {
         return "timeout"
     }
-    
+
     if pgErr, ok := err.(*pq.Error); ok {
         return string(pgErr.Code)
     }
-    
+
     return "unknown"
 }
 ```
@@ -2955,7 +2955,7 @@ func CategorizeError(err error) string {
                                                                 │
  GORM:                                                          │
  ✗ Difícil expresar lógica compleja                           │
- ✗ Puede generar ineficientes queries                          
+ ✗ Puede generar ineficientes queries  
  ✗ Debugging complejo                                          │
                                                                 │
 
@@ -3046,7 +3046,7 @@ SELECT EXTRACT(MILLISECOND FROM (
 
 // Solución 1: Visualizar transacciones en conflicto
 const findDeadlocks = `
-SELECT 
+SELECT
     blocked_locks.pid AS blocked_pid,
     blocking_locks.pid AS blocking_pid,
     blocked_activity.query AS blocked_query,
@@ -3111,7 +3111,7 @@ import (
     "database/sql"
     "fmt"
     "log"
-    
+
     _ "github.com/lib/pq"
 )
 
@@ -3129,7 +3129,7 @@ func init() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Create table
     db.Exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -3146,11 +3146,11 @@ func CreateUser(name, email string) (*User, error) {
     err := db.QueryRow(
         "INSERT INTO users(name, email) VALUES($1, $2) RETURNING id",
         name, email).Scan(&id)
-    
+
     if err != nil {
         return nil, err
     }
-    
+
     return &User{ID: id, Name: name, Email: email}, nil
 }
 
@@ -3160,7 +3160,7 @@ func GetUser(id int) (*User, error) {
     err := db.QueryRow(
         "SELECT id, name, email FROM users WHERE id = $1", id).
         Scan(&u.ID, &u.Name, &u.Email)
-    
+
     if err == sql.ErrNoRows {
         return nil, fmt.Errorf("user not found")
     }
@@ -3172,49 +3172,49 @@ func UpdateUser(id int, name, email string) error {
     result, err := db.Exec(
         "UPDATE users SET name = $1, email = $2 WHERE id = $3",
         name, email, id)
-    
+
     if err != nil {
         return err
     }
-    
+
     rows, _ := result.RowsAffected()
     if rows == 0 {
         return fmt.Errorf("user not found")
     }
-    
+
     return nil
 }
 
 // DELETE
 func DeleteUser(id int) error {
     result, err := db.Exec("DELETE FROM users WHERE id = $1", id)
-    
+
     if err != nil {
         return err
     }
-    
+
     rows, _ := result.RowsAffected()
     if rows == 0 {
         return fmt.Errorf("user not found")
     }
-    
+
     return nil
 }
 
 func main() {
     defer db.Close()
-    
+
     // Test CRUD
     u, _ := CreateUser("Alice", "alice@example.com")
     fmt.Printf("Created: %+v\n", u)
-    
+
     u, _ = GetUser(u.ID)
     fmt.Printf("Retrieved: %+v\n", u)
-    
+
     UpdateUser(u.ID, "Alice Updated", "alice.new@example.com")
     u, _ = GetUser(u.ID)
     fmt.Printf("Updated: %+v\n", u)
-    
+
     DeleteUser(u.ID)
     _, err := GetUser(u.ID)
     fmt.Printf("Deleted: err=%v\n", err)
@@ -3394,7 +3394,6 @@ CONFIRMADO O ANULADO
 **Fin del CAPÍTULO 64**
 
 Word Count: ~1,950 líneas | Tamaño: ~45 KB
-
 
 ---
 

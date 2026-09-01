@@ -257,6 +257,7 @@ go generate ./ent
 ```
 
 Esto crea:
+
 - `ent/client.go` - Cliente principal
 - `ent/user.go` - Modelo de Usuario
 - `ent/user_create.go` - Builder de creación
@@ -289,44 +290,44 @@ func (Product) Fields() []ent.Field {
             MaxLen(255).
             MinLen(1).
             NotEmpty(),
-        
+
         // String con múltiples validadores
         field.String("slug").
             Unique().
             Immutable(). // No puede cambiar
             Match(regexp.MustCompile("^[a-z0-9-]+$")).
             Default(""),
-        
+
         // Numeric fields
         field.Int("quantity").
             Min(0),
-        
+
         field.Float("price").
             Min(0).
             Positive(),
-        
+
         // Boolean
         field.Bool("active").
             Default(true),
-        
+
         // Time fields
         field.Time("created_at").
             Default(time.Now).
             Immutable(),
-        
+
         field.Time("updated_at").
             Default(time.Now).
             UpdateDefault(time.Now),
-        
+
         // UUID
         field.UUID("id", uuid.UUID{}).
             Default(uuid.New).
             Immutable(),
-        
+
         // Bytes
         field.Bytes("data").
             Optional(),
-        
+
         // Enum
         field.Enum("status").
             NamedValues(
@@ -334,7 +335,7 @@ func (Product) Fields() []ent.Field {
                 "inactive", "INACTIVE",
                 "deleted", "DELETED",
             ),
-        
+
         // JSON
         field.JSON("metadata", map[string]interface{}{}).
             Default(map[string]interface{}{}),
@@ -369,28 +370,28 @@ func (User) Fields() []ent.Field {
         field.String("email").
             Unique().
             Match(regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)),
-        
+
         field.String("username").
             Unique().
             MinLen(3).
             MaxLen(32).
             Match(regexp.MustCompile("^[a-zA-Z0-9_]+$")).
             NotEmpty(),
-        
+
         field.Int("age").
             Min(0).
             Max(150).
             Optional(),
-        
+
         field.String("password").
             MinLen(8).
             MaxLen(255).
             Sensitive(), // No aparece en logs
-        
+
         field.String("phone").
             Optional().
             Match(regexp.MustCompile(`^\+?[0-9\s\-\(\)]{7,}$`)),
-        
+
         field.Bool("verified").
             Default(false),
     }
@@ -400,10 +401,10 @@ func (User) Indexes() []ent.Index {
     return []ent.Index{
         // Índice simple
         index.Fields("email"),
-        
+
         // Índice compuesto
         index.Fields("email", "username"),
-        
+
         // Índice único compuesto
         index.Fields("organization_id", "username").Unique(),
     }
@@ -433,32 +434,32 @@ func (Article) Fields() []ent.Field {
         // Campo con valores por defecto
         field.String("title").
             NotEmpty(),
-        
+
         // Campo inmutable (solo lectura después de creación)
         field.Time("published_at").
             Immutable().
             Optional(),
-        
+
         // Campo sensible (no aparece en logs/dumps)
         field.String("api_key").
             Sensitive().
             Optional(),
-        
+
         // Campo comentado
         field.Int("view_count").
             Default(0).
             Comment("Total number of views"),
-        
+
         // Campo con valores por defecto variables
         field.String("slug").
             Default("").
             UpdateDefault(""), // Se resetea en updates
-        
+
         // Campo con conversión de tipos
         field.String("tags").
             Default("[]").
             Optional(),
-        
+
         // Campo con almacenamiento alternativo
         field.String("internal_id").
             StructTag(`db:"internal_id" json:"id"`).
@@ -487,20 +488,20 @@ import (
 )
 
 func main() {
-    client, err := ent.Open("postgres", 
+    client, err := ent.Open("postgres",
         "host=localhost port=5432 user=postgres password=secret dbname=myapp sslmode=disable")
     if err != nil {
         log.Fatalf("failed opening connection to postgres: %v", err)
     }
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // Crear todas las tablas
     if err := client.Schema.Create(ctx); err != nil {
         log.Fatalf("failed creating schema resources: %v", err)
     }
-    
+
     log.Println("Schema created successfully!")
 }
 ```
@@ -528,22 +529,22 @@ func (User) Fields() []ent.Field {
         field.String("email").
             Unique().
             NotEmpty(),
-        
+
         field.String("username").
             Unique().
             MinLen(3).
             MaxLen(32),
-        
+
         field.String("display_name").
             NotEmpty(),
-        
+
         field.String("bio").
             MaxLen(500).
             Optional(),
-        
+
         field.String("avatar_url").
             Optional(),
-        
+
         field.Enum("role").
             NamedValues(
                 "admin", "ADMIN",
@@ -551,14 +552,14 @@ func (User) Fields() []ent.Field {
                 "user", "USER",
             ).
             Default("user"),
-        
+
         field.Bool("verified").
             Default(false),
-        
+
         field.Time("created_at").
             Default(time.Now).
             Immutable(),
-        
+
         field.Time("updated_at").
             Default(time.Now).
             UpdateDefault(time.Now),
@@ -747,7 +748,7 @@ func (Post) Edges() []ent.Edge {
             Ref("posts").
             Unique().
             Required(),
-        
+
         edge.To("comments", Comment.Type),
     }
 }
@@ -770,7 +771,7 @@ func (Comment) Edges() []ent.Edge {
             Ref("comments").
             Unique().
             Required(),
-        
+
         edge.From("post", Post.Type).
             Ref("comments").
             Unique().
@@ -1081,7 +1082,7 @@ func main() {
     opts := []entc.Option{
         entc.Default(),
     }
-    
+
     if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
         log.Fatalf("running ent codegen: %v", err)
     }
@@ -1293,7 +1294,7 @@ func main() {
     client, _ := ent.Open("postgres", dsn)
     defer client.Close()
     ctx := context.Background()
-    
+
     // ✅ Creación simple
     user, err := client.User.Create().
         SetEmail("alice@example.com").
@@ -1303,7 +1304,7 @@ func main() {
     if err != nil {
         log.Printf("error creating user: %v", err)
     }
-    
+
     // ✅ Crear con valores opcionales
     user2, _ := client.User.Create().
         SetEmail("bob@example.com").
@@ -1311,7 +1312,7 @@ func main() {
         SetAge(25).
         SetBio("Software engineer"). // campo opcional
         Save(ctx)
-    
+
     // ✅ Crear múltiples
     users := []*ent.User{
         client.User.Create().
@@ -1325,12 +1326,12 @@ func main() {
             SetAge(28).
             SaveX(ctx),
     }
-    
+
     // ✅ Creación con relaciones
     profile := client.Profile.Create().
         SetBio("Engineer").
         SaveX(ctx)
-    
+
     user3 := client.User.Create().
         SetEmail("eve@example.com").
         SetUsername("eve").
@@ -1355,19 +1356,19 @@ import (
 func main() {
     client, _ := ent.Open("postgres", dsn)
     ctx := context.Background()
-    
+
     // ✅ Obtener por ID
     u, _ := client.User.Get(ctx, 1)
     println(u.Email)
-    
+
     // ✅ Query simple
     users, _ := client.User.Query().All(ctx)
-    
+
     // ✅ Con filtros
     adults, _ := client.User.Query().
         Where(user.AgeGT(18)).
         All(ctx)
-    
+
     // ✅ Con múltiples predicados
     results, _ := client.User.Query().
         Where(
@@ -1376,32 +1377,32 @@ func main() {
             user.AgeLT(50),
         ).
         All(ctx)
-    
+
     // ✅ Ordenamiento
     sorted, _ := client.User.Query().
         Order(user.ByAge()).
         All(ctx)
-    
+
     // ✅ Reverse order
     descending, _ := client.User.Query().
         Order(user.ByAge(sql.OrderDesc())).
         All(ctx)
-    
+
     // ✅ Obtener primero
     first, _ := client.User.Query().
         Order(user.ByEmail()).
         First(ctx)
-    
+
     // ✅ Con Only (error si no existe)
     only, err := client.User.Query().
         Where(user.ID(1)).
         Only(ctx)
-    
+
     // ✅ Contar
     count, _ := client.User.Query().
         Where(user.AgeGT(18)).
         Count(ctx)
-    
+
     // ✅ Exist
     exists, _ := client.User.Query().
         Where(user.ID(999)).
@@ -1425,45 +1426,45 @@ import (
 func main() {
     client, _ := ent.Open("postgres", dsn)
     ctx := context.Background()
-    
+
     // ✅ Actualizar un registro
     u, _ := client.User.Get(ctx, 1)
     u, _ = u.Update().
         SetAge(31).
         SetBio("Updated bio").
         Save(ctx)
-    
+
     // ✅ Actualizar múltiples (sin obtener primero)
     affected, _ := client.User.Update().
         Where(user.AgeGT(30)).
         SetBio("Senior developer").
         Exec(ctx)
     println(affected) // Número de registros actualizados
-    
+
     // ✅ Actualizar por ID
     updated, _ := client.User.UpdateOneID(1).
         SetAge(32).
         SetEmail("newemail@example.com").
         Save(ctx)
-    
+
     // ✅ Actualizar múltiples IDs
     affected, _ = client.User.Update().
         Where(user.IDIn(1, 2, 3)).
         SetRole("admin").
         Exec(ctx)
-    
+
     // ✅ Incrementar/Decrementar
     client.User.Update().
         Where(user.ID(1)).
         AddAge(1). // Incrementar edad
         Exec(ctx)
-    
+
     // ✅ Clear (limpiar campo opcional)
     client.User.Update().
         Where(user.ID(1)).
         ClearBio(). // Limpiar campo "bio"
         Exec(ctx)
-    
+
     // ✅ Actualizar con relaciones
     dept, _ := client.Department.Get(ctx, 1)
     client.Employee.Update().
@@ -1489,24 +1490,24 @@ import (
 func main() {
     client, _ := ent.Open("postgres", dsn)
     ctx := context.Background()
-    
+
     // ✅ Eliminar un registro
     u, _ := client.User.Get(ctx, 1)
     client.User.DeleteOne(u).Exec(ctx)
-    
+
     // ✅ Eliminar por ID
     client.User.DeleteOneID(1).Exec(ctx)
-    
+
     // ✅ Eliminar múltiples
     affected, _ := client.User.Delete().
         Where(user.AgeGT(100)).
         Exec(ctx)
     println(affected) // Número eliminado
-    
+
     // ✅ Eliminar todos
     affected, _ = client.User.Delete().
         Exec(ctx)
-    
+
     // ✅ Eliminar por condiciones complejas
     affected, _ = client.User.Delete().
         Where(
@@ -1534,14 +1535,14 @@ import (
 func batchCreate(client *ent.Client, ctx context.Context, count int) {
     // ✅ Crear múltiples en paralelo
     bulk := make([]*ent.UserCreate, count)
-    
+
     for i := 0; i < count; i++ {
         bulk[i] = client.User.Create().
             SetEmail(fmt.Sprintf("user%d@example.com", i)).
             SetUsername(fmt.Sprintf("user%d", i)).
             SetAge(20 + i%50)
     }
-    
+
     users, _ := client.User.CreateBulk(bulk...).Save(ctx)
     println(len(users), "users created")
 }
@@ -1561,16 +1562,16 @@ func batchDelete(client *ent.Client, ctx context.Context) {
         Where(user.StatusEQ("inactive")).
         Limit(1000).
         All(ctx)
-    
+
     ids := make([]int, len(users))
     for i, u := range users {
         ids[i] = u.ID
     }
-    
+
     affected, _ := client.User.Delete().
         Where(user.IDIn(ids...)).
         Exec(ctx)
-    
+
     println(affected, "deleted")
 }
 ```
@@ -1593,7 +1594,7 @@ import (
 )
 
 func advancedQueries(ctx context.Context, client *ent.Client) {
-    
+
     // ✅ Comparaciones numéricas
     users, _ := client.User.Query().Where(
         user.AgeEQ(30),      // Age == 30
@@ -1603,7 +1604,7 @@ func advancedQueries(ctx context.Context, client *ent.Client) {
         user.AgeLTE(65),     // Age <= 65
         user.AgeNEQ(0),      // Age != 0
     ).All(ctx)
-    
+
     // ✅ String operations
     results, _ := client.User.Query().Where(
         user.EmailEQ("alice@example.com"),
@@ -1613,7 +1614,7 @@ func advancedQueries(ctx context.Context, client *ent.Client) {
         user.EmailIn("alice@ex.com", "bob@ex.com"),
         user.EmailNotIn("spam@ex.com"),
     ).All(ctx)
-    
+
     // ✅ Operadores lógicos
     filtered, _ := client.User.Query().Where(
         user.And(
@@ -1628,7 +1629,7 @@ func advancedQueries(ctx context.Context, client *ent.Client) {
             user.StatusEQ("banned"),
         ),
     ).All(ctx)
-    
+
     // ✅ Predicados complejos
     complex, _ := client.User.Query().Where(
         user.Or(
@@ -1642,7 +1643,7 @@ func advancedQueries(ctx context.Context, client *ent.Client) {
             ),
         ),
     ).All(ctx)
-    
+
     // ✅ NULL checks
     optional, _ := client.User.Query().Where(
         user.BioIsNil(),      // BIO es NULL
@@ -1665,17 +1666,17 @@ import (
 )
 
 func pagination(ctx context.Context, client *ent.Client) {
-    
+
     // ✅ Ordenamiento simple
     ascending, _ := client.User.Query().
         Order(user.ByEmail()).
         All(ctx)
-    
+
     // ✅ Orden descendente
     descending, _ := client.User.Query().
         Order(user.ByAge(sql.OrderDesc())).
         All(ctx)
-    
+
     // ✅ Ordenamiento múltiple
     sorted, _ := client.User.Query().
         Order(
@@ -1683,26 +1684,26 @@ func pagination(ctx context.Context, client *ent.Client) {
             user.ByEmail(),
         ).
         All(ctx)
-    
+
     // ✅ Paginación
     pageSize := 20
     pageNum := 1
     offset := (pageNum - 1) * pageSize
-    
+
     page, _ := client.User.Query().
         Order(user.ByEmail()).
         Offset(offset).
         Limit(pageSize).
         All(ctx)
-    
+
     println(len(page), "users in page")
-    
+
     // ✅ Cursor-based pagination
     users, _ := client.User.Query().
         Order(user.ByID()).
         Limit(11).
         All(ctx)
-    
+
     hasNext := len(users) > 10
     if hasNext {
         users = users[:10]
@@ -1726,14 +1727,14 @@ import (
 )
 
 func eagerLoading(ctx context.Context, client *ent.Client) {
-    
+
     // ❌ Sin eager loading (N+1 queries)
     posts, _ := client.Post.Query().All(ctx)
     for _, p := range posts {
         author, _ := p.QueryAuthor().Only(ctx)
         println(author.Username)
     }
-    
+
     // ✅ Con eager loading (1 query)
     posts, _ = client.Post.Query().
         WithAuthor().
@@ -1742,28 +1743,28 @@ func eagerLoading(ctx context.Context, client *ent.Client) {
         author := p.Edges.Author
         println(author.Username)
     }
-    
+
     // ✅ Múltiples relaciones
     posts, _ = client.Post.Query().
         WithAuthor().
         WithComments().
         WithTags().
         All(ctx)
-    
+
     for _, p := range posts {
         println("Post:", p.Title)
         println("Author:", p.Edges.Author.Username)
         println("Comments:", len(p.Edges.Comments))
         println("Tags:", len(p.Edges.Tags))
     }
-    
+
     // ✅ Eager loading condicional
     posts, _ = client.Post.Query().
         WithAuthor(func(q *ent.UserQuery) {
             q.Where(user.VerifiedEQ(true))
         }).
         All(ctx)
-    
+
     // ✅ Nested eager loading
     users, _ := client.User.Query().
         WithPosts(func(q *ent.PostQuery) {
@@ -1787,44 +1788,44 @@ import (
 )
 
 func aggregations(ctx context.Context, client *ent.Client) {
-    
+
     // ✅ Count
     count, _ := client.User.Query().Count(ctx)
     println("Total users:", count)
-    
+
     // ✅ Count con filtro
     adults, _ := client.User.Query().
         Where(user.AgeGTE(18)).
         Count(ctx)
-    
+
     // ✅ Min y Max
     minAge, _ := client.User.Query().Aggregate(
         ent.Min(user.FieldAge),
     ).Int(ctx)
-    
+
     maxAge, _ := client.User.Query().Aggregate(
         ent.Max(user.FieldAge),
     ).Int(ctx)
-    
+
     println("Age range:", minAge, "-", maxAge)
-    
+
     // ✅ Sum y Avg
     totalAge, _ := client.User.Query().Aggregate(
         ent.Sum(user.FieldAge),
     ).Int(ctx)
-    
+
     avgAge, _ := client.User.Query().Aggregate(
         ent.Avg(user.FieldAge),
     ).Float64(ctx)
-    
+
     println("Average age:", avgAge)
-    
+
     // ✅ Group by
     results, _ := client.User.Query().
         GroupBy(user.FieldRole).
         Aggregate(ent.Count()).
         All(ctx)
-    
+
     for _, res := range results {
         role, _ := res.Scan()
         count, _ := res.Int()
@@ -1846,19 +1847,19 @@ import (
 )
 
 func graphTraversal(ctx context.Context, client *ent.Client) {
-    
+
     // ✅ Traversal simple
     user, _ := client.User.Get(ctx, 1)
-    
+
     // Todos los posts del usuario
     posts, _ := user.QueryPosts().All(ctx)
-    
+
     // Todos los comentarios de los posts
     for _, post := range posts {
         comments, _ := post.QueryComments().All(ctx)
         println(post.Title, "has", len(comments), "comments")
     }
-    
+
     // ✅ Traversal en cadena
     user, _ = client.User.Get(ctx, 1)
     authoredCommentAuthors, _ := user.
@@ -1866,20 +1867,20 @@ func graphTraversal(ctx context.Context, client *ent.Client) {
         QueryComments().
         QueryAuthor().
         All(ctx)
-    
+
     println(len(authoredCommentAuthors), "users commented on my posts")
-    
+
     // ✅ Traversal bidireccional
     post, _ := client.Post.Get(ctx, 1)
-    
+
     // Autor del post
     author, _ := post.QueryAuthor().Only(ctx)
-    
+
     // Otros posts del autor
     otherPosts, _ := author.QueryPosts().
         Where(post.IDNEQ(post.ID)).
         All(ctx)
-    
+
     println("Author has", len(otherPosts), "other posts")
 }
 ```
@@ -2003,19 +2004,19 @@ func (Product) Fields() []ent.Field {
             NotEmpty().
             MinLen(1).
             MaxLen(255),
-        
+
         field.String("sku").
             Unique().
             Match(regexp.MustCompile(`^[A-Z0-9-]+$`)),
-        
+
         field.Float("price").
             Min(0).
             Positive(),
-        
+
         field.Int("stock").
             Min(0).
             Default(0),
-        
+
         field.String("category").
             Enums("electronics", "books", "clothing", "food"),
     }
@@ -2055,22 +2056,22 @@ func LoggingMiddleware() ent.Hook {
         return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
             start := time.Now()
             op := m.Op()
-            
+
             value, err := next.Mutate(ctx, m)
-            
+
             duration := time.Since(start)
             status := "success"
             if err != nil {
                 status = "error"
             }
-            
+
             log.Printf("[%s] %s %s (%v)",
                 op,
                 m.Type(),
                 status,
                 duration,
             )
-            
+
             return value, err
         })
     }
@@ -2081,7 +2082,7 @@ func AuditMiddleware(auditLog chan string) ent.Hook {
     return func(next ent.Mutator) ent.Mutator {
         return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
             value, err := next.Mutate(ctx, m)
-            
+
             if err == nil {
                 msg := fmt.Sprintf("%s: %s (%s)",
                     time.Now().Format(time.RFC3339),
@@ -2093,7 +2094,7 @@ func AuditMiddleware(auditLog chan string) ent.Hook {
                 default:
                 }
             }
-            
+
             return value, err
         })
     }
@@ -2106,7 +2107,7 @@ func PermissionMiddleware(userRole string) ent.Hook {
             if userRole != "admin" && m.Op().String() == "DELETE" {
                 return nil, fmt.Errorf("permission denied: only admins can delete")
             }
-            
+
             return next.Mutate(ctx, m)
         })
     }
@@ -2131,13 +2132,13 @@ import (
 )
 
 func transferFunds(ctx context.Context, client *ent.Client) error {
-    
+
     // Crear transacción
     tx, err := client.Tx(ctx)
     if err != nil {
         return fmt.Errorf("starting transaction: %w", err)
     }
-    
+
     // Operación 1: Restar de cuenta origen
     sender, err := tx.Account.Query().
         Where(account.ID(1)).
@@ -2146,17 +2147,17 @@ func transferFunds(ctx context.Context, client *ent.Client) error {
     if err != nil {
         return rollback(tx, err)
     }
-    
+
     if sender.Balance < 100 {
         return rollback(tx, fmt.Errorf("insufficient funds"))
     }
-    
+
     if err := sender.Update().
         AddBalance(-100).
         Exec(ctx); err != nil {
         return rollback(tx, err)
     }
-    
+
     // Operación 2: Sumar a cuenta destino
     receiver, err := tx.Account.Query().
         Where(account.ID(2)).
@@ -2165,13 +2166,13 @@ func transferFunds(ctx context.Context, client *ent.Client) error {
     if err != nil {
         return rollback(tx, err)
     }
-    
+
     if err := receiver.Update().
         AddBalance(100).
         Exec(ctx); err != nil {
         return rollback(tx, err)
     }
-    
+
     // Registrar transacción
     _, err = tx.Transaction.Create().
         SetFromAccount(sender).
@@ -2181,7 +2182,7 @@ func transferFunds(ctx context.Context, client *ent.Client) error {
     if err != nil {
         return rollback(tx, err)
     }
-    
+
     // Commit
     return tx.Commit()
 }
@@ -2198,12 +2199,12 @@ func rollback(tx *ent.Tx, err error) error {
 
 ```go
 func complexTransaction(ctx context.Context, client *ent.Client) error {
-    
+
     tx, err := client.Tx(ctx)
     if err != nil {
         return err
     }
-    
+
     // Crear usuario
     user, err := tx.User.Create().
         SetEmail("alice@example.com").
@@ -2212,7 +2213,7 @@ func complexTransaction(ctx context.Context, client *ent.Client) error {
     if err != nil {
         return rollback(tx, err)
     }
-    
+
     // Crear múltiples posts
     posts := make([]*ent.Post, 3)
     for i := 0; i < 3; i++ {
@@ -2226,7 +2227,7 @@ func complexTransaction(ctx context.Context, client *ent.Client) error {
         }
         posts[i] = post
     }
-    
+
     // Agregar tags a posts
     for _, post := range posts {
         _, err := tx.Tag.Create().
@@ -2237,7 +2238,7 @@ func complexTransaction(ctx context.Context, client *ent.Client) error {
             return rollback(tx, err)
         }
     }
-    
+
     return tx.Commit()
 }
 ```
@@ -2246,17 +2247,17 @@ func complexTransaction(ctx context.Context, client *ent.Client) error {
 
 ```go
 func safeTransaction(ctx context.Context, client *ent.Client) (*ent.User, error) {
-    
+
     tx, err := client.Tx(ctx)
     if err != nil {
         return nil, fmt.Errorf("failed to start transaction: %w", err)
     }
-    
+
     user, err := tx.User.Create().
         SetEmail("bob@example.com").
         SetUsername("bob").
         Save(ctx)
-    
+
     if err != nil {
         // Rollback automático en caso de error
         if rbErr := tx.Rollback(); rbErr != nil {
@@ -2264,11 +2265,11 @@ func safeTransaction(ctx context.Context, client *ent.Client) (*ent.User, error)
         }
         return nil, fmt.Errorf("failed to create user: %w", err)
     }
-    
+
     if err := tx.Commit(); err != nil {
         return nil, fmt.Errorf("failed to commit: %w", err)
     }
-    
+
     return user, nil
 }
 ```
@@ -2291,29 +2292,29 @@ import (
 )
 
 func updateWithMask(ctx context.Context, client *ent.Client) {
-    
+
     // Actualizar solo email
     client.User.UpdateOneID(1).
         SetEmail("newemail@example.com").
         ClearAge(). // Limpiar opcional
         Exec(ctx)
-    
+
     // Actualizar parcial con validación
     updates := map[string]interface{}{
         "email":     "alice@example.com",
         "username":  "alice_new",
     }
-    
+
     builder := client.User.UpdateOneID(1)
-    
+
     if email, ok := updates["email"]; ok {
         builder.SetEmail(email.(string))
     }
-    
+
     if username, ok := updates["username"]; ok {
         builder.SetUsername(username.(string))
     }
-    
+
     builder.Exec(ctx)
 }
 ```
@@ -2353,7 +2354,7 @@ func (Post) Policy() ent.Policy {
                 if m.Op().Is(ent.OpUpdateOne|ent.OpDelete) {
                     postMut := m.(*ent.PostMutation)
                     userID := auth.UserIDFromContext(ctx)
-                    
+
                     authorID, _ := postMut.AuthorID()
                     if authorID != userID {
                         return privacy.Deny
@@ -2393,20 +2394,20 @@ import (
 
 // Obtener comentarios anidados
 func getCommentsTree(ctx context.Context, client *ent.Client, postID int) {
-    
+
     post, _ := client.Post.Get(ctx, postID)
-    
+
     // Obtener comentarios top-level
     topComments, _ := post.QueryComments().
         Where(comment.ParentIsNil()). // Sin padre
         All(ctx)
-    
+
     // Para cada comentario, obtener respuestas
     for _, comment := range topComments {
         replies, _ := comment.QueryReplies().All(ctx)
-        
+
         println(fmt.Sprintf("- %s (%d replies)", comment.Text, len(replies)))
-        
+
         for _, reply := range replies {
             nestedReplies, _ := reply.QueryReplies().All(ctx)
             println(fmt.Sprintf("  - %s (%d replies)", reply.Text, len(nestedReplies)))
@@ -2416,7 +2417,7 @@ func getCommentsTree(ctx context.Context, client *ent.Client, postID int) {
 
 // Obtener árbol de categorías
 func getCategoryTree(ctx context.Context, client *ent.Client, rootID int) {
-    
+
     category, _ := client.Category.Get(ctx, rootID)
     printCategoryTree(ctx, client, category, 0)
 }
@@ -2424,7 +2425,7 @@ func getCategoryTree(ctx context.Context, client *ent.Client, rootID int) {
 func printCategoryTree(ctx context.Context, client *ent.Client, cat *ent.Category, depth int) {
     indent := strings.Repeat("  ", depth)
     println(indent + cat.Name)
-    
+
     children, _ := cat.QueryChildren().All(ctx)
     for _, child := range children {
         printCategoryTree(ctx, client, child, depth+1)
@@ -2455,15 +2456,15 @@ func NewTestClient(t *testing.T) *ent.Client {
     if err != nil {
         t.Fatalf("failed opening connection to sqlite: %v", err)
     }
-    
+
     if err := client.Schema.Create(context.Background()); err != nil {
         t.Fatalf("failed creating schema resources: %v", err)
     }
-    
+
     t.Cleanup(func() {
         client.Close()
     })
-    
+
     return client
 }
 
@@ -2500,17 +2501,17 @@ import (
 func TestCreateUser(t *testing.T) {
     client := NewTestClient(t)
     ctx := context.Background()
-    
+
     u, err := client.User.Create().
         SetEmail("test@example.com").
         SetUsername("testuser").
         SetAge(30).
         Save(ctx)
-    
+
     if err != nil {
         t.Fatalf("failed creating user: %v", err)
     }
-    
+
     if u.Email != "test@example.com" {
         t.Errorf("expected email test@example.com, got %s", u.Email)
     }
@@ -2519,7 +2520,7 @@ func TestCreateUser(t *testing.T) {
 func TestUniqueConstraint(t *testing.T) {
     client := NewTestClient(t)
     ctx := context.Background()
-    
+
     // Crear primer usuario
     _, err := client.User.Create().
         SetEmail("alice@example.com").
@@ -2528,13 +2529,13 @@ func TestUniqueConstraint(t *testing.T) {
     if err != nil {
         t.Fatalf("failed creating first user: %v", err)
     }
-    
+
     // Intentar crear otro con mismo email
     _, err = client.User.Create().
         SetEmail("alice@example.com").
         SetUsername("alice2").
         Save(ctx)
-    
+
     if err == nil {
         t.Error("expected error for duplicate email, got nil")
     }
@@ -2543,7 +2544,7 @@ func TestUniqueConstraint(t *testing.T) {
 func TestQueryFilter(t *testing.T) {
     client := NewTestClient(t)
     ctx := context.Background()
-    
+
     // Crear usuarios
     for i := 0; i < 5; i++ {
         client.User.Create().
@@ -2552,12 +2553,12 @@ func TestQueryFilter(t *testing.T) {
             SetAge(20 + i).
             SaveX(ctx)
     }
-    
+
     // Consultar adultos
     adults, _ := client.User.Query().
         Where(user.AgeGTE(21)).
         All(ctx)
-    
+
     if len(adults) != 4 {
         t.Errorf("expected 4 adults, got %d", len(adults))
     }
@@ -2578,13 +2579,13 @@ import (
 func TestUserPostWorkflow(t *testing.T) {
     client := NewTestClient(t)
     ctx := context.Background()
-    
+
     // Crear usuario
     user, _ := client.User.Create().
         SetEmail("author@example.com").
         SetUsername("author").
         SaveX(ctx)
-    
+
     // Crear posts
     for i := 0; i < 3; i++ {
         client.Post.Create().
@@ -2593,18 +2594,18 @@ func TestUserPostWorkflow(t *testing.T) {
             SetAuthor(user).
             SaveX(ctx)
     }
-    
+
     // Verificar
     posts, _ := user.QueryPosts().All(ctx)
     if len(posts) != 3 {
         t.Errorf("expected 3 posts, got %d", len(posts))
     }
-    
+
     // Actualizar post
     posts[0].Update().
         SetTitle("Updated Post").
         ExecX(ctx)
-    
+
     // Verificar actualización
     updated, _ := client.Post.Get(ctx, posts[0].ID)
     if updated.Title != "Updated Post" {
@@ -2615,26 +2616,26 @@ func TestUserPostWorkflow(t *testing.T) {
 func TestTransactionRollback(t *testing.T) {
     client := NewTestClient(t)
     ctx := context.Background()
-    
+
     // Crear usuario inicial
     user, _ := client.User.Create().
         SetEmail("test@example.com").
         SetUsername("test").
         SaveX(ctx)
-    
+
     // Intentar transacción con error
     tx, _ := client.Tx(ctx)
-    
+
     _, err := tx.Post.Create().
         SetTitle("Post 1").
         SetContent("content").
         SetAuthor(user).
         Save(ctx)
-    
+
     if err != nil {
         tx.Rollback()
     }
-    
+
     // Verificar que no se creó
     posts, _ := client.Post.Query().All(ctx)
     if len(posts) != 0 {
@@ -2649,7 +2650,7 @@ func TestTransactionRollback(t *testing.T) {
 
 ### 63.11.1 Performance Optimization
 
-#### Estrategias de Optimización:
+#### Estrategias de Optimización
 
 ```go
 package main
@@ -2951,10 +2952,10 @@ import (
 
 func ejercicio1(client *ent.Client) {
     ctx := context.Background()
-    
+
     // Crear schema
     // (Ver ent/schema/user.go)
-    
+
     // Crear usuarios
     users := make([]*ent.User, 3)
     for i := 0; i < 3; i++ {
@@ -2965,16 +2966,16 @@ func ejercicio1(client *ent.Client) {
             Save(ctx)
         users[i] = u
     }
-    
+
     // Consultar adultos
     adults, _ := client.User.Query().
         Where(user.AgeGTE(18)).
         All(ctx)
     fmt.Printf("Adults: %d\n", len(adults))
-    
+
     // Actualizar
     users[0].Update().SetAge(21).ExecX(ctx)
-    
+
     // Eliminar
     client.User.DeleteOne(users[2]).ExecX(ctx)
 }
@@ -2996,13 +2997,13 @@ package main
 
 func ejercicio2(client *ent.Client) {
     ctx := context.Background()
-    
+
     // Crear usuario
     author, _ := client.User.Create().
         SetEmail("author@example.com").
         SetUsername("author").
         SaveX(ctx)
-    
+
     // Crear posts
     for i := 1; i <= 5; i++ {
         client.Post.Create().
@@ -3011,12 +3012,12 @@ func ejercicio2(client *ent.Client) {
             SetAuthor(author).
             SaveX(ctx)
     }
-    
+
     // Consultar con eager loading
     posts, _ := client.Post.Query().
         WithAuthor().
         All(ctx)
-    
+
     for _, p := range posts {
         fmt.Printf("%s by %s\n", p.Title, p.Edges.Author.Username)
     }
@@ -3039,7 +3040,7 @@ package main
 
 func ejercicio3(client *ent.Client) {
     ctx := context.Background()
-    
+
     // Usuarios
     users := make([]*ent.User, 4)
     ages := []int{22, 28, 35, 19}
@@ -3051,7 +3052,7 @@ func ejercicio3(client *ent.Client) {
             SaveX(ctx)
         users[i] = u
     }
-    
+
     // Posts
     for i, u := range users {
         for j := 0; j < 3; j++ {
@@ -3062,14 +3063,14 @@ func ejercicio3(client *ent.Client) {
                 SaveX(ctx)
         }
     }
-    
+
     // Query: Posts de usuarios > 25
     posts, _ := client.Post.Query().
         Where(post.HasAuthorWith(user.AgeGT(25))).
         WithAuthor().
         Order(post.ByCreatedAtDesc()).
         All(ctx)
-    
+
     fmt.Printf("Posts from authors > 25: %d\n", len(posts))
 }
 ```
@@ -3115,7 +3116,7 @@ package main
 
 func ejercicio5(client *ent.Client) {
     ctx := context.Background()
-    
+
     // Crear usuarios
     users := make([]*ent.User, 3)
     for i := 0; i < 3; i++ {
@@ -3125,7 +3126,7 @@ func ejercicio5(client *ent.Client) {
             SaveX(ctx)
         users[i] = u
     }
-    
+
     // Crear posts
     posts := make([]*ent.Post, 6)
     for i, u := range users {
@@ -3138,18 +3139,18 @@ func ejercicio5(client *ent.Client) {
             posts[i*2+j] = p
         }
     }
-    
+
     // Agregar tags
     golang, _ := client.Tag.Create().
         SetName("golang").
         SaveX(ctx)
-    
+
     database, _ := client.Tag.Create().
         SetName("database").
         SaveX(ctx)
-    
+
     posts[0].Update().AddTags(golang, database).ExecX(ctx)
-    
+
     // Crear comentarios
     for i, p := range posts[:2] {
         for j := 0; j < 2; j++ {
@@ -3161,7 +3162,7 @@ func ejercicio5(client *ent.Client) {
                 SaveX(ctx)
         }
     }
-    
+
     // Feed del usuario 0
     feed, _ := client.Post.Query().
         Where(post.Or(
@@ -3175,7 +3176,7 @@ func ejercicio5(client *ent.Client) {
         WithTags().
         Order(post.ByCreatedAtDesc()).
         All(ctx)
-    
+
     fmt.Printf("User feed: %d posts\n", len(feed))
 }
 ```
@@ -3205,21 +3206,24 @@ func ejercicio5(client *ent.Client) {
 ╚════════════════════╩═════════════════╩═════════════════╩════════════════╝
 ```
 
-### Cuándo usar cada uno:
+### Cuándo usar cada uno
 
 **ENT es mejor para:**
+
 - Modelos complejos con múltiples relaciones
 - Type safety en compilación
 - Validación integrada
 - Aplicaciones medianas a grandes
 
 **GORM es mejor para:**
+
 - Prototipado rápido
 - Máxima flexibilidad
 - Migraciones complejas
 - Equipos que prefieren reflexión
 
 **sqlc es mejor para:**
+
 - Máximo control sobre SQL
 - Performance crítica
 - Queries muy específicas
@@ -3408,10 +3412,10 @@ edge.To("following", User.Type).From("followers")
 func TestFeature(t *testing.T) {
     client := ent.Open("sqlite3", "file:ent?mode=memory")
     defer client.Close()
-    
+
     ctx := context.Background()
     client.Schema.CreateX(ctx)
-    
+
     // test code
 }
 ```
@@ -3453,11 +3457,11 @@ if err != nil {
 
 ### Recursos Útiles
 
-- **Documentación oficial**: https://entgo.io
-- **Ejemplos**: https://github.com/ent/ent/tree/master/examples
-- **Discord**: https://discord.gg/qZmPgTE6RQ
-- **Issues**: https://github.com/ent/ent/issues
-- **Changelog**: https://github.com/ent/ent/releases
+- **Documentación oficial**: <https://entgo.io>
+- **Ejemplos**: <https://github.com/ent/ent/tree/master/examples>
+- **Discord**: <https://discord.gg/qZmPgTE6RQ>
+- **Issues**: <https://github.com/ent/ent/issues>
+- **Changelog**: <https://github.com/ent/ent/releases>
 
 ---
 

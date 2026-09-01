@@ -55,6 +55,7 @@ func counterService(inc <-chan struct{}, result chan<- int) {
 ### 24.1.3 Cuándo Sync Es Apropiado
 
 **Caso 1: Acceso Frecuente a Estructura Compartida**
+
 ```go
 // Cache con R/W frecuentes: RWMutex es mejor que channel
 type Cache struct {
@@ -71,6 +72,7 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 ```
 
 **Caso 2: Inicialización Una Sola Vez**
+
 ```go
 // sync.Once es más elegante que canales para esto
 var (
@@ -87,6 +89,7 @@ func GetInstance() *Singleton {
 ```
 
 **Caso 3: Coordinación de Grupo (WaitGroup)**
+
 ```go
 // Esperar a que terminen N goroutines
 var wg sync.WaitGroup
@@ -219,10 +222,10 @@ type Transfer struct {
 func (t *Transfer) Move(from, to int, amount float64) {
     t.accounts[from].mu.Lock()
     defer t.accounts[from].mu.Unlock()
-    
+
     t.accounts[to].mu.Lock()      // ¿Qué si otro thread
     defer t.accounts[to].mu.Unlock()  // hace Move(to, from)?
-    
+
     t.accounts[from].balance -= amount
     t.accounts[to].balance += amount
 }
@@ -232,13 +235,13 @@ func (t *Transfer) Move(from, to int, amount float64) {
     if from > to {
         from, to = to, from
     }
-    
+
     t.accounts[from].mu.Lock()
     defer t.accounts[from].mu.Unlock()
-    
+
     t.accounts[to].mu.Lock()
     defer t.accounts[to].mu.Unlock()
-    
+
     t.accounts[from].balance -= amount
     t.accounts[to].balance += amount
 }
@@ -256,12 +259,12 @@ type Database struct {
 func (db *Database) GetAndProcess(key string) interface{} {
     db.mu.Lock()
     defer db.mu.Unlock()
-    
+
     val := db.cache[key]
-    
+
     // 1 segundo de procesamiento bajo lock!
     result := expensiveComputation(val)
-    
+
     db.cache[key] = result
     return result
 }
@@ -269,17 +272,17 @@ func (db *Database) GetAndProcess(key string) interface{} {
 // ✓ PATRÓN: Copiar datos bajo lock, procesar fuera
 func (db *Database) GetAndProcess(key string) interface{} {
     var val interface{}
-    
+
     db.mu.Lock()
     val = db.cache[key]
     db.mu.Unlock()  // Liberar rápidamente
-    
+
     result := expensiveComputation(val)  // Fuera del lock
-    
+
     db.mu.Lock()
     db.cache[key] = result
     db.mu.Unlock()
-    
+
     return result
 }
 ```
@@ -299,10 +302,10 @@ type Server struct {
 type Server struct {
     requestsMu sync.Mutex
     requests   int
-    
+
     errorsMu   sync.Mutex
     errors     int
-    
+
     latencyMu  sync.Mutex
     latency    time.Duration
 }
@@ -311,10 +314,11 @@ type Server struct {
 ### 24.2.8 Comparación con Otros Lenguajes
 
 **Java: synchronized**
+
 ```java
 class SafeCounter {
     private int value = 0;
-    
+
     synchronized void increment() {
         value++;
     }
@@ -322,6 +326,7 @@ class SafeCounter {
 ```
 
 **Go: Mutex explícito**
+
 ```go
 type SafeCounter struct {
     mu    sync.Mutex
@@ -437,7 +442,7 @@ func (cfg *Config) Set(key string, value interface{}) {
 func (cfg *Config) GetAll() map[string]interface{} {
     cfg.mu.RLock()
     defer cfg.mu.RUnlock()
-    
+
     // Copiar para evitar race condition
     result := make(map[string]interface{})
     for k, v := range cfg.data {
@@ -454,11 +459,11 @@ func (cfg *Config) GetAll() map[string]interface{} {
 func (c *Cache) GetOrCompute(key string, fn func() interface{}) interface{} {
     c.mu.RLock()
     defer c.mu.RUnlock()
-    
+
     if val, ok := c.items[key]; ok {
         return val
     }
-    
+
     // ❌ Deadlock: Intentar Lock con RLock ya tenido
     c.mu.Lock()
     result := fn()
@@ -475,15 +480,15 @@ func (c *Cache) GetOrCompute(key string, fn func() interface{}) interface{} {
         return val
     }
     c.mu.RUnlock()
-    
+
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     // Recomprobar después de readquirir
     if val, ok := c.items[key]; ok {
         return val
     }
-    
+
     result := fn()
     c.items[key] = result
     return result
@@ -524,7 +529,7 @@ func (wg *WaitGroup) Wait()            // Esperar hasta contador == 0
 func main() {
     var wg sync.WaitGroup
     results := make([]int, 10)
-    
+
     // Fan-Out: Lanzar 10 goroutines
     for i := 0; i < 10; i++ {
         wg.Add(1)
@@ -533,10 +538,10 @@ func main() {
             results[index] = expensiveComputation(index)
         }(i)
     }
-    
+
     // Fan-In: Esperar a que todas terminen
     wg.Wait()
-    
+
     fmt.Println(results)
 }
 ```
@@ -552,7 +557,7 @@ type Task struct {
 func ProcessTasks(tasks []int) []error {
     var wg sync.WaitGroup
     results := make([]Task, len(tasks))
-    
+
     for i, task := range tasks {
         wg.Add(1)
         go func(index, taskID int) {
@@ -562,9 +567,9 @@ func ProcessTasks(tasks []int) []error {
             }
         }(i, task)
     }
-    
+
     wg.Wait()
-    
+
     // Recolectar solo errores
     var errs []error
     for _, result := range results {
@@ -582,7 +587,7 @@ func ProcessTasks(tasks []int) []error {
 func WorkerPool(jobCount int, workers int) {
     var wg sync.WaitGroup
     jobs := make(chan int, jobCount)
-    
+
     // Lanzar workers
     for w := 0; w < workers; w++ {
         wg.Add(1)
@@ -594,13 +599,13 @@ func WorkerPool(jobCount int, workers int) {
             }
         }(w)
     }
-    
+
     // Enviar jobs
     for j := 0; j < jobCount; j++ {
         jobs <- j
     }
     close(jobs)  // Señal para que workers terminen
-    
+
     wg.Wait()
 }
 ```
@@ -629,7 +634,7 @@ func GOOD() {
 func ProcessWithCancel(ctx context.Context, count int) {
     var wg sync.WaitGroup
     done := make(chan struct{})
-    
+
     for i := 0; i < count; i++ {
         wg.Add(1)
         go func(id int) {
@@ -644,13 +649,13 @@ func ProcessWithCancel(ctx context.Context, count int) {
             }
         }(i)
     }
-    
+
     // Esperar o timeout
     go func() {
         wg.Wait()
         close(done)
     }()
-    
+
     select {
     case <-ctx.Done():
         fmt.Println("Contexto cancelado")
@@ -714,7 +719,7 @@ func main() {
     d1 := GetDatabase()
     d2 := GetDatabase()
     d3 := GetDatabase()
-    
+
     fmt.Println(d1 == d2 && d2 == d3)  // true
 }
 ```
@@ -774,6 +779,7 @@ func main() {
 ### 24.5.6 Características de Once
 
 **1. Thread-safe por defecto**
+
 ```go
 var once sync.Once
 for i := 0; i < 100; i++ {
@@ -786,6 +792,7 @@ for i := 0; i < 100; i++ {
 ```
 
 **2. La función se ejecuta ANTES de que Do() retorne**
+
 ```go
 var once sync.Once
 var result string
@@ -798,6 +805,7 @@ fmt.Println(result)  // "inicializado" garantizado
 ```
 
 **3. Panic en la función es visible**
+
 ```go
 var once sync.Once
 
@@ -857,12 +865,12 @@ func NewBuffer() *Buffer {
 func (b *Buffer) Put(item interface{}) {
     b.mu.Lock()
     defer b.mu.Unlock()
-    
+
     // Esperar mientras está lleno
     for len(b.items) >= 10 {
         b.notFull.Wait()  // Libera lock, espera, readquiere lock
     }
-    
+
     b.items = append(b.items, item)
     b.notEmpty.Signal()  // Despertar un consumidor
 }
@@ -870,16 +878,16 @@ func (b *Buffer) Put(item interface{}) {
 func (b *Buffer) Get() interface{} {
     b.mu.Lock()
     defer b.mu.Unlock()
-    
+
     // Esperar mientras está vacío
     for len(b.items) == 0 {
         b.notEmpty.Wait()
     }
-    
+
     item := b.items[0]
     b.items = b.items[1:]
     b.notFull.Signal()  // Despertar un productor
-    
+
     return item
 }
 ```
@@ -903,7 +911,7 @@ func NewBarrier(n int) *Barrier {
 func (b *Barrier) Wait() {
     b.mu.Lock()
     defer b.mu.Unlock()
-    
+
     b.count++
     if b.count >= b.total {
         // Último a llegar despierta a todos
@@ -916,7 +924,7 @@ func (b *Barrier) Wait() {
 
 func main() {
     barrier := NewBarrier(5)
-    
+
     for i := 0; i < 5; i++ {
         go func(id int) {
             fmt.Printf("Goroutine %d: llegó\n", id)
@@ -924,7 +932,7 @@ func main() {
             fmt.Printf("Goroutine %d: continuando\n", id)
         }(i)
     }
-    
+
     time.Sleep(time.Second)
 }
 
@@ -1057,11 +1065,13 @@ func ToMap(m *sync.Map) map[string]interface{} {
 ### 24.7.6 Cuándo Usar sync.Map
 
 **✓ Usa sync.Map cuando:**
+
 - Lecturas muy frecuentes, escrituras raras
 - Alto contention (muchas goroutines accediendo)
 - Keys no cambian frecuentemente
 
 **✗ Evita sync.Map cuando:**
+
 - Muchas escrituras
 - Necesitas Len(), Clear()
 - Necesitas mantener orden
@@ -1123,11 +1133,11 @@ func (bp *BytesPool) Put(b []byte) {
 
 func main() {
     pool := NewBytesPool(1024)
-    
+
     buf1 := pool.Get()
     copy(buf1, []byte("data"))
     pool.Put(buf1)
-    
+
     buf2 := pool.Get()  // Reutiliza buf1!
     fmt.Println(cap(buf2))  // 1024
 }
@@ -1145,7 +1155,7 @@ var jsonEncoderPool = sync.Pool{
 func EncodeJSON(w io.Writer, data interface{}) error {
     enc := jsonEncoderPool.Get().(*json.Encoder)
     defer jsonEncoderPool.Put(enc)
-    
+
     enc.Reset(w)
     return enc.Encode(data)
 }
@@ -1166,10 +1176,10 @@ var pool = sync.Pool{
 func demo() {
     buf := pool.Get()
     pool.Put(buf)
-    
+
     // GC corre
     runtime.GC()
-    
+
     buf = pool.Get()
     // Puede crear un nuevo objeto si fue recolectado
 }
@@ -1178,6 +1188,7 @@ func demo() {
 ### 24.8.6 Patrones Reales
 
 **Caso 1: HTTP Request/Response Bodies**
+
 ```go
 var bufferPool = sync.Pool{
     New: func() interface{} {
@@ -1188,7 +1199,7 @@ var bufferPool = sync.Pool{
 func HandleRequest(r *http.Request) {
     buf := bufferPool.Get().(*bytes.Buffer)
     defer bufferPool.Put(buf)
-    
+
     buf.Reset()
     io.Copy(buf, r.Body)
     // usar buf...
@@ -1257,7 +1268,7 @@ func NewDBPool(maxConnections int) *DBPool {
 func (dp *DBPool) Query(query string) error {
     dp.sem.Acquire()
     defer dp.sem.Release()
-    
+
     // Ejecutar query con máximo 'maxConnections' simultáneamente
     return executeQuery(query)
 }
@@ -1269,18 +1280,18 @@ func (dp *DBPool) Query(query string) error {
 func ProcessLargeDataset(items []interface{}, workers int) {
     sem := NewSemaphore(workers)
     var wg sync.WaitGroup
-    
+
     for _, item := range items {
         wg.Add(1)
         go func(i interface{}) {
             defer wg.Done()
             sem.Acquire()
             defer sem.Release()
-            
+
             processItem(i)
         }(item)
     }
-    
+
     wg.Wait()
 }
 ```
@@ -1369,17 +1380,17 @@ Si rompes UNA condición, no hay deadlock.
 func main() {
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     go func() {
         <-ch1              // Esperar ch1
         ch2 <- 42          // Enviar a ch2
     }()
-    
+
     go func() {
         <-ch2              // Esperar ch2
         ch1 <- 42          // Enviar a ch1
     }()
-    
+
     time.Sleep(time.Second)
     // Ambas goroutines esperando...
 }
@@ -1388,12 +1399,12 @@ func main() {
 func main() {
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     go func() {
         <-ch1
         ch2 <- 42
     }()
-    
+
     go func() {
         <-ch1              // Cambio: leer ch1 en lugar de ch2
         ch2 <- 42
@@ -1407,16 +1418,16 @@ func main() {
 // ❌ DEADLOCK
 func main() {
     var mu sync.Mutex
-    
+
     ch := make(chan struct{})
-    
+
     go func() {
         mu.Lock()
         defer mu.Unlock()
-        
+
         <-ch  // Espera forever
     }()
-    
+
     mu.Lock()           // ❌ Deadlock: misma goroutine no puede Lock dos veces
     defer mu.Unlock()
     ch <- struct{}{}
@@ -1425,18 +1436,18 @@ func main() {
 // ✓ SOLUCIÓN: No hacer lock de la misma goroutine dos veces
 func main() {
     var mu sync.Mutex
-    
+
     ch := make(chan struct{})
-    
+
     go func() {
         mu.Lock()
         defer mu.Unlock()
-        
+
         <-ch
     }()
-    
+
     ch <- struct{}{}
-    
+
     mu.Lock()
     defer mu.Unlock()
 }
@@ -1487,13 +1498,13 @@ func main() {
             counter++  // Read-modify-write no atómico
         }
     }()
-    
+
     go func() {
         for i := 0; i < 1000; i++ {
             counter++
         }
     }()
-    
+
     time.Sleep(time.Second)
     fmt.Println(counter)  // Puede ser < 2000
 }
@@ -1554,7 +1565,7 @@ func main() {
 // sync_test.go
 func TestRaceCondition(t *testing.T) {
     var counter int
-    
+
     var wg sync.WaitGroup
     for i := 0; i < 100; i++ {
         wg.Add(1)
@@ -1563,9 +1574,9 @@ func TestRaceCondition(t *testing.T) {
             counter++
         }()
     }
-    
+
     wg.Wait()
-    
+
     if counter != 100 {
         t.Errorf("Expected 100, got %d", counter)
     }
@@ -1595,13 +1606,13 @@ type User struct {
 type User struct {
     nameMu sync.Mutex
     Name   string
-    
+
     emailMu sync.Mutex
     Email   string
-    
+
     ageMu sync.Mutex
     Age   int
-    
+
     scoreMu sync.Mutex
     Score   float64
 }
@@ -1611,7 +1622,7 @@ type User struct {
     mu    sync.RWMutex
     Name  string
     Email string
-    
+
     scoreMu sync.Mutex
     Score   float64  // Acceso frecuente
 }
@@ -1624,7 +1635,7 @@ type User struct {
 func (c *Cache) ProcessItem(key string, fn func(interface{}) interface{}) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     item := c.items[key]
     result := fn(item)  // Puede ser lento
     c.items[key] = result
@@ -1633,14 +1644,14 @@ func (c *Cache) ProcessItem(key string, fn func(interface{}) interface{}) {
 // ✓ PATRÓN: Copiar, soltar, procesar, guardar
 func (c *Cache) ProcessItem(key string, fn func(interface{}) interface{}) {
     var item interface{}
-    
+
     // Hold time: mínimo
     c.mu.Lock()
     item = c.items[key]
     c.mu.Unlock()
-    
+
     result := fn(item)  // Fuera del lock
-    
+
     c.mu.Lock()
     c.items[key] = result
     c.mu.Unlock()
@@ -1659,10 +1670,10 @@ type Account struct {
 func Transfer(from, to *Account, amount float64) {
     from.mu.Lock()
     defer from.mu.Unlock()
-    
+
     to.mu.Lock()          // ¿Y si otro thread hace Transfer(to, from)?
     defer to.mu.Unlock()
-    
+
     from.balance -= amount
     to.balance += amount
 }
@@ -1672,13 +1683,13 @@ func Transfer(from, to *Account, amount float64) {
     if uintptr(unsafe.Pointer(from)) > uintptr(unsafe.Pointer(to)) {
         from, to = to, from
     }
-    
+
     from.mu.Lock()
     defer from.mu.Unlock()
-    
+
     to.mu.Lock()
     defer to.mu.Unlock()
-    
+
     from.balance -= amount
     to.balance += amount
 }
@@ -1717,15 +1728,15 @@ func (c *Config) Get(key string) (interface{}, bool) {
 func (c *Config) Set(key string, value interface{}) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     snap := c.atomic.Load().(configSnapshot)
     newSnap := make(configSnapshot)
-    
+
     for k, v := range snap {
         newSnap[k] = v
     }
     newSnap[key] = value
-    
+
     c.atomic.Store(newSnap)
 }
 ```
@@ -1786,7 +1797,7 @@ type CacheEntry struct {
 func (e *CacheEntry) Get() (interface{}, bool) {
     e.mu.Lock()
     defer e.mu.Unlock()
-    
+
     if time.Now().After(e.expiry) {
         return nil, false
     }
@@ -1800,7 +1811,7 @@ func (e *CacheEntry) Get() (interface{}, bool) {
 func (e *CacheEntry) Set(value interface{}, duration time.Duration) {
     e.mu.Lock()
     defer e.mu.Unlock()
-    
+
     e.value = value
     e.expiry = time.Now().Add(duration)
 }
@@ -1944,9 +1955,9 @@ El paquete `sync` proporciona herramientas poderosas para sincronización de baj
 
 ## Recursos Externos
 
-- https://golang.org/pkg/sync/
-- https://golang.org/doc/effective_go#concurrency
-- https://www.ardanlabs.com/blog/2015/01/race-detector.html
+- <https://golang.org/pkg/sync/>
+- <https://golang.org/doc/effective_go#concurrency>
+- <https://www.ardanlabs.com/blog/2015/01/race-detector.html>
 
 ---
 

@@ -1,6 +1,7 @@
 # Capítulo 23: Select - Multiplexing de channels
 
 ## Índice
+
 1. [¿Qué es Select?](#231-qué-es-select)
 2. [Sintaxis Básica](#232-sintaxis-básica)
 3. [Select Bloqueante](#233-select-bloqueante)
@@ -42,21 +43,25 @@ El select resuelve un problema crítico en programación concurrente: **¿Cómo 
 ### 23.1.2 Características Clave
 
 **1. Multiplexing de Channels**
+
 - Escucha múltiples channels simultáneamente
 - Procesa el primero que tenga datos disponibles
 - Sin polling activo (blocking eficiente)
 
 **2. No Determinista**
+
 - Si múltiples channels están listos, elige uno al azar
 - Evita sesgo hacia canales específicos
 - Garantiza fairness en sistemas de carga balanceada
 
 **3. Bloqueante por Defecto**
+
 - Bloquea la goroutine si ningún case está listo
 - Se desbloquea cuando cualquier case pueda proceder
 - Usa CPU zero mientras espera
 
 **4. Timeout Native**
+
 - Integración nativa con `time.After` para timeouts
 - Cancelación con `context.Done()`
 - Patrón elegante para operaciones temporizadas
@@ -75,7 +80,7 @@ import (
 func serverMultiplexing() {
     requestsChan := make(chan string, 10)
     shutdownChan := make(chan bool)
-    
+
     // Enviar solicitudes
     go func() {
         for i := 1; i <= 5; i++ {
@@ -83,13 +88,13 @@ func serverMultiplexing() {
             requestsChan <- fmt.Sprintf("Solicitud %d", i)
         }
     }()
-    
+
     // Enviar señal de shutdown después de 3 segundos
     go func() {
         time.Sleep(3 * time.Second)
         shutdownChan <- true
     }()
-    
+
     // Servidor multiplexando dos fuentes
     for {
         select {
@@ -125,17 +130,17 @@ func serverMultiplexing() {
 select {
 case <-channel1:
     // Ejecuta si hay datos en channel1
-    
+
 case value := <-channel2:
     // Ejecuta si hay datos en channel2
     // value contiene el dato
-    
+
 case channel3 <- data:
     // Ejecuta si se puede enviar a channel3
-    
+
 case <-time.After(1 * time.Second):
     // Ejecuta después de 1 segundo si no hay otros casos listos
-    
+
 default:
     // Ejecuta si ningún case está listo (no bloqueante)
 }
@@ -144,6 +149,7 @@ default:
 ### 23.2.2 Casos de Uso Común
 
 **Recibir de un Channel**
+
 ```go
 select {
 case msg := <-msgChan:
@@ -152,6 +158,7 @@ case msg := <-msgChan:
 ```
 
 **Enviar a un Channel**
+
 ```go
 select {
 case dataChan <- value:
@@ -160,25 +167,27 @@ case dataChan <- value:
 ```
 
 **Múltiples Recepciones**
+
 ```go
 select {
 case req := <-requests:
     handleRequest(req)
-    
+
 case msg := <-messages:
     processMessage(msg)
-    
+
 case alert := <-alerts:
     handleAlert(alert)
 }
 ```
 
 **Mezcla de Envíos y Recepciones**
+
 ```go
 select {
 case value := <-inputChan:
     processValue(value)
-    
+
 case resultChan <- computeResult():
     fmt.Println("Resultado enviado")
 }
@@ -194,10 +203,10 @@ El select tiene un orden de evaluación específico pero no determinista:
 select {
 case <-chan1:  // Case 1 - Posición 1
     fmt.Println("Chan1")
-    
+
 case <-chan2:  // Case 2 - Posición 2
     fmt.Println("Chan2")
-    
+
 case <-chan3:  // Case 3 - Posición 3
     fmt.Println("Chan3")
 }
@@ -212,10 +221,10 @@ for {
     select {
     case job := <-jobQueue:
         fmt.Printf("Procesando: %v\n", job)
-        
+
     case result := <-resultChannel:
         fmt.Printf("Resultado: %v\n", result)
-        
+
     case <-stopChan:
         fmt.Println("Parando...")
         return
@@ -242,22 +251,22 @@ import (
 func blockingSelectDemo() {
     chan1 := make(chan string)
     chan2 := make(chan string)
-    
+
     // Goroutine que envía después de 2 segundos
     go func() {
         time.Sleep(2 * time.Second)
         chan1 <- "¡Datos en chan1!"
     }()
-    
+
     // Select bloqueante - espera 2 segundos sin hacer nada
     fmt.Println("Esperando...")
     start := time.Now()
-    
+
     select {
     case msg := <-chan1:
-        fmt.Printf("Recibido: %s después de %v\n", 
+        fmt.Printf("Recibido: %s después de %v\n",
             msg, time.Since(start))
-        
+
     case msg := <-chan2:
         fmt.Printf("Recibido: %s\n", msg)
     }
@@ -265,6 +274,7 @@ func blockingSelectDemo() {
 ```
 
 Output:
+
 ```
 Esperando...
 Recibido: ¡Datos en chan1! después de 2.001234567s
@@ -276,7 +286,7 @@ Recibido: ¡Datos en chan1! después de 2.001234567s
 // ❌ DEADLOCK: Select bloqueante en main sin goroutines
 func deadlockExample() {
     chan1 := make(chan string)
-    
+
     // Esto bloquea PARA SIEMPRE porque:
     // 1. chan1 no tiene datos
     // 2. No hay goroutines que envíen datos
@@ -285,7 +295,7 @@ func deadlockExample() {
     case msg := <-chan1:
         fmt.Println(msg)
     }
-    
+
     // Nunca llega aquí
     fmt.Println("Fin")
 }
@@ -297,11 +307,11 @@ func deadlockExample() {
 // ✓ CORRECTO: Usar timeout para detectar bloqueos
 func selectWithTimeout() {
     chan1 := make(chan string)
-    
+
     select {
     case msg := <-chan1:
         fmt.Println(msg)
-        
+
     case <-time.After(3 * time.Second):
         fmt.Println("Timeout: nada llegó en 3 segundos")
     }
@@ -325,7 +335,7 @@ func serverKeepAlive() {
             time.Sleep(1 * time.Second)
         }
     }()
-    
+
     // Mantener main viva
     select {}
 }
@@ -349,20 +359,20 @@ import (
 
 func defaultCaseDemo() {
     dataChan := make(chan int)
-    
+
     // Enviar datos después de 2 segundos
     go func() {
         time.Sleep(2 * time.Second)
         dataChan <- 42
     }()
-    
+
     // Verificar múltiples veces sin bloquear
     for i := 0; i < 5; i++ {
         select {
         case data := <-dataChan:
             fmt.Printf("Datos recibidos: %d\n", data)
             return
-            
+
         default:
             fmt.Printf("No hay datos (intento %d)\n", i+1)
             time.Sleep(1 * time.Second)
@@ -372,6 +382,7 @@ func defaultCaseDemo() {
 ```
 
 Output:
+
 ```
 No hay datos (intento 1)
 No hay datos (intento 2)
@@ -383,12 +394,12 @@ Datos recibidos: 42
 ```go
 func nonBlockingSend() {
     resultChan := make(chan string)
-    
+
     // Envío que no bloquea
     select {
     case resultChan <- "Resultado":
         fmt.Println("Resultado enviado")
-        
+
     default:
         fmt.Println("No se pudo enviar (buffer lleno o sin receptores)")
     }
@@ -401,11 +412,11 @@ func nonBlockingSend() {
 func pollingPattern() {
     jobs := make(chan string, 10)
     results := make(chan string)
-    
+
     // Llenar canal
     jobs <- "job1"
     jobs <- "job2"
-    
+
     // Procesar con polling no bloqueante
     processed := 0
     for processed < 2 {
@@ -416,11 +427,11 @@ func pollingPattern() {
                 time.Sleep(100 * time.Millisecond)
                 results <- j + " completado"
             }(job)
-            
+
         case result := <-results:
             fmt.Printf("Resultado: %s\n", result)
             processed++
-            
+
         default:
             // Pequeña pausa si no hay nada
             time.Sleep(10 * time.Millisecond)
@@ -436,13 +447,13 @@ func pollingPattern() {
 func trySendWithFallback() {
     alertChan := make(chan string)
     logChan := make(chan string)
-    
+
     alert := "CRÍTICO: Sistema degradado"
-    
+
     select {
     case alertChan <- alert:
         fmt.Println("Alerta enviada por canal prioritario")
-        
+
     default:
         // Fallback: usar log
         select {
@@ -473,17 +484,17 @@ import (
 
 func simpleTimeout() {
     resultChan := make(chan string)
-    
+
     go func() {
         // Simular operación lenta
         time.Sleep(3 * time.Second)
         resultChan <- "Resultado"
     }()
-    
+
     select {
     case result := <-resultChan:
         fmt.Println("Éxito:", result)
-        
+
     case <-time.After(1 * time.Second):
         fmt.Println("❌ Timeout: operación tardó demasiado")
     }
@@ -496,7 +507,7 @@ func simpleTimeout() {
 func timeoutWithRetry() {
     for attempt := 1; attempt <= 3; attempt++ {
         fmt.Printf("Intento %d...\n", attempt)
-        
+
         result := attemptWithTimeout(500 * time.Millisecond)
         if result != "" {
             fmt.Println("Éxito:", result)
@@ -509,7 +520,7 @@ func timeoutWithRetry() {
 
 func attemptWithTimeout(timeout time.Duration) string {
     resultChan := make(chan string)
-    
+
     go func() {
         // Operación que a veces falla
         if time.Now().UnixNano()%2 == 0 {
@@ -517,11 +528,11 @@ func attemptWithTimeout(timeout time.Duration) string {
         }
         // Si no envía nada, se produce timeout
     }()
-    
+
     select {
     case result := <-resultChan:
         return result
-        
+
     case <-time.After(timeout):
         return ""
     }
@@ -534,20 +545,20 @@ func attemptWithTimeout(timeout time.Duration) string {
 func fetchDataWithTimeout() {
     dataChan := make(chan string)
     errorChan := make(chan error)
-    
+
     go func() {
         // Simular fetch de API
         time.Sleep(2 * time.Second)
         dataChan <- "Datos del servidor"
     }()
-    
+
     select {
     case data := <-dataChan:
         fmt.Println("Datos:", data)
-        
+
     case err := <-errorChan:
         fmt.Println("Error:", err)
-        
+
     case <-time.After(1 * time.Second):
         fmt.Println("Timeout: Servidor no respondió")
     }
@@ -560,10 +571,10 @@ func fetchDataWithTimeout() {
 func tickerPattern() {
     ticker := time.NewTicker(500 * time.Millisecond)
     defer ticker.Stop()
-    
+
     jobsChan := make(chan string)
     stopChan := make(chan bool)
-    
+
     // Goroutine que envía jobs
     go func() {
         for i := 1; i <= 5; i++ {
@@ -572,15 +583,15 @@ func tickerPattern() {
         }
         stopChan <- true
     }()
-    
+
     for {
         select {
         case <-ticker.C:
             fmt.Println("[Heartbeat] Sistema activo")
-            
+
         case job := <-jobsChan:
             fmt.Printf("[Job] %s\n", job)
-            
+
         case <-stopChan:
             fmt.Println("[Stop] Terminando")
             return
@@ -598,22 +609,22 @@ func escalatingTimeout() {
         500 * time.Millisecond,
         2 * time.Second,
     }
-    
+
     for i, timeout := range timeouts {
         fmt.Printf("Intento %d con timeout %v\n", i+1, timeout)
-        
+
         resultChan := make(chan string)
-        
+
         go func() {
             time.Sleep(300 * time.Millisecond)
             resultChan <- "Éxito"
         }()
-        
+
         select {
         case result := <-resultChan:
             fmt.Println("✓", result)
             return
-            
+
         case <-time.After(timeout):
             if i < len(timeouts)-1 {
                 fmt.Println("✗ Timeout, reintentando...")
@@ -642,7 +653,7 @@ import (
 func doneChannelPattern() {
     done := make(chan bool)
     resultChan := make(chan string)
-    
+
     // Goroutine que puede ser cancelada
     go func() {
         for i := 0; i < 10; i++ {
@@ -650,28 +661,28 @@ func doneChannelPattern() {
             case <-done:
                 fmt.Println("Goroutine cancelada")
                 return
-                
+
             default:
                 fmt.Printf("Trabajando... %d\n", i)
                 time.Sleep(500 * time.Millisecond)
-                
+
                 if i == 4 {
                     resultChan <- "Resultado a mitad"
                 }
             }
         }
     }()
-    
+
     select {
     case result := <-resultChan:
         fmt.Println("Recibido:", result)
         done <- true  // Cancelar goroutine
-        
+
     case <-time.After(3 * time.Second):
         fmt.Println("Timeout, cancelando...")
         done <- true
     }
-    
+
     time.Sleep(500 * time.Millisecond)
 }
 ```
@@ -684,31 +695,31 @@ import "context"
 func contextCancellation() {
     // Crear contexto con timeout
     ctx, cancel := context.WithTimeout(
-        context.Background(), 
+        context.Background(),
         2 * time.Second,
     )
     defer cancel()
-    
+
     resultChan := make(chan string)
-    
+
     go func() {
         for i := 0; i < 10; i++ {
             select {
             case <-ctx.Done():
                 fmt.Println("Contexto cancelado:", ctx.Err())
                 return
-                
+
             default:
                 time.Sleep(500 * time.Millisecond)
                 fmt.Printf("Paso %d\n", i)
             }
         }
     }()
-    
+
     select {
     case result := <-resultChan:
         fmt.Println("Resultado:", result)
-        
+
     case <-ctx.Done():
         fmt.Println("Operación cancelada por timeout")
     }
@@ -730,7 +741,7 @@ func (s *Server) Start() {
             case <-s.stopChan:
                 fmt.Println("Servidor detenido")
                 return
-                
+
             case job := <-s.jobsChan:
                 s.processJob(job)
             }
@@ -740,10 +751,10 @@ func (s *Server) Start() {
 
 func (s *Server) Stop() {
     fmt.Println("Iniciando shutdown graceful...")
-    
+
     // Dar tiempo para procesar jobs pendientes
     time.Sleep(1 * time.Second)
-    
+
     s.stopChan <- true
     fmt.Println("Servidor parado")
 }
@@ -758,14 +769,14 @@ func gracefulShutdownDemo() {
         stopChan: make(chan bool),
         jobsChan: make(chan string, 100),
     }
-    
+
     server.Start()
-    
+
     // Enviar jobs
     for i := 1; i <= 5; i++ {
         server.jobsChan <- fmt.Sprintf("Job %d", i)
     }
-    
+
     time.Sleep(2 * time.Second)
     server.Stop()
 }
@@ -777,30 +788,30 @@ func gracefulShutdownDemo() {
 func cancelOnFirstCompletion() {
     results := make(chan string)
     done := make(chan bool)
-    
+
     // Múltiples goroutines competidoras
     for i := 1; i <= 3; i++ {
         go func(id int) {
             delay := time.Duration(id) * time.Second
             time.Sleep(delay)
-            
+
             select {
             case <-done:
                 fmt.Printf("Worker %d: Cancelado\n", id)
-                
+
             default:
                 results <- fmt.Sprintf("Worker %d completó", id)
             }
         }(i)
     }
-    
+
     // Esperar al primero que termine
     select {
     case result := <-results:
         fmt.Println("✓", result)
         close(done)  // Cancelar otros
     }
-    
+
     time.Sleep(2 * time.Second)
 }
 ```
@@ -823,7 +834,7 @@ func forSelectPattern() {
     inputChan := make(chan string, 10)
     outputChan := make(chan string)
     stopChan := make(chan bool)
-    
+
     // Producer
     go func() {
         for i := 1; i <= 5; i++ {
@@ -832,7 +843,7 @@ func forSelectPattern() {
         }
         close(inputChan)
     }()
-    
+
     // Consumer loop
     for {
         select {
@@ -846,10 +857,10 @@ func forSelectPattern() {
                 time.Sleep(100 * time.Millisecond)
                 outputChan <- i + " procesado"
             }(item)
-            
+
         case result := <-outputChan:
             fmt.Printf("Resultado: %s\n", result)
-            
+
         case <-stopChan:
             fmt.Println("Deteniendo...")
             return
@@ -887,10 +898,10 @@ func (wp *WorkerPool) worker(id int) {
                 fmt.Printf("Worker %d: Canal cerrado\n", id)
                 return
             }
-            result := fmt.Sprintf("Worker %d procesó Task %d: %s", 
+            result := fmt.Sprintf("Worker %d procesó Task %d: %s",
                 id, task.ID, task.Data)
             wp.results <- result
-            
+
         case <-wp.done:
             fmt.Printf("Worker %d: Cancelado\n", id)
             return
@@ -905,9 +916,9 @@ func workerPoolDemo() {
         results: make(chan string),
         done:    make(chan bool),
     }
-    
+
     wp.Start()
-    
+
     // Enviar tareas
     go func() {
         for i := 1; i <= 10; i++ {
@@ -915,7 +926,7 @@ func workerPoolDemo() {
         }
         close(wp.tasks)
     }()
-    
+
     // Procesar resultados
     processed := 0
     for processed < 10 {
@@ -925,7 +936,7 @@ func workerPoolDemo() {
             processed++
         }
     }
-    
+
     // Señalizar fin
     for i := 0; i < 3; i++ {
         wp.done <- true
@@ -949,7 +960,7 @@ func fanInPattern() {
         }()
         return out
     }
-    
+
     // Fan-in: combinar múltiples canales
     merge := func(channels ...<-chan string) <-chan string {
         merged := make(chan string)
@@ -973,15 +984,15 @@ func fanInPattern() {
         }()
         return merged
     }
-    
+
     // Crear productores
     ch1 := producer("A")
     ch2 := producer("B")
     ch3 := producer("C")
-    
+
     // Combinar
     merged := merge(ch1, ch2, ch3)
-    
+
     for msg := range merged {
         fmt.Println(msg)
     }
@@ -994,10 +1005,10 @@ func fanInPattern() {
 // Distribuir trabajo a múltiples workers
 func fanOutPattern() {
     tasks := []int{1, 2, 3, 4, 5}
-    
+
     // Crear canales para cada worker
     results := make([]<-chan string, len(tasks))
-    
+
     for i, task := range tasks {
         ch := make(chan string)
         go func(t int, c chan string) {
@@ -1007,7 +1018,7 @@ func fanOutPattern() {
         }(task, ch)
         results[i] = ch
     }
-    
+
     // Recolectar todos los resultados
     for i, resultCh := range results {
         select {
@@ -1036,27 +1047,27 @@ import (
 func nonDeterminismDemo() {
     ch1 := make(chan string)
     ch2 := make(chan string)
-    
+
     // Ambos listos simultáneamente
     go func() {
         time.Sleep(100 * time.Millisecond)
         ch1 <- "Mensaje de ch1"
         ch2 <- "Mensaje de ch2"
     }()
-    
+
     // Ejecutar 10 veces - resultado diferente cada vez
     results := make(map[string]int)
-    
+
     for trial := 0; trial < 10; trial++ {
         select {
         case msg := <-ch1:
             results[msg]++
-            
+
         case msg := <-ch2:
             results[msg]++
         }
     }
-    
+
     fmt.Println("Distribución de 10 ejecuciones:")
     for msg, count := range results {
         fmt.Printf("  %s: %d veces\n", msg, count)
@@ -1072,12 +1083,12 @@ func nonDeterminismDemo() {
 func fragileTest(t *testing.T) {
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     go func() {
         ch1 <- 1
         ch2 <- 2
     }()
-    
+
     select {
     case v := <-ch1:
         if v != 1 {
@@ -1095,12 +1106,12 @@ func robustTest(t *testing.T) {
     ch1 := make(chan int)
     ch2 := make(chan int)
     results := []int{}
-    
+
     go func() {
         ch1 <- 1
         ch2 <- 2
     }()
-    
+
     // Recolectar ambos valores
     for i := 0; i < 2; i++ {
         select {
@@ -1110,7 +1121,7 @@ func robustTest(t *testing.T) {
             results = append(results, v)
         }
     }
-    
+
     // Verificar contenido sin depender del orden
     if len(results) != 2 || (results[0] != 1 && results[0] != 2) {
         t.Fail()
@@ -1125,7 +1136,7 @@ func robustTest(t *testing.T) {
 func fairnessDemo() {
     heavy := make(chan int, 100)    // Muchos datos
     light := make(chan int, 10)     // Pocos datos
-    
+
     // Llenar los canales
     for i := 0; i < 100; i++ {
         heavy <- i
@@ -1133,10 +1144,10 @@ func fairnessDemo() {
     for i := 0; i < 10; i++ {
         light <- i
     }
-    
+
     heavyCount := 0
     lightCount := 0
-    
+
     // Sin no-determinismo, se procesaría heavy primero
     // Con no-determinismo, se distribuye equitativamente
     for i := 0; i < 110; i++ {
@@ -1147,7 +1158,7 @@ func fairnessDemo() {
             lightCount++
         }
     }
-    
+
     fmt.Printf("Heavy: %d, Light: %d\n", heavyCount, lightCount)
     // Típicamente ~55 y ~55, no 100 y 10
 }
@@ -1163,25 +1174,25 @@ func priorityPattern() {
     critical := make(chan string)
     normal := make(chan string)
     background := make(chan string)
-    
+
     // Procesar con prioridad explícita
     for {
         select {
         case task := <-critical:
             fmt.Printf("CRÍTICO: %s\n", task)
-            
+
         default:
             // Luego evaluar normal
             select {
             case task := <-normal:
                 fmt.Printf("Normal: %s\n", task)
-                
+
             default:
                 // Finalmente background
                 select {
                 case task := <-background:
                     fmt.Printf("Background: %s\n", task)
-                    
+
                 default:
                     return
                 }
@@ -1222,7 +1233,7 @@ func receiveWithIf() {
     go func() {
         ch <- "Hola"
     }()
-    
+
     // Bloquea hasta que hay datos
     msg := <-ch
     fmt.Println(msg)
@@ -1235,11 +1246,11 @@ func receiveWithSelect() {
         time.Sleep(100 * time.Millisecond)
         ch <- "Hola"
     }()
-    
+
     select {
     case msg := <-ch:
         fmt.Println(msg)
-        
+
     case <-time.After(50 * time.Millisecond):
         fmt.Println("Timeout")
     }
@@ -1253,7 +1264,7 @@ func receiveWithSelect() {
 func multipleChannelsWithIf() {
     ch1 := make(chan string)
     ch2 := make(chan int)
-    
+
     // No hay forma elegante de esperar ambos
     // Requeriría goroutines adicionales
 }
@@ -1262,11 +1273,11 @@ func multipleChannelsWithIf() {
 func multipleChannelsWithSelect() {
     ch1 := make(chan string)
     ch2 := make(chan int)
-    
+
     select {
     case msg := <-ch1:
         fmt.Println("String:", msg)
-        
+
     case num := <-ch2:
         fmt.Println("Int:", num)
     }
@@ -1279,7 +1290,7 @@ func multipleChannelsWithSelect() {
 // ❌ CON IF - No se puede hacer
 func nonBlockingWithIf() {
     ch := make(chan string)
-    
+
     // Esto bloquea o panics
     // msg := <-ch  // bloquea
 }
@@ -1287,11 +1298,11 @@ func nonBlockingWithIf() {
 // ✓ CON SELECT - Default lo permite
 func nonBlockingWithSelect() {
     ch := make(chan string)
-    
+
     select {
     case msg := <-ch:
         fmt.Println("Mensaje:", msg)
-        
+
     default:
         fmt.Println("No hay datos disponibles")
     }
@@ -1305,7 +1316,7 @@ func nonBlockingWithSelect() {
 func advancedLogic() {
     dataChan := make(chan string)
     errorChan := make(chan error)
-    
+
     go func() {
         // Simulación: 50% éxito, 50% error
         if time.Now().UnixNano()%2 == 0 {
@@ -1314,19 +1325,19 @@ func advancedLogic() {
             errorChan <- fmt.Errorf("fallo")
         }
     }()
-    
+
     select {
     case data := <-dataChan:
         // Select elegir cuál channel tenía datos
         if len(data) > 0 {  // If para lógica dentro
             fmt.Println("Datos válidos:", data)
         }
-        
+
     case err := <-errorChan:
         if err != nil {  // If para validación
             fmt.Println("Error:", err)
         }
-        
+
     case <-time.After(1 * time.Second):
         fmt.Println("Timeout")
     }
@@ -1351,10 +1362,10 @@ func rateLimiterPattern() {
     // Limitar a 5 solicitudes por segundo
     ticker := time.NewTicker(200 * time.Millisecond)  // 1000/5
     defer ticker.Stop()
-    
+
     requests := make(chan string, 20)
     results := make(chan string)
-    
+
     // Productor: genera muchas solicitudes rápido
     go func() {
         for i := 1; i <= 20; i++ {
@@ -1362,7 +1373,7 @@ func rateLimiterPattern() {
         }
         close(requests)
     }()
-    
+
     // Procesador rate-limited
     go func() {
         for req := range requests {
@@ -1371,7 +1382,7 @@ func rateLimiterPattern() {
         }
         close(results)
     }()
-    
+
     // Consumer
     for result := range results {
         fmt.Println(result, "en", time.Now().Format("15:04:05"))
@@ -1399,7 +1410,7 @@ func (cb *CircuitBreaker) attempt(fn func() error) error {
             return fmt.Errorf("circuit breaker abierto")
         }
     }
-    
+
     err := fn()
     if err != nil {
         cb.attempts++
@@ -1411,13 +1422,13 @@ func (cb *CircuitBreaker) attempt(fn func() error) error {
     } else {
         cb.attempts = 0
     }
-    
+
     return err
 }
 
 func circuitBreakerDemo() {
     cb := &CircuitBreaker{maxAttempts: 3}
-    
+
     for i := 0; i < 8; i++ {
         err := cb.attempt(func() error {
             if i < 4 {
@@ -1425,13 +1436,13 @@ func circuitBreakerDemo() {
             }
             return nil
         })
-        
+
         if err != nil {
             fmt.Printf("Intento %d: %v\n", i+1, err)
         } else {
             fmt.Printf("Intento %d: Éxito\n", i+1)
         }
-        
+
         time.Sleep(500 * time.Millisecond)
     }
 }
@@ -1459,7 +1470,7 @@ func (b *Bulkhead) execute(task string) {
     case b.semaphore <- true:
         go func() {
             defer func() { <-b.semaphore }()
-            
+
             err := b.handler(task)
             if err != nil {
                 fmt.Printf("Task %s falló: %v\n", task, err)
@@ -1467,7 +1478,7 @@ func (b *Bulkhead) execute(task string) {
                 fmt.Printf("Task %s completada\n", task)
             }
         }()
-        
+
     default:
         fmt.Printf("Task %s rechazada (sin capacidad)\n", task)
     }
@@ -1478,12 +1489,12 @@ func bulkheadDemo() {
         time.Sleep(time.Second)
         return nil
     })
-    
+
     // Enviar 10 tareas, pero solo 3 concurrentes
     for i := 1; i <= 10; i++ {
         bh.execute(fmt.Sprintf("Task %d", i))
     }
-    
+
     time.Sleep(5 * time.Second)
 }
 ```
@@ -1500,7 +1511,7 @@ func pipelinePattern() {
         }
         close(numbers)
     }()
-    
+
     // Stage 2: Cuadrar números
     squares := make(chan int)
     go func() {
@@ -1509,7 +1520,7 @@ func pipelinePattern() {
         }
         close(squares)
     }()
-    
+
     // Stage 3: Consumir resultados
     for sq := range squares {
         fmt.Println("Cuadrado:", sq)
@@ -1524,16 +1535,16 @@ import "context"
 
 func operationWithContextTimeout(ctx context.Context, data string) (string, error) {
     resultChan := make(chan string)
-    
+
     go func() {
         time.Sleep(2 * time.Second)
         resultChan <- "Resultado: " + data
     }()
-    
+
     select {
     case result := <-resultChan:
         return result, nil
-        
+
     case <-ctx.Done():
         return "", ctx.Err()
     }
@@ -1546,7 +1557,7 @@ func contextTimeoutDemo() {
         1 * time.Second,
     )
     defer cancel()
-    
+
     result, err := operationWithContextTimeout(ctx, "datos")
     if err != nil {
         fmt.Println("Error:", err)
@@ -1568,13 +1579,13 @@ func contextTimeoutDemo() {
 // ✓ CORRECTO: Detectar channel cerrado
 func properChannelHandling() {
     ch := make(chan string)
-    
+
     go func() {
         ch <- "dato1"
         ch <- "dato2"
         close(ch)  // Señalizar fin
     }()
-    
+
     for msg := range ch {  // Detecta automáticamente close()
         fmt.Println(msg)
     }
@@ -1584,7 +1595,7 @@ func properChannelHandling() {
 func improperChannelHandling() {
     ch := make(chan string)
     close(ch)
-    
+
     msg := <-ch  // Panic!
 }
 ```
@@ -1595,7 +1606,7 @@ func improperChannelHandling() {
 // ✓ CORRECTO: Context para timeout y cancelación
 func properCancellation(ctx context.Context) {
     resultChan := make(chan string)
-    
+
     go func() {
         select {
         case <-ctx.Done():
@@ -1606,7 +1617,7 @@ func properCancellation(ctx context.Context) {
             resultChan <- "Resultado"
         }
     }()
-    
+
     select {
     case result := <-resultChan:
         fmt.Println(result)
@@ -1618,14 +1629,14 @@ func properCancellation(ctx context.Context) {
 // ❌ INCORRECTO: Done channel manual (más verboso)
 func improperCancellation() {
     done := make(chan bool)
-    
+
     go func() {
         select {
         case <-done:
             return
         }
     }()
-    
+
     done <- true
 }
 ```
@@ -1641,7 +1652,7 @@ func properMainLoop() {
             fmt.Println("[Background] Activo")
         }
     }()
-    
+
     // Mantener programa activo
     select {}  // Necesario, documentado
 }
@@ -1658,7 +1669,7 @@ func improperMainLoop() {
 // ✓ CORRECTO: Buffer adecuado para evitar deadlock
 func properBuffering() {
     ch := make(chan int, 10)  // Buffer de 10
-    
+
     for i := 0; i < 10; i++ {
         ch <- i  // No bloquea si buffer disponible
     }
@@ -1667,7 +1678,7 @@ func properBuffering() {
 // ⚠ CUIDADO: Sin buffer requiere receptor
 func noBuffering() {
     ch := make(chan int)  // Sin buffer
-    
+
     ch <- 1  // Bloquea hasta que alguien reciba
 }
 ```
@@ -1680,15 +1691,15 @@ func noBuffering() {
 // ❌ ANTIPATRÓN: Race condition
 func racyPattern() {
     ch := make(chan int)
-    
+
     go func() {
         ch <- 1  // Goroutine 1
     }()
-    
+
     go func() {
         ch <- 2  // Goroutine 2
     }()
-    
+
     // ¿Cuál se recibe? Indeterminista
     fmt.Println(<-ch)
     // Ambos se enviaron pero solo uno se recibió
@@ -1697,15 +1708,15 @@ func racyPattern() {
 // ✓ CORRECTO: Recolectar ambos
 func properCollection() {
     ch := make(chan int)
-    
+
     go func() {
         ch <- 1
     }()
-    
+
     go func() {
         ch <- 2
     }()
-    
+
     fmt.Println(<-ch)  // Recibir 1
     fmt.Println(<-ch)  // Recibir 2
 }
@@ -1718,7 +1729,7 @@ func properCollection() {
 func deadlockSelect() {
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     select {
     case <-ch1:  // Nunca llegará datos
     case <-ch2:  // Nunca llegará datos
@@ -1730,7 +1741,7 @@ func deadlockSelect() {
 func properSelectWithTimeout() {
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     select {
     case <-ch1:
     case <-ch2:
@@ -1775,7 +1786,7 @@ func (p *Pool) worker() {
 // ❌ ANTIPATRÓN: Puede bloquear indefinidamente
 func blockingLoop() {
     eventChan := make(chan string)
-    
+
     for {
         select {
         case event := <-eventChan:
@@ -1788,12 +1799,12 @@ func blockingLoop() {
 // ✓ CORRECTO: Incluir timeout o default
 func properLoop() {
     eventChan := make(chan string)
-    
+
     for {
         select {
         case event := <-eventChan:
             fmt.Println(event)
-            
+
         case <-time.After(30 * time.Second):
             fmt.Println("[Heartbeat] Activo")
         }
@@ -1810,10 +1821,10 @@ import "runtime"
 func debugBlockedGoroutines() {
     before := runtime.NumGoroutine()
     fmt.Printf("Goroutines antes: %d\n", before)
-    
+
     ch1 := make(chan int)
     ch2 := make(chan int)
-    
+
     // Goroutine bloqueada
     go func() {
         select {
@@ -1821,10 +1832,10 @@ func debugBlockedGoroutines() {
         case <-ch2:
         }
     }()
-    
+
     after := runtime.NumGoroutine()
     fmt.Printf("Goroutines después: %d\n", after)
-    
+
     if after > before {
         fmt.Println("⚠ Goroutine creada pero posiblemente bloqueada")
     }
@@ -1834,12 +1845,12 @@ func debugBlockedGoroutines() {
 func debugSelect() {
     ch1 := make(chan string)
     ch2 := make(chan string)
-    
+
     go func() {
         time.Sleep(1 * time.Second)
         ch1 <- "dato"
     }()
-    
+
     fmt.Println("[DEBUG] Esperando select...")
     select {
     case msg := <-ch1:
@@ -1862,10 +1873,10 @@ func efficientMultiplexing() {
     ch1 := make(chan int)
     ch2 := make(chan int)
     ch3 := make(chan int)
-    
+
     // Fan-in: combinar en un canal
     combined := make(chan int)
-    
+
     go func() {
         select {
         case v := <-ch1:
@@ -1876,7 +1887,7 @@ func efficientMultiplexing() {
             combined <- v
         }
     }()
-    
+
     // Ahora solo selectar sobre un canal
     select {
     case v := <-combined:
@@ -1894,6 +1905,7 @@ func efficientMultiplexing() {
 **Objetivo:** Implementar una función que realiza una operación con timeout.
 
 **Requisitos:**
+
 - Crear una goroutine que envía un resultado después de 2 segundos
 - Usar select con time.After para un timeout de 1 segundo
 - Mostrar si fue exitoso o timeout
@@ -1910,13 +1922,13 @@ import (
 
 func fetchDataWithTimeout(timeout time.Duration) (string, error) {
     resultChan := make(chan string)
-    
+
     go func() {
         // Simular operación lenta
         time.Sleep(2 * time.Second)
         resultChan <- "Datos obtenidos"
     }()
-    
+
     // TODO: Implementar select con timeout
     select {
     // Completar aquí
@@ -1931,7 +1943,7 @@ func main() {
     } else {
         fmt.Println("Resultado:", result)
     }
-    
+
     // Caso 2: Timeout de 3 segundos (debe éxito)
     result, err = fetchDataWithTimeout(3 * time.Second)
     if err != nil {
@@ -1947,16 +1959,16 @@ func main() {
 ```go
 func fetchDataWithTimeout(timeout time.Duration) (string, error) {
     resultChan := make(chan string)
-    
+
     go func() {
         time.Sleep(2 * time.Second)
         resultChan <- "Datos obtenidos"
     }()
-    
+
     select {
     case result := <-resultChan:
         return result, nil
-        
+
     case <-time.After(timeout):
         return "", fmt.Errorf("timeout excedido")
     }
@@ -1970,6 +1982,7 @@ func fetchDataWithTimeout(timeout time.Duration) (string, error) {
 **Objetivo:** Select que espera de 3+ fuentes diferentes.
 
 **Requisitos:**
+
 - Crear 3 goroutines que envían diferentes tipos de datos a intervalos variados
 - Usar select para recibir de cualquiera que esté listo
 - Procesar cada mensaje según su origen
@@ -1989,7 +2002,7 @@ func multiplexingSources() {
     emailsChan := make(chan string)
     notificationsChan := make(chan string)
     alertsChan := make(chan string)
-    
+
     // Goroutine 1: Emails cada 1 segundo
     go func() {
         for i := 1; i <= 3; i++ {
@@ -1997,7 +2010,7 @@ func multiplexingSources() {
             emailsChan <- fmt.Sprintf("Email %d", i)
         }
     }()
-    
+
     // Goroutine 2: Notifications cada 1.5 segundos
     go func() {
         for i := 1; i <= 2; i++ {
@@ -2005,14 +2018,14 @@ func multiplexingSources() {
             notificationsChan <- fmt.Sprintf("Notif %d", i)
         }
     }()
-    
+
     // Goroutine 3: Alerts cada 2 segundos
     go func() {
         time.Sleep(2 * time.Second)
         alertsChan <- "ALERT: Sistema"
         alertsChan <- "ALERT: Crítico"
     }()
-    
+
     // TODO: Implementar select multiplexing
     // Procesar hasta recibir 7 mensajes totales
 }
@@ -2023,6 +2036,7 @@ func main() {
 ```
 
 **Resultado esperado:**
+
 ```
 Email 1 recibido
 Notif 1 recibido
@@ -2040,6 +2054,7 @@ ALERT: Crítico recibido
 **Objetivo:** Crear un worker que procesa tareas con timeout individual.
 
 **Requisitos:**
+
 - Implementar un type `Worker` que procesa tareas
 - Cada tarea tiene un timeout de 500ms
 - Si excede timeout, mostrar error y continuar
@@ -2066,12 +2081,12 @@ type Worker struct {
 
 func (w *Worker) Process(task Task, timeout time.Duration) error {
     resultChan := make(chan string)
-    
+
     go func() {
         time.Sleep(task.Duration)
         resultChan <- fmt.Sprintf("Task %d completada", task.ID)
     }()
-    
+
     // TODO: Implementar select con timeout
     return nil
 }
@@ -2089,9 +2104,9 @@ func (w *Worker) Start() {
 
 func main() {
     worker := &Worker{tasksChan: make(chan Task)}
-    
+
     go worker.Start()
-    
+
     // Enviar tareas con diferentes duraciones
     tasks := []Task{
         {ID: 1, Duration: 200 * time.Millisecond},
@@ -2100,11 +2115,11 @@ func main() {
         {ID: 4, Duration: 700 * time.Millisecond},  // Timeout
         {ID: 5, Duration: 100 * time.Millisecond},
     }
-    
+
     for _, task := range tasks {
         worker.tasksChan <- task
     }
-    
+
     close(worker.tasksChan)
     time.Sleep(5 * time.Second)
 }
@@ -2117,6 +2132,7 @@ func main() {
 **Objetivo:** Implementar shutdown graceful de un servidor concurrente.
 
 **Requisitos:**
+
 - Servidor procesa jobs de un canal
 - Recibe señal de shutdown (SIGINT simulado)
 - Completa jobs pendientes antes de cerrar
@@ -2148,7 +2164,7 @@ func (s *Server) Start(numWorkers int) {
 
 func (s *Server) worker(id int) {
     defer s.wg.Done()
-    
+
     for {
         select {
         // TODO: Recibir jobs o señal de stop
@@ -2159,7 +2175,7 @@ func (s *Server) worker(id int) {
 func (s *Server) Stop() {
     fmt.Println("\n[SHUTDOWN] Cerrando servidor...")
     fmt.Println("[SHUTDOWN] Deteniendo workers...")
-    
+
     // TODO: Señalizar stop a todos los workers
     // TODO: Esperar a que terminen
     // TODO: Mostrar confirmación
@@ -2179,9 +2195,9 @@ func main() {
         jobsChan: make(chan string, 5),
         stopChan: make(chan bool),
     }
-    
+
     server.Start(2)
-    
+
     // Simular jobs entrantes
     go func() {
         for i := 1; i <= 10; i++ {
@@ -2189,7 +2205,7 @@ func main() {
             time.Sleep(200 * time.Millisecond)
         }
     }()
-    
+
     // Shutdown después de 3 segundos
     time.Sleep(3 * time.Second)
     server.Stop()
@@ -2203,6 +2219,7 @@ func main() {
 **Objetivo:** Implementar un rate limiter que controla throughput usando time.Tick.
 
 **Requisitos:**
+
 - Limitar a 3 solicitudes por segundo
 - Mostrar timestamps de cada solicitud procesada
 - Usar time.Tick en select para throttling
@@ -2228,9 +2245,9 @@ func (rl *RateLimiter) Start() {
     interval := time.Second / time.Duration(rl.ratePerSec)
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
-    
+
     processed := 0
-    
+
     for {
         select {
         // TODO: Recibir solicitudes
@@ -2245,7 +2262,7 @@ func main() {
         requestsChan: make(chan string, 20),
         ratePerSec:   3,  // 3 por segundo
     }
-    
+
     // Procesar en background
     go func() {
         for i := 1; i <= 10; i++ {
@@ -2254,13 +2271,14 @@ func main() {
         }
         close(limiter.requestsChan)
     }()
-    
+
     // Esto debería procesar 3 por segundo
     limiter.Start()
 }
 ```
 
 **Resultado esperado (aproximadamente):**
+
 ```
 [00:00:00] Request 1 procesada (3 por segundo)
 [00:00:00] Request 2 procesada
@@ -2313,7 +2331,7 @@ El **select statement** es un mecanismo fundamental para concurrencia eficiente 
 
 ## Referencias y Lecturas Adicionales
 
-- **Effective Go**: https://golang.org/doc/effective_go#channels
+- **Effective Go**: <https://golang.org/doc/effective_go#channels>
 - **Go Memory Model**: Explica synchronization primitives
 - **Concurrency Patterns**: Rob Pike - Go Concurrency Patterns (video)
 - **Context Package**: Standard library para cancellation

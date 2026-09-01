@@ -397,13 +397,13 @@ func (c *Counter) Decrement() {
 
 func main() {
     c := Counter{0}
-    
+
     // ✓ Funciona: Counter tiene el método Increment()
     var inc Incrementer = c
-    
+
     // ✗ No funciona: Counter no tiene Decrement(), solo *Counter
     // var dec Incrementer = c  // Error: Counter doesn't have Decrement()
-    
+
     // ✓ Funciona: *Counter tiene ambos
     var dec Incrementer = &c
 }
@@ -422,9 +422,9 @@ func main() {
           │         │         │         │
       File    Buffer    Socket    Connection
       ✓       ✓         ✓         ✓
-      
+
   Todos tienen método Read() → Todos satisfacen Reader
-  
+
   Go verifica automáticamente esto en compilación
 ```
 
@@ -446,6 +446,7 @@ Internamente, una interfaz en Go es un par de dos palabras (dos punteros):
 ```
 
 Donde:
+
 - **itab**: Descriptor de tipo (qué tipo concreto se almacena)
 - **data pointer**: Puntero al valor real
 
@@ -460,7 +461,7 @@ func (f File) Read(p []byte) (int, error) { /* ... */ }
 func main() {
     f := File{"test.txt"}
     var r Reader = f
-    
+
     // Internamente:
     // r.itab = descriptor de File
     // r.data = &f (puntero al valor File)
@@ -701,7 +702,7 @@ type Logger interface {
 
 func LogWithType(logger Logger, value interface{}) {
     var typeInfo string
-    
+
     switch v := value.(type) {
     case string:
         typeInfo = "string"
@@ -712,7 +713,7 @@ func LogWithType(logger Logger, value interface{}) {
     default:
         typeInfo = "unknown"
     }
-    
+
     logger.Log("Value: %v (%s)", value, typeInfo)
 }
 ```
@@ -802,24 +803,24 @@ func ProcessData(data interface{}) string {
     switch v := data.(type) {
     case string:
         return "String: " + v
-        
+
     case int:
         return fmt.Sprintf("Int: %d", v)
-        
+
     case float64:
         return fmt.Sprintf("Float: %.2f", v)
-        
+
     case []interface{}:
         count := len(v)
         return fmt.Sprintf("Array with %d elements", count)
-        
+
     case map[string]interface{}:
         keys := len(v)
         return fmt.Sprintf("Object with %d keys", keys)
-        
+
     case nil:
         return "Null"
-        
+
     default:
         return fmt.Sprintf("Unknown type: %T", v)
     }
@@ -1528,11 +1529,13 @@ type Metrics interface {
 **Objetivo**: Implementar múltiples tipos que satisfacen una interfaz común
 
 Crea una interfaz `Forma` con métodos `Area()` e `Perímetro()`. Implementa esta interfaz para:
+
 - `Círculo` (radio)
 - `Rectángulo` (ancho, alto)
 - `Triángulo` (a, b, c)
 
 Luego crea una función que acepte `[]Forma` y calcule:
+
 - Área total
 - Perímetro total
 - Forma con mayor área
@@ -1575,10 +1578,10 @@ func main() {
         Rectángulo{ancho: 4, alto: 3},
         Triángulo{a: 3, b: 4, c: 5},
     }
-    
+
     fmt.Printf("Área total: %.2f\n", AreaTotal(formas))
     // Área total: 95.87
-    
+
     mayor := FormaConMayorArea(formas)
     fmt.Printf("Mayor forma: %.2f\n", mayor.Área())
     // Mayor forma: 78.54
@@ -1681,6 +1684,7 @@ func main() {
 Crea una interfaz `Notificador` con método `Enviar(destinatario, mensaje string) error`.
 
 Implementa para:
+
 - `EmailNotificador`
 - `SMSNotificador`
 - `PushNotificador`
@@ -1721,9 +1725,9 @@ func main() {
     dist.Agregar(EmailNotificador{})
     dist.Agregar(SMSNotificador{})
     dist.Agregar(PushNotificador{})
-    
+
     errores := dist.EnviarATodos("usuario@example.com", "Hola")
-    
+
     if errores != nil {
         fmt.Println("Errores:", errores)
     }
@@ -1740,6 +1744,7 @@ func main() {
 Crea interfaz `Escritor` con método `Escribir(msg string) error`.
 
 Implementa:
+
 - `LoggerConsola`
 - `LoggerArchivo`
 - `LoggerRed` (simular cliente HTTP)
@@ -1773,7 +1778,7 @@ func main() {
     mult.AgregarEscritor(LoggerConsola{})
     mult.AgregarEscritor(LoggerArchivo{archivo: "app.log"})
     mult.AgregarEscritor(LoggerRed{endpoint: "http://logs.example.com"})
-    
+
     err := mult.Escribir("Aplicación iniciada")
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -1791,6 +1796,7 @@ func main() {
 Crea interfaz `Convertible` con método `Convertir(formato string) (interface{}, error)`.
 
 Implementa para diferentes tipos:
+
 - `Documento` (a JSON, XML, PDF)
 - `Imagen` (a PNG, JPG, WebP)
 - `Tabla` (a CSV, JSON, HTML)
@@ -1821,12 +1827,12 @@ import (
 
 func ConvertirMuchosFormatos(items []Convertible, formato string) map[string]interface{} {
     resultados := make(map[string]interface{})
-    
+
     for i, item := range items {
         result, err := item.Convertir(formato)
         // TODO: Guardar resultado o error
     }
-    
+
     return resultados
 }
 
@@ -1836,9 +1842,9 @@ func main() {
         Imagen{nombre: "foto.png"},
         Tabla{nombre: "datos", filas: 100},
     }
-    
+
     resultados := ConvertirMuchosFormatos(items, "json")
-    
+
     for clave, valor := range resultados {
         fmt.Printf("%s: %v\n", clave, valor)
     }
@@ -1855,11 +1861,13 @@ func main() {
 Crea interfaz `Pagador` con método `Pagar(monto float64) error`.
 
 Implementa:
+
 - `TarjetaCredito` (simple)
 - `Billetera` (requiere verificación de saldo)
 - `Transferencia` (requiere código de autorización)
 
 Crea función `ProcesarPago` que:
+
 1. Acepta un `Pagador`
 2. Calcula descuentos si el pagador es `Billetera` (-5%) o `Transferencia` (-10%)
 3. Ejecuta el pago con monto ajustado
@@ -1890,15 +1898,15 @@ type RegistroPago struct {
 
 func ProcesarPago(pagador Pagador, monto float64) RegistroPago {
     descuento := 0.0
-    
+
     // TODO: Usar type switch para determinar descuento
-    
+
     montoFinal := monto - (monto * descuento / 100)
-    
+
     // TODO: Ejecutar pago
-    
+
     // TODO: Retornar registro
-    
+
     return RegistroPago{}
 }
 
@@ -1908,7 +1916,7 @@ func main() {
         Billetera{saldo: 1000},
         Transferencia{banco: "BanCo", cuenta: "123456"},
     }
-    
+
     for _, pagador := range pagos {
         registro := ProcesarPago(pagador, 100)
         fmt.Printf("Pago: %+v\n", registro)
@@ -1917,6 +1925,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 Pago: {Tipo:TarjetaCredito MontoPagado:100 Descuento:0 Exito:true Error:}
 Pago: {Tipo:Billetera MontoPagado:95 Descuento:5 Exito:true Error:}
@@ -1954,7 +1963,6 @@ Go no tiene "OOP" en sentido tradicional, pero logra polimorfismo real y elegant
 - [Standard Library: io package](https://pkg.go.dev/io)
 - [Standard Library: fmt package](https://pkg.go.dev/fmt)
 - [The Laws of Reflection](https://go.dev/blog/laws-of-reflection)
-
 
 ---
 

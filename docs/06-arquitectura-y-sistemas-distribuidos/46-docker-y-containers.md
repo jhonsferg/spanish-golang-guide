@@ -49,6 +49,7 @@ Containers Docker:
 ```
 
 **Ventajas de Containers:**
+
 - **Ligereza**: Arrancan en milisegundos vs segundos en VMs
 - **Eficiencia de Recursos**: Múltiples containers comparten kernel
 - **Portabilidad**: "Build once, run anywhere"
@@ -61,6 +62,7 @@ Containers Docker:
 Una **imagen Docker** es una plantilla inmutable que contiene todo lo necesario para ejecutar una aplicación: código, runtime, libraries, variables de entorno y configuración.
 
 **Características clave:**
+
 - **Inmutables**: Una vez construidas, no cambian
 - **Capas (Layers)**: Compuestas de capas apiladas read-only
 - **Versionables**: Se identifican por tags (v1.0, latest, sha256:...)
@@ -94,6 +96,7 @@ Layers:
 ```
 
 **Ventajas del sistema de layers:**
+
 - **Caching**: Si un layer no cambió, Docker lo reutiliza
 - **Eficiencia de almacenamiento**: Layers se comparten entre imágenes
 - **Builds rápidos**: Solo reconstruye layers modificados
@@ -217,6 +220,7 @@ ENTRYPOINT /app/myapp
 ```
 
 **ENTRYPOINT vs CMD:**
+
 - ENTRYPOINT es el comando que siempre se ejecuta
 - CMD son argumentos por defecto (pueden sobrescribirse)
 
@@ -786,6 +790,7 @@ ENTRYPOINT ["/app"]
 ```
 
 **Flags explicados:**
+
 - `CGO_ENABLED=0`: Deshabilitar CGO para binario estático
 - `GOOS=linux GOARCH=amd64`: Compilación cruzada si es necesario
 - `-trimpath`: Remover rutas absolutas (reproducibilidad)
@@ -839,6 +844,7 @@ ENTRYPOINT ["python", "app.py"]
 ```
 
 **Ventajas de Go:**
+
 - Binarios estáticos (scratch image posible)
 - Tamaño final 20-30x más pequeño que Java/Python
 - Arranque instantáneo
@@ -992,6 +998,7 @@ services:
 ```
 
 **Archivo .env:**
+
 ```
 DATABASE_URL=postgres://user:pass@localhost/db
 API_KEY=secret123
@@ -1058,6 +1065,7 @@ networks:
 ```
 
 **DNS automático:**
+
 ```
 En compose, los servicios se resuelven por nombre dentro de la misma red:
 - web → Resuelve a IP de web
@@ -1167,6 +1175,7 @@ networks:
 ```
 
 **Lanzar:**
+
 ```bash
 docker-compose up -d
 docker-compose logs -f api
@@ -1211,6 +1220,7 @@ docker run --name db --network app-bridge -d postgres:15
 ```
 
 **Beneficios vs bridge default:**
+
 - DNS resolve por nombre de container
 - Containers pueden conectarse/desconectarse dinámicamente
 - Aislamiento entre redes
@@ -1384,6 +1394,7 @@ docker run -v ./relative/path:/app/data postgres
 ```
 
 **En docker-compose:**
+
 ```yaml
 services:
   web:
@@ -1412,6 +1423,7 @@ services:
 ```
 
 **Uso:**
+
 - Datos temporales (sesiones, cache)
 - Archivos sensibles que no deben persistir
 - Mejor performance que disco
@@ -1448,6 +1460,7 @@ volumes:
 ```
 
 **Ciclo de vida:**
+
 ```bash
 docker-compose up -d       # Crea containers y volumes
 # Insertas datos en la DB
@@ -1517,12 +1530,12 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "DB unhealthy", http.StatusServiceUnavailable)
         return
     }
-    
+
     if !isCacheHealthy() {
         http.Error(w, "Cache unhealthy", http.StatusServiceUnavailable)
         return
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprintf(w, `{"status":"ok","timestamp":"%s"}`, time.Now())
 }
@@ -1647,6 +1660,7 @@ ENTRYPOINT ["/app"]
 ```
 
 **Verificar:**
+
 ```bash
 docker run --rm myapp:latest id
 # uid=1000(appuser) gid=1000(appuser) groups=1000(appuser)
@@ -1668,6 +1682,7 @@ docker run --read-only -v /tmp myapp:latest
 ```
 
 **En docker-compose:**
+
 ```yaml
 services:
   app:
@@ -1688,6 +1703,7 @@ ENV DB_PASSWORD=super_secret
 ```
 
 **Mejor: Usar Docker Secrets (Swarm)**
+
 ```bash
 echo "super_secret" | docker secret create db_password -
 
@@ -1697,6 +1713,7 @@ docker service create \
 ```
 
 **En aplicación Go:**
+
 ```go
 package main
 
@@ -1739,6 +1756,7 @@ aqua scan myapp:latest
 ```
 
 **Ejemplo output:**
+
 ```
 myapp:latest
 
@@ -2275,7 +2293,7 @@ var startTime = time.Now()
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
     uptime := time.Since(startTime).Seconds()
-    
+
     // Verificar si está listo (después de 5 segundos)
     if uptime < 5 {
         w.WriteHeader(http.StatusServiceUnavailable)
@@ -2546,6 +2564,7 @@ docker run -p 8080:8080 ghcr.io/username/myapp:v1.0.0
 ## Conclusión
 
 Docker es fundamental en el desarrollo moderno de aplicaciones Go. Los containers proporcionan:
+
 - **Consistencia**: Mismo comportamiento en dev, staging y prod
 - **Escalabilidad**: Fácil horizontal scaling
 - **Eficiencia**: Mejor utilización de recursos
@@ -2557,11 +2576,11 @@ Los próximos capítulos exploraremos Kubernetes, que orquesta containers a esca
 
 ## Referencias Clave
 
-- Docker Official Docs: https://docs.docker.com/
-- Best Practices: https://docs.docker.com/develop/
-- Go Docker: https://github.com/golang/go/wiki/Modules
-- Trivy Security Scanner: https://github.com/aquasecurity/trivy
-- Docker Compose Spec: https://github.com/compose-spec/compose-spec
+- Docker Official Docs: <https://docs.docker.com/>
+- Best Practices: <https://docs.docker.com/develop/>
+- Go Docker: <https://github.com/golang/go/wiki/Modules>
+- Trivy Security Scanner: <https://github.com/aquasecurity/trivy>
+- Docker Compose Spec: <https://github.com/compose-spec/compose-spec>
 
 ---
 

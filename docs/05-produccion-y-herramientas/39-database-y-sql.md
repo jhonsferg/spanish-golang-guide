@@ -138,8 +138,8 @@ session.close()
 /*
 Class.forName("org.postgresql.Driver");
 Connection conn = DriverManager.getConnection(
-    "jdbc:postgresql://localhost:5432/mydb", 
-    "user", 
+    "jdbc:postgresql://localhost:5432/mydb",
+    "user",
     "password"
 );
 
@@ -186,12 +186,12 @@ func main() {
         log.Fatal("Error abriendo BD:", err)
     }
     defer db.Close()
-    
+
     // Aquí ES cuando abrimos la conexión (lazy connect)
     if err := db.Ping(); err != nil {
         log.Fatal("Error conectando a BD:", err)
     }
-    
+
     log.Println("Conectado exitosamente")
 }
 ```
@@ -232,13 +232,13 @@ import (
 func main() {
     db, _ := sql.Open("postgres", "...")
     defer db.Close()
-    
+
     // Configuración del pool (ANTES de usar la BD)
     db.SetMaxOpenConns(25)      // máximo de conexiones abiertas
     db.SetMaxIdleConns(5)       // conexiones inactivas en el pool
     db.SetConnMaxLifetime(5 * time.Minute)    // vida máxima de una conexión
     db.SetConnMaxIdleTime(10 * time.Minute)   // tiempo máximo inactiva
-    
+
     // Verificar que conecta
     if err := db.Ping(); err != nil {
         log.Fatal(err)
@@ -261,7 +261,7 @@ import (
 func connectWithRetry(dsn string, maxRetries int) (*sql.DB, error) {
     var db *sql.DB
     var err error
-    
+
     for i := 0; i < maxRetries; i++ {
         db, err = sql.Open("postgres", dsn)
         if err == nil {
@@ -269,11 +269,11 @@ func connectWithRetry(dsn string, maxRetries int) (*sql.DB, error) {
                 return db, nil
             }
         }
-        
+
         log.Printf("Intento %d falló: %v", i+1, err)
         time.Sleep(time.Second * time.Duration(i+1)) // backoff exponencial
     }
-    
+
     return nil, errors.New("no se pudo conectar después de reintentos")
 }
 
@@ -310,14 +310,14 @@ type User struct {
 func main() {
     db, _ := sql.Open("sqlite", "users.db")
     defer db.Close()
-    
+
     // Caso 1: UNA fila (QueryRow + Scan)
     var user User
     err := db.QueryRow(
-        "SELECT id, name, email, age FROM users WHERE id = ?", 
+        "SELECT id, name, email, age FROM users WHERE id = ?",
         1,
     ).Scan(&user.ID, &user.Name, &user.Email, &user.Age)
-    
+
     if err == sql.ErrNoRows {
         log.Println("Usuario no encontrado")
     } else if err != nil {
@@ -325,7 +325,7 @@ func main() {
     } else {
         log.Printf("Usuario: %+v\n", user)
     }
-    
+
     // Caso 2: MÚLTIPLES filas (Query + Rows)
     rows, err := db.Query(
         "SELECT id, name, email, age FROM users WHERE age > ? ORDER BY name",
@@ -335,7 +335,7 @@ func main() {
         log.Fatal(err)
     }
     defer rows.Close()  // IMPORTANTE: siempre cerrar rows
-    
+
     var users []User
     for rows.Next() {
         var u User
@@ -344,12 +344,12 @@ func main() {
         }
         users = append(users, u)
     }
-    
+
     // Verificar errores de iteración
     if err = rows.Err(); err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Encontrados %d usuarios\n", len(users))
 }
 ```
@@ -364,20 +364,20 @@ import "database/sql"
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Scan a variables simples
     var id int
     var name string
     var balance float64
-    
+
     err := db.QueryRow(
         "SELECT id, name, balance FROM accounts WHERE id = ?", 1,
     ).Scan(&id, &name, &balance)
-    
+
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Los tipos deben coincidir o ser convertibles
     // int/int64, string, float64/float32, []byte, time.Time son comunes
 }
@@ -407,26 +407,26 @@ func getRowAsMap(db *sql.DB, query string, args ...interface{}) (map[string]inte
         return nil, err
     }
     defer rows.Close()
-    
+
     columns, err := rows.Columns()
     if err != nil {
         return nil, err
     }
-    
+
     if !rows.Next() {
         return nil, sql.ErrNoRows
     }
-    
+
     values := make([]interface{}, len(columns))
     valuePtrs := make([]interface{}, len(columns))
     for i := range columns {
         valuePtrs[i] = &values[i]
     }
-    
+
     if err := rows.Scan(valuePtrs...); err != nil {
         return nil, err
     }
-    
+
     result := make(map[string]interface{})
     for i, col := range columns {
         result[col] = values[i]
@@ -441,12 +441,12 @@ func getAllRowsAsMap(db *sql.DB, query string, args ...interface{}) ([]map[strin
         return nil, err
     }
     defer rows.Close()
-    
+
     columns, err := rows.Columns()
     if err != nil {
         return nil, err
     }
-    
+
     var results []map[string]interface{}
     for rows.Next() {
         values := make([]interface{}, len(columns))
@@ -454,29 +454,29 @@ func getAllRowsAsMap(db *sql.DB, query string, args ...interface{}) ([]map[strin
         for i := range columns {
             valuePtrs[i] = &values[i]
         }
-        
+
         if err := rows.Scan(valuePtrs...); err != nil {
             return nil, err
         }
-        
+
         entry := make(map[string]interface{})
         for i, col := range columns {
             entry[col] = values[i]
         }
         results = append(results, entry)
     }
-    
+
     return results, rows.Err()
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "test.db")
     defer db.Close()
-    
+
     // Usar las funciones helper
     rowMap, _ := getRowAsMap(db, "SELECT * FROM users WHERE id = ?", 1)
     log.Printf("Row: %+v\n", rowMap)
-    
+
     allRows, _ := getAllRowsAsMap(db, "SELECT * FROM users LIMIT 10")
     log.Printf("Rows: %+v\n", allRows)
 }
@@ -504,19 +504,19 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // ❌ INCORRECTO: SQL injection vulnerable
     userInput := "'; DROP TABLE users; --"
     query := "SELECT * FROM users WHERE name = '" + userInput + "'"
     // Esto ejecutaría: SELECT * FROM users WHERE name = ''; DROP TABLE users; --'
-    
+
     // ✅ CORRECTO: Prepared statement
     stmt, err := db.Prepare("SELECT id, name, email FROM users WHERE name = ?")
     if err != nil {
         log.Fatal(err)
     }
     defer stmt.Close()
-    
+
     // Los ? son placeholders seguros
     rows, err := stmt.Query(userInput)
     if err != nil {
@@ -544,14 +544,14 @@ type User struct {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Preparar una vez
     stmt, err := db.Prepare("SELECT id, name FROM users WHERE id = ?")
     if err != nil {
         log.Fatal(err)
     }
     defer stmt.Close()
-    
+
     // Ejecutar múltiples veces (eficiente)
     for i := 1; i <= 100; i++ {
         var user User
@@ -580,17 +580,17 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     tx, _ := db.Begin()
     defer tx.Rollback()
-    
+
     // Prepared statement dentro de transacción
     stmt, err := tx.Prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)")
     if err != nil {
         log.Fatal(err)
     }
     defer stmt.Close()
-    
+
     // Insertar múltiples registros
     actions := []string{"login", "view_page", "logout"}
     for _, action := range actions {
@@ -599,7 +599,7 @@ func main() {
             log.Fatal(err)
         }
     }
-    
+
     if err := tx.Commit(); err != nil {
         log.Fatal(err)
     }
@@ -620,10 +620,10 @@ import (
 func main() {
     db, _ := sql.Open("postgres", "...")
     defer db.Close()
-    
+
     // PostgreSQL soporta $1, $2, etc.
     ctx := context.Background()
-    
+
     rows, err := db.QueryContext(ctx,
         "SELECT id, name FROM users WHERE age > $1 AND city = $2",
         18, "Madrid",
@@ -632,7 +632,7 @@ func main() {
         log.Fatal(err)
     }
     defer rows.Close()
-    
+
     for rows.Next() {
         var id int
         var name string
@@ -661,7 +661,7 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // INSERT
     result, err := db.Exec(
         "INSERT INTO users (name, email, age) VALUES (?, ?, ?)",
@@ -670,14 +670,14 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Obtener el ID insertado (solo en SQLite, MySQL)
     id, err := result.LastInsertId()
     if err != nil {
         log.Fatal(err)
     }
     log.Printf("Inserción exitosa, ID: %d\n", id)
-    
+
     // UPDATE
     result, err = db.Exec(
         "UPDATE users SET age = ? WHERE id = ?",
@@ -686,14 +686,14 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Obtener número de filas afectadas
     rowsAffected, err := result.RowsAffected()
     if err != nil {
         log.Fatal(err)
     }
     log.Printf("Filas actualizadas: %d\n", rowsAffected)
-    
+
     // DELETE
     result, err = db.Exec(
         "DELETE FROM users WHERE age < ?",
@@ -702,7 +702,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     rowsDeleted, _ := result.RowsAffected()
     log.Printf("Filas eliminadas: %d\n", rowsDeleted)
 }
@@ -730,29 +730,29 @@ func bulkInsert(db *sql.DB, users []User) error {
     if len(users) == 0 {
         return nil
     }
-    
+
     // Construir query dinámica
     placeholders := []string{}
     args := []interface{}{}
-    
+
     for i, user := range users {
         placeholders = append(placeholders, "(?, ?, ?)")
         args = append(args, user.Name, user.Email, user.Age)
     }
-    
-    query := "INSERT INTO users (name, email, age) VALUES " + 
+
+    query := "INSERT INTO users (name, email, age) VALUES " +
              strings.Join(placeholders, ", ")
-    
+
     result, err := db.Exec(query, args...)
     if err != nil {
         return err
     }
-    
+
     rows, err := result.RowsAffected()
     if err != nil {
         return err
     }
-    
+
     log.Printf("Insertados %d usuarios\n", rows)
     return nil
 }
@@ -760,13 +760,13 @@ func bulkInsert(db *sql.DB, users []User) error {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     users := []User{
         {"Alice", "alice@example.com", 28},
         {"Bob", "bob@example.com", 35},
         {"Carol", "carol@example.com", 42},
     }
-    
+
     if err := bulkInsert(db, users); err != nil {
         log.Fatal(err)
     }
@@ -792,24 +792,24 @@ func updateIfExists(db *sql.DB, userID int, newEmail string) (bool, error) {
     if err != nil {
         return false, err
     }
-    
+
     rows, err := result.RowsAffected()
     if err != nil {
         return false, err
     }
-    
+
     return rows > 0, nil
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     updated, err := updateIfExists(db, 1, "newemail@example.com")
     if err != nil {
         log.Fatal(err)
     }
-    
+
     if updated {
         log.Println("Email actualizado")
     } else {
@@ -842,13 +842,13 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Iniciar transacción
     tx, err := db.Begin()
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // TODO algo dentro de la transacción
     _, err = tx.Exec("INSERT INTO logs (message) VALUES (?)", "Action 1")
     if err != nil {
@@ -856,18 +856,18 @@ func main() {
         tx.Rollback()
         log.Fatal(err)
     }
-    
+
     _, err = tx.Exec("INSERT INTO logs (message) VALUES (?)", "Action 2")
     if err != nil {
         tx.Rollback()
         log.Fatal(err)
     }
-    
+
     // Todo bien: hacer commit
     if err := tx.Commit(); err != nil {
         log.Fatal(err)
     }
-    
+
     log.Println("Transacción completada")
 }
 ```
@@ -893,26 +893,26 @@ func transferMoney(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     // Versión con defer para garantizar rollback en caso de panic
     defer func() {
         if err != nil {
             tx.Rollback()
         }
     }()
-    
+
     // Step 1: Leer balance de cuenta origen
     var fromBalance float64
     row := tx.QueryRow("SELECT balance FROM accounts WHERE id = ?", fromID)
     if err := row.Scan(&fromBalance); err != nil {
         return fmt.Errorf("cuenta origen no encontrada: %w", err)
     }
-    
+
     // Step 2: Verificar fondos suficientes
     if fromBalance < amount {
         return fmt.Errorf("fondos insuficientes: %.2f < %.2f", fromBalance, amount)
     }
-    
+
     // Step 3: Restar de cuenta origen
     _, err = tx.Exec(
         "UPDATE accounts SET balance = balance - ? WHERE id = ?",
@@ -921,7 +921,7 @@ func transferMoney(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     // Step 4: Sumar a cuenta destino
     _, err = tx.Exec(
         "UPDATE accounts SET balance = balance + ? WHERE id = ?",
@@ -930,7 +930,7 @@ func transferMoney(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     // Step 5: Registrar transacción
     _, err = tx.Exec(
         "INSERT INTO transactions (from_account, to_account, amount, status) VALUES (?, ?, ?, ?)",
@@ -939,12 +939,12 @@ func transferMoney(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     // Step 6: Commit
     if err := tx.Commit(); err != nil {
         return err
     }
-    
+
     log.Printf("Transferencia exitosa: %.2f de cuenta %d a %d\n", amount, fromID, toID)
     return nil
 }
@@ -952,7 +952,7 @@ func transferMoney(db *sql.DB, fromID, toID int, amount float64) error {
 func main() {
     db, _ := sql.Open("sqlite", "bank.db")
     defer db.Close()
-    
+
     if err := transferMoney(db, 1, 2, 100.50); err != nil {
         log.Printf("Transferencia fallida: %v\n", err)
     }
@@ -976,15 +976,15 @@ import (
 func main() {
     db, _ := sql.Open("postgres", "...")
     defer db.Close()
-    
+
     // Transacción con aislamiento explícito
     tx, _ := db.Begin()
-    
+
     // Ejecutar comando SQL directamente
     tx.Exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
-    
+
     // Ahora la transacción está en el nivel más alto de aislamiento
-    
+
     tx.Commit()
 }
 ```
@@ -1025,21 +1025,21 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Configuraciones recomendadas
-    
+
     // 1. Para aplicación web típica (100 RPS)
     db.SetMaxOpenConns(25)
     db.SetMaxIdleConns(5)
-    
+
     // 2. Para aplicación de alta carga (10,000 RPS)
     db.SetMaxOpenConns(100)
     db.SetMaxIdleConns(20)
-    
+
     // 3. Para batch processing
     db.SetMaxOpenConns(10)
     db.SetMaxIdleConns(2)
-    
+
     // Ciclo de vida de conexiones
     db.SetConnMaxLifetime(15 * time.Minute)    // Reciclar después de 15 min
     db.SetConnMaxIdleTime(5 * time.Minute)     // Cerrar si inactiva 5 min
@@ -1060,7 +1060,7 @@ import (
 func monitorPool(db *sql.DB, interval time.Duration) {
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
-    
+
     for range ticker.C {
         stats := db.Stats()
         log.Printf("Pool Stats:\n"+
@@ -1085,19 +1085,19 @@ func monitorPool(db *sql.DB, interval time.Duration) {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     db.SetMaxOpenConns(10)
-    
+
     // Monitorear en goroutine separada
     go monitorPool(db, 5*time.Second)
-    
+
     // Simular carga
     for i := 0; i < 100; i++ {
         go func(id int) {
             _, _ = db.Exec("SELECT 1")
         }(i)
     }
-    
+
     time.Sleep(30 * time.Second)
 }
 ```
@@ -1182,28 +1182,28 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Error 1: Fila no encontrada
     var name string
     err := db.QueryRow("SELECT name FROM users WHERE id = ?", 999).Scan(&name)
     if err == sql.ErrNoRows {
         log.Println("Usuario no encontrado")
     }
-    
+
     // Error 2: Tipo incorrecto
     var age int
     err = db.QueryRow("SELECT age FROM users WHERE id = ?", 1).Scan(&age)
     if err != nil {
         log.Printf("Error de tipo: %v\n", err)
     }
-    
+
     // Error 3: Conexión cerrada
     db.Close()
     _, err = db.Query("SELECT * FROM users")
     if err != nil {
         log.Printf("BD cerrada: %v\n", err)
     }
-    
+
     // Error 4: SQL injection (con prepared statements)
     stmt, _ := db.Prepare("SELECT * FROM users WHERE name = ?")
     defer stmt.Close()
@@ -1239,30 +1239,30 @@ type RetryableFunc func() error
 // Retry ejecuta una función con lógica de reintento exponencial
 func Retry(config RetryConfig, fn RetryableFunc) error {
     var lastErr error
-    
+
     for attempt := 0; attempt < config.MaxRetries; attempt++ {
         if err := fn(); err != nil {
             lastErr = err
-            
+
             // Determinar si es retryable
             if !isRetryable(err) {
                 return err
             }
-            
+
             // Esperar antes de reintentar
             wait := config.InitialWait * time.Duration(math.Pow(2, float64(attempt)))
             if wait > config.MaxWait {
                 wait = config.MaxWait
             }
-            
-            log.Printf("Intento %d falló (%v), reintentando en %v\n", 
+
+            log.Printf("Intento %d falló (%v), reintentando en %v\n",
                 attempt+1, err, wait)
             time.Sleep(wait)
         } else {
             return nil // Éxito
         }
     }
-    
+
     return lastErr
 }
 
@@ -1272,25 +1272,25 @@ func isRetryable(err error) bool {
     if errors.Is(err, sql.ErrNoRows) {
         return false
     }
-    
+
     // Algunos errores de conexión son retryable
     if errors.Is(err, sql.ErrConnDone) {
         return true
     }
-    
+
     return true
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     config := RetryConfig{
         MaxRetries:  3,
         InitialWait: 100 * time.Millisecond,
         MaxWait:     5 * time.Second,
     }
-    
+
     err := Retry(config, func() error {
         rows, err := db.Query("SELECT * FROM users")
         if err != nil {
@@ -1299,7 +1299,7 @@ func main() {
         defer rows.Close()
         return nil
     })
-    
+
     if err != nil {
         log.Fatal(err)
     }
@@ -1370,24 +1370,24 @@ type User struct {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     var user User
     err := db.QueryRow(
         "SELECT id, name, email, phone, age, balance, last_seen, is_active FROM users WHERE id = ?",
         1,
     ).Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.Age, &user.Balance, &user.LastSeen, &user.IsActive)
-    
+
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Usar valores nullos
     if user.Email.Valid {
         log.Printf("Email: %s\n", user.Email.String)
     } else {
         log.Println("Email no proporcionado")
     }
-    
+
     if user.Age.Valid {
         log.Printf("Edad: %d\n", user.Age.Int64)
     }
@@ -1430,17 +1430,17 @@ type Config struct {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     var config Config
     err := db.QueryRow(
         "SELECT id, name, data FROM configs WHERE id = ?",
         1,
     ).Scan(&config.ID, &config.Name, &config.Data)
-    
+
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Config: %+v\n", config)
     log.Printf("Data: %+v\n", config.Data)
 }
@@ -1482,17 +1482,17 @@ type Post struct {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     var post Post
     err := db.QueryRow(
         "SELECT id, title, tags FROM posts WHERE id = ?",
         1,
     ).Scan(&post.ID, &post.Title, &post.Tags)
-    
+
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Post: %s\n", post.Title)
     log.Printf("Tags: %v\n", post.Tags)
 }
@@ -1517,11 +1517,11 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Context con timeout
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
-    
+
     rows, err := db.QueryContext(ctx,
         "SELECT id, name FROM users WHERE id > ? LIMIT 10",
         0,
@@ -1530,7 +1530,7 @@ func main() {
         log.Fatal(err)
     }
     defer rows.Close()
-    
+
     for rows.Next() {
         select {
         case <-ctx.Done():
@@ -1564,29 +1564,29 @@ func queryUserWithContext(ctx context.Context, db *sql.DB, userID int) error {
     // Añadir timeout adicional si el context padre no lo tiene
     ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
     defer cancel()
-    
+
     var name string
     err := db.QueryRowContext(
         ctx,
         "SELECT name FROM users WHERE id = ?",
         userID,
     ).Scan(&name)
-    
+
     if err == context.DeadlineExceeded {
         log.Println("Query excedió timeout")
     }
-    
+
     return err
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Context padre con timeout más largo
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
-    
+
     if err := queryUserWithContext(ctx, db, 1); err != nil {
         log.Fatal(err)
     }
@@ -1611,14 +1611,14 @@ const UserIDKey ContextKey = "userID"
 func executeWithUserContext(ctx context.Context, db *sql.DB) {
     // Extraer valor del context
     userID := ctx.Value(UserIDKey).(int)
-    
+
     var name string
     err := db.QueryRowContext(
         ctx,
         "SELECT name FROM users WHERE id = ? AND created_by = ?",
         1, userID,
     ).Scan(&name)
-    
+
     if err != nil {
         log.Fatal(err)
     }
@@ -1627,10 +1627,10 @@ func executeWithUserContext(ctx context.Context, db *sql.DB) {
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Crear context con valores
     ctx := context.WithValue(context.Background(), UserIDKey, 42)
-    
+
     executeWithUserContext(ctx, db)
 }
 ```
@@ -1692,11 +1692,11 @@ func runMigrations(db *sql.DB) error {
 func main() {
     db, _ := sql.Open("sqlite", "myapp.db")
     defer db.Close()
-    
+
     if err := runMigrations(db); err != nil {
         log.Fatal(err)
     }
-    
+
     log.Println("Base de datos inicializada")
 }
 ```
@@ -1755,29 +1755,29 @@ func (qb *QueryBuilder) Build() (string, []interface{}) {
         qb.selectCols = []string{"*"}
     }
     query := "SELECT " + strings.Join(qb.selectCols, ", ") + " FROM " + qb.from
-    
+
     // Construir WHERE
     if len(qb.whereCond) > 0 {
         query += " WHERE " + strings.Join(qb.whereCond, " AND ")
     }
-    
+
     // Construir ORDER BY
     if qb.orderBy != "" {
         query += " ORDER BY " + qb.orderBy
     }
-    
+
     // Construir LIMIT
     if qb.limit > 0 {
         query += fmt.Sprintf(" LIMIT %d", qb.limit)
     }
-    
+
     return query, qb.args
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     // Usar query builder
     qb := NewQuery("users").
         Select("id", "name", "email").
@@ -1785,11 +1785,11 @@ func main() {
         Where("is_active = ?", true).
         OrderBy("name").
         Limit(10)
-    
+
     query, args := qb.Build()
     fmt.Println("Query:", query)
     fmt.Println("Args:", args)
-    
+
     rows, _ := db.Query(query, args...)
     defer rows.Close()
 }
@@ -1827,14 +1827,14 @@ func (r *UserRepository) FindByID(id int) (*User, error) {
         "SELECT id, name, email, age FROM users WHERE id = ?",
         id,
     ).Scan(&user.ID, &user.Name, &user.Email, &user.Age)
-    
+
     if err == sql.ErrNoRows {
         return nil, nil
     }
     if err != nil {
         return nil, err
     }
-    
+
     return &user, nil
 }
 
@@ -1844,7 +1844,7 @@ func (r *UserRepository) FindAll() ([]User, error) {
         return nil, err
     }
     defer rows.Close()
-    
+
     var users []User
     for rows.Next() {
         var user User
@@ -1853,7 +1853,7 @@ func (r *UserRepository) FindAll() ([]User, error) {
         }
         users = append(users, user)
     }
-    
+
     return users, rows.Err()
 }
 
@@ -1865,7 +1865,7 @@ func (r *UserRepository) Create(user *User) (int, error) {
     if err != nil {
         return 0, err
     }
-    
+
     id, err := result.LastInsertId()
     return int(id), err
 }
@@ -1878,16 +1878,16 @@ func (r *UserRepository) Update(user *User) error {
     if err != nil {
         return err
     }
-    
+
     rows, err := result.RowsAffected()
     if err != nil {
         return err
     }
-    
+
     if rows == 0 {
         return sql.ErrNoRows
     }
-    
+
     return nil
 }
 
@@ -1896,38 +1896,38 @@ func (r *UserRepository) Delete(id int) error {
     if err != nil {
         return err
     }
-    
+
     rows, err := result.RowsAffected()
     if err != nil {
         return err
     }
-    
+
     if rows == 0 {
         return sql.ErrNoRows
     }
-    
+
     return nil
 }
 
 func main() {
     db, _ := sql.Open("sqlite", "mydb.db")
     defer db.Close()
-    
+
     repo := NewUserRepository(db)
-    
+
     // Crear usuario
     newUser := &User{Name: "Alice", Email: "alice@example.com", Age: 30}
     id, _ := repo.Create(newUser)
     log.Printf("Usuario creado con ID: %d\n", id)
-    
+
     // Buscar usuario
     user, _ := repo.FindByID(id)
     log.Printf("Usuario encontrado: %+v\n", user)
-    
+
     // Actualizar usuario
     user.Age = 31
     repo.Update(user)
-    
+
     // Listar todos
     users, _ := repo.FindAll()
     log.Printf("Total usuarios: %d\n", len(users))
@@ -1966,22 +1966,22 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Migrar schema
     db.AutoMigrate(&User{}, &Post{})
-    
+
     // Crear
     user := User{Name: "Alice", Email: "alice@example.com", Age: 30}
     db.Create(&user)
-    
+
     // Leer
     var result User
     db.First(&result, user.ID)
     log.Printf("Usuario: %+v\n", result)
-    
+
     // Actualizar
     db.Model(&result).Update("age", 31)
-    
+
     // Borrar
     db.Delete(&result)
 }
@@ -2015,7 +2015,7 @@ func main() {
         log.Fatal(err)
     }
     defer db.Close()
-    
+
     // 2. Crear tabla
     _, err = db.Exec(`
         CREATE TABLE products (
@@ -2028,7 +2028,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // 3. Insertar datos de prueba
     products := []struct {
         name     string
@@ -2039,7 +2039,7 @@ func main() {
         {"Mouse", 29.99, 50},
         {"Teclado", 79.99, 30},
     }
-    
+
     for _, p := range products {
         _, err := db.Exec(
             "INSERT INTO products (name, price, quantity) VALUES (?, ?, ?)",
@@ -2049,25 +2049,25 @@ func main() {
             log.Fatal(err)
         }
     }
-    
+
     // 4. Listar todos los productos
     rows, err := db.Query("SELECT id, name, price, quantity FROM products")
     if err != nil {
         log.Fatal(err)
     }
     defer rows.Close()
-    
+
     fmt.Println("=== Productos ===")
     for rows.Next() {
         var id int
         var name string
         var price float64
         var quantity int
-        
+
         if err := rows.Scan(&id, &name, &price, &quantity); err != nil {
             log.Fatal(err)
         }
-        
+
         fmt.Printf("ID: %d | Nombre: %s | Precio: %.2f | Cantidad: %d\n",
             id, name, price, quantity)
     }
@@ -2075,6 +2075,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 === Productos ===
 ID: 1 | Nombre: Laptop | Precio: 999.99 | Cantidad: 5
@@ -2108,7 +2109,7 @@ type Article struct {
 func main() {
     db, _ := sql.Open("sqlite", ":memory:")
     defer db.Close()
-    
+
     // Crear tabla
     db.Exec(`
         CREATE TABLE articles (
@@ -2118,7 +2119,7 @@ func main() {
             views INTEGER DEFAULT 0
         )
     `)
-    
+
     // CREATE
     fmt.Println("=== CREATE ===")
     result, _ := db.Exec(
@@ -2127,14 +2128,14 @@ func main() {
     )
     id, _ := result.LastInsertId()
     fmt.Printf("Artículo creado con ID: %d\n\n", id)
-    
+
     // READ
     fmt.Println("=== READ ===")
     var article Article
     db.QueryRow("SELECT id, title, content, views FROM articles WHERE id = ?", id).
         Scan(&article.ID, &article.Title, &article.Content, &article.Views)
     fmt.Printf("Artículo: %+v\n\n", article)
-    
+
     // UPDATE
     fmt.Println("=== UPDATE ===")
     result, _ = db.Exec(
@@ -2143,11 +2144,11 @@ func main() {
     )
     rows, _ := result.RowsAffected()
     fmt.Printf("Filas actualizadas: %d\n", rows)
-    
+
     // Verificar actualización
     db.QueryRow("SELECT views FROM articles WHERE id = ?", id).Scan(&article.Views)
     fmt.Printf("Nuevas vistas: %d\n\n", article.Views)
-    
+
     // DELETE
     fmt.Println("=== DELETE ===")
     result, _ = db.Exec("DELETE FROM articles WHERE id = ?", id)
@@ -2175,7 +2176,7 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", ":memory:")
     defer db.Close()
-    
+
     // Crear tabla
     db.Exec(`
         CREATE TABLE accounts (
@@ -2184,14 +2185,14 @@ func main() {
             balance REAL
         )
     `)
-    
+
     // Insertar datos de prueba
     db.Exec("INSERT INTO accounts (id, name, balance) VALUES (1, 'Alice', 1000)")
     db.Exec("INSERT INTO accounts (id, name, balance) VALUES (2, 'Bob', 500)")
-    
+
     fmt.Println("=== Estado Inicial ===")
     printAccounts(db)
-    
+
     // Transferencia con transacción
     fmt.Println("\n=== Transferencia: Alice -> Bob (200) ===")
     if err := transfer(db, 1, 2, 200); err != nil {
@@ -2199,16 +2200,16 @@ func main() {
     } else {
         fmt.Println("Transferencia exitosa")
     }
-    
+
     fmt.Println("\n=== Estado Final ===")
     printAccounts(db)
-    
+
     // Intentar transferencia que falla
     fmt.Println("\n=== Transferencia fallida: Bob -> Alice (1000) ===")
     if err := transfer(db, 2, 1, 1000); err != nil {
         fmt.Printf("Transferencia rechazada: %v\n", err)
     }
-    
+
     fmt.Println("\n=== Estado (sin cambios) ===")
     printAccounts(db)
 }
@@ -2218,13 +2219,13 @@ func transfer(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     defer func() {
         if err != nil {
             tx.Rollback()
         }
     }()
-    
+
     // Verificar fondos
     var balance float64
     err = tx.QueryRow("SELECT balance FROM accounts WHERE id = ?", fromID).
@@ -2232,25 +2233,25 @@ func transfer(db *sql.DB, fromID, toID int, amount float64) error {
     if err != nil {
         return err
     }
-    
+
     if balance < amount {
         return fmt.Errorf("fondos insuficientes")
     }
-    
+
     // Restar
     _, err = tx.Exec("UPDATE accounts SET balance = balance - ? WHERE id = ?",
         amount, fromID)
     if err != nil {
         return err
     }
-    
+
     // Sumar
     _, err = tx.Exec("UPDATE accounts SET balance = balance + ? WHERE id = ?",
         amount, toID)
     if err != nil {
         return err
     }
-    
+
     err = tx.Commit()
     return err
 }
@@ -2258,7 +2259,7 @@ func transfer(db *sql.DB, fromID, toID int, amount float64) error {
 func printAccounts(db *sql.DB) {
     rows, _ := db.Query("SELECT id, name, balance FROM accounts ORDER BY id")
     defer rows.Close()
-    
+
     for rows.Next() {
         var id int
         var name string
@@ -2288,7 +2289,7 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", ":memory:")
     defer db.Close()
-    
+
     // Crear tabla
     db.Exec(`
         CREATE TABLE users (
@@ -2298,13 +2299,13 @@ func main() {
             age INTEGER
         )
     `)
-    
+
     // Prepared statement para inserción
     fmt.Println("=== Prepared Statement para INSERT ===")
     insertStmt, _ := db.Prepare(
         "INSERT INTO users (username, email, age) VALUES (?, ?, ?)")
     defer insertStmt.Close()
-    
+
     // Usar múltiples veces
     data := []struct {
         user  string
@@ -2315,7 +2316,7 @@ func main() {
         {"bob", "bob@example.com", 35},
         {"carol", "carol@example.com", 42},
     }
-    
+
     for _, d := range data {
         _, err := insertStmt.Exec(d.user, d.email, d.age)
         if err != nil {
@@ -2324,13 +2325,13 @@ func main() {
             fmt.Printf("Insertado: %s\n", d.user)
         }
     }
-    
+
     // Prepared statement para búsqueda
     fmt.Println("\n=== Prepared Statement para SELECT ===")
     searchStmt, _ := db.Prepare(
         "SELECT id, username, email, age FROM users WHERE age > ? ORDER BY age")
     defer searchStmt.Close()
-    
+
     // Usar múltiples veces con diferentes parámetros
     for _, minAge := range []int{25, 30, 40} {
         fmt.Printf("\nUsuarios mayores a %d años:\n", minAge)
@@ -2368,7 +2369,7 @@ import (
 func main() {
     db, _ := sql.Open("sqlite", ":memory:")
     defer db.Close()
-    
+
     // Crear tabla
     db.Exec(`
         CREATE TABLE tasks (
@@ -2377,28 +2378,28 @@ func main() {
             duration_ms INTEGER
         )
     `)
-    
+
     // Configurar pool
     db.SetMaxOpenConns(5)
     db.SetMaxIdleConns(2)
     db.SetConnMaxLifetime(1 * time.Minute)
-    
+
     fmt.Println("=== Configuración del Pool ===")
     fmt.Println("MaxOpenConns: 5")
     fmt.Println("MaxIdleConns: 2")
-    
+
     // Simular carga concurrente
     fmt.Println("\n=== Ejecutando 50 queries concurrentes ===")
     var wg sync.WaitGroup
     results := make(chan string, 50)
-    
+
     start := time.Now()
-    
+
     for i := 1; i <= 50; i++ {
         wg.Add(1)
         go func(id int) {
             defer wg.Done()
-            
+
             // Simular query
             var result int
             err := db.QueryRow("SELECT ?", id).Scan(&result)
@@ -2409,13 +2410,13 @@ func main() {
             }
         }(i)
     }
-    
+
     wg.Wait()
     close(results)
-    
+
     elapsed := time.Since(start)
     fmt.Printf("\nTiempo total: %v\n", elapsed)
-    
+
     // Mostrar estadísticas
     fmt.Println("\n=== Estadísticas del Pool ===")
     stats := db.Stats()
@@ -2451,12 +2452,12 @@ func main() {
 El package `database/sql` de Go proporciona una abstracción elegante y poderosa para trabajar con bases de datos. Su enfoque minimalista pero completo permite escribir código seguro, eficiente y mantenible. Combinándolo con patrones como Repository y Query Builder, se pueden construir aplicaciones de datos sólidas y escalables.
 
 La clave está en:
+
 1. Usar **prepared statements** para seguridad y performance
 2. Gestionar **transacciones** adecuadamente
 3. Configurar el **pool de conexiones** según la carga
 4. Manejar **errores** explícitamente
 5. Aplicar **patterns** como Repository para mejor organización
-
 
 ---
 

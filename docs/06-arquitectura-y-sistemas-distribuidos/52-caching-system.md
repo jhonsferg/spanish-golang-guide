@@ -1,6 +1,7 @@
 # Capítulo 52: Caching - Sistemas de caché en producción
 
 ## Índice General
+
 1. [52.1 - Introducción a Caching](#521---introducción-a-caching)
 2. [52.2 - Memoria Local (In-Memory)](#522---memoria-local-in-memory)
 3. [52.3 - Problemas de Cache](#523---problemas-de-cache-cache-invalidation)
@@ -94,6 +95,7 @@ clear
 ### 52.1.4 Casos de Uso y Antipatterns
 
 **✅ CASOS DE USO APROPIADOS:**
+
 - Consultas frecuentes a base de datos (user profiles, settings)
 - Cálculos computacionales costosos (reporte analíticos)
 - Datos semi-estáticos (catálogos de productos)
@@ -192,7 +194,7 @@ func (c *SimpleCache) Count() int {
 
 func ExampleSyncMap() {
     cache := &SimpleCache{}
-    
+
     // Set/Get concurrente
     go func() {
         for i := 0; i < 1000; i++ {
@@ -200,7 +202,7 @@ func ExampleSyncMap() {
             cache.Set(key, fmt.Sprintf("value:%d", i))
         }
     }()
-    
+
     go func() {
         for i := 0; i < 1000; i++ {
             key := fmt.Sprintf("key:%d", i)
@@ -210,7 +212,7 @@ func ExampleSyncMap() {
             }
         }
     }()
-    
+
     time.Sleep(100 * time.Millisecond)
     fmt.Printf("Cache contiene %d items\n", cache.Count())
 }
@@ -224,7 +226,7 @@ func BenchmarkSyncMapVsMutex() {
         syncMap.Store(fmt.Sprintf("key:%d", i), i)
     }
     fmt.Printf("sync.Map: %v\n", time.Since(start))
-    
+
     // map + RWMutex
     var mu sync.RWMutex
     regularMap := make(map[string]int)
@@ -235,7 +237,7 @@ func BenchmarkSyncMapVsMutex() {
         mu.Unlock()
     }
     fmt.Printf("map + RWMutex: %v\n", time.Since(start))
-    
+
     // Resultado: sync.Map es ~2-3x más rápido para reads + writes mixed
 }
 ```
@@ -275,7 +277,7 @@ func NewTTLCache() *TTLCache {
 func (c *TTLCache) Set(key string, value interface{}, ttl time.Duration) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     c.items[key] = &CacheItem{
         Value:     value,
         ExpiresAt: time.Now().Add(ttl),
@@ -285,24 +287,24 @@ func (c *TTLCache) Set(key string, value interface{}, ttl time.Duration) {
 func (c *TTLCache) Get(key string) (interface{}, bool) {
     c.mu.RLock()
     defer c.mu.RUnlock()
-    
+
     item, exists := c.items[key]
     if !exists {
         return nil, false
     }
-    
+
     // Check if expired
     if time.Now().After(item.ExpiresAt) {
         return nil, false
     }
-    
+
     return item.Value, true
 }
 
 func (c *TTLCache) cleanupExpired() {
     ticker := time.NewTicker(1 * time.Second)
     defer ticker.Stop()
-    
+
     for {
         select {
         case <-ticker.C:
@@ -328,14 +330,14 @@ func (c *TTLCache) Close() {
 func ExampleTTLCache() {
     cache := NewTTLCache()
     defer cache.Close()
-    
+
     // Guardar con 5 segundos de TTL
     cache.Set("user:1", map[string]string{"name": "Alice"}, 5*time.Second)
-    
+
     // Inmediatamente disponible
     val, ok := cache.Get("user:1")
     fmt.Printf("Inmediato: %v, %v\n", val, ok) // true
-    
+
     // Después de 6 segundos, expirado
     time.Sleep(6 * time.Second)
     val, ok = cache.Get("user:1")
@@ -378,12 +380,12 @@ func NewLRUCache(capacity int) *LRUCache {
 func (c *LRUCache) Get(key string) (interface{}, bool) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     elem, exists := c.cache[key]
     if !exists {
         return nil, false
     }
-    
+
     // Mover a frente (más recientemente usado)
     c.list.MoveToFront(elem)
     return elem.Value.(*cacheNode).value, true
@@ -392,18 +394,18 @@ func (c *LRUCache) Get(key string) (interface{}, bool) {
 func (c *LRUCache) Set(key string, value interface{}) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     // Si ya existe, actualizar y mover a frente
     if elem, exists := c.cache[key]; exists {
         c.list.MoveToFront(elem)
         elem.Value.(*cacheNode).value = value
         return
     }
-    
+
     // Nuevo item
     elem := c.list.PushFront(&cacheNode{key: key, value: value})
     c.cache[key] = elem
-    
+
     // Evictar LRU si se excede capacidad
     if c.list.Len() > c.capacity {
         evicted := c.list.Remove(c.list.Back())
@@ -413,17 +415,17 @@ func (c *LRUCache) Set(key string, value interface{}) {
 
 func ExampleLRU() {
     lru := NewLRUCache(3)
-    
+
     lru.Set("a", 1)
     lru.Set("b", 2)
     lru.Set("c", 3)
     fmt.Println("Cache:", "a, b, c")
-    
+
     lru.Set("d", 4) // Evicta 'a' (least recently used)
-    
+
     _, exists := lru.Get("a")
     fmt.Printf("¿Existe 'a'?: %v\n", exists) // false
-    
+
     val, exists := lru.Get("d")
     fmt.Printf("Valor de 'd': %v\n", val) // 4
 }
@@ -445,31 +447,31 @@ import (
 func ExampleGoCache() {
     // Crear caché con default expiration 5 min, cleanup cada 10 min
     c := cache.New(5*time.Minute, 10*time.Minute)
-    
+
     // Set
     c.Set("userID:123", map[string]interface{}{
         "name": "Alice",
         "role": "admin",
     }, cache.DefaultExpiration)
-    
+
     // Set con TTL específico
     c.Set("session:abc123", "session_data", 30*time.Minute)
-    
+
     // Get
     user, found := c.Get("userID:123")
     if found {
         fmt.Printf("Usuario: %v\n", user)
     }
-    
+
     // Get y eliminar
     session, found := c.GetWithExpiration("session:abc123")
     if found {
         fmt.Printf("Session: %v\n", session)
     }
-    
+
     // Iterar
     c.Items() // Retorna todos los items
-    
+
     // Limpiar
     c.Flush()
 }
@@ -490,17 +492,17 @@ func (ur *UserRepository) GetUser(userID string) (map[string]interface{}, error)
     if cached, found := ur.cache.Get("user:" + userID); found {
         return cached.(map[string]interface{}), nil
     }
-    
+
     // No en caché, consultar DB
     user := map[string]interface{}{
         "id":    userID,
         "name":  "Alice",
         "email": "alice@example.com",
     }
-    
+
     // Guardar en caché
     ur.cache.Set("user:"+userID, user, cache.DefaultExpiration)
-    
+
     return user, nil
 }
 
@@ -537,7 +539,7 @@ func (c *TTLCacheStrategy) Set(key string, value interface{}) {
     c.mu.Lock()
     defer c.mu.Unlock()
     c.cache[key] = value
-    
+
     // Auto-expire después de TTL
     go func() {
         time.Sleep(c.ttl)
@@ -566,7 +568,7 @@ func (c *EventBasedCache) OnUserUpdate(userID string) {
     c.mu.Lock()
     delete(c.cache, key)
     c.mu.Unlock()
-    
+
     // Notificar listeners
     if c.invalidateFunc != nil {
         c.invalidateFunc(key)
@@ -591,16 +593,16 @@ func (c *HybridCache) Set(key string, value interface{}) {
 func (c *HybridCache) Get(key string) (interface{}, bool) {
     c.mu.RLock()
     defer c.mu.RUnlock()
-    
+
     val, exists := c.cache[key]
     if !exists {
         return nil, false
     }
-    
+
     if time.Now().After(c.expiresAt[key]) {
         return nil, false
     }
-    
+
     return val, true
 }
 
@@ -625,7 +627,7 @@ T1: Cache expire para key="user:1"
     ├─ Request C: ¿Está en caché? NO
     ├─ Request D: ¿Está en caché? NO
     └─ Todas lanzan query a DB SIMULTÁNEAMENTE
-       
+
 DB recibe 4 queries idénticas → servidor se ahoga
 ```
 
@@ -654,11 +656,11 @@ func (c *CacheWithLock) GetOrLoad(key string, loader func() (interface{}, error)
         c.locks[key] = lock
     }
     c.mu.Unlock()
-    
+
     // Solo el primer goroutine carga datos, otros esperan
     lock.Lock()
     defer lock.Unlock()
-    
+
     // Verificar nuevamente si alguien ya cargó
     c.mu.RLock()
     if val, exists := c.data[key]; exists {
@@ -666,7 +668,7 @@ func (c *CacheWithLock) GetOrLoad(key string, loader func() (interface{}, error)
         return val, nil
     }
     c.mu.RUnlock()
-    
+
     // Cargar datos
     val, err := loader()
     if err == nil {
@@ -674,7 +676,7 @@ func (c *CacheWithLock) GetOrLoad(key string, loader func() (interface{}, error)
         c.data[key] = val
         c.mu.Unlock()
     }
-    
+
     return val, err
 }
 ```
@@ -699,7 +701,7 @@ func (c *ProbabilisticCache) Set(key string, value interface{}, baseTTL time.Dur
     // TTL = baseTTL * random(0.8, 1.0)
     variance := 0.8 + rand.Float64()*0.2
     actualTTL := time.Duration(float64(baseTTL) * variance)
-    
+
     c.data[key] = value
     c.expiresAt[key] = time.Now().Add(actualTTL)
 }
@@ -745,10 +747,10 @@ func (c *TTLCache) GetOrDefault(key string, loader func() (interface{}, error)) 
             return entry.Value, nil
         }
     }
-    
+
     // Cargar de fuente
     val, err := loader()
-    
+
     // Cachear resultado, aunque no exista
     if err == nil {
         c.Set(key, &NegativeCacheEntry{
@@ -756,7 +758,7 @@ func (c *TTLCache) GetOrDefault(key string, loader func() (interface{}, error)) 
             Value: val,
         }, 5*time.Minute)
     }
-    
+
     return val, err
 }
 ```
@@ -797,7 +799,7 @@ func (c *AvalancheSafeCache) Set(key string, value interface{}, baseTTL time.Dur
     // Agregar varianza aleatoria para evitar expiración simultánea
     variance := 0.9 + rand.Float64()*0.2 // 0.9 a 1.1
     actualTTL := time.Duration(float64(baseTTL) * variance)
-    
+
     c.data[key] = value
     c.expiresAt[key] = time.Now().Add(actualTTL)
 }
@@ -904,9 +906,9 @@ func main() {
         Addr: "localhost:6379",
     })
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // Ping
     pong, err := client.Ping(ctx).Result()
     if err != nil {
@@ -914,7 +916,7 @@ func main() {
         return
     }
     fmt.Printf("Redis: %s\n", pong)
-    
+
     // Cluster
     clusterClient := redis.NewClusterClient(&redis.ClusterOptions{
         Addrs: []string{
@@ -924,13 +926,13 @@ func main() {
         },
     })
     defer clusterClient.Close()
-    
+
     // Sentinel (High Availability)
     sentinelClient := redis.NewSentinelClient(&redis.SentinelOptions{
         Addrs: []string{"sentinel1:26379", "sentinel2:26379"},
     })
     defer sentinelClient.Close()
-    
+
     masterClient := sentinelClient.GetMasterClient(ctx, "mymaster")
     defer masterClient.Close()
 }
@@ -952,65 +954,65 @@ func BasicOperations() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // STRING
     client.Set(ctx, "username", "alice", 0)
     val, _ := client.Get(ctx, "username").Result()
     fmt.Printf("GET username: %s\n", val)
-    
+
     // MGET/MSET (múltiples claves)
     client.MSet(ctx, "user:1:name", "Alice", "user:2:name", "Bob")
     vals, _ := client.MGet(ctx, "user:1:name", "user:2:name").Result()
     fmt.Printf("MGET: %v\n", vals)
-    
+
     // INCR (contador)
     client.Set(ctx, "views:article:1", "0", 0)
     client.Incr(ctx, "views:article:1")
     client.Incr(ctx, "views:article:1")
     count, _ := client.Get(ctx, "views:article:1").Result()
     fmt.Printf("Views: %s\n", count)
-    
+
     // APPEND
     client.Set(ctx, "message", "Hello", 0)
     client.Append(ctx, "message", " World")
     msg, _ := client.Get(ctx, "message").Result()
     fmt.Printf("Message: %s\n", msg)
-    
+
     // LIST
     client.RPush(ctx, "queue", "task1", "task2", "task3")
     client.LPush(ctx, "queue", "urgent_task")
     len, _ := client.LLen(ctx, "queue").Result()
     fmt.Printf("Queue length: %d\n", len)
-    
+
     // POP
     first, _ := client.LPop(ctx, "queue").Result()
     fmt.Printf("First task: %s\n", first)
-    
+
     // HASH
     client.HSet(ctx, "user:100", map[string]interface{}{
         "name":  "Alice",
         "email": "alice@example.com",
         "role":  "admin",
     })
-    
+
     email, _ := client.HGet(ctx, "user:100", "email").Result()
     fmt.Printf("User email: %s\n", email)
-    
+
     all, _ := client.HGetAll(ctx, "user:100").Result()
     fmt.Printf("All fields: %v\n", all)
-    
+
     // SET
     client.SAdd(ctx, "tags", "golang", "redis", "caching", "golang")
     members, _ := client.SMembers(ctx, "tags").Result()
     fmt.Printf("Tags: %v\n", members) // golang, redis, caching (sin duplicados)
-    
+
     // ZSET (Sorted Set)
     client.ZAdd(ctx, "leaderboard", redis.Z{Score: 100, Member: "Alice"})
     client.ZAdd(ctx, "leaderboard", redis.Z{Score: 85, Member: "Bob"})
     client.ZAdd(ctx, "leaderboard", redis.Z{Score: 92, Member: "Charlie"})
-    
+
     // Top 3
-    top, _ := client.ZRevRangeByScoreWithScores(ctx, "leaderboard", 
+    top, _ := client.ZRevRangeByScoreWithScores(ctx, "leaderboard",
         &redis.ZRangeBy{Min: "-inf", Max: "+inf", Count: 3}).Result()
     for _, entry := range top {
         fmt.Printf("%v: %g\n", entry.Member, entry.Score)
@@ -1022,21 +1024,21 @@ func TTLOperations() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // SET con expiración
     client.Set(ctx, "session:abc123", "user_data", 30*time.Minute)
-    
+
     // Ver TTL restante
     ttl, _ := client.TTL(ctx, "session:abc123").Result()
     fmt.Printf("TTL: %v\n", ttl)
-    
+
     // EXPIRE: establecer expiración en clave existente
     client.Set(ctx, "temp_data", "value", 0)
     client.Expire(ctx, "temp_data", 5*time.Minute)
-    
+
     // EXPIREAT: expirar en fecha específica
     client.ExpireAt(ctx, "temp_data", time.Now().Add(1*time.Hour))
-    
+
     // PERSIST: remover expiración
     client.Persist(ctx, "temp_data")
 }
@@ -1046,12 +1048,12 @@ func AtomicOperations() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // GETSET: obtener valor anterior mientras se actualiza
     client.Set(ctx, "counter", "0", 0)
     prev, _ := client.GetSet(ctx, "counter", "1").Result()
     fmt.Printf("Previous value: %s\n", prev)
-    
+
     // GETEX: obtener con opción de actualizar TTL
     client.Set(ctx, "key", "value", 0)
     val, _ := client.GetEx(ctx, "key", &redis.GetExOptions{
@@ -1077,23 +1079,23 @@ func PubSubExample() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Suscriptor
     go func() {
         pubsub := client.Subscribe(ctx, "news", "alerts")
         defer pubsub.Close()
-        
+
         ch := pubsub.Channel()
         for msg := range ch {
             fmt.Printf("[%s] %s\n", msg.Channel, msg.Payload)
         }
     }()
-    
+
     // Publicador
     time.Sleep(1 * time.Second)
     client.Publish(ctx, "news", "Breaking news!")
     client.Publish(ctx, "alerts", "System alert!")
-    
+
     time.Sleep(2 * time.Second)
 }
 
@@ -1102,24 +1104,24 @@ func PatternSubscription() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Suscribirse a patrón
     pubsub := client.PSubscribe(ctx, "user:*", "system:*")
     defer pubsub.Close()
-    
+
     ch := pubsub.Channel()
-    
+
     go func() {
         for msg := range ch {
             fmt.Printf("Pattern match [%s]: %s\n", msg.Channel, msg.Payload)
         }
     }()
-    
+
     // Publicar mensajes
     client.Publish(ctx, "user:login", "user123 logged in")
     client.Publish(ctx, "system:status", "System healthy")
     client.Publish(ctx, "user:logout", "user456 logged out")
-    
+
     time.Sleep(1 * time.Second)
 }
 ```
@@ -1145,7 +1147,7 @@ func PipelineExample() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Sin Pipeline (N roundtrips)
     start := time.Now()
     for i := 0; i < 1000; i++ {
@@ -1153,7 +1155,7 @@ func PipelineExample() {
         client.Set(ctx, key, fmt.Sprintf("value:%d", i), 0)
     }
     fmt.Printf("Sin Pipeline: %v\n", time.Since(start))
-    
+
     // Con Pipeline (1 roundtrip)
     start = time.Now()
     pipe := client.Pipeline()
@@ -1174,15 +1176,15 @@ func ConditionalPipeline() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Actualizar múltiples usuarios solo si existen
     pipe := client.Pipeline()
     userIDs := []string{"user:1", "user:2", "user:3"}
-    
+
     for _, userID := range userIDs {
         pipe.Exists(ctx, userID)
     }
-    
+
     results, _ := pipe.Exec(ctx)
     for i, result := range results {
         if val, ok := result.(*redis.IntCmd); ok && val.Val() > 0 {
@@ -1190,7 +1192,7 @@ func ConditionalPipeline() {
             pipe.HSet(ctx, userID, "last_seen", time.Now().Unix())
         }
     }
-    
+
     pipe.Exec(ctx)
 }
 ```
@@ -1212,20 +1214,20 @@ func TransactionExample() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Transferencia de dinero: Alice → Bob (atomicidad)
     err := client.Watch(ctx, func(tx *redis.Tx) error {
         // Leer saldos
         aliceBalance, _ := tx.Get(ctx, "user:alice:balance").Int64()
         bobBalance, _ := tx.Get(ctx, "user:bob:balance").Int64()
-        
+
         transferAmount := int64(100)
-        
+
         // Verificar que Alice tenga suficientes fondos
         if aliceBalance < transferAmount {
             return fmt.Errorf("Insufficient funds")
         }
-        
+
         // Ejecutar en transaction
         _, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
             pipe.Decrby(ctx, "user:alice:balance", transferAmount)
@@ -1234,7 +1236,7 @@ func TransactionExample() {
         })
         return err
     }, "user:alice:balance")
-    
+
     if err != nil {
         fmt.Printf("Transaction failed: %v\n", err)
     }
@@ -1245,27 +1247,27 @@ func CounterWithOptimisticLock() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     client.Set(ctx, "counter", "0", 0)
-    
+
     maxRetries := 5
     for i := 0; i < maxRetries; i++ {
         err := client.Watch(ctx, func(tx *redis.Tx) error {
             val, _ := tx.Get(ctx, "counter").Int64()
-            
+
             _, err := tx.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
                 pipe.Set(ctx, "counter", val+1, 0)
                 return nil
             })
-            
+
             return err
         }, "counter")
-        
+
         if err == redis.Nil {
             // Collision, reintentar
             continue
         }
-        
+
         if err == nil {
             fmt.Printf("Counter incremented successfully\n")
             break
@@ -1291,18 +1293,18 @@ func LuaScriptExample() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Script: Incrementar si es menor que limit
     script := redis.NewScript(`
         local current = redis.call('get', KEYS[1])
         local limit = tonumber(ARGV[1])
-        
+
         if not current then
             current = 0
         else
             current = tonumber(current)
         end
-        
+
         if current < limit then
             redis.call('set', KEYS[1], current + 1)
             return current + 1
@@ -1310,7 +1312,7 @@ func LuaScriptExample() {
             return -1
         end
     `)
-    
+
     // Ejecutar script
     result, err := script.Run(ctx, client, []string{"counter"}, 10).Result()
     if err != nil {
@@ -1324,19 +1326,19 @@ func RateLimiterWithLua() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     // Script: Sliding window rate limiter
     rateLimiterScript := redis.NewScript(`
         local key = KEYS[1]
         local limit = tonumber(ARGV[1])
         local window = tonumber(ARGV[2])
         local now = tonumber(ARGV[3])
-        
+
         local clearBefore = now - window
         redis.call('zremrangebyscore', key, 0, clearBefore)
-        
+
         local current = redis.call('zcard', key)
-        
+
         if current < limit then
             redis.call('zadd', key, now, now)
             redis.call('expire', key, window)
@@ -1345,16 +1347,16 @@ func RateLimiterWithLua() {
             return 0  -- Rechazado
         end
     `)
-    
+
     // Test rate limiting: 5 requests per 60 segundos
     userID := "user:123"
     limit := 5
     window := 60
-    
+
     for i := 0; i < 10; i++ {
-        result, _ := rateLimiterScript.Run(ctx, client, 
+        result, _ := rateLimiterScript.Run(ctx, client,
             []string{userID}, limit, window, time.Now().Unix()).Int64()
-        
+
         if result == 1 {
             fmt.Printf("Request %d: Permitido\n", i+1)
         } else {
@@ -1368,10 +1370,10 @@ func DistributedLockWithLua() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer client.Close()
     ctx := context.Background()
-    
+
     lockKey := "resource:lock"
     lockValue := "unique_token_123"
-    
+
     // Adquirir lock
     acquireScript := redis.NewScript(`
         if redis.call('setnx', KEYS[1], ARGV[1]) == 1 then
@@ -1381,15 +1383,15 @@ func DistributedLockWithLua() {
             return 0
         end
     `)
-    
-    result, _ := acquireScript.Run(ctx, client, 
+
+    result, _ := acquireScript.Run(ctx, client,
         []string{lockKey}, lockValue, 30).Int64()
-    
+
     if result == 1 {
         fmt.Println("Lock acquired!")
-        
+
         // Hacer trabajo...
-        
+
         // Liberar lock (solo si es el propietario)
         releaseScript := redis.NewScript(`
             if redis.call('get', KEYS[1]) == ARGV[1] then
@@ -1398,7 +1400,7 @@ func DistributedLockWithLua() {
                 return 0  -- No es propietario
             end
         `)
-        
+
         releaseScript.Run(ctx, client, []string{lockKey}, lockValue)
         fmt.Println("Lock released!")
     }
@@ -1429,14 +1431,14 @@ func ClusterModeExample() {
         MaxRedirects: 8,
     })
     defer clusterClient.Close()
-    
+
     ctx := context.Background()
-    
+
     // Operaciones normales (automáticamente enrutadas)
     clusterClient.Set(ctx, "user:1000", "alice", 0)
     val, _ := clusterClient.Get(ctx, "user:1000").Result()
     fmt.Printf("User: %s\n", val)
-    
+
     // MGET/MSET también funciona (pero requiere mismo slot)
     // Para claves en diferentes slots, usar pipeline
 }
@@ -1447,18 +1449,18 @@ func HashTagExample() {
         Addrs: []string{"redis-node1:6379", "redis-node2:6379"},
     })
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // Hash tag: {userId} asegura que ambas claves vayan al mismo slot
     userID := "user:123"
     userDataKey := fmt.Sprintf("{%s}:data", userID)
     userSettingsKey := fmt.Sprintf("{%s}:settings", userID)
-    
+
     // Ahora estos MGET funcionarán (mismo slot)
     client.Set(ctx, userDataKey, "data_value", 0)
     client.Set(ctx, userSettingsKey, "settings_value", 0)
-    
+
     vals, _ := client.MGet(ctx, userDataKey, userSettingsKey).Result()
     fmt.Printf("Values: %v\n", vals)
 }
@@ -1469,13 +1471,13 @@ func ClusterInfo() {
         Addrs: []string{"redis-node1:6379"},
     })
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // Info del cluster
     info := client.ClusterInfo(ctx)
     fmt.Printf("Cluster state: %v\n", info)
-    
+
     // Slots
     slots, _ := client.ClusterSlots(ctx).Result()
     for _, slot := range slots {
@@ -1507,9 +1509,9 @@ func SentinelHA() {
         },
     })
     defer sentinel.Close()
-    
+
     ctx := context.Background()
-    
+
     // Obtener master
     masterAddr, err := sentinel.GetMasterAddrByName(ctx, "mymaster").Result()
     if err != nil {
@@ -1517,16 +1519,16 @@ func SentinelHA() {
         return
     }
     fmt.Printf("Master: %s\n", masterAddr)
-    
+
     // Conectar al master
     master := sentinel.GetMasterClient(ctx, "mymaster")
     defer master.Close()
-    
+
     // Operaciones
     master.Set(ctx, "key", "value", 0)
     val, _ := master.Get(ctx, "key").Result()
     fmt.Printf("Value: %s\n", val)
-    
+
     // Si master falla, Sentinel automáticamente promove un esclavo
 }
 
@@ -1536,15 +1538,15 @@ func SentinelMonitoring() {
         Addrs: []string{"sentinel1:26379"},
     })
     defer sentinel.Close()
-    
+
     ctx := context.Background()
-    
+
     // Obtener estado del master
     masters, _ := sentinel.Masters(ctx).Result()
     for name, state := range masters {
         fmt.Printf("Master %s: %v\n", name, state)
     }
-    
+
     // Obtener estado de esclavos
     slaves, _ := sentinel.Slaves(ctx, "mymaster").Result()
     for _, slave := range slaves {
@@ -1591,7 +1593,7 @@ type UserRepository struct {
 
 func (ur *UserRepository) GetUser(ctx context.Context, userID string) (*User, error) {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     // Paso 1: Intentar caché
     cachedJSON, err := ur.redisClient.Get(ctx, cacheKey).Result()
     if err == nil {
@@ -1601,24 +1603,24 @@ func (ur *UserRepository) GetUser(ctx context.Context, userID string) (*User, er
         fmt.Printf("Cache hit: user %s\n", userID)
         return &user, nil
     }
-    
+
     if err != redis.Nil {
         // Error de conexión a Redis, fallback a DB
         fmt.Printf("Redis error, using DB: %v\n", err)
         return ur.db.GetUser(userID)
     }
-    
+
     // Paso 2: Cache miss, consultar BD
     fmt.Printf("Cache miss: user %s, querying DB\n", userID)
     user, err := ur.db.GetUser(userID)
     if err != nil {
         return nil, err
     }
-    
+
     // Paso 3: Guardar en caché
     userJSON, _ := json.Marshal(user)
     ur.redisClient.Set(ctx, cacheKey, userJSON, 1*time.Hour)
-    
+
     return user, nil
 }
 
@@ -1628,11 +1630,11 @@ func (ur *UserRepository) UpdateUser(ctx context.Context, user *User) error {
     if err != nil {
         return err
     }
-    
+
     // Invalidar caché
     cacheKey := fmt.Sprintf("user:%s", user.ID)
     ur.redisClient.Del(ctx, cacheKey)
-    
+
     return nil
 }
 ```
@@ -1646,7 +1648,7 @@ REQUEST → [App] ──┬─ "Buscar en caché"
                   │     │ SÍ (hit)          ↓
                   │     └──────────────→ [RETURN] ✓ (1ms)
                   │     │ NO (miss)
-     └──────────┐                  
+     └──────────┐  
                   │                ├─ Consultar DB (100ms)
                   │                ├─ Guardar en Redis (1ms)
                   │                └──────────────→ [RETURN] ✓
@@ -1680,11 +1682,11 @@ import (
 
 func (ur *UserRepository) UpdateUserWriteThrough(ctx context.Context, user *User) error {
     cacheKey := fmt.Sprintf("user:%s", user.ID)
-    
+
     // Paso 1: Escribir en caché primero (rápido)
     userJSON, _ := json.Marshal(user)
     ur.redisClient.Set(ctx, cacheKey, userJSON, 1*time.Hour)
-    
+
     // Paso 2: Escribir en BD (lento)
     err := ur.db.UpdateUser(user)
     if err != nil {
@@ -1693,7 +1695,7 @@ func (ur *UserRepository) UpdateUserWriteThrough(ctx context.Context, user *User
         ur.redisClient.Del(ctx, cacheKey)
         return err
     }
-    
+
     fmt.Printf("User %s updated (write-through)\n", user.ID)
     return nil
 }
@@ -1738,17 +1740,17 @@ type PendingWrite struct {
 
 func (wbc *WriteBackCache) UpdateUserWriteBehind(ctx context.Context, user *User) error {
     cacheKey := fmt.Sprintf("user:%s", user.ID)
-    
+
     // Paso 1: Escribir en caché INMEDIATAMENTE
     userJSON, _ := json.Marshal(user)
     wbc.redis.Set(ctx, cacheKey, userJSON, 0)
-    
+
     // Paso 2: Encolar para escribir en BD (background)
     wbc.writeQueue <- &PendingWrite{
         User:      user,
         Timestamp: time.Now(),
     }
-    
+
     fmt.Printf("User %s cached, BD update queued\n", user.ID)
     return nil
 }
@@ -1758,20 +1760,20 @@ func (wbc *WriteBackCache) ProcessWriteQueue() {
     for write := range wbc.writeQueue {
         retries := 0
         maxRetries := 3
-        
+
         for retries < maxRetries {
             err := wbc.db.UpdateUser(write.User)
             if err == nil {
                 fmt.Printf("User %s written to DB\n", write.User.ID)
                 break
             }
-            
+
             retries++
             time.Sleep(time.Duration(retries) * time.Second) // Exponential backoff
         }
-        
+
         if retries == maxRetries {
-            fmt.Printf("Failed to write user %s after %d retries\n", 
+            fmt.Printf("Failed to write user %s after %d retries\n",
                 write.User.ID, maxRetries)
             // Alertar administrador
         }
@@ -1811,30 +1813,30 @@ import (
 
 func (ur *UserRepository) GetUserWithRefreshAhead(ctx context.Context, userID string) (*User, error) {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     // Obtener con TTL
     val, err := ur.redisClient.Get(ctx, cacheKey).Result()
     if err == nil {
         // Cache hit
         var user User
         json.Unmarshal([]byte(val), &user)
-        
+
         // Verificar si está próximo a expirar (< 5 min)
         ttl, _ := ur.redisClient.TTL(ctx, cacheKey).Result()
         if ttl < 5*time.Minute && ttl > 0 {
             // Actualizar en background
             go ur.refreshUserCache(ctx, userID)
         }
-        
+
         return &user, nil
     }
-    
+
     // Cache miss o error, cargar normalmente
     user, err := ur.db.GetUser(userID)
     if err != nil {
         return nil, err
     }
-    
+
     userJSON, _ := json.Marshal(user)
     ur.redisClient.Set(ctx, cacheKey, userJSON, 1*time.Hour)
     return user, nil
@@ -1842,13 +1844,13 @@ func (ur *UserRepository) GetUserWithRefreshAhead(ctx context.Context, userID st
 
 func (ur *UserRepository) refreshUserCache(ctx context.Context, userID string) {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     user, err := ur.db.GetUser(userID)
     if err != nil {
         fmt.Printf("Error refreshing cache: %v\n", err)
         return
     }
-    
+
     userJSON, _ := json.Marshal(user)
     ur.redisClient.Set(ctx, cacheKey, userJSON, 1*time.Hour)
     fmt.Printf("Refreshed cache for user %s\n", userID)
@@ -1956,7 +1958,7 @@ func NewDistributedCache() *DistributedCache {
 
 func (dc *DistributedCache) GetUser(ctx context.Context, userID string) (*User, error) {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     // Todos los servidores consultan el MISMO Redis
     val, err := dc.redis.Get(ctx, cacheKey).Result()
     if err == nil {
@@ -1964,7 +1966,7 @@ func (dc *DistributedCache) GetUser(ctx context.Context, userID string) (*User, 
         json.Unmarshal([]byte(val), &user)
         return &user, nil
     }
-    
+
     // Cache miss en todas las instancias
     return db.GetUser(userID)
 }
@@ -1972,14 +1974,14 @@ func (dc *DistributedCache) GetUser(ctx context.Context, userID string) (*User, 
 func (dc *DistributedCache) SetUser(ctx context.Context, user *User) error {
     cacheKey := fmt.Sprintf("user:%s", user.ID)
     userJSON, _ := json.Marshal(user)
-    
+
     // Escribir en Redis compartido
     return dc.redis.Set(ctx, cacheKey, userJSON, 1*time.Hour).Err()
 }
 
 func (dc *DistributedCache) InvalidateUser(ctx context.Context, userID string) error {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     // Invalida para TODOS los servidores
     return dc.redis.Del(ctx, cacheKey).Err()
 }
@@ -2005,20 +2007,20 @@ import (
 // Instance A: Actualiza
 func UpdateUserNameInstanceA(userID, newName string) {
     ctx := context.Background()
-    
+
     // 1. Actualizar DB
     db.UpdateUserName(userID, newName)
-    
+
     // 2. Invalidar caché (Redis)
     redisClient.Del(ctx, fmt.Sprintf("user:%s", userID))
-    
+
     // 3. Publicar evento
     redisClient.Publish(ctx, "user:updated", fmt.Sprintf(`{
         "event": "user_updated",
         "userID": "%s",
         "timestamp": %d
     }`, userID, time.Now().Unix()))
-    
+
     fmt.Printf("Instance A: Updated user %s\n", userID)
 }
 
@@ -2027,18 +2029,18 @@ func ListenForUserUpdatesInstanceB() {
     ctx := context.Background()
     pubsub := redisClient.Subscribe(ctx, "user:updated")
     defer pubsub.Close()
-    
+
     ch := pubsub.Channel()
     for msg := range ch {
         var event map[string]interface{}
         json.Unmarshal([]byte(msg.Payload), &event)
-        
+
         userID := event["userID"].(string)
-        
+
         // Invalidar caché localmente
         cacheKey := fmt.Sprintf("user:%s", userID)
         redisClient.Del(ctx, cacheKey)
-        
+
         fmt.Printf("Instance B: Invalidated cache for user %s\n", userID)
     }
 }
@@ -2066,25 +2068,25 @@ import (
 
 func WarmCacheOnStartup() {
     ctx := context.Background()
-    
+
     // Obtener datos críticos de BD
     topUsers, _ := db.GetTopUsers(1000)
-    
+
     // Cargar en caché
     pipe := redisClient.Pipeline()
-    
+
     for _, user := range topUsers {
         cacheKey := fmt.Sprintf("user:%s", user.ID)
         userJSON, _ := json.Marshal(user)
         pipe.Set(ctx, cacheKey, userJSON, 24*time.Hour)
     }
-    
+
     _, err := pipe.Exec(ctx)
     if err != nil {
         fmt.Printf("Error warming cache: %v\n", err)
         return
     }
-    
+
     fmt.Printf("Cache warmed with %d top users\n", len(topUsers))
 }
 
@@ -2092,7 +2094,7 @@ func WarmCacheOnStartup() {
 func PeriodicCacheWarmup() {
     ticker := time.NewTicker(1 * time.Hour)
     defer ticker.Stop()
-    
+
     for range ticker.C {
         fmt.Println("Running periodic cache warmup...")
         WarmCacheOnStartup()
@@ -2126,7 +2128,7 @@ func BroadcastInvalidation(ctx context.Context, keys []string) error {
         Keys:      keys,
         Timestamp: time.Now(),
     }
-    
+
     payload, _ := json.Marshal(msg)
     return redisClient.Publish(ctx, "cache:invalidation", string(payload)).Err()
 }
@@ -2134,17 +2136,17 @@ func BroadcastInvalidation(ctx context.Context, keys []string) error {
 func ListenForInvalidation(ctx context.Context) {
     pubsub := redisClient.Subscribe(ctx, "cache:invalidation")
     defer pubsub.Close()
-    
+
     ch := pubsub.Channel()
     for msg := range ch {
         var invalidation InvalidationMessage
         json.Unmarshal([]byte(msg.Payload), &invalidation)
-        
+
         // Invalidar localmente
         for _, key := range invalidation.Keys {
             redisClient.Del(ctx, key)
         }
-        
+
         fmt.Printf("Invalidated %d keys\n", len(invalidation.Keys))
     }
 }
@@ -2154,22 +2156,22 @@ func InvalidatePattern(ctx context.Context, pattern string) error {
     // Obtener todas las claves que coinciden
     var keys []string
     iter := redisClient.Scan(ctx, 0, pattern, 100).Iterator()
-    
+
     for iter.Next(ctx) {
         keys = append(keys, iter.Val())
     }
-    
+
     if len(keys) > 0 {
         redisClient.Del(ctx, keys...)
     }
-    
+
     // Notificar a otros servidores
     msg := InvalidationMessage{
         Keys:      keys,
         Pattern:   pattern,
         Timestamp: time.Now(),
     }
-    
+
     payload, _ := json.Marshal(msg)
     return redisClient.Publish(ctx, "cache:invalidation", string(payload)).Err()
 }
@@ -2221,7 +2223,7 @@ import (
 
 func MemcachedExample() {
     mc := memcache.New("localhost:11211")
-    
+
     // SET
     err := mc.Set(&memcache.Item{
         Key:        "user:1",
@@ -2231,7 +2233,7 @@ func MemcachedExample() {
     if err != nil {
         fmt.Printf("Error: %v\n", err)
     }
-    
+
     // GET
     item, err := mc.Get("user:1")
     if err == memcache.ErrCacheMiss {
@@ -2239,22 +2241,22 @@ func MemcachedExample() {
     } else if err == nil {
         fmt.Printf("Found: %s\n", string(item.Value))
     }
-    
+
     // DELETE
     mc.Delete("user:1")
-    
+
     // MGET
     items, err := mc.GetMulti([]string{"user:1", "user:2", "user:3"})
     for key, item := range items {
         fmt.Printf("%s: %s\n", key, string(item.Value))
     }
-    
+
     // ADD (solo si no existe)
     mc.Add(&memcache.Item{
         Key:   "session:abc",
         Value: []byte("session_data"),
     })
-    
+
     // CAS (Compare-And-Swap, para atomicidad)
     item, _ := mc.Get("counter")
     // Modificar item...
@@ -2263,7 +2265,7 @@ func MemcachedExample() {
         Value: []byte("new_value"),
         CAS:   item.CAS,
     })
-    
+
     // FLUSH (limpiar todo)
     mc.FlushAll()
 }
@@ -2272,6 +2274,7 @@ func MemcachedExample() {
 ### 52.8.3 Comparativa Redis vs Memcached
 
 **Cuando usar REDIS:**
+
 - Necesitas data types complejos (Lists, Sets, Hashes)
 - Persistence importante
 - Transactions y Lua scripts
@@ -2279,6 +2282,7 @@ func MemcachedExample() {
 - High Availability (Sentinel, Cluster)
 
 **Cuando usar MEMCACHED:**
+
 - Caché puro, solo key-value
 - Máxima velocidad para operaciones simple
 - Clustering distribuido (consistente hashing)
@@ -2314,19 +2318,19 @@ func MemcachedCluster() {
         "memcached-node-2:11211",
         "memcached-node-3:11211",
     )
-    
+
     // Memcached usa consistent hashing
     // Cada clave va automáticamente al mismo nodo
-    
+
     item := &memcache.Item{
         Key:   "user:100",
         Value: []byte("alice"),
     }
     mc.Set(item)
-    
+
     // La clave "user:100" siempre va al mismo nodo
     // Aunque agregues/remuevas nodos, mayoría de claves se quedan donde estaban
-    
+
     retrieved, _ := mc.Get("user:100")
     fmt.Printf("Value: %s\n", string(retrieved.Value))
 }
@@ -2371,24 +2375,24 @@ import (
 func CacheableResponse(w http.ResponseWriter, r *http.Request) {
     data := `{"id":1,"name":"Alice","role":"admin"}`
     hash := calculateHash(data) // MD5 o SHA256
-    
+
     // Establecer headers de caché
     w.Header().Set("Cache-Control", "public, max-age=3600")
     w.Header().Set("ETag", fmt.Sprintf(`"%s"`, hash))
     w.Header().Set("Last-Modified", time.Now().Format(http.TimeFormat))
-    
+
     // Validar ETag (cliente envía If-None-Match)
     if match := r.Header.Get("If-None-Match"); match == fmt.Sprintf(`"%s"`, hash) {
         w.WriteHeader(http.StatusNotModified)
         return
     }
-    
+
     // Validar Last-Modified
     if modifiedSince := r.Header.Get("If-Modified-Since"); modifiedSince != "" {
         w.WriteHeader(http.StatusNotModified)
         return
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprint(w, data)
 }
@@ -2445,10 +2449,10 @@ func (cm *CacheMiddleware) CacheHandler(next http.Handler) http.Handler {
             next.ServeHTTP(w, r)
             return
         }
-        
+
         ctx := r.Context()
         cacheKey := fmt.Sprintf("http:%s:%s", r.Method, r.URL.Path)
-        
+
         // Intentar caché
         if cached, err := cm.redis.Get(ctx, cacheKey).Result(); err == nil {
             w.Header().Set("X-Cache", "HIT")
@@ -2456,20 +2460,20 @@ func (cm *CacheMiddleware) CacheHandler(next http.Handler) http.Handler {
             fmt.Fprint(w, cached)
             return
         }
-        
+
         // Capturar response
         recorder := &responseRecorder{
             ResponseWriter: w,
             statusCode:     http.StatusOK,
         }
-        
+
         next.ServeHTTP(recorder, r)
-        
+
         // Cachear respuesta
         if recorder.statusCode == http.StatusOK {
             cm.redis.Set(ctx, cacheKey, string(recorder.body), cm.ttl)
         }
-        
+
         w.Header().Set("X-Cache", "MISS")
     })
 }
@@ -2492,17 +2496,17 @@ func (rr *responseRecorder) Write(b []byte) (int, error) {
 
 func main() {
     client := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
-    
+
     cm := &CacheMiddleware{
         redis: client,
         ttl:   1 * time.Hour,
     }
-    
+
     handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         fmt.Fprint(w, `{"data":"expensive computation result"}`)
     })
-    
+
     http.Handle("/api/data", cm.CacheHandler(handler))
     http.ListenAndServe(":8080", nil)
 }
@@ -2523,15 +2527,15 @@ import (
 func CDNOptimizedResponse(w http.ResponseWriter, r *http.Request) {
     // Cache en CDN por 24 horas
     w.Header().Set("Cache-Control", "public, max-age=86400")
-    
+
     // Permitir caching en CDN también
     w.Header().Set("Surrogate-Control", "public, max-age=86400")
-    
+
     // Purge cache cuando sea necesario (Cloudflare API)
     // curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" \
     //      -H "Authorization: Bearer {token}" \
     //      -d '{"files":["https://example.com/api/data"]}'
-    
+
     w.Header().Set("Vary", "Accept-Encoding")
     w.Header().Set("Content-Type", "application/json")
     fmt.Fprint(w, `{"cached":"by_cdn"}`)
@@ -2582,7 +2586,7 @@ func NewMockCache() *MockCache {
 func (mc *MockCache) Get(ctx context.Context, key string) (interface{}, error) {
     mc.mu.Lock()
     defer mc.mu.Unlock()
-    
+
     mc.callLog = append(mc.callLog, "GET:"+key)
     val, exists := mc.data[key]
     if exists {
@@ -2594,7 +2598,7 @@ func (mc *MockCache) Get(ctx context.Context, key string) (interface{}, error) {
 func (mc *MockCache) Set(ctx context.Context, key string, value interface{}) error {
     mc.mu.Lock()
     defer mc.mu.Unlock()
-    
+
     mc.callLog = append(mc.callLog, "SET:"+key)
     mc.data[key] = value
     return nil
@@ -2603,7 +2607,7 @@ func (mc *MockCache) Set(ctx context.Context, key string, value interface{}) err
 func (mc *MockCache) Delete(ctx context.Context, key string) error {
     mc.mu.Lock()
     defer mc.mu.Unlock()
-    
+
     mc.callLog = append(mc.callLog, "DEL:"+key)
     delete(mc.data, key)
     return nil
@@ -2619,13 +2623,13 @@ func (mc *MockCache) GetCallLog() []string {
 func TestUserRepository() {
     cache := NewMockCache()
     repo := NewUserRepository(cache)
-    
+
     // Primer acceso: cache miss
     user, _ := repo.GetUser("user:1")
-    
+
     // Segundo acceso: cache hit
     user, _ = repo.GetUser("user:1")
-    
+
     log := cache.GetCallLog()
     // Verificar que se hizo SET seguido de GET
     assert(log[0] == "SET:user:1", "Primer call debe ser SET")
@@ -2667,7 +2671,7 @@ func (cm *CacheMetrics) GetHitRate() float64 {
     hits := atomic.LoadInt64(&cm.hits)
     misses := atomic.LoadInt64(&cm.misses)
     total := hits + misses
-    
+
     if total == 0 {
         return 0
     }
@@ -2679,12 +2683,12 @@ func (cm *CacheMetrics) Stats() map[string]interface{} {
     misses := atomic.LoadInt64(&cm.misses)
     evictions := atomic.LoadInt64(&cm.evictions)
     total := hits + misses
-    
+
     var hitRate float64
     if total > 0 {
         hitRate = float64(hits) / float64(total) * 100
     }
-    
+
     return map[string]interface{}{
         "hits":       hits,
         "misses":     misses,
@@ -2717,7 +2721,7 @@ import (
 func MonitorMemoryUsage() {
     var m runtime.MemStats
     runtime.ReadMemStats(&m)
-    
+
     fmt.Printf("=== Memory Stats ===\n")
     fmt.Printf("Alloc: %v MB\n", m.Alloc / 1024 / 1024)
     fmt.Printf("TotalAlloc: %v MB\n", m.TotalAlloc / 1024 / 1024)
@@ -2730,7 +2734,7 @@ func MonitorMemoryUsage() {
 func StartMemoryMonitoring(interval time.Duration) {
     ticker := time.NewTicker(interval)
     defer ticker.Stop()
-    
+
     for range ticker.C {
         MonitorMemoryUsage()
     }
@@ -2759,14 +2763,14 @@ import (
 
 func BenchmarkLocalCacheVsRedis(b *testing.B) {
     ctx := context.Background()
-    
+
     // Caché local
     localCache := make(map[string]interface{})
-    
+
     // Redis
     redisClient := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
     defer redisClient.Close()
-    
+
     // Benchmark: Local cache
     b.Run("LocalCache", func(b *testing.B) {
         for i := 0; i < b.N; i++ {
@@ -2774,7 +2778,7 @@ func BenchmarkLocalCacheVsRedis(b *testing.B) {
             localCache[key] = "value"
         }
     })
-    
+
     // Benchmark: Redis
     b.Run("Redis", func(b *testing.B) {
         for i := 0; i < b.N; i++ {
@@ -2903,21 +2907,21 @@ func UpdateUserProfile(ctx context.Context, userID string, data map[string]inter
     if err != nil {
         return fmt.Errorf("DB update failed: %w", err)
     }
-    
+
     // 2. Invalidar caché
     cacheKey := fmt.Sprintf("user:profile:%s", userID)
     if err := redisClient.Del(ctx, cacheKey).Err(); err != nil {
         // Logging importante, pero no fallar el request
         log.Printf("Failed to invalidate cache: %v", err)
     }
-    
+
     // 3. Notificar listeners
     redisClient.Publish(ctx, "user:updated", fmt.Sprintf(`{
         "userID": "%s",
         "event": "profile_updated",
         "timestamp": %d
     }`, userID, time.Now().Unix()))
-    
+
     return nil
 }
 
@@ -2949,7 +2953,7 @@ import (
 
 func GetUserWithFallback(ctx context.Context, userID string) (*User, error) {
     cacheKey := fmt.Sprintf("user:%s", userID)
-    
+
     // Intentar caché
     cached, err := redisClient.Get(ctx, cacheKey).Result()
     if err == nil {
@@ -2957,28 +2961,28 @@ func GetUserWithFallback(ctx context.Context, userID string) (*User, error) {
         json.Unmarshal([]byte(cached), &user)
         return &user, nil
     }
-    
+
     if err != redis.Nil {
         // Error de conexión a Redis
         log.Printf("Redis error (cache unavailable): %v", err)
         // Continuar, iremos a DB
     }
-    
+
     // Cache miss o error, consultar DB
     user, dbErr := db.GetUser(userID)
     if dbErr != nil {
         return nil, fmt.Errorf("failed to get user from DB: %w", dbErr)
     }
-    
+
     // Intentar cachear (best-effort, no críticamente)
     go func() {
         userJSON, _ := json.Marshal(user)
-        if err := redisClient.Set(context.Background(), 
+        if err := redisClient.Set(context.Background(),
             cacheKey, userJSON, 1*time.Hour).Err(); err != nil {
             log.Printf("Failed to cache user: %v", err)
         }
     }()
-    
+
     return user, nil
 }
 
@@ -3195,7 +3199,7 @@ func NewUserStore() *UserStore {
 func (us *UserStore) Get(userID string) (*User, bool) {
     us.mu.RLock()
     defer us.mu.RUnlock()
-    
+
     user, exists := us.cache[userID]
     return user, exists
 }
@@ -3203,14 +3207,14 @@ func (us *UserStore) Get(userID string) (*User, bool) {
 func (us *UserStore) Set(userID string, user *User) {
     us.mu.Lock()
     defer us.mu.Unlock()
-    
+
     us.cache[userID] = user
 }
 
 func (us *UserStore) Delete(userID string) {
     us.mu.Lock()
     defer us.mu.Unlock()
-    
+
     delete(us.cache, userID)
 }
 
@@ -3219,18 +3223,18 @@ func (us *UserStore) Delete(userID string) {
 
 func Exercise1() {
     store := NewUserStore()
-    
+
     // Set
     store.Set("user:1", &User{
         ID:    "user:1",
         Name:  "Alice",
         Email: "alice@example.com",
     })
-    
+
     // Get
     user, exists := store.Get("user:1")
     fmt.Printf("User exists: %v, data: %+v\n", exists, user)
-    
+
     // Delete
     store.Delete("user:1")
     user, exists = store.Get("user:1")
@@ -3256,12 +3260,12 @@ func Exercise2() {
         Addr: "localhost:6379",
     })
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // Contar visitas a un artículo
     articleID := "article:123"
-    
+
     // Incrementar contador
     for i := 0; i < 10; i++ {
         count, err := client.Incr(ctx, articleID).Result()
@@ -3271,14 +3275,14 @@ func Exercise2() {
         }
         fmt.Printf("Visit %d: count = %d\n", i+1, count)
     }
-    
+
     // Establecer expiración (1 hora)
     client.Expire(ctx, articleID, 1*time.Hour)
-    
+
     // Obtener TTL restante
     ttl, _ := client.TTL(ctx, articleID).Result()
     fmt.Printf("TTL: %v\n", ttl)
-    
+
     // TODO: Agregar rate limiting (máximo 100 views por minuto)
     // TODO: Agregar stats (views totales, visitors únicos)
 }
@@ -3311,7 +3315,7 @@ type ProductService struct {
 
 func (ps *ProductService) GetProduct(ctx context.Context, productID string) (*Product, error) {
     cacheKey := fmt.Sprintf("product:%s", productID)
-    
+
     // Paso 1: Intentar caché
     cached, err := ps.redis.Get(ctx, cacheKey).Result()
     if err == nil {
@@ -3320,22 +3324,22 @@ func (ps *ProductService) GetProduct(ctx context.Context, productID string) (*Pr
         fmt.Printf("Cache HIT: %s\n", productID)
         return &product, nil
     }
-    
+
     if err != redis.Nil {
         fmt.Printf("Redis error: %v\n", err)
     }
-    
+
     // Paso 2: Cache miss, consultar BD
     fmt.Printf("Cache MISS: %s, querying DB\n", productID)
     product, err := ps.db.GetProduct(productID)
     if err != nil {
         return nil, err
     }
-    
+
     // Paso 3: Guardar en caché
     productJSON, _ := json.Marshal(product)
     ps.redis.Set(ctx, cacheKey, productJSON, 1*time.Hour)
-    
+
     return product, nil
 }
 
@@ -3356,11 +3360,11 @@ package main
 // Ejercicio 4: Write-Through (caché siempre actualizado)
 func (ps *ProductService) UpdateProduct(ctx context.Context, product *Product) error {
     cacheKey := fmt.Sprintf("product:%s", product.ID)
-    
+
     // Paso 1: Actualizar caché primero
     productJSON, _ := json.Marshal(product)
     ps.redis.Set(ctx, cacheKey, productJSON, 1*time.Hour)
-    
+
     // Paso 2: Actualizar BD (sincrónico)
     err := ps.db.UpdateProduct(product)
     if err != nil {
@@ -3368,7 +3372,7 @@ func (ps *ProductService) UpdateProduct(ctx context.Context, product *Product) e
         ps.redis.Del(ctx, cacheKey)
         return err
     }
-    
+
     fmt.Printf("Product %s updated (write-through)\n", product.ID)
     return nil
 }
@@ -3413,15 +3417,15 @@ type CacheMetrics struct {
 
 func NewCacheService(redisAddr string) *CacheService {
     client := redis.NewClient(&redis.Options{Addr: redisAddr})
-    
+
     return &CacheService{
         redis:   client,
         metrics: &CacheMetrics{},
     }
 }
 
-func (cs *CacheService) GetWithFallback(ctx context.Context, 
-    key string, 
+func (cs *CacheService) GetWithFallback(ctx context.Context,
+    key string,
     loader func() (interface{}, error),
 ) (interface{}, error) {
     // Intentar caché
@@ -3430,25 +3434,25 @@ func (cs *CacheService) GetWithFallback(ctx context.Context,
         atomic.AddInt64(&cs.metrics.hits, 1)
         return val, nil
     }
-    
+
     if err != redis.Nil {
         // Error de conexión
         log.Printf("Redis error: %v", err)
         atomic.AddInt64(&cs.metrics.errors, 1)
     }
-    
+
     // Cache miss, cargar datos
     atomic.AddInt64(&cs.metrics.misses, 1)
-    
+
     data, err := loader()
     if err != nil {
         return nil, err
     }
-    
+
     // Cachear
     dataJSON, _ := json.Marshal(data)
     cs.redis.Set(ctx, key, dataJSON, 1*time.Hour)
-    
+
     return data, nil
 }
 
@@ -3456,20 +3460,20 @@ func (cs *CacheService) MetricsHandler(w http.ResponseWriter, r *http.Request) {
     hits := atomic.LoadInt64(&cs.metrics.hits)
     misses := atomic.LoadInt64(&cs.metrics.misses)
     errors := atomic.LoadInt64(&cs.metrics.errors)
-    
+
     total := hits + misses
     var hitRate float64
     if total > 0 {
         hitRate = float64(hits) / float64(total) * 100
     }
-    
+
     metrics := map[string]interface{}{
         "hits":     hits,
         "misses":   misses,
         "errors":   errors,
         "hit_rate": fmt.Sprintf("%.2f%%", hitRate),
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(metrics)
 }
@@ -3518,11 +3522,11 @@ El caché transforma una aplicación de "lenta y escalable" a "rápida y escalab
 ---
 
 **Referencias:**
+
 - Redis Official Documentation
 - Stripe Engineering Blog: Caching at Scale
 - Google SRE Book: Chapter on Caching
 - Netflix Tech Blog: Cache Architecture
-
 
 ---
 

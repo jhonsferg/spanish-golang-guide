@@ -43,6 +43,7 @@ try {
 **El Problema 2: Las Excepciones Marcan Casos "Excepcionales"**
 
 Pero en desarrollo real, los errores NO son excepcionales:
+
 - Archivo no encontrado: común, no es una excepción
 - Conexión rechazada: normal en redes, no es una excepción
 - Usuario ingresa datos inválidos: esperado, no es una excepción
@@ -353,7 +354,7 @@ func main() {
     // Forma 1: errors.New
     err := errors.New("archivo no encontrado")
     fmt.Println(err)  // "archivo no encontrado"
-    
+
     // Forma 2: El equivalente manual
     // err := &errorString{s: "archivo no encontrado"}
 }
@@ -393,14 +394,14 @@ import (
 func main() {
     username := "admin"
     id := 42
-    
+
     // Sin formato
     err1 := fmt.Errorf("usuario inválido")
-    
+
     // Con formato (mucho mejor)
     err2 := fmt.Errorf("usuario %q no encontrado", username)
     err3 := fmt.Errorf("usuario id=%d no tiene permisos", id)
-    
+
     fmt.Println(err2)  // "usuario "admin" no encontrado"
     fmt.Println(err3)  // "usuario id=42 no tiene permisos"
 }
@@ -480,7 +481,7 @@ func main() {
         "user@",
         "user@domain.com",
     }
-    
+
     for _, email := range tests {
         if err := ValidateEmail(email); err != nil {
             fmt.Printf("✗ %s: %v\n", email, err)
@@ -492,6 +493,7 @@ func main() {
 ```
 
 Output:
+
 ```
 ✗ : email vacío
 ✗ user@: email "user@" inválido: dominio vacío
@@ -531,15 +533,15 @@ if err != nil {
 // Cuando hay múltiples valores y uno es error
 func ParseConfig(data []byte) (Config, error) {
     var cfg Config
-    
+
     if len(data) == 0 {
         return cfg, fmt.Errorf("datos vacíos")
     }
-    
+
     if err := json.Unmarshal(data, &cfg); err != nil {
         return cfg, fmt.Errorf("JSON inválido: %w", err)
     }
-    
+
     return cfg, nil
 }
 ```
@@ -561,31 +563,34 @@ err, value := SomeFunc()  // Rompe el idiom
 func ProcessFile(name string) (data []byte, err error) {
     // 'data' y 'err' existen desde el inicio
     // data = nil, err = nil
-    
+
     f, err := os.Open(name)
     if err != nil {
         return  // Retorna (nil, err) implícitamente
     }
     defer f.Close()
-    
+
     data, err = io.ReadAll(f)
     if err != nil {
         return  // Retorna (nil, err)
     }
-    
+
     return  // Retorna (data, nil)
 }
 ```
 
 **Ventajas:**
+
 - `return` vacío es claro en contexto
 - Las variables tienen significado
 
 **Desventajas:**
+
 - Menos evidente qué se retorna
 - Puede confundir si hay operaciones intermedias
 
 **Cuándo usarlo:**
+
 ```go
 // ✓ Usa named returns para funciones simples y claras
 func SimpleFunc() (value int, err error) {
@@ -628,15 +633,15 @@ func Process(file string) error {
     if err != nil {
         return fmt.Errorf("no se pudo leer: %w", err)
     }
-    
+
     if err := json.Unmarshal(data, &config); err != nil {
         return fmt.Errorf("JSON inválido: %w", err)
     }
-    
+
     if !validateConfig(&config) {
         return fmt.Errorf("config inválida")
     }
-    
+
     return saveConfig(&config)
 }
 ```
@@ -650,7 +655,7 @@ func CopyFile(src, dst string) (err error) {
         return fmt.Errorf("no se pudo abrir fuente: %w", err)
     }
     defer srcFile.Close()  // Se cierra incluso si hay error
-    
+
     dstFile, err := os.Create(dst)
     if err != nil {
         return fmt.Errorf("no se pudo crear destino: %w", err)
@@ -661,12 +666,12 @@ func CopyFile(src, dst string) (err error) {
         }
         dstFile.Close()
     }()
-    
+
     _, err = io.Copy(dstFile, srcFile)
     if err != nil {
         return fmt.Errorf("error copiando: %w", err)
     }
-    
+
     return nil
 }
 ```
@@ -961,7 +966,7 @@ func captureStack() []string {
     pc := make([]uintptr, 10)
     n := runtime.Callers(2, pc)
     frames := runtime.CallersFrames(pc[:n])
-    
+
     for {
         frame, more := frames.Next()
         stack = append(stack, fmt.Sprintf("%s:%d %s", frame.File, frame.Line, frame.Function))
@@ -1069,7 +1074,7 @@ func main() {
         // ✓ CORRECTO - Envuelve el error preservando el original
         wrappedErr := fmt.Errorf("no se pudo leer config: %w", err)
         fmt.Println(wrappedErr)  // "no se pudo leer config: open missing.txt: no such file or directory"
-        
+
         // El error original está dentro
         fmt.Println("Error original:", errors.Unwrap(wrappedErr))
     }
@@ -1104,15 +1109,15 @@ func Level1() error {
 
 func main() {
     err := Level1()
-    
+
     // Ver la cadena completa
     fmt.Println(err)
     // Output: level1 error: level2 error: database connection failed
-    
+
     // Unwrap accede solo al siguiente nivel
     fmt.Println(errors.Unwrap(err))
     // Output: level2 error: database connection failed
-    
+
     // Para ver la cadena completa
     for err != nil {
         fmt.Println("  ->", err)
@@ -1135,12 +1140,12 @@ import (
 func main() {
     // Simula un error
     err := fmt.Errorf("error al procesar: %w", os.ErrNotExist)
-    
+
     // ✗ INCORRECTO - No funciona si está envuelto
     if err == os.ErrNotExist {
         fmt.Println("No encontrado")  // No se ejecuta
     }
-    
+
     // ✓ CORRECTO - Busca en la cadena
     if errors.Is(err, os.ErrNotExist) {
         fmt.Println("No encontrado")  // Se ejecuta
@@ -1169,20 +1174,20 @@ func (e CustomError) Error() string {
 }
 
 func SomeOp() error {
-    return fmt.Errorf("operación falló: %w", 
+    return fmt.Errorf("operación falló: %w",
         CustomError{Code: 42, Msg: "invalid input"})
 }
 
 func main() {
     err := SomeOp()
-    
+
     // errors.As busca en la cadena un tipo específico
     var customErr CustomError
     if errors.As(err, &customErr) {
         fmt.Printf("Código: %d, Mensaje: %s\n", customErr.Code, customErr.Msg)
         // Output: Código: 42, Mensaje: invalid input
     }
-    
+
     // Lo mismo con errores estándar
     var pathErr *os.PathError
     if errors.As(err, &pathErr) {
@@ -1251,7 +1256,7 @@ func AuthenticateUser(username, password string) error {
 
 func main() {
     err := AuthenticateUser("", "pass")
-    
+
     // Los sentinels se comparan con ==
     if err == ErrInvalidPassword {
         println("Contraseña incorrecta")
@@ -1276,22 +1281,22 @@ var ErrNotFound = errors.New("not found")
 func main() {
     // Cuando NO está envuelto, ambos funcionan
     err := ErrNotFound
-    
+
     if err == ErrNotFound {
         println("✓ == funciona")
     }
-    
+
     if errors.Is(err, ErrNotFound) {
         println("✓ errors.Is funciona")
     }
-    
+
     // Cuando está envuelto, solo errors.Is funciona
     wrappedErr := fmt.Errorf("operación falló: %w", ErrNotFound)
-    
+
     if wrappedErr == ErrNotFound {
         println("✗ == no funciona con wrapped")
     }
-    
+
     if errors.Is(wrappedErr, ErrNotFound) {
         println("✓ errors.Is funciona incluso con wrapped")
     }
@@ -1301,6 +1306,7 @@ func main() {
 ### Cuándo Usar Sentinels
 
 **✓ USA cuando:**
+
 - El error es bien definido y no necesita información variable
 - Necesitas que el código cliente pueda identificar exactamente qué pasó
 - El error representa un caso específico (no encontrado, timeout, etc.)
@@ -1317,6 +1323,7 @@ if errors.Is(err, ErrTimeout) {
 ```
 
 **✗ EVITA cuando:**
+
 - El error necesita información variable (usa structs)
 - El error se puede envolver (usa tipos personalizados)
 - Hay muchos sentinels (difícil de mantener)
@@ -1417,7 +1424,7 @@ var (
 
 func ProcessWithRetry(path string, maxRetries int) error {
     var lastErr error
-    
+
     for attempt := 0; attempt <= maxRetries; attempt++ {
         if err := process(path); err != nil {
             lastErr = err
@@ -1425,7 +1432,7 @@ func ProcessWithRetry(path string, maxRetries int) error {
         }
         return nil
     }
-    
+
     return &OperationError{
         Op:        "ProcessWithRetry",
         Path:      path,
@@ -1467,7 +1474,7 @@ func (ve ValidationErrors) Error() string {
     if len(ve.Errors) == 0 {
         return "validación pasada"
     }
-    
+
     msg := "errores de validación:\n"
     for field, err := range ve.Errors {
         msg += fmt.Sprintf("  %s: %s\n", field, err)
@@ -1489,19 +1496,19 @@ func (ve ValidationErrors) Add(field, message string) {
 
 func ValidateUser(username, email string) error {
     errors := ValidationErrors{Errors: make(map[string]string)}
-    
+
     if username == "" {
         errors.Add("username", "no puede estar vacío")
     } else if len(username) < 3 {
         errors.Add("username", "mínimo 3 caracteres")
     }
-    
+
     if email == "" {
         errors.Add("email", "no puede estar vacío")
     } else if !isValidEmail(email) {
         errors.Add("email", "formato inválido")
     }
-    
+
     if !errors.IsValid() {
         return errors
     }
@@ -1516,7 +1523,7 @@ func main() {
     err := ValidateUser("ab", "invalid")
     if err != nil {
         fmt.Println(err)
-        
+
         // Acceder a errores específicos
         if ve, ok := err.(ValidationErrors); ok {
             if usernameErr := ve.Get("username"); usernameErr != "" {
@@ -1633,7 +1640,7 @@ func main() {
             Logger: log.New(os.Stderr, "", 0),
         },
     }
-    
+
     var err error = fmt.Errorf("algo falló")
     handler.Handle(err)
 }
@@ -1655,11 +1662,11 @@ func SafeOperation(shouldFail bool) (result string, err error) {
             err = fmt.Errorf("panic recovered: %v", r)
         }
     }()
-    
+
     if shouldFail {
         panic("operación crítica falló")
     }
-    
+
     return "éxito", nil
 }
 
@@ -1713,7 +1720,7 @@ func LongRunningOp(ctx context.Context) error {
 func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
     defer cancel()
-    
+
     if err := LongRunningOp(ctx); err != nil {
         fmt.Println(err)
     }
@@ -1746,11 +1753,11 @@ func (me *MultiError) Add(err error) {
 func (me *MultiError) Error() string {
     me.mu.Lock()
     defer me.mu.Unlock()
-    
+
     if len(me.Errors) == 0 {
         return "sin errores"
     }
-    
+
     msg := fmt.Sprintf("%d errores:\n", len(me.Errors))
     for i, err := range me.Errors {
         msg += fmt.Sprintf("  %d. %v\n", i+1, err)
@@ -1768,7 +1775,7 @@ func (me *MultiError) HasError() bool {
 func ProcessItems(items []string) error {
     multi := &MultiError{Errors: []error{}}
     var wg sync.WaitGroup
-    
+
     for _, item := range items {
         wg.Add(1)
         go func(i string) {
@@ -1778,9 +1785,9 @@ func ProcessItems(items []string) error {
             }
         }(item)
     }
-    
+
     wg.Wait()
-    
+
     if multi.HasError() {
         return multi
     }
@@ -1985,6 +1992,7 @@ fmt.Errorf("no se pudo procesar: %w", err)
 **Objetivo:** Crear un tipo de error que incluya un código de error.
 
 **Requisitos:**
+
 1. Define `ValidationError` con campos: `Field`, `Code` (int), `Message`
 2. Implementa `Error()` en formato: `[CODE] FIELD: MESSAGE`
 3. Crea función `ValidateAge(age int) error` que:
@@ -2026,6 +2034,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 [400] age: edad no puede ser negativa
 [401] age: edad no puede ser mayor a 150
@@ -2039,6 +2048,7 @@ Age 25 válido
 **Objetivo:** Crear un validador que retorna múltiples errores.
 
 **Requisitos:**
+
 1. Define `MultiFieldError` con slice de errors
 2. Implementa `Error()` que lista todos
 3. Implementa método `IsValid() bool`
@@ -2083,6 +2093,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 3 errores de validación:
  - name: no puede estar vacío
@@ -2097,6 +2108,7 @@ func main() {
 **Objetivo:** Leer un archivo con error wrapping apropiado.
 
 **Requisitos:**
+
 1. Crea función `ReadConfig(filename string) (map[string]string, error)`
 2. Implementa wrapping de errores en 3 niveles:
    - Nivel 1: Abre archivo
@@ -2135,6 +2147,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 Archivo no encontrado
 Full error: no se pudo leer config: no se pudo abrir config.conf: open config.conf: no such file or directory
@@ -2147,6 +2160,7 @@ Full error: no se pudo leer config: no se pudo abrir config.conf: open config.co
 **Objetivo:** Crear una estructura que acumula errores durante operación batch.
 
 **Requisitos:**
+
 1. Define `ErrorStack` con slice de errors y método `Add(err error)`
 2. Implementa `Error()` que lista todos en orden
 3. Implementa `IsEmpty() bool` y `Count() int`
@@ -2189,7 +2203,7 @@ func ProcessBatch(items []string) error {
             stack.Add(fmt.Errorf("error procesando %q", item))
         }
     }
-    
+
     if !stack.IsEmpty() {
         return stack
     }
@@ -2205,6 +2219,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 2 errores:
  1. error procesando "fail"
@@ -2218,6 +2233,7 @@ func main() {
 **Objetivo:** Crear un middleware que intercepta y maneja errores.
 
 **Requisitos:**
+
 1. Define interfaz `ErrorHandler` con método `Handle(err error) error`
 2. Crea 3 handlers:
    - `LoggingHandler`: registra el error
@@ -2267,7 +2283,7 @@ func main() {
         }
         return nil
     }
-    
+
     // Debería reintentar 2 veces antes de exitir
     if err := ProcessWithHandlers(operation); err != nil {
         fmt.Println("Final error:", err)
@@ -2276,6 +2292,7 @@ func main() {
 ```
 
 **Salida esperada:**
+
 ```
 Error: intento 1 falló
 Error: intento 2 falló

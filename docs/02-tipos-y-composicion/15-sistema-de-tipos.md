@@ -65,6 +65,7 @@ Go utiliza un modelo único de tipos llamado **"identity-based typing"** para ti
 ### Ventajas del Sistema de Tipos de Go
 
 **1. Seguridad en Compilación**
+
 ```go
 func procesarEdad(edad int) string {
     return "Edad: " + edad  // Error en compilación ✓
@@ -72,6 +73,7 @@ func procesarEdad(edad int) string {
 ```
 
 **2. Sin Sorpresas en Runtime**
+
 ```go
 // JavaScript: "5" + 3 = "53" (sorpresa!)
 // Python: "5" + 3 = TypeError (error en runtime)
@@ -79,6 +81,7 @@ func procesarEdad(edad int) string {
 ```
 
 **3. Documentación Automática**
+
 ```go
 func guardarArchivo(contenido []byte, ruta string) error {
     // El tipo te dice exactamente qué espera
@@ -86,6 +89,7 @@ func guardarArchivo(contenido []byte, ruta string) error {
 ```
 
 **4. Optimización del Compilador**
+
 ```go
 // Go puede optimizar agresivamente porque conoce tipos exactos
 for i := 0; i < 1_000_000; i++ {
@@ -108,15 +112,18 @@ for i := 0; i < 1_000_000; i++ {
 ```
 
 **Go vs TypeScript**:
+
 - Go es más simple, menos features
 - TypeScript es más complejo, más seguridad de tipos
 - Go confía en interfaces, TypeScript en tipos estructurales explícitos
 
 **Go vs Python**:
+
 - Go: errores en compilación, código más predecible
 - Python: errores en runtime, código más flexible
 
 **Go vs Rust**:
+
 - Go: sistema de tipos más simple, más fácil de aprender
 - Rust: sistema de tipos más complejo, más seguro (borrow checker)
 
@@ -160,10 +167,10 @@ type Velocidad float64
 func main() {
     distancia := Metros(100.5)      // Conversión explícita
     velocidad := Velocidad(25.0)
-    
+
     // ERROR: No puedes sumar directamente tipos diferentes
     // total := distancia + velocidad  // ✗ Compile error
-    
+
     // Correcto: Conversión explícita
     total := Metros(float64(velocidad) + float64(distancia))
     fmt.Println(total)  // 125.5
@@ -196,7 +203,7 @@ type MetrosAlias = float64
 func main() {
     var valor1 MetrosAlias = 100.5
     var valor2 float64 = 50.0
-    
+
     // Sí puedes sumar: son exactamente el mismo tipo
     suma := valor1 + valor2
     fmt.Println(suma)  // 150.5
@@ -215,10 +222,10 @@ type km = float64           // Otro nombre para float64
 func main() {
     var km1 Kilometros = 100
     var km2 km = 50
-    
+
     // km1 + km2 = ERROR ✗
     // km2 es compatible con float64: NO ERROR ✓
-    
+
     var f float64 = km2      // Válido
     // var f2 float64 = km1  // ERROR: tipos incompatibles
 }
@@ -227,6 +234,7 @@ func main() {
 ### Historia de Go: Por Qué Necesitó Aliases
 
 **Go 1.0 - Go 1.8:**
+
 - Solo existían type definitions
 - Problema: Refactorizar código era difícil
 - Si renombrabas un tipo, debías convertir explícitamente en todos lados
@@ -242,6 +250,7 @@ type SistemaModerno = SistemaViejo  // ✓ Go 1.9 lo permite
 ```
 
 **Go 1.9:**
+
 - Se añadieron type aliases
 - Permite refactorización suave (deprecación gradual)
 
@@ -281,7 +290,7 @@ func main() {
     dinero := Centavos(2999)      // 29.99
     temperatura := Celsius(25.5)
     estado := Estado("completado")
-    
+
     fmt.Println(tiempo, dinero, temperatura, estado)
 }
 ```
@@ -310,7 +319,7 @@ func (s Segundos) EsValido() bool {
 
 func main() {
     tiempo := Segundos(7200)  // 2 horas
-    
+
     fmt.Println(tiempo.AMinutos())  // 120
     fmt.Println(tiempo.AHoras())    // 2
     fmt.Println(tiempo.EsValido())  // true
@@ -344,10 +353,10 @@ func (u *Usuario) ModificarNombre(nuevoNombre string) {
 
 func main() {
     usuario := Usuario{"Juan", "juan@example.com", 25, false}
-    
+
     fmt.Println(usuario.EsAdulto())     // true
     fmt.Println(usuario.Saludar())      // "Hola Juan"
-    
+
     usuario.ModificarNombre("Carlos")
     fmt.Println(usuario.Nombre)         // "Carlos"
 }
@@ -418,7 +427,7 @@ func main() {
     numeros := Numeros{1, 2, 3, 4, 5}
     fmt.Println(numeros.Suma())     // 15
     fmt.Println(numeros.Promedio()) // 3.0
-    
+
     inv := Inventario{
         "lapices": 100,
         "cuadernos": 50,
@@ -488,7 +497,7 @@ type UsuarioAlias = Usuario
 func main() {
     u1 := Usuario{"Juan"}
     u2 := UsuarioAlias{"María"}
-    
+
     // Tipos internamente idénticos
     // Pero semánticamente comunican diferente propósito
 }
@@ -520,16 +529,17 @@ type Kilometros float64
 func main() {
     // Conversión explícita
     distancia := Metros(100)
-    
+
     // Convertir a Kilometros
     distanciaKm := Kilometros(float64(distancia) / 1000)
     fmt.Println(distanciaKm)  // 0.1
-    
+
     // Dos pasos: Metros -> float64 -> Kilometros
 }
 ```
 
 **Fórmula de conversión:**
+
 ```
 NuevoTipo(Expresión)
 ```
@@ -542,12 +552,12 @@ func main() {
     var numeroInt int = 42
     var numeroFloat float64 = float64(numeroInt)
     var numeroIntAgain int = int(numeroFloat)
-    
+
     // string <-> []byte
     texto := "Hola"
     bytes := []byte(texto)
     textoNuevo := string(bytes)
-    
+
     // int <-> uint
     var num int = -5
     // var numUnsigned uint = uint(num)  // Cuidado con negativos
@@ -593,7 +603,7 @@ func main() {
 func main() {
     // ✗ INCORRECTO
     // texto := string(42)  // No funciona así
-    
+
     // ✓ CORRECTO
     texto := strconv.Itoa(42)
     fmt.Println(texto)  // "42"
@@ -610,7 +620,7 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println(num, reflect.TypeOf(num))  // 42 int
-    
+
     // string -> float64
     valor, err := strconv.ParseFloat("3.14", 64)
     // string -> int64
@@ -683,16 +693,16 @@ func main() {
     // Básico: mismo tipo
     var a int = 5
     var b int = a  // ✓ Compatible
-    
+
     // Sin type definition: son el mismo tipo
     x := 5
     var y int = x  // ✓ Compatible (int)
-    
+
     // Con type definitions: tipos diferentes
     type Metros int
     var m Metros = 100
     var n int = m  // ✗ ERROR: tipos incompatibles
-    
+
     // Conversión explícita
     n = int(m)  // ✓ Correcto
 }
@@ -713,10 +723,10 @@ type UsuarioV2 struct {
 
 func main() {
     u1 := Usuario{"Juan", "juan@example.com"}
-    
+
     // ✗ ERROR: Aunque tienen los mismos campos
     // u2 := UsuarioV2(u1)
-    
+
     // ✓ Debes convertir campo a campo
     u2 := UsuarioV2{
         Nombre: u1.Nombre,
@@ -749,10 +759,10 @@ func procesarLector(l Lector) {
 
 func main() {
     archivo := Archivo{"datos.txt"}
-    
+
     // ✓ Compatible: Archivo implementa Lector
     procesarLector(archivo)
-    
+
     // Structural typing: Go verifica métodos, no nombres explícitos
 }
 ```
@@ -763,11 +773,11 @@ func main() {
 func main() {
     // Constantes sin tipo son flexibles
     const numero = 42
-    
+
     var a int = numero      // ✓
     var b int64 = numero    // ✓
     var c float64 = numero  // ✓
-    
+
     // Variables con tipo son estrictas
     var x int = 5
     var y int64 = x  // ✗ ERROR
@@ -814,6 +824,7 @@ func procesar(v interface{}) {
 ```
 
 **Patrón: comma-ok**
+
 ```
 valor, ok := interfaz.(TipoEsperado)
 
@@ -857,15 +868,15 @@ func main() {
         "edad": 30,
         "activo": true
     }`)
-    
+
     var data map[string]interface{}
     json.Unmarshal(jsonData, &data)
-    
+
     // Extraer valores con type assertion
     if nombre, ok := data["nombre"].(string); ok {
         fmt.Println("Nombre:", nombre)
     }
-    
+
     if edad, ok := data["edad"].(float64); ok {
         fmt.Println("Edad:", int(edad))
     }
@@ -899,7 +910,7 @@ func ejecutarPlugin(plugin Plugin, config map[string]interface{}) {
     if debugPlugin, ok := plugin.(*DebugPlugin); ok {
         debugPlugin.SetLogLevel("DEBUG")
     }
-    
+
     plugin.Execute(config)
 }
 ```
@@ -980,20 +991,20 @@ func procesarValor(v interface{}) {
     switch val := v.(type) {
     case int:
         fmt.Printf("Número entero: %d\n", val)
-        
+
     case float64:
         fmt.Printf("Número decimal: %.2f\n", val)
-        
+
     case string:
         fmt.Printf("Texto: %s\n", val)
-        
+
     case bool:
         if val {
             fmt.Println("Verdadero")
         } else {
             fmt.Println("Falso")
         }
-        
+
     default:
         fmt.Println("Tipo desconocido")
     }
@@ -1023,13 +1034,13 @@ func procesar(entidad interface{}) {
     switch e := entidad.(type) {
     case *Usuario:
         fmt.Println("Usuario:", e.Nombre)
-        
+
     case *Producto:
         fmt.Printf("Producto: %s ($%.2f)\n", e.Nombre, e.Precio)
-        
+
     case []int:
         fmt.Println("Slice de números:", e)
-        
+
     default:
         fmt.Println("Entidad desconocida")
     }
@@ -1069,10 +1080,10 @@ func mostrar(v interface{}) {
     switch val := v.(type) {
     case Imprimible:
         fmt.Println(val.String())
-        
+
     case fmt.Stringer:  // Go proporciona esta interfaz
         fmt.Println(val.String())
-        
+
     default:
         fmt.Println(v)
     }
@@ -1122,10 +1133,10 @@ func procesarEvento(evento Evento) {
     switch e := evento.(type) {
     case EventoClick:
         fmt.Printf("Click en (%d, %d)\n", e.X, e.Y)
-        
+
     case EventoTeclado:
         fmt.Printf("Tecla presionada: %s\n", e.Tecla)
-        
+
     default:
         fmt.Println("Evento desconocido")
     }
@@ -1139,23 +1150,23 @@ func parsearConfiguracion(valor interface{}) string {
     switch v := valor.(type) {
     case string:
         return v
-        
+
     case int:
         return strconv.Itoa(v)
-        
+
     case bool:
         if v {
             return "true"
         }
         return "false"
-        
+
     case []interface{}:
         items := make([]string, len(v))
         for i, item := range v {
             items[i] = parsearConfiguracion(item)
         }
         return "[" + strings.Join(items, ", ") + "]"
-        
+
     default:
         return fmt.Sprint(v)
     }
@@ -1221,14 +1232,14 @@ func main() {
         Animal: Animal{Nombre: "Rex", Edad: 3},
         Raza:   "Pastor Alemán",
     }
-    
+
     // Acceso a campos del tipo embebido
     fmt.Println(perro.Nombre)      // "Rex"
     fmt.Println(perro.Edad)         // 3
-    
+
     // Acceso a métodos del tipo embebido
     fmt.Println(perro.Hablar())     // "Rex hace un sonido"
-    
+
     // Acceso explícito
     fmt.Println(perro.Animal.Nombre)  // "Rex"
 }
@@ -1280,7 +1291,7 @@ func main() {
         Motor: Motor{RPM: 0},
         Marca: "Toyota",
     }
-    
+
     // El método Acelerar() está promovido
     coche.Acelerar()  // ✓ Funciona sin especificar Motor
 }
@@ -1344,7 +1355,7 @@ func main() {
         Nadador:  Nadador{50.0},
         Nombre:   "Michael",
     }
-    
+
     fmt.Println(deportista.Correr())     // Método de Corredor
     fmt.Println(deportista.Nadar())      // Método de Nadador
 }
@@ -1366,7 +1377,7 @@ type Servidor struct {
 func main() {
     config := &Configuracion{"localhost", 8080}
     servidor := Servidor{config}
-    
+
     fmt.Println(servidor.Host)      // "localhost"
     fmt.Println(servidor.Port)      // 8080
 }
@@ -1395,10 +1406,10 @@ func (c *Contador) IncrementarV2() {
 
 func main() {
     contador := Contador{0}
-    
+
     contador.Incrementar()   // No efectivo
     fmt.Println(contador.valor)  // 0 (sin cambios)
-    
+
     contador.IncrementarV2()  // Efectivo
     fmt.Println(contador.valor)  // 1 (cambió)
 }
@@ -1457,10 +1468,10 @@ func procesarLector(l Lector) {
 func main() {
     b1 := Buffer1{[]byte("Hola")}
     procesarLector(b1)  // ✓ Funciona (valor)
-    
+
     b2 := Buffer2{[]byte("Mundo")}
     procesarLector(&b2)  // ✓ Funciona (puntero)
-    
+
     // procesarLector(b2)  // ✗ ERROR: puntero esperado
 }
 ```
@@ -1468,6 +1479,7 @@ func main() {
 ### Casos de Uso: Valor vs Puntero
 
 **Usar Receptor por VALOR cuando:**
+
 ```go
 // El tipo es pequeño
 type Punto struct {
@@ -1489,6 +1501,7 @@ func (u Usuario) Saludar() string {
 ```
 
 **Usar Receptor por PUNTERO cuando:**
+
 ```go
 // Necesitas modificar el tipo
 type Contador struct {
@@ -1777,12 +1790,14 @@ type Orden struct {
 **Objetivo:** Crear tipos personalizados para distancia y tiempo con conversiones seguras.
 
 **Tarea:**
+
 1. Define tipos `Metros`, `Kilómetros`, `Segundos`, `Minutos`
 2. Implementa métodos de conversión entre unidades
 3. Calcula velocidad (distancia/tiempo)
 4. Implementa validación (no valores negativos)
 
 **Plantilla:**
+
 ```go
 package main
 
@@ -1802,7 +1817,7 @@ type Minutos int
 func main() {
     distancia := Metros(1500)
     tiempo := Segundos(300)
-    
+
     // TODO: Mostrar distancia en km
     // TODO: Mostrar tiempo en minutos
     // TODO: Calcular y mostrar velocidad
@@ -1810,6 +1825,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] 4 tipos definidos
 - [ ] Métodos de conversión bidireccional
 - [ ] Función de velocidad
@@ -1823,12 +1839,14 @@ func main() {
 **Objetivo:** Crear tipos seguros basados en string con validación integrada.
 
 **Tarea:**
+
 1. Define tipos `Email`, `Password`, `Nombre`
 2. Cada tipo debe tener métodos de validación
 3. Implementa un tipo `Usuario` que combine todos
 4. Valida antes de guardar en la "base de datos"
 
 **Plantilla:**
+
 ```go
 package main
 
@@ -1862,6 +1880,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Email valida formato @
 - [ ] Password tiene mínimo 8 caracteres
 - [ ] Nombre no está vacío
@@ -1875,12 +1894,14 @@ func main() {
 **Objetivo:** Implementar un conversor que maneje múltiples tipos.
 
 **Tarea:**
+
 1. Crear función `Convertir` que acepta `interface{}`
 2. Implementar conversiones: string ↔ int ↔ float ↔ bool
 3. Usar type switches para detectar tipo origen
 4. Retornar error si conversión es imposible
 
 **Plantilla:**
+
 ```go
 package main
 
@@ -1909,6 +1930,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] 3 funciones de conversión (string, int, float64)
 - [ ] Type switches con múltiples casos
 - [ ] Manejo de errores
@@ -1921,12 +1943,14 @@ func main() {
 **Objetivo:** Crear tipos complejos con métodos y validación.
 
 **Tarea:**
+
 1. Tipo `Dinero` con cantidad y moneda
 2. Tipo `Coordenadas` con latitud y longitud
 3. Métodos: conversión de moneda, distancia entre puntos
 4. Embedding de un tipo en otro (Ubicacion embebe Coordenadas)
 
 **Plantilla:**
+
 ```go
 package main
 
@@ -1963,6 +1987,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Tipos `Dinero` y `Coordenadas` con validación
 - [ ] Métodos de conversión
 - [ ] Cálculo de distancia haversine
@@ -1976,12 +2001,14 @@ func main() {
 **Objetivo:** Implementar contenedor type-safe usando type assertions y switches.
 
 **Tarea:**
+
 1. Crear tipo `Contenedor` que almacena `interface{}`
 2. Métodos `Agregar`, `Obtener` con type checking
 3. Implementar iterador que valida tipos
 4. Usar type switches para operaciones seguras
 
 **Plantilla:**
+
 ```go
 package main
 
@@ -2012,6 +2039,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Validación de tipos en Agregar()
 - [ ] Type switches en Iterar()
 - [ ] Mensajes de error descriptivos

@@ -44,6 +44,7 @@ Go se esfuerza por proporcionar la misma API en diferentes sistemas operativos:
 ### Comparación con Otros Lenguajes
 
 **Go vs C (libc)**:
+
 ```go
 // Go: Simple y seguro
 file, err := os.Open("archivo.txt")
@@ -63,6 +64,7 @@ fclose(file);
 ```
 
 **Go vs Python**:
+
 ```go
 // Go: Control explícito, compilado
 file, err := os.Open("archivo.txt")
@@ -120,6 +122,7 @@ func main() {
 ```
 
 **Modos de apertura**:
+
 - `os.Open()`: Solo lectura (equivalente a `O_RDONLY`)
 - `os.OpenFile()`: Control total sobre flags y permisos
 
@@ -134,7 +137,7 @@ import (
 
 func main() {
     // Abrir para lectura y escritura, crear si no existe
-    file, err := os.OpenFile("datos.txt", 
+    file, err := os.OpenFile("datos.txt",
         os.O_RDWR|os.O_CREATE|os.O_TRUNC,
         0644)
     if err != nil {
@@ -145,6 +148,7 @@ func main() {
 ```
 
 **Flags comunes**:
+
 | Flag | Significado |
 |------|-------------|
 | `O_RDONLY` | Solo lectura |
@@ -196,7 +200,7 @@ func main() {
 
     // Buffer de lectura
     buffer := make([]byte, 1024)
-    
+
     for {
         n, err := file.Read(buffer)
         if err != nil {
@@ -394,7 +398,7 @@ const (
 func main() {
     // Crear archivo con permisos específicos
     os.WriteFile("config.txt", []byte("datos"), PermisosArchivo)
-    
+
     // Crear directorio con permisos específicos
     os.Mkdir("privado", PermisosSecreto)
 }
@@ -490,7 +494,7 @@ func main() {
     fmt.Println("Modo:", info.Mode())
     fmt.Println("Es directorio:", info.IsDir())
     fmt.Println("Última modificación:", info.ModTime())
-    
+
     // Obtener sys() para info específica del SO
     sys := info.Sys()
     fmt.Println("Sistema:", sys)
@@ -583,7 +587,7 @@ import (
 
 func main() {
     info, _ := os.Stat("archivo.txt")
-    
+
     // En Unix
     if stat, ok := info.Sys().(*syscall.Stat_t); ok {
         fmt.Println("Inode:", stat.Ino)
@@ -692,7 +696,7 @@ func traversar(dir string, nivel int) error {
         }
 
         ruta := filepath.Join(dir, entry.Name())
-        
+
         if entry.IsDir() {
             fmt.Printf("%s📁 %s/\n", indent, entry.Name())
             traversar(ruta, nivel+1) // Recursivo
@@ -1065,7 +1069,7 @@ func main() {
 
     debugMode, _ := strconv.ParseBool(os.Getenv("DEBUG"))
 
-    fmt.Printf("Conectando a %s:%d (debug=%v)\n", 
+    fmt.Printf("Conectando a %s:%d (debug=%v)\n",
         dbHost, dbPort, debugMode)
 }
 ```
@@ -1092,7 +1096,7 @@ func LoadEnv(filename string) error {
     scanner := bufio.NewScanner(file)
     for scanner.Scan() {
         linea := scanner.Text()
-        
+
         // Ignorar comentarios y líneas vacías
         if strings.HasPrefix(linea, "#") || linea == "" {
             continue
@@ -1139,6 +1143,7 @@ func main() {
 ```
 
 **Ejecución**:
+
 ```bash
 $ go run main.go hola mundo
 Programa: /tmp/go-build.../main
@@ -1161,7 +1166,7 @@ func main() {
     nombre := flag.String("nombre", "usuario", "Nombre del usuario")
     edad := flag.Int("edad", 0, "Edad del usuario")
     activo := flag.Bool("activo", true, "¿Está activo?")
-    
+
     flag.Parse()
 
     fmt.Printf("Nombre: %s\n", *nombre)
@@ -1175,6 +1180,7 @@ func main() {
 ```
 
 **Uso**:
+
 ```bash
 $ go run main.go -nombre Juan -edad 30 -activo=false archivo.txt
 Nombre: Juan
@@ -1206,7 +1212,7 @@ func main() {
     flag.IntVar(&config.Edad, "edad", 0, "Edad")
     flag.BoolVar(&config.Activo, "activo", true, "Activo")
     flag.BoolVar(&config.Verbose, "v", false, "Modo verbose")
-    
+
     flag.Parse()
 
     fmt.Printf("Config: %+v\n", config)
@@ -1226,11 +1232,11 @@ import (
 
 func parseArgs(args []string) map[string]string {
     result := make(map[string]string)
-    
+
     for i := 0; i < len(args); i++ {
         if strings.HasPrefix(args[i], "-") {
             key := strings.TrimPrefix(args[i], "-")
-            
+
             if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
                 result[key] = args[i+1]
                 i++
@@ -1239,7 +1245,7 @@ func parseArgs(args []string) map[string]string {
             }
         }
     }
-    
+
     return result
 }
 
@@ -1302,12 +1308,12 @@ Las señales son eventos asincronos que el SO envía a procesos:
 ```
 Señal común    Descripción                 CTRL+X
 ──────────────────────────────────────────────────
-SIGTERM        Terminar (limpiable)        
+SIGTERM        Terminar (limpiable)  
 SIGINT         Interrupt (Ctrl+C)         Ctrl+C
 SIGQUIT        Quit                        Ctrl+\
-SIGHUP         Desconexión terminal        
+SIGHUP         Desconexión terminal  
 SIGKILL        Matar (no se puede atrapar)
-SIGUSR1        Usuario 1 (custom)         
+SIGUSR1        Usuario 1 (custom)  
 SIGUSR2        Usuario 2 (custom)
 ```
 
@@ -1400,7 +1406,7 @@ func main() {
     signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
     done := make(chan bool)
-    
+
     // Iniciar goroutines de trabajo
     for i := 1; i <= 3; i++ {
         go func(id int) {
@@ -1445,7 +1451,7 @@ import (
 func main() {
     // Comando simple sin output capturado
     cmd := exec.Command("ls", "-la", "/tmp")
-    
+
     // Ejecutar y esperar
     err := cmd.Run()
     if err != nil {
@@ -1771,12 +1777,12 @@ func CopiarArchivo(src, dst string) error {
     if err != nil {
         return err
     }
-    
+
     srcInfo, err := os.Stat(src)
     if err != nil {
         return err
     }
-    
+
     return os.WriteFile(dst, contenido, srcInfo.Mode())
 }
 ```
@@ -1796,7 +1802,7 @@ import (
 func ValidarRuta(basedir, userpath string) (string, error) {
     // Hacer absoluta desde basedir
     ruta := filepath.Join(basedir, userpath)
-    
+
     // Resolver todos los symlinks y ..
     ruta, err := filepath.Abs(ruta)
     if err != nil {
@@ -1887,7 +1893,7 @@ func BuenoClose(nombre string) (string, error) {
         return "", err
     }
     defer file.Close()
-    
+
     contenido, err := os.ReadFile(nombre)
     return string(contenido), err
 }
@@ -1957,7 +1963,7 @@ func main() {
         for _, entry := range entries {
             info, _ := entry.Info()
             modo := info.Mode()
-            
+
             tipo := "-"
             if entry.IsDir() {
                 tipo = "d"
@@ -2036,7 +2042,7 @@ func main() {
         if n > 0 {
             dstFile.Write(buffer[:n])
             copied += int64(n)
-            
+
             // Mostrar progreso
             percent := (copied * 100) / totalSize
             fmt.Printf("\r[%-50s] %d%%",
@@ -2305,9 +2311,9 @@ func main() {
 
 ### Recursos Adicionales
 
-- Documentación oficial: https://pkg.go.dev/os
-- Documentación filepath: https://pkg.go.dev/path/filepath
-- Documentación exec: https://pkg.go.dev/os/exec
+- Documentación oficial: <https://pkg.go.dev/os>
+- Documentación filepath: <https://pkg.go.dev/path/filepath>
+- Documentación exec: <https://pkg.go.dev/os/exec>
 
 ---
 

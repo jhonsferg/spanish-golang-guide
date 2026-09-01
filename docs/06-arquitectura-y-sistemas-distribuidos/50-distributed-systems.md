@@ -22,6 +22,7 @@
 ### La Realidad: No Todo es Local
 
 En programación local, tienes garantías:
+
 - Tu función ejecuta en un procesador
 - La memoria es accesible y rápida
 - Si falla, todo falla (pero de forma clara)
@@ -31,7 +32,7 @@ En programación local, tienes garantías:
 
 ```
         Node A              Network              Node B
-        
+
         f() {           [Packet Loss]           ready?
           ready?    ─→  [Latency]         ─→  process()
         }            ←─  [Corruption]     ←─   done!
@@ -43,12 +44,14 @@ En programación local, tienes garantías:
 #### 1. **Latencia - El Tiempo No Es Instantáneo**
 
 En una máquina local:
+
 ```go
 // Acceso a memoria: ~100 nanosegundos
 x := data[i]
 ```
 
 En una red:
+
 ```go
 // Consulta a otro servidor: ~1-100 milisegundos
 // = 1,000,000x más lento
@@ -71,6 +74,7 @@ Timeline de latencias comparativas:
 ```
 
 Esto significa que:
+
 - Una consulta de red = 10,000,000 accesos a memoria
 - Debes batching: No preguntes 1 cosa, pregunta 1000
 - Debes caching: Evita preguntar si puedes
@@ -78,6 +82,7 @@ Esto significa que:
 #### 2. **Partial Failures - Fallos Parciales**
 
 En un programa local:
+
 ```go
 // O funciona TODO o falla TODO
 // Clear distinction
@@ -87,6 +92,7 @@ if x := riskyOperation(); x != nil {
 ```
 
 En distribuido:
+
 ```go
 // Node A envía a Node B
 // Posibilidades:
@@ -101,6 +107,7 @@ En distribuido:
 ```
 
 **El problema del "ambigüedad":**
+
 - Enviaste una transacción de dinero
 - La conexión se cortó
 - ¿Se procesó? ¿No?
@@ -109,12 +116,14 @@ En distribuido:
 #### 3. **Asynchronous Communication - No Hay Respuestas Garantizadas**
 
 En local, la comunicación es síncrona:
+
 ```go
 result := function()  // Esperas siempre
 // result está garantizado
 ```
 
 En distribuido:
+
 ```go
 // Envías mensaje
 // Esperas
@@ -137,7 +146,7 @@ En todo sistema distribuido, solo puedes tener 2 de 3:
             /   |   \
         AP /    |    \ CA
           /     |     \
-         / Availab| \ 
+         / Availab| \
         /________|____\
        Partition (P)
 ```
@@ -147,6 +156,7 @@ En todo sistema distribuido, solo puedes tener 2 de 3:
 - **P (Partition Tolerance):** El sistema sigue funcionando si la red se particiona
 
 **La verdad:**
+
 - En internet, las particiones EXISTEN
 - Luego, DEBES elegir entre C (SQL) o A (NoSQL)
 
@@ -164,7 +174,7 @@ Pero la realidad es más sutil:
 Sistema actual: CP
 - Cuando NO hay partición de red:
   → Tenemos Consistency Y Availability
-  
+
 - Cuando SÍ hay partición de red:
   → Elegimos entre:
     • Consistency: Rechazar operaciones (CP)
@@ -180,14 +190,14 @@ Sistema actual: CP
 
 /*
 Arquitectura:
-  
+
   Client A        Client B
     |               |
     └───────┬───────┘
             |
       Database
       (monolítica)
-      
+
 Garantías:
 - Todos ven el mismo estado (Consistency)
 - Siempre responde (Availability)
@@ -210,6 +220,7 @@ func (s *CAsystem) Transfer(from, to string, amount float64) error {
 ```
 
 **Problema práctico:**
+
 ```
 Time:  0ms              100ms
        |                |
@@ -220,7 +231,7 @@ Time:  0ms              100ms
        ├─→ Consistent write ✓
        │
        └─→ Error: DB unreachable ✗
-           
+
 Result: User sees error, goes to competitor
 ```
 
@@ -238,7 +249,7 @@ Arquitectura: Replicado pero conservador
           |
       Replicas
       (followers)
-      
+
 Si la red se particiona:
 - Leader sigue disponible en su partición
 - Followers en otra partición: LEEN SOLO (stale data)
@@ -266,6 +277,7 @@ func (s *CPSystem) Write(key string, value interface{}) error {
 ```
 
 **Ventaja para datos críticos:**
+
 ```
 Banco:
 - Transfers deben ser consistentes (CP)
@@ -288,7 +300,7 @@ Arquitectura: Replicado y optimista
     │       └────────┬───┘
     │                |
     └──────────────────
-    
+
 Si red se particiona:
 - A y B escriben a replicas diferentes
 - Cada uno recibe respuesta OK ✓
@@ -309,10 +321,10 @@ func (s *APSystem) Write(key string, value interface{}) error {
     // Escribimos a NUESTRO nodo INMEDIATAMENTE
     // (sin esperar quórum)
     s.replicas["local"].Write(key, value)
-    
+
     // Replicamos en background (best effort)
     go s.asyncReplicateToAll(key, value)
-    
+
     return nil  // Siempre OK
 }
 
@@ -320,6 +332,7 @@ func (s *APSystem) Write(key string, value interface{}) error {
 ```
 
 **Ventaja para escalabilidad:**
+
 ```
 Social Network:
 - Cuando escribo un tweet:
@@ -333,7 +346,7 @@ Social Network:
 
 ```
                 CP              AP
-                
+
 Consistency    FUERTE          EVENTUAL
                (C ≈ 1.0)        (C ≈ 0.95-0.99)
 
@@ -459,16 +472,16 @@ func (vc *VectorClock) Increment(nodeID string) {
 func (vc *VectorClock) Update(other *VectorClock) {
     vc.mu.Lock()
     defer vc.mu.Unlock()
-    
+
     other.mu.RLock()
     defer other.mu.RUnlock()
-    
+
     for nodeID, timestamp := range other.clocks {
         if vc.clocks[nodeID] < timestamp {
             vc.clocks[nodeID] = timestamp
         }
     }
-    
+
     // Incrementar propio
     if nodeID, exists := vc.clocks["self"]; exists {
         vc.clocks["self"] = nodeID + 1
@@ -479,12 +492,12 @@ func (vc *VectorClock) Update(other *VectorClock) {
 func (vc *VectorClock) Happens Before(other *VectorClock) bool {
     vc.mu.RLock()
     defer vc.mu.RUnlock()
-    
+
     other.mu.RLock()
     defer other.mu.RUnlock()
-    
+
     atLeastOneLess := false
-    
+
     for nodeID, ts := range vc.clocks {
         otherTS := other.clocks[nodeID]
         if ts > otherTS {
@@ -494,7 +507,7 @@ func (vc *VectorClock) Happens Before(other *VectorClock) bool {
             atLeastOneLess = true
         }
     }
-    
+
     return atLeastOneLess
 }
 
@@ -525,7 +538,7 @@ type QuorumStore struct {
 func (qs *QuorumStore) Write(key string, value interface{}) error {
     successCount := 0
     errors := 0
-    
+
     for _, replica := range qs.replicas {
         if replica.Write(key, value) == nil {
             successCount++
@@ -533,12 +546,12 @@ func (qs *QuorumStore) Write(key string, value interface{}) error {
             errors++
         }
     }
-    
+
     // Si alcanzamos quórum, éxito
     if successCount >= qs.quorumSize {
         return nil
     }
-    
+
     return fmt.Errorf("failed: %d/%d", errors, len(qs.replicas))
 }
 
@@ -550,29 +563,29 @@ type ReadResult struct {
 
 func (qs *QuorumStore) Read(key string) (interface{}, error) {
     results := make([]ReadResult, 0)
-    
+
     for _, replica := range qs.replicas[:qs.quorumSize] {
         val, version, err := replica.Read(key)
         if err == nil {
             results = append(results, ReadResult{val, version})
         }
     }
-    
+
     // Retornar la versión más reciente (quórum de lecturas)
     if len(results) >= (qs.quorumSize / 2) {
         maxVersion := int64(-1)
         var maxValue interface{}
-        
+
         for _, r := range results {
             if r.Version > maxVersion {
                 maxVersion = r.Version
                 maxValue = r.Value
             }
         }
-        
+
         return maxValue, nil
     }
-    
+
     return nil, errors.New("quórum read failed")
 }
 
@@ -604,6 +617,7 @@ Si W + R ≤ N → Posible inconsistencia
 ### El Problema de Consenso
 
 **Escenario:**
+
 - 5 servidores
 - 3 quieren hacer X
 - 2 quieren hacer Y
@@ -668,12 +682,12 @@ type RaftNode struct {
     state       State  // FOLLOWER, CANDIDATE, LEADER
     currentTerm int64
     votedFor    string
-    
+
     peers       []*RaftNode
-    
+
     commitIndex int
     lastApplied int
-    
+
     // Timers
     electionTimer  *time.Timer
     heartbeatTimer *time.Timer
@@ -696,22 +710,22 @@ func (rn *RaftNode) startElection() {
     rn.state = CANDIDATE
     rn.currentTerm++
     rn.votedFor = rn.id
-    
+
     // Pedir votos a peers
     voteCount := 1  // Me voto a mí mismo
-    
+
     for _, peer := range rn.peers {
         if peer.id == rn.id {
             continue
         }
-        
+
         // Enviar RequestVote RPC
         vote := rn.requestVote(peer)
         if vote {
             voteCount++
         }
     }
-    
+
     // Si ganamos mayoría
     if voteCount > len(rn.peers)/2 {
         rn.state = LEADER
@@ -726,7 +740,7 @@ func (rn *RaftNode) requestVote(peer *RaftNode) bool {
     // Peer responde:
     // - SÍ si: currentTerm ≥ su term Y (no votó O votó por mí)
     // - NO en otro caso
-    
+
     // Simplificado:
     if peer.currentTerm < rn.currentTerm {
         if peer.votedFor == "" || peer.votedFor == rn.id {
@@ -751,7 +765,7 @@ func (rn *RaftNode) AppendEntries(term int64, leaderID string) {
         rn.state = FOLLOWER
         rn.votedFor = ""
     }
-    
+
     // Resetear election timer (líder está vivo)
     rn.electionTimer.Reset(rn.electionTimeout())
 }
@@ -764,10 +778,10 @@ Escenario con 3 servidores:
 
 Servidor A (LEADER):
   Log: [1: X], [2: Y], [3: Z] ← Qué queremos que pase
-  
+
 Servidor B (FOLLOWER):
   Log: [1: X], [2: Y]          ← Retraso
-  
+
 Servidor C (FOLLOWER):
   Log: [1: X]                  ← Más retraso
 
@@ -793,7 +807,7 @@ type LogEntry struct {
 type RaftNode struct {
     // ... (como antes)
     log []LogEntry
-    
+
     // Leader state
     nextIndex  map[string]int64  // Siguiente entry a enviar
     matchIndex map[string]int64  // Última replicada
@@ -808,12 +822,12 @@ func (rn *RaftNode) AppendEntries(
         rn.currentTerm = term
         rn.state = FOLLOWER
     }
-    
+
     // Agregar entries al log
     for _, entry := range entries {
         rn.log = append(rn.log, entry)
     }
-    
+
     // Actualizar commit index
     if len(entries) > 0 && entries[len(entries)-1].Index > rn.commitIndex {
         rn.commitIndex = entries[len(entries)-1].Index
@@ -826,39 +840,39 @@ func (rn *RaftNode) Replicate(command interface{}) error {
     if rn.state != LEADER {
         return errors.New("not leader")
     }
-    
+
     entry := LogEntry{
         Term:    rn.currentTerm,
         Index:   int64(len(rn.log)),
         Command: command,
     }
-    
+
     rn.log = append(rn.log, entry)
-    
+
     // Enviar a todos los followers
     replicationCount := 1  // Yo lo tengo
-    
+
     for _, peer := range rn.peers {
         if peer.id == rn.id {
             continue
         }
-        
+
         idx := rn.nextIndex[peer.id]
         entries := rn.log[idx:]
-        
+
         if peer.AppendEntries(rn.currentTerm, rn.id, entries) {
             rn.matchIndex[peer.id]++
             replicationCount++
         }
     }
-    
+
     // Si mayoría tiene la entrada, commit
     if replicationCount > len(rn.peers)/2 {
         rn.commitIndex = entry.Index
         rn.apply()
         return nil
     }
-    
+
     return errors.New("replication failed")
 }
 ```
@@ -1002,11 +1016,11 @@ const (
 
 func (tx *Transaction2PC) Prepare(ctx context.Context) error {
     tx.state = PREPARE
-    
+
     // Fase 1: Preguntar a todos
     results := make(chan bool, len(tx.peers))
     wg := sync.WaitGroup{}
-    
+
     for _, peer := range tx.peers {
         wg.Add(1)
         go func(p string) {
@@ -1019,10 +1033,10 @@ func (tx *Transaction2PC) Prepare(ctx context.Context) error {
             }
         }(peer)
     }
-    
+
     wg.Wait()
     close(results)
-    
+
     // Contar votos
     yesCount := 0
     for vote := range results {
@@ -1034,21 +1048,21 @@ func (tx *Transaction2PC) Prepare(ctx context.Context) error {
             return errors.New("prepare failed")
         }
     }
-    
+
     if yesCount == len(tx.peers) {
         return tx.Commit(ctx)
     }
-    
+
     return tx.Abort(ctx)
 }
 
 func (tx *Transaction2PC) Commit(ctx context.Context) error {
     tx.state = COMMIT
-    
+
     // Fase 2: TODOS ejecutan
     errChan := make(chan error, len(tx.peers))
     wg := sync.WaitGroup{}
-    
+
     for _, peer := range tx.peers {
         wg.Add(1)
         go func(p string) {
@@ -1058,27 +1072,27 @@ func (tx *Transaction2PC) Commit(ctx context.Context) error {
             }
         }(peer)
     }
-    
+
     wg.Wait()
     close(errChan)
-    
+
     for err := range errChan {
         if err != nil {
             return err  // Alguno falló
         }
     }
-    
+
     return nil
 }
 
 func (tx *Transaction2PC) Abort(ctx context.Context) error {
     tx.state = ABORT
-    
+
     // Liberar locks
     for peer := range tx.locks {
         delete(tx.locks, peer)
     }
-    
+
     return nil
 }
 
@@ -1131,7 +1145,7 @@ Saga approach:
   Paso 1: Withdraw(from_account, 100)
           → Si falla: END (no iniciamos)
           → Si éxito: Continúa
-          
+
   Paso 2: Deposit(to_account, 100)
           → Si falla: Ejecuta CompensateWithdraw(from_account, 100)
           → Si éxito: Continúa
@@ -1151,7 +1165,7 @@ type SagaStep struct {
 
 func (s *Saga) Execute() error {
     completed := []string{}
-    
+
     for _, step := range s.steps {
         if err := step.action(); err != nil {
             // Falló, ejecutar compensations en reverso
@@ -1165,10 +1179,10 @@ func (s *Saga) Execute() error {
             }
             return err
         }
-        
+
         completed = append(completed, step.name)
     }
-    
+
     return nil
 }
 
@@ -1214,19 +1228,19 @@ if err := transferSaga.Execute(); err != nil {
 func CreateOrder(order *Order) error {
     // 1. Crear orden en DB
     db.SaveOrder(order)
-    
+
     // 2. Procesar pago (WAIT)
     if err := paymentService.Charge(order.Amount); err != nil {
         // Si falla, ¿ya guardamos la orden?
         return err
     }
-    
+
     // 3. Enviar email (WAIT)
     emailService.Send(order.Email, "Gracias!")
-    
+
     // 4. Actualizar inventario (WAIT)
     inventoryService.Decrease(order.Items)
-    
+
     return nil
 }
 
@@ -1247,13 +1261,13 @@ type MessageQueue interface {
 func CreateOrder(order *Order, mq MessageQueue) error {
     // 1. Guardar orden
     db.SaveOrder(order)
-    
+
     // 2. Publicar event (NO ESPERA)
     mq.Publish("order.created", OrderCreatedEvent{
         OrderID: order.ID,
         Amount:  order.Amount,
     })
-    
+
     return nil  // Inmediato ✓
 }
 
@@ -1317,26 +1331,26 @@ func (q *SimpleQueue) Publish(topic string, msg interface{}) error {
     q.mu.Lock()
     q.messages[topic] = append(q.messages[topic], msg)
     q.mu.Unlock()
-    
+
     // Procesar suscriptores
     q.mu.RLock()
     handlers := q.handlers[topic]
     q.mu.RUnlock()
-    
+
     for _, handler := range handlers {
         // Async processing
         go handler(msg)
     }
-    
+
     return nil
 }
 
 func (q *SimpleQueue) Subscribe(topic string, handler func(interface{})) error {
     q.mu.Lock()
     defer q.mu.Unlock()
-    
+
     q.handlers[topic] = append(q.handlers[topic], handler)
-    
+
     return nil
 }
 
@@ -1351,7 +1365,7 @@ func (q *SimpleQueue) Subscribe(topic string, handler func(interface{})) error {
 /*
 Enfoque tradicional (Estado):
   db.accounts: {id: 1, balance: 500}
-  
+
   Problema:
   - ¿Cómo llegó a 500?
   - ¿Qué pasó antes?
@@ -1362,10 +1376,10 @@ Event Sourcing (Eventos):
     - {timestamp: 10:00, account: 1, type: "deposit", amount: 1000}
     - {timestamp: 10:05, account: 1, type: "withdraw", amount: 200}
     - {timestamp: 10:10, account: 1, type: "withdraw", amount: 300}
-    
+
   Estado derivado:
     balance = 1000 - 200 - 300 = 500
-    
+
   Ventajas:
   - Auditoría completa
   - Reconstruir estado a cualquier momento
@@ -1388,10 +1402,10 @@ type EventStore struct {
 func (es *EventStore) Append(event Event) error {
     es.mu.Lock()
     defer es.mu.Unlock()
-    
+
     event.Timestamp = time.Now()
     event.ID = generateID()  // UUID
-    
+
     es.events = append(es.events, event)
     return nil
 }
@@ -1399,7 +1413,7 @@ func (es *EventStore) Append(event Event) error {
 func (es *EventStore) GetEvents(filter func(Event) bool) []Event {
     es.mu.RLock()
     defer es.mu.RUnlock()
-    
+
     var results []Event
     for _, event := range es.events {
         if filter(event) {
@@ -1419,9 +1433,9 @@ func (es *EventStore) ReplayAccount(accountID string) BankAccount {
     events := es.GetEvents(func(e Event) bool {
         return e.Data["account_id"] == accountID
     })
-    
+
     acc := BankAccount{ID: accountID, Balance: 0}
-    
+
     for _, event := range events {
         switch event.Type {
         case "deposit":
@@ -1430,7 +1444,7 @@ func (es *EventStore) ReplayAccount(accountID string) BankAccount {
             acc.Balance -= event.Data["amount"].(float64)
         }
     }
-    
+
     return acc
 }
 
@@ -1474,10 +1488,10 @@ type RoundRobinBalancer struct {
 func (rb *RoundRobinBalancer) NextServer() *Server {
     rb.mu.Lock()
     defer rb.mu.Unlock()
-    
+
     server := rb.servers[rb.index]
     rb.index = (rb.index + 1) % len(rb.servers)
-    
+
     return server
 }
 
@@ -1504,16 +1518,16 @@ Solución: Weighted round-robin
 Hash tradicional:
   key = "user123"
   hash(key) % 3 = 1  → Server 1
-  
+
   Añadimos Server 4:
   hash(key) % 4 = ?  → DIFERENTE SERVIDOR
-  
+
   Resultado: Cache miss masivo (invalidation)
 
 Consistent hashing:
   Coloca servidores en un círculo (ring)
   Busca el primer servidor en dirección horaria
-  
+
   Al añadir servidor:
   - Solo las claves entre el nuevo y el anterior se mueven
   - ~1/N de las claves, no todas
@@ -1538,14 +1552,14 @@ func (ch *ConsistentHash) AddServer(serverID string) {
 
 func (ch *ConsistentHash) GetServer(key string) string {
     keyHash := hashFunc(key)
-    
+
     // Buscar primer servidor ≥ keyHash
     for _, serverHash := range ch.ring {
         if serverHash >= keyHash {
             return ch.servers[serverHash]
         }
     }
-    
+
     // Wrap around
     return ch.servers[ch.ring[0]]
 }
@@ -1566,7 +1580,7 @@ Agregar S4 en 60°:
   key1 (30°)  → SIGUE EN S1 ✓
   key2 (150°) → SIGUE EN S2 ✓
   key3 (270°) → SIGUE EN S3 ✓
-  
+
   Solo las claves entre S4 y S1 se mueven a S4
 */
 
@@ -1612,18 +1626,18 @@ func (chr *ConsistentHashRing) GetNode(key string) string {
     if len(chr.nodes) == 0 {
         return ""
     }
-    
+
     hash := hashFunc(key)
-    
+
     // Binary search para encontrar el primer nodo ≥ hash
     idx := sort.Search(len(chr.sortedKeys), func(i int) bool {
         return chr.sortedKeys[i] >= hash
     })
-    
+
     if idx == len(chr.sortedKeys) {
         idx = 0  // Wrap around
     }
-    
+
     return chr.nodes[chr.sortedKeys[idx]]
 }
 ```
@@ -1648,17 +1662,17 @@ func (msr *MasterSlaveReplication) Write(key string, value interface{}) error {
     if err := msr.master.Write(key, value); err != nil {
         return err
     }
-    
+
     // 2. Guardar en binlog
     entry := LogEntry{
         Command: fmt.Sprintf("SET %s = %v", key, value),
         Timestamp: time.Now(),
     }
     msr.binlog = append(msr.binlog, entry)
-    
+
     // 3. Replicar a slaves en background
     go msr.replicateToSlaves(entry)
-    
+
     return nil
 }
 
@@ -1666,7 +1680,7 @@ func (msr *MasterSlaveReplication) Read(key string) (interface{}, error) {
     // Leer de master o slave (depende de política)
     // Opción 1: Leer de master siempre (consistencia fuerte)
     // Opción 2: Leer de slave (riesgo: stale data)
-    
+
     return msr.master.Read(key)
 }
 
@@ -1723,10 +1737,10 @@ func (mmr *MasterMasterReplication) Write(
 ) error {
     // 1. Escribir en nodo local
     mmr.nodes[nodeID].Write(key, value)
-    
+
     // 2. Incrementar vector clock
     mmr.vectorClocks[nodeID].Increment(nodeID)
-    
+
     // 3. Replicar a otros nodos con vector clock
     for _, other := range mmr.nodes {
         if other.ID == nodeID {
@@ -1734,7 +1748,7 @@ func (mmr *MasterMasterReplication) Write(
         }
         go other.Replicate(key, value, mmr.vectorClocks[nodeID])
     }
-    
+
     return nil
 }
 
@@ -1793,7 +1807,7 @@ Partición por rango:
   Shard 0: user_id 0-999
   Shard 1: user_id 1000-1999
   Shard 2: user_id 2000-2999
-  
+
 Cálculo: shard = user_id / 1000
 
 Ventajas:
@@ -1898,19 +1912,19 @@ type HotspotHandler struct {
 func (hh *HotspotHandler) DetectHotspots() []int {
     var hotspots []int
     avgLoad := hh.computeAverageLoad()
-    
+
     for shardID, count := range hh.accessCounts {
         if count > avgLoad*2 {  // 2x promedio
             hotspots = append(hotspots, shardID)
         }
     }
-    
+
     return hotspots
 }
 
 func (hh *HotspotHandler) AddReplicas(shardID int) {
     primaryShard := hh.primaryShards[shardID]
-    
+
     // Crear replicas
     for i := 0; i < 3; i++ {
         replica := primaryShard.CreateReplica()
@@ -1934,28 +1948,28 @@ type RetryPolicy struct {
 
 func (rp *RetryPolicy) Execute(fn func() error) error {
     var lastErr error
-    
+
     for attempt := 0; attempt <= rp.maxRetries; attempt++ {
         if err := fn(); err == nil {
             return nil  // Success
         } else {
             lastErr = err
         }
-        
+
         if attempt < rp.maxRetries {
             delay := rp.baseDelay * (1 << uint(attempt))  // 2^attempt
-            
+
             // Cap máximo
             if delay > rp.maxDelay {
                 delay = rp.maxDelay
             }
-            
+
             // Jitter para evitar thundering herd
             jitter := time.Duration(rand.Int63n(int64(delay / 2)))
             time.Sleep(delay + jitter)
         }
     }
-    
+
     return lastErr
 }
 
@@ -2006,11 +2020,11 @@ func (cb *CircuitBreaker) Call(fn func() error) error {
 
 func (cb *CircuitBreaker) callClosed(fn func() error) error {
     err := fn()
-    
+
     if err != nil {
         cb.failureCount++
         cb.lastFailTime = time.Now()
-        
+
         if cb.failureCount >= cb.failureThreshold {
             cb.state = OPEN
             return errors.New("circuit breaker opened")
@@ -2018,7 +2032,7 @@ func (cb *CircuitBreaker) callClosed(fn func() error) error {
     } else {
         cb.failureCount = 0
     }
-    
+
     return err
 }
 
@@ -2029,25 +2043,25 @@ func (cb *CircuitBreaker) callOpen(fn func() error) error {
         cb.successCount = 0
         return cb.callHalfOpen(fn)
     }
-    
+
     return errors.New("circuit breaker is open")
 }
 
 func (cb *CircuitBreaker) callHalfOpen(fn func() error) error {
     err := fn()
-    
+
     if err != nil {
         cb.state = OPEN  // Aún falla, volver a OPEN
         cb.lastFailTime = time.Now()
         return err
     }
-    
+
     cb.successCount++
     if cb.successCount >= cb.successThreshold {
         cb.state = CLOSED  // Recuperado
         cb.failureCount = 0
     }
-    
+
     return nil
 }
 ```
@@ -2079,7 +2093,7 @@ func (be *BulkheadExecutor) Execute(
     fn func() error,
 ) error {
     executor := be.executors[serviceName]
-    
+
     // Enviar a este executor específico
     // Si está saturado, rechazo (no espero)
     return executor.ExecuteWithTimeout(fn, 5*time.Second)
@@ -2105,11 +2119,11 @@ be.Execute("shipping", fastShippingFn)
 // Timeout simple
 func CallWithTimeout(fn func() error, timeout time.Duration) error {
     done := make(chan error, 1)
-    
+
     go func() {
         done <- fn()
     }()
-    
+
     select {
     case err := <-done:
         return err
@@ -2121,11 +2135,11 @@ func CallWithTimeout(fn func() error, timeout time.Duration) error {
 // Timeout con contexto (Go idiomatic)
 func CallWithContext(ctx context.Context, fn func() error) error {
     done := make(chan error, 1)
-    
+
     go func() {
         done <- fn()
     }()
-    
+
     select {
     case err := <-done:
         return err
@@ -2281,7 +2295,7 @@ Antipattern 4: 2PC Sin Fallback
 
 INCORRECTO:
   Do 2PC, si falla → DEADLOCK
-  
+
 CORRECTO:
   Sagas con compensations
   O aceptar eventual consistency
@@ -2347,7 +2361,7 @@ type LogEntry struct {
 
 func (mss *MasterSlaveSystem) Write(key string, value interface{}) {
     mss.master.Set(key, value)
-    
+
     entry := LogEntry{
         Operation: "SET",
         Key:       key,
@@ -2355,7 +2369,7 @@ func (mss *MasterSlaveSystem) Write(key string, value interface{}) {
         Timestamp: time.Now(),
     }
     mss.binlog = append(mss.binlog, entry)
-    
+
     // Replicate to slaves
     for _, slave := range mss.slaves {
         go slave.Set(key, value)
@@ -2371,16 +2385,16 @@ func main() {
     master := &DataStore{data: make(map[string]interface{})}
     slave1 := &DataStore{data: make(map[string]interface{})}
     slave2 := &DataStore{data: make(map[string]interface{})}
-    
+
     system := &MasterSlaveSystem{
         master:  master,
         slaves:  []*DataStore{slave1, slave2},
         binlog:  []LogEntry{},
     }
-    
+
     system.Write("user:1", "Alice")
     time.Sleep(100 * time.Millisecond)  // Esperar replicación
-    
+
     fmt.Println("Master:", system.master.Get("user:1"))
     fmt.Println("Slave1:", slave1.Get("user:1"))
     fmt.Println("Slave2:", slave2.Get("user:1"))
@@ -2388,6 +2402,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Master puede escribir
 - [ ] Slaves replican cambios
 - [ ] Logs se guardan
@@ -2448,26 +2463,26 @@ func (ch *ConsistentHash) GetNode(key string) string {
     if len(ch.nodes) == 0 {
         return ""
     }
-    
+
     hash := hashFunc(key)
     idx := sort.Search(len(ch.sortedKeys), func(i int) bool {
         return ch.sortedKeys[i] >= hash
     })
-    
+
     if idx == len(ch.sortedKeys) {
         idx = 0
     }
-    
+
     return ch.nodes[ch.sortedKeys[idx]]
 }
 
 func main() {
     ch := NewConsistentHash(3)  // 3 virtual nodes
-    
+
     ch.AddNode("server-1")
     ch.AddNode("server-2")
     ch.AddNode("server-3")
-    
+
     // Distribuir claves
     keys := []string{"user:1", "user:2", "user:3", "cache:x", "cache:y"}
     for _, key := range keys {
@@ -2478,6 +2493,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Agregar nodos sin rehashear todo
 - [ ] Distribución uniforme
 - [ ] Virtual nodes para balance
@@ -2519,7 +2535,7 @@ type RaftNode struct {
     votedFor     string
     log          []LogEntry
     commitIndex  int64
-    
+
     peers        []*RaftNode
     mu           sync.RWMutex
 }
@@ -2535,15 +2551,15 @@ func NewRaftNode(id string) *RaftNode {
 func (rn *RaftNode) Append(entry LogEntry) bool {
     rn.mu.Lock()
     defer rn.mu.Unlock()
-    
+
     if rn.state != LEADER {
         return false
     }
-    
+
     entry.Term = rn.currentTerm
     entry.Index = int64(len(rn.log))
     rn.log = append(rn.log, entry)
-    
+
     rn.replicate()
     return true
 }
@@ -2558,7 +2574,7 @@ func (rn *RaftNode) replicate() {
 func (rn *RaftNode) Sync(entries []LogEntry) {
     rn.mu.Lock()
     defer rn.mu.Unlock()
-    
+
     for _, entry := range entries {
         if entry.Index >= int64(len(rn.log)) {
             rn.log = append(rn.log, entry)
@@ -2576,14 +2592,14 @@ func (rn *RaftNode) StartElection() {
     rn.currentTerm++
     rn.votedFor = rn.id
     rn.mu.Unlock()
-    
+
     votes := 1
     for _, peer := range rn.peers {
         if peer.RequestVote(rn.currentTerm, rn.id) {
             votes++
         }
     }
-    
+
     rn.mu.Lock()
     if votes > len(rn.peers)/2 && rn.state == CANDIDATE {
         rn.state = LEADER
@@ -2597,17 +2613,17 @@ func (rn *RaftNode) StartElection() {
 func (rn *RaftNode) RequestVote(term int64, candidateID string) bool {
     rn.mu.Lock()
     defer rn.mu.Unlock()
-    
+
     if term > rn.currentTerm {
         rn.currentTerm = term
         rn.votedFor = ""
     }
-    
+
     if term == rn.currentTerm && (rn.votedFor == "" || rn.votedFor == candidateID) {
         rn.votedFor = candidateID
         return true
     }
-    
+
     return false
 }
 
@@ -2616,19 +2632,19 @@ func main() {
     for i := 0; i < 3; i++ {
         nodes[i] = NewRaftNode(fmt.Sprintf("node-%d", i))
     }
-    
+
     // Conectar peers
     for i := 0; i < 3; i++ {
         nodes[i].peers = append(nodes[i].peers, nodes...)
     }
-    
+
     // Iniciar elecciones
     for _, node := range nodes {
         go node.StartElection()
     }
-    
+
     time.Sleep(1 * time.Second)
-    
+
     for _, node := range nodes {
         fmt.Printf("%s: state=%v\n", node.id, node.state)
     }
@@ -2636,6 +2652,7 @@ func main() {
 ```
 
 **Requisitos:**
+
 - [ ] Leader election funciona
 - [ ] Log replication entre nodos
 - [ ] Manejo de términos
@@ -2681,12 +2698,12 @@ type Account struct {
 
 func (es *EventStore) ReplayAccount(accountID string) Account {
     acc := Account{ID: accountID}
-    
+
     for _, event := range es.events {
         if event.Data["account_id"] != accountID {
             continue
         }
-        
+
         switch event.Type {
         case "deposit":
             acc.Balance += event.Data["amount"].(float64)
@@ -2697,36 +2714,37 @@ func (es *EventStore) ReplayAccount(accountID string) Account {
         }
         acc.Version++
     }
-    
+
     return acc
 }
 
 func main() {
     es := &EventStore{}
-    
+
     // Simular transacciones
     es.Append("deposit", map[string]interface{}{
         "account_id": "acc1",
         "amount":     1000.0,
     })
-    
+
     es.Append("withdraw", map[string]interface{}{
         "account_id": "acc1",
         "amount":     200.0,
     })
-    
+
     es.Append("interest", map[string]interface{}{
         "account_id": "acc1",
         "rate":       0.01,  // 1%
     })
-    
+
     account := es.ReplayAccount("acc1")
-    fmt.Printf("Account %s: Balance = %.2f (v%d)\n", 
+    fmt.Printf("Account %s: Balance = %.2f (v%d)\n",
         account.ID, account.Balance, account.Version)
 }
 ```
 
 **Requisitos:**
+
 - [ ] Guardar eventos
 - [ ] Replay de estado
 - [ ] Auditoría completa
@@ -2757,30 +2775,30 @@ func (ds *DistributedStore) Write(key string, value interface{}) error {
     if ds.currentLeader.state != LEADER {
         return fmt.Errorf("not leader")
     }
-    
+
     entry := LogEntry{
         Command: fmt.Sprintf("SET %s=%v", key, value),
     }
-    
+
     if ds.currentLeader.Append(entry) {
         ds.commitLog = append(ds.commitLog, entry)
         return nil
     }
-    
+
     return fmt.Errorf("replication failed")
 }
 
 func (ds *DistributedStore) HandleLeaderFailure() {
     ds.mu.Lock()
     defer ds.mu.Unlock()
-    
+
     // Trigger new election
     for _, node := range ds.nodes {
         if node != ds.currentLeader {
             node.StartElection()
         }
     }
-    
+
     // Encontrar nuevo líder
     time.Sleep(500 * time.Millisecond)
     for _, node := range ds.nodes {
@@ -2797,34 +2815,35 @@ func main() {
     for i := 0; i < 5; i++ {
         nodes[i] = NewRaftNode(fmt.Sprintf("node-%d", i))
     }
-    
+
     // Conectar
     for i := 0; i < 5; i++ {
         nodes[i].peers = append(nodes[i].peers, nodes...)
     }
-    
+
     // Eleger líder
     nodes[0].StartElection()
     time.Sleep(500 * time.Millisecond)
-    
+
     store := &DistributedStore{
         nodes:        nodes,
         currentLeader: nodes[0],
     }
-    
+
     // Escribir data
     _ = store.Write("key1", "value1")
     fmt.Println("Written to leader")
-    
+
     // Simular fallo de líder
     fmt.Println("Leader died!")
     store.HandleLeaderFailure()
-    
+
     fmt.Printf("New leader: %s\n", store.currentLeader.id)
 }
 ```
 
 **Requisitos:**
+
 - [ ] Replicación entre múltiples nodos
 - [ ] Leader failover
 - [ ] Recuperación automática
@@ -2851,8 +2870,8 @@ func main() {
 
 1. **"Designing Data-Intensive Applications"** - Martin Kleppmann
 2. **"The Art of Distributed Systems"** - Leslie Lamport
-3. **Etcd Documentation** - https://etcd.io
-4. **Raft Consensus Algorithm** - https://raft.github.io
+3. **Etcd Documentation** - <https://etcd.io>
+4. **Raft Consensus Algorithm** - <https://raft.github.io>
 5. **Go Distributed Systems Libraries:**
    - github.com/hashicorp/raft
    - github.com/etcd-io/raft

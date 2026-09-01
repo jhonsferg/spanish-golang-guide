@@ -116,7 +116,7 @@ func Add(a, b int) int {
 func TestAdd(t *testing.T) {
     result := Add(2, 3)
     expected := 5
-    
+
     if result != expected {
         t.Errorf("Add(2, 3) = %d, want %d", result, expected)
     }
@@ -134,18 +134,18 @@ func TestVariousErrors(t *testing.T) {
         t.Error("1 != 2")
     }
     t.Log("Este mensaje se imprime")
-    
+
     // Errorf: como Error pero con formato
     if true != false {
         t.Errorf("true != false: %v", false)
     }
-    
+
     // Fatal: registra y detiene el test inmediatamente
     if nil == nil {
         t.Fatal("nil == nil") // Test termina aquí
         t.Log("Esto no se ejecuta")
     }
-    
+
     // Fatalf: como Fatal pero con formato
     if 1 > 2 {
         t.Fatalf("1 > 2: %d > %d", 1, 2)
@@ -160,7 +160,7 @@ func TestLogging(t *testing.T) {
     // Log básico
     t.Log("Información general")
     t.Logf("Valor: %d", 42)
-    
+
     // Los logs solo se muestran si:
     // 1. El test falla
     // 2. Se ejecuta con -v (verbose)
@@ -177,13 +177,13 @@ func TestWithCleanup(t *testing.T) {
     // Simular apertura de recurso
     file := createTemporaryFile()
     t.Logf("Archivo creado: %s", file)
-    
+
     // Registrar cleanup - se ejecuta al final del test
     t.Cleanup(func() {
         deleteFile(file)
         t.Logf("Archivo eliminado: %s", file)
     })
-    
+
     // Test continúa normalmente
     if file == "" {
         t.Error("Archivo no fue creado")
@@ -200,7 +200,7 @@ func TestCondicional(t *testing.T) {
     if testing.Short() {
         t.Skip("Saltando test largo en modo -short")
     }
-    
+
     // Test que toma mucho tiempo
     for i := 0; i < 1000000; i++ {
         // operación intensiva
@@ -312,14 +312,14 @@ func TestCalculator(t *testing.T) {
             t.Errorf("Add(2, 3) = %d, want 5", result)
         }
     })
-    
+
     t.Run("suma con negativos", func(t *testing.T) {
         result := Add(-2, 3)
         if result != 1 {
             t.Errorf("Add(-2, 3) = %d, want 1", result)
         }
     })
-    
+
     t.Run("resta", func(t *testing.T) {
         result := Subtract(5, 3)
         if result != 2 {
@@ -370,14 +370,14 @@ func TestNestedSubtests(t *testing.T) {
                 t.Error("suma falló")
             }
         })
-        
+
         t.Run("resta", func(t *testing.T) {
             if Subtract(5, 3) != 2 {
                 t.Error("resta falló")
             }
         })
     })
-    
+
     t.Run("operaciones avanzadas", func(t *testing.T) {
         t.Run("potencia", func(t *testing.T) {
             if Power(2, 3) != 8 {
@@ -411,7 +411,7 @@ func TestParallel(t *testing.T) {
             t.Error("test 1 falló")
         }
     })
-    
+
     t.Run("test 2", func(t *testing.T) {
         t.Parallel()  // Ejecutar en paralelo
         result := Add(2, 2)
@@ -442,11 +442,11 @@ func TestAdd(t *testing.T) {
         {"suma mixtos", -2, 3, 1},
         {"suma con cero", 0, 5, 5},
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             if got := Add(tt.a, tt.b); got != tt.want {
-                t.Errorf("Add(%d, %d) = %d, want %d", 
+                t.Errorf("Add(%d, %d) = %d, want %d",
                     tt.a, tt.b, got, tt.want)
             }
         })
@@ -476,12 +476,12 @@ func TestValidateEmail(t *testing.T) {
         {"sin @", "userexample.com", true, "invalid format"},
         {"múltiples @", "user@@example.com", true, "invalid format"},
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             err := ValidateEmail(tt.email)
             if (err != nil) != tt.wantErr {
-                t.Fatalf("ValidateEmail() error = %v, wantErr %v", 
+                t.Fatalf("ValidateEmail() error = %v, wantErr %v",
                     err, tt.wantErr)
             }
             if err != nil && err.Error() != tt.errMsg {
@@ -532,20 +532,20 @@ func TestParser(t *testing.T) {
             wantErr:   true,
         },
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             if tt.setup != nil {
                 tt.setup()
                 t.Cleanup(tt.cleanup)
             }
-            
+
             nodes, err := ParseJSON(tt.input)
             if (err != nil) != tt.wantErr {
                 t.Fatalf("ParseJSON() error = %v, wantErr %v", err, tt.wantErr)
             }
             if len(nodes) != tt.wantNodes {
-                t.Errorf("ParseJSON() got %d nodes, want %d", 
+                t.Errorf("ParseJSON() got %d nodes, want %d",
                     len(nodes), tt.wantNodes)
             }
         })
@@ -655,17 +655,17 @@ type TestFixture struct {
 
 func setupFixture(t *testing.T) *TestFixture {
     t.Helper()
-    
+
     user := &User{ID: 1, Name: "John"}
     post := &Post{ID: 1, UserID: 1, Title: "Test"}
     comment := &Comment{ID: 1, PostID: 1, Text: "Good"}
-    
+
     t.Cleanup(func() {
         deleteUser(user.ID)
         deletePost(post.ID)
         deleteComment(comment.ID)
     })
-    
+
     return &TestFixture{
         User:    user,
         Post:    post,
@@ -675,7 +675,7 @@ func setupFixture(t *testing.T) *TestFixture {
 
 func TestWithFixture(t *testing.T) {
     fixture := setupFixture(t)
-    
+
     // Usar fixture en tests
     if fixture.User.Name != "John" {
         t.Error("user setup failed")
@@ -722,7 +722,7 @@ func GetUserWithCache(db Database, id int) *User {
 func TestGetUserWithCache(t *testing.T) {
     mock := &MockDB{}
     user := GetUserWithCache(mock, 1)
-    
+
     if user.Name != "Mock User" {
         t.Error("mock not working")
     }
@@ -750,7 +750,7 @@ func TestWithConfigurable(t *testing.T) {
             return nil, errors.New("not found")
         },
     }
-    
+
     _, err := GetUserWithCache(mock, 999)
     if err == nil {
         t.Error("expected error for non-existent user")
@@ -776,15 +776,15 @@ func (db *SpyDB) SaveUser(user *User) error {
 
 func TestSpyMock(t *testing.T) {
     spy := &SpyDB{}
-    
+
     GetUserWithCache(spy, 1)
     GetUserWithCache(spy, 2)
     GetUserWithCache(spy, 1)
-    
+
     if len(spy.GetUserCalls) != 3 {
         t.Errorf("expected 3 calls, got %d", len(spy.GetUserCalls))
     }
-    
+
     if spy.GetUserCalls[0] != 1 {
         t.Errorf("first call should be for id 1, got %d", spy.GetUserCalls[0])
     }
@@ -809,15 +809,15 @@ func TestAPIWithStub(t *testing.T) {
             w.Write([]byte(`{"id": 1, "name": "John"}`))
         }))
     defer server.Close()
-    
+
     // Usar servidor stub en cliente
     client := &http.Client{}
     resp, err := client.Get(server.URL + "/users/1")
-    
+
     if err != nil {
         t.Fatalf("request failed: %v", err)
     }
-    
+
     if resp.StatusCode != http.StatusOK {
         t.Errorf("expected status 200, got %d", resp.StatusCode)
     }
@@ -887,6 +887,7 @@ ok      github.com/ejemplo/fib  2.345s
 ```
 
 Interpretación:
+
 - `BenchmarkAdd-8`: 8 CPUs
 - `2000000000`: 2 mil millones de iteraciones (b.N)
 - `0.35 ns/op`: 0.35 nanosegundos por operación
@@ -916,9 +917,9 @@ func BenchmarkGoodFib(b *testing.B) {
 func BenchmarkWithSetup(b *testing.B) {
     // Setup costoso
     data := loadLargeDataset()
-    
+
     b.ResetTimer()  // Reiniciar timer, descontar setup
-    
+
     for i := 0; i < b.N; i++ {
         processData(data)
     }
@@ -930,7 +931,7 @@ func BenchmarkWithSetup(b *testing.B) {
 ```go
 func BenchmarkStringConcat(b *testing.B) {
     b.ReportAllocs()  // Incluir info de allocations
-    
+
     for i := 0; i < b.N; i++ {
         s := "hello"
         s += "world"
@@ -1069,7 +1070,7 @@ go doc -http=:6060
 Examples aparecen automáticamente en `godoc`:
 
 ```
-$ godoc github.com/usuario/calculadora Add
+godoc github.com/usuario/calculadora Add
 ```
 
 Muestra:
@@ -1155,7 +1156,7 @@ func TestDivide(t *testing.T) {
         {"division normal", 10, 2, 5, false},
         {"division por cero", 10, 0, 0, true},
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             got, err := Divide(tt.a, tt.b)
@@ -1175,6 +1176,7 @@ func TestDivide(t *testing.T) {
 ### 36.10.4 Interpretar Reportes
 
 En HTML, diferentes colores:
+
 - **Verde**: Código cubierto
 - **Rojo**: Código no cubierto
 - **Gris**: Código no ejecutable
@@ -1205,10 +1207,10 @@ fi
 func TestUser(t *testing.T) {
     // Arrange - preparar
     user := &User{Name: "John", Age: 30}
-    
+
     // Act - actuar
     result := user.IsAdult()
-    
+
     // Assert - verificar
     if !result {
         t.Error("user should be adult")
@@ -1242,7 +1244,7 @@ func TestUser(t *testing.T) {
     if !user.IsAdult() {
         t.Error("30 should be adult")
     }
-    
+
     user2 := &User{Age: 10}
     if user2.IsAdult() {
         t.Error("10 should not be adult")
@@ -1368,17 +1370,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: actions/setup-go@v2
         with:
           go-version: 1.21
-      
+
       - name: Run tests
         run: go test -race -cover ./...
-      
+
       - name: Generate coverage
         run: go test -coverprofile=coverage.out ./...
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v2
         with:
@@ -1404,7 +1406,7 @@ go test -vet=off  # Desactivar vet
 func BenchmarkStringConcat(b *testing.B) {
     b.ReportAllocs()
     data := generateStrings(1000)  // Datos realistas
-    
+
     b.ResetTimer()
     for i := 0; i < b.N; i++ {
         concatenateStrings(data)
@@ -1451,12 +1453,14 @@ func Subtract(a, b int) int {
 ```
 
 **Tu tarea**:
+
 1. Escribe 3 tests para `Add` (casos positivos, negativos, cero)
 2. Escribe 2 tests para `Subtract`
 3. Ejecuta: `go test -v`
 4. Verifica que todos pasan
 
 **Solución esperada**:
+
 ```go
 // calculator_test.go
 package main
@@ -1501,12 +1505,14 @@ func TestSubtract(t *testing.T) {
 **Descripción**: Refactoriza los tests del ejercicio 1 usando `t.Run()` y `t.Parallel()`
 
 **Tu tarea**:
+
 1. Agrupa tests con `t.Run()`
 2. Usa `t.Parallel()` para ejecutar en paralelo
 3. Ejecuta: `go test -v -parallel 4`
 4. Verifica que se ejecutan en paralelo
 
 **Solución esperada**:
+
 ```go
 // calculator_test.go (mejorado)
 package main
@@ -1516,14 +1522,14 @@ import "testing"
 func TestCalculatorOperations(t *testing.T) {
     t.Run("add operations", func(t *testing.T) {
         t.Parallel()
-        
+
         t.Run("positive numbers", func(t *testing.T) {
             t.Parallel()
             if Add(2, 3) != 5 {
                 t.Error("Add(2, 3) failed")
             }
         })
-        
+
         t.Run("negative numbers", func(t *testing.T) {
             t.Parallel()
             if Add(-2, -3) != -5 {
@@ -1531,7 +1537,7 @@ func TestCalculatorOperations(t *testing.T) {
             }
         })
     })
-    
+
     t.Run("subtract operations", func(t *testing.T) {
         t.Parallel()
         if Subtract(10, 3) != 7 {
@@ -1571,11 +1577,13 @@ func ParseNumbers(input string) ([]int, error) {
 ```
 
 **Tu tarea**:
+
 1. Implementa tabla-driven tests para `ParseNumbers`
 2. Incluye casos: válidos, vacíos, con espacios, con errores
 3. Ejecuta: `go test -v`
 
 **Solución esperada**:
+
 ```go
 // parser_test.go
 package main
@@ -1617,7 +1625,7 @@ func TestParseNumbers(t *testing.T) {
             wantErr: true,
         },
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             got, err := ParseNumbers(tt.input)
@@ -1671,12 +1679,14 @@ func (s *UserService) GetUserName(id int) (string, error) {
 ```
 
 **Tu tarea**:
+
 1. Crea un `MockRepository` que implemente `UserRepository`
 2. Escribe tests para `UserService.GetUserName()` usando el mock
 3. Prueba el caso de éxito y error
 4. Ejecuta: `go test -v`
 
 **Solución esperada**:
+
 ```go
 // user_test.go
 package main
@@ -1704,10 +1714,10 @@ func TestGetUserNameSuccess(t *testing.T) {
             1: {ID: 1, Name: "John"},
         },
     }
-    
+
     service := NewUserService(mock)
     name, err := service.GetUserName(1)
-    
+
     if err != nil {
         t.Errorf("unexpected error: %v", err)
     }
@@ -1720,10 +1730,10 @@ func TestGetUserNameNotFound(t *testing.T) {
     mock := &MockUserRepository{
         users: make(map[int]*User),
     }
-    
+
     service := NewUserService(mock)
     _, err := service.GetUserName(999)
-    
+
     if err == nil {
         t.Error("expected error for non-existent user")
     }
@@ -1764,6 +1774,7 @@ func FibIterative(n int) int {
 ```
 
 **Tu tarea**:
+
 1. Escribe tests unitarios para ambas funciones
 2. Escribe benchmarks comparando performance
 3. Ejecuta: `go test -bench=. -benchmem`
@@ -1771,6 +1782,7 @@ func FibIterative(n int) int {
 5. Reporta: ¿Cuál es más rápida?
 
 **Solución esperada**:
+
 ```go
 // fibonacci_test.go
 package main
@@ -1787,7 +1799,7 @@ func TestFibRecursive(t *testing.T) {
         {6, 8},
         {10, 55},
     }
-    
+
     for _, tt := range tests {
         if got := FibRecursive(tt.n); got != tt.want {
             t.Errorf("FibRecursive(%d) = %d, want %d", tt.n, got, tt.want)
@@ -1805,7 +1817,7 @@ func TestFibIterative(t *testing.T) {
         {6, 8},
         {10, 55},
     }
-    
+
     for _, tt := range tests {
         if got := FibIterative(tt.n); got != tt.want {
             t.Errorf("FibIterative(%d) = %d, want %d", tt.n, got, tt.want)

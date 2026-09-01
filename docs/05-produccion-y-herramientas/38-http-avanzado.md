@@ -163,7 +163,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     // Este código se ejecuta en un goroutine separado
     // Si aquí se lanzan 1000 requests simultáneos,
     // Go crea 1000 goroutines automáticamente
-    
+
     fmt.Println(runtime.NumGoroutine()) // Ver cantidad de goroutines activos
 }
 ```
@@ -205,7 +205,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 ```go
 func handler(w http.ResponseWriter, r *http.Request) {
     ctx := r.Context()
-    
+
     // El context tiene deadline, valores, y se puede cancelar
     select {
     case <-ctx.Done():
@@ -222,7 +222,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 ```
 mi-api/
 ├── main.go              # Punto de entrada
-├── handlers/            
+├── handlers/  
 │   ├── users.go         # Handlers de usuarios
 │   ├── products.go      # Handlers de productos
 │   └── health.go        # Health checks
@@ -281,13 +281,13 @@ mux.HandleFunc("/", h3)
 ```go
 func usuarioHandler(w http.ResponseWriter, r *http.Request) {
     // Con http.ServeMux, hay que parsear manualmente
-    
+
     // Opción 1: Usando strings
     id := strings.TrimPrefix(r.URL.Path, "/usuarios/")
-    
+
     // Opción 2: Usando Query parameters
     id := r.URL.Query().Get("id")
-    
+
     // Opción 3: Usando path parameters (más moderno)
     // Requiere router personalizado
 }
@@ -350,10 +350,10 @@ func (r *Router) Post(path string, handler http.HandlerFunc) {
 // Uso
 func main() {
     router := NewRouter()
-    
+
     router.Get("/", homeHandler)
     router.Post("/usuarios", crearUsuarioHandler)
-    
+
     http.ListenAndServe(":8080", router)
 }
 ```
@@ -450,10 +450,10 @@ func chain(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.
 func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         inicio := time.Now()
-        
+
         // Llamar al siguiente handler
         next(w, r)
-        
+
         duracion := time.Since(inicio)
         log.Printf("%s %s completado en %v", r.Method, r.URL.Path, duracion)
     }
@@ -463,17 +463,17 @@ func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         token := r.Header.Get("Authorization")
-        
+
         if token == "" {
             http.Error(w, "Token no proporcionado", http.StatusUnauthorized)
             return
         }
-        
+
         if !validarToken(token) {
             http.Error(w, "Token inválido", http.StatusForbidden)
             return
         }
-        
+
         // Token válido, continuar
         next(w, r)
     }
@@ -482,13 +482,13 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // Uso
 func main() {
     mux := http.NewServeMux()
-    
+
     // Sin middleware
     mux.HandleFunc("/public", chain(publicHandler))
-    
+
     // Con middleware
     mux.HandleFunc("/protected", chain(protectedHandler, authMiddleware, loggingMiddleware))
-    
+
     http.ListenAndServe(":8080", mux)
 }
 ```
@@ -522,9 +522,9 @@ func responseInterceptorMiddleware(next http.HandlerFunc) http.HandlerFunc {
             ResponseWriter: w,
             statusCode:     http.StatusOK,
         }
-        
+
         next(interceptor, r)
-        
+
         // Hacer algo con status code y body
         log.Printf("Status: %d, Body size: %d bytes", interceptor.statusCode, len(interceptor.body))
     }
@@ -539,22 +539,22 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         // Permitir todos los orígenes (NO recomendado en producción)
         w.Header().Set("Access-Control-Allow-Origin", "*")
-        
+
         // Permitir métodos
         w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        
+
         // Permitir headers personalizados
         w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        
+
         // Tiempo de caché de CORS preflight
         w.Header().Set("Access-Control-Max-Age", "3600")
-        
+
         // Manejar preflight request
         if r.Method == http.MethodOptions {
             w.WriteHeader(http.StatusOK)
             return
         }
-        
+
         next(w, r)
     }
 }
@@ -569,17 +569,17 @@ func timeoutMiddleware(duracion time.Duration) func(http.HandlerFunc) http.Handl
         return func(w http.ResponseWriter, r *http.Request) {
             ctx, cancel := context.WithTimeout(r.Context(), duracion)
             defer cancel()
-            
+
             // Crear nuevo request con contexto
             r = r.WithContext(ctx)
-            
+
             // Canal para saber si handler terminó
             done := make(chan struct{})
             go func() {
                 next(w, r)
                 done <- struct{}{}
             }()
-            
+
             select {
             case <-done:
                 // Handler completó normalmente
@@ -604,10 +604,10 @@ Go puede parsear automáticamente varios formatos:
 // 1. Query Parameters
 func queryHandler(w http.ResponseWriter, r *http.Request) {
     // GET /search?q=golang&limit=10
-    
+
     q := r.URL.Query().Get("q")           // "golang"
     limit := r.URL.Query().Get("limit")   // "10"
-    
+
     // Obtener valor múltiple
     tags := r.URL.Query()["tag"]  // []string{"golang", "http"}
 }
@@ -620,13 +620,13 @@ type Producto struct {
 
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
     var producto Producto
-    
+
     err := json.NewDecoder(r.Body).Decode(&producto)
     if err != nil {
         http.Error(w, "JSON inválido", http.StatusBadRequest)
         return
     }
-    
+
     // Usar producto
     fmt.Printf("Producto: %s, Precio: $%.2f\n", producto.Nombre, producto.Precio)
 }
@@ -634,9 +634,9 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 // 3. Form Data (application/x-www-form-urlencoded)
 func formHandler(w http.ResponseWriter, r *http.Request) {
     // POST con Content-Type: application/x-www-form-urlencoded
-    
+
     r.ParseForm()
-    
+
     nombre := r.FormValue("nombre")
     email := r.FormValue("email")
 }
@@ -648,7 +648,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
     // Límite de tamaño: 10MB
     r.ParseMultipartForm(10 << 20)
-    
+
     // Obtener el archivo del form
     archivo, handler, err := r.FormFile("file")
     if err != nil {
@@ -656,12 +656,12 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     defer archivo.Close()
-    
+
     // Información del archivo
     fmt.Printf("Nombre: %s\n", handler.Filename)
     fmt.Printf("Tamaño: %d bytes\n", handler.Size)
     fmt.Printf("Tipo MIME: %s\n", handler.Header.Get("Content-Type"))
-    
+
     // Guardar archivo
     rutaDestino := fmt.Sprintf("uploads/%s", handler.Filename)
     destino, err := os.Create(rutaDestino)
@@ -670,14 +670,14 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     defer destino.Close()
-    
+
     // Copiar contenido
     _, err = io.Copy(destino, archivo)
     if err != nil {
         http.Error(w, "Error al copiar", http.StatusInternalServerError)
         return
     }
-    
+
     fmt.Fprintf(w, "Archivo guardado en: %s", rutaDestino)
 }
 ```
@@ -697,33 +697,33 @@ func validarUsuario(u Usuario) error {
     if u.Nombre == "" || len(u.Nombre) < 3 {
         return errors.New("nombre debe tener al menos 3 caracteres")
     }
-    
+
     if !strings.Contains(u.Email, "@") {
         return errors.New("email inválido")
     }
-    
+
     if u.Edad < 18 || u.Edad > 150 {
         return errors.New("edad debe estar entre 18 y 150")
     }
-    
+
     return nil
 }
 
 func crearUsuarioHandler(w http.ResponseWriter, r *http.Request) {
     var usuario Usuario
-    
+
     err := json.NewDecoder(r.Body).Decode(&usuario)
     if err != nil {
         http.Error(w, "JSON inválido", http.StatusBadRequest)
         return
     }
-    
+
     // Validar
     if err := validarUsuario(usuario); err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-    
+
     // Procesar usuario válido
 }
 ```
@@ -736,10 +736,10 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
         "nombre": "Juan",
         "edad":   30,
     }
-    
+
     // Parsear Accept header
     tipoAceptado := r.Header.Get("Accept")
-    
+
     if strings.Contains(tipoAceptado, "application/xml") {
         // Retornar XML
         w.Header().Set("Content-Type", "application/xml")
@@ -772,16 +772,17 @@ func responseHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
     w.Header().Set("X-Custom-Header", "valor")
     w.Header().Add("Set-Cookie", "session=abc123")  // Add permite múltiples valores
-    
+
     // Escribir status code (solo una vez!)
     w.WriteHeader(http.StatusOK)
-    
+
     // Escribir body
     fmt.Fprintf(w, `{"status":"ok"}`)
 }
 ```
 
 **Orden importante:**
+
 1. Primero `w.Header().Set()` (múltiples veces)
 2. Luego `w.WriteHeader()` (solo una vez)
 3. Finalmente escribir body
@@ -820,7 +821,7 @@ http.StatusServiceUnavailable   // 503
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
     // Redirección simple (302)
     http.Redirect(w, r, "/nueva-url", http.StatusFound)
-    
+
     // Redirección permanente (301)
     http.Redirect(w, r, "/nueva-url", http.StatusMovedPermanently)
 }
@@ -831,23 +832,23 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 ```go
 func downloadHandler(w http.ResponseWriter, r *http.Request) {
     // Para archivos grandes, usar streaming en lugar de cargar todo en memoria
-    
+
     archivo, err := os.Open("grande-archivo.zip")
     if err != nil {
         http.Error(w, "Archivo no encontrado", http.StatusNotFound)
         return
     }
     defer archivo.Close()
-    
+
     // Información del archivo
     info, _ := archivo.Stat()
     tamaño := info.Size()
-    
+
     // Headers para descarga
     w.Header().Set("Content-Type", "application/octet-stream")
     w.Header().Set("Content-Disposition", `attachment; filename="archivo.zip"`)
     w.Header().Set("Content-Length", strconv.FormatInt(tamaño, 10))
-    
+
     // Copiar contenido directamente al response (streaming)
     io.Copy(w, archivo)
 }
@@ -869,7 +870,7 @@ func productosHandler(w http.ResponseWriter, r *http.Request) {
         {"id": 1, "nombre": "Laptop"},
         {"id": 2, "nombre": "Mouse"},
     }
-    
+
     writeJSON(w, http.StatusOK, productos)
 }
 ```
@@ -914,7 +915,7 @@ func writeError(w http.ResponseWriter, status int, codigo, mensaje string) {
         Mensaje:   mensaje,
         Timestamp: time.Now().UnixMilli(),
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(status)
     json.NewEncoder(w).Encode(error)
@@ -923,18 +924,18 @@ func writeError(w http.ResponseWriter, status int, codigo, mensaje string) {
 // Uso
 func usuarioHandler(w http.ResponseWriter, r *http.Request) {
     id := r.URL.Query().Get("id")
-    
+
     if id == "" {
         writeError(w, http.StatusBadRequest, "PARAM_MISSING", "Parámetro 'id' requerido")
         return
     }
-    
+
     usuario, err := buscarUsuario(id)
     if err != nil {
         writeError(w, http.StatusNotFound, "USUARIO_NO_ENCONTRADO", "Usuario no existe")
         return
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(usuario)
 }
@@ -949,12 +950,12 @@ func recoveryMiddleware(next http.HandlerFunc) http.HandlerFunc {
         defer func() {
             if err := recover(); err != nil {
                 log.Printf("PANIC: %v\n%s", err, debug.Stack())
-                
-                writeError(w, http.StatusInternalServerError, 
+
+                writeError(w, http.StatusInternalServerError,
                     "INTERNAL_ERROR", "Error interno del servidor")
             }
         }()
-        
+
         next(w, r)
     }
 }
@@ -965,16 +966,16 @@ func recoveryMiddleware(next http.HandlerFunc) http.HandlerFunc {
 ```go
 func handlerConTimeout(w http.ResponseWriter, r *http.Request) {
     ctx := r.Context()
-    
+
     // Operación con timeout
     resultado := make(chan interface{}, 1)
-    
+
     go func() {
         // Simulación de operación lenta
         time.Sleep(2 * time.Second)
         resultado <- "datos"
     }()
-    
+
     select {
     case res := <-resultado:
         json.NewEncoder(w).Encode(res)
@@ -1005,17 +1006,17 @@ func validarAPIKey(apiKey string) bool {
 func apiKeyMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         apiKey := r.Header.Get("X-API-Key")
-        
+
         if apiKey == "" {
             writeError(w, http.StatusUnauthorized, "MISSING_KEY", "API Key requerida")
             return
         }
-        
+
         if !validarAPIKey(apiKey) {
             writeError(w, http.StatusForbidden, "INVALID_KEY", "API Key inválida")
             return
         }
-        
+
         next(w, r)
     }
 }
@@ -1044,7 +1045,7 @@ func generarToken(userID int, username string) (string, error) {
             IssuedAt:  jwt.NewNumericDate(time.Now()),
         },
     }
-    
+
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString([]byte(jwtSecret))
 }
@@ -1052,15 +1053,15 @@ func generarToken(userID int, username string) (string, error) {
 // Validar token
 func validarToken(tokenString string) (*Claims, error) {
     claims := &Claims{}
-    
+
     token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
         return []byte(jwtSecret), nil
     })
-    
+
     if err != nil || !token.Valid {
         return nil, err
     }
-    
+
     return claims, nil
 }
 
@@ -1069,25 +1070,25 @@ func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         // Obtener token del header Authorization
         authHeader := r.Header.Get("Authorization")
-        
+
         if authHeader == "" {
             writeError(w, http.StatusUnauthorized, "MISSING_TOKEN", "Token requerido")
             return
         }
-        
+
         // Formato: "Bearer <token>"
         parts := strings.Split(authHeader, " ")
         if len(parts) != 2 || parts[0] != "Bearer" {
             writeError(w, http.StatusUnauthorized, "INVALID_FORMAT", "Formato inválido")
             return
         }
-        
+
         claims, err := validarToken(parts[1])
         if err != nil {
             writeError(w, http.StatusForbidden, "INVALID_TOKEN", "Token inválido")
             return
         }
-        
+
         // Guardar claims en contexto
         ctx := context.WithValue(r.Context(), "claims", claims)
         next(w, r.WithContext(ctx))
@@ -1097,7 +1098,7 @@ func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // Uso en handler
 func protectedHandler(w http.ResponseWriter, r *http.Request) {
     claims := r.Context().Value("claims").(*Claims)
-    
+
     fmt.Fprintf(w, "Usuario: %s (ID: %d)", claims.Username, claims.UserID)
 }
 ```
@@ -1108,13 +1109,13 @@ func protectedHandler(w http.ResponseWriter, r *http.Request) {
 func basicAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         username, password, ok := r.BasicAuth()
-        
+
         if !ok || !validarCredenciales(username, password) {
             w.Header().Set("WWW-Authenticate", `Basic realm="API"`)
             writeError(w, http.StatusUnauthorized, "INVALID_AUTH", "Credenciales inválidas")
             return
         }
-        
+
         next(w, r)
     }
 }
@@ -1141,32 +1142,32 @@ func init() {
 func loginHandler(w http.ResponseWriter, r *http.Request) {
     username := r.FormValue("username")
     password := r.FormValue("password")
-    
+
     // Validar credenciales
     if username != "admin" || password != "123456" {
         http.Error(w, "Credenciales inválidas", http.StatusUnauthorized)
         return
     }
-    
+
     // Crear sesión
     session, _ := cookieStore.Get(r, "session")
     session.Values["user_id"] = 123
     session.Values["username"] = username
-    
+
     session.Save(r, w)
-    
+
     http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 func sessionMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         session, _ := cookieStore.Get(r, "session")
-        
+
         if auth, ok := session.Values["user_id"]; !ok || auth == nil {
             http.Redirect(w, r, "/login", http.StatusSeeOther)
             return
         }
-        
+
         next(w, r)
     }
 }
@@ -1192,7 +1193,7 @@ func corsHandler(config CORSConfig) func(http.HandlerFunc) http.HandlerFunc {
     return func(next http.HandlerFunc) http.HandlerFunc {
         return func(w http.ResponseWriter, r *http.Request) {
             origin := r.Header.Get("Origin")
-            
+
             // Verificar si origen está permitido
             allowedOrigin := false
             for _, o := range config.AllowedOrigins {
@@ -1201,29 +1202,29 @@ func corsHandler(config CORSConfig) func(http.HandlerFunc) http.HandlerFunc {
                     break
                 }
             }
-            
+
             if !allowedOrigin {
                 next(w, r)
                 return
             }
-            
+
             // Headers CORS
             w.Header().Set("Access-Control-Allow-Origin", origin)
             w.Header().Set("Access-Control-Allow-Methods", strings.Join(config.AllowedMethods, ", "))
             w.Header().Set("Access-Control-Allow-Headers", strings.Join(config.AllowedHeaders, ", "))
             w.Header().Set("Access-Control-Expose-Headers", strings.Join(config.ExposedHeaders, ", "))
             w.Header().Set("Access-Control-Max-Age", strconv.Itoa(config.MaxAge))
-            
+
             if config.AllowCredentials {
                 w.Header().Set("Access-Control-Allow-Credentials", "true")
             }
-            
+
             // Manejar preflight
             if r.Method == http.MethodOptions {
                 w.WriteHeader(http.StatusOK)
                 return
             }
-            
+
             next(w, r)
         }
     }
@@ -1237,23 +1238,23 @@ func securityHeadersMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         // Prevenir clickjacking
         w.Header().Set("X-Frame-Options", "DENY")
-        
+
         // Prevenir MIME sniffing
         w.Header().Set("X-Content-Type-Options", "nosniff")
-        
+
         // Habilitar XSS protection en navegadores antiguos
         w.Header().Set("X-XSS-Protection", "1; mode=block")
-        
+
         // Content Security Policy
         w.Header().Set("Content-Security-Policy", "default-src 'self'")
-        
+
         // HTTP Strict Transport Security (solo HTTPS)
         w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-        
+
         // No cachear datos sensibles
         w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
         w.Header().Set("Pragma", "no-cache")
-        
+
         next(w, r)
     }
 }
@@ -1268,19 +1269,19 @@ func csrfMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         // Obtener token CSRF del header o cookie
         csrfToken := csrf.Token(r)
-        
+
         // Para formularios, incluir en template: {{ csrf.TemplateField }}
-        
+
         // Para AJAX, comparar con header X-CSRF-Token
         if r.Method != http.MethodGet && r.Method != http.MethodOptions {
             headerToken := r.Header.Get("X-CSRF-Token")
-            
+
             if headerToken != csrfToken {
                 writeError(w, http.StatusForbidden, "INVALID_CSRF", "Token CSRF inválido")
                 return
             }
         }
-        
+
         next(w, r)
     }
 }
@@ -1307,7 +1308,7 @@ func (rl *RateLimiter) limitarMiddleware(requestsPerSecond float64) func(http.Ha
         return func(w http.ResponseWriter, r *http.Request) {
             // IP del cliente como identificador
             ip := r.RemoteAddr
-            
+
             rl.mu.Lock()
             limiter, exists := rl.limiters[ip]
             if !exists {
@@ -1315,12 +1316,12 @@ func (rl *RateLimiter) limitarMiddleware(requestsPerSecond float64) func(http.Ha
                 rl.limiters[ip] = limiter
             }
             rl.mu.Unlock()
-            
+
             if !limiter.Allow() {
                 writeError(w, http.StatusTooManyRequests, "RATE_LIMIT", "Demasiadas solicitudes")
                 return
             }
-            
+
             next(w, r)
         }
     }
@@ -1334,6 +1335,7 @@ func (rl *RateLimiter) limitarMiddleware(requestsPerSecond float64) func(http.Ha
 ### El Problema: Cerrar Limpiamente
 
 Cuando apagamos un servidor HTTP, queremos:
+
 1. No rechazar nuevos requests bruscamente
 2. Permitir que requests en progreso terminen
 3. Cerrar conexiones de base de datos
@@ -1387,7 +1389,7 @@ func main() {
     // Crear servidor
     mux := http.NewServeMux()
     mux.HandleFunc("/api", apiHandler)
-    
+
     server := &http.Server{
         Addr:           ":8080",
         Handler:        mux,
@@ -1395,20 +1397,20 @@ func main() {
         WriteTimeout:   10 * time.Second,
         MaxHeaderBytes: 1 << 20,
     }
-    
+
     // Canal para errores del servidor
     serverErrors := make(chan error, 1)
-    
+
     // Iniciar servidor en goroutine
     go func() {
         log.Printf("Servidor iniciado en %s", server.Addr)
         serverErrors <- server.ListenAndServe()
     }()
-    
+
     // Canal para señales del SO
     quit := make(chan os.Signal, 1)
     signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-    
+
     select {
     case err := <-serverErrors:
         if err != http.ErrServerClosed {
@@ -1416,16 +1418,16 @@ func main() {
         }
     case sig := <-quit:
         log.Printf("Señal recibida: %v", sig)
-        
+
         // Contexto con timeout de 30 segundos
         ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
         defer cancel()
-        
+
         // Shutdown graceful
         if err := server.Shutdown(ctx); err != nil {
             log.Fatalf("Error al apagar servidor: %v", err)
         }
-        
+
         log.Println("Servidor apagado correctamente")
     }
 }
@@ -1448,45 +1450,45 @@ type App struct {
 
 func (app *App) Shutdown(ctx context.Context) error {
     // Cerrar en orden correcto: últero en crear, primero en cerrar
-    
+
     // 1. Apagar HTTP server
     if err := app.server.Shutdown(ctx); err != nil {
         return fmt.Errorf("error apagando servidor HTTP: %w", err)
     }
-    
+
     // 2. Cerrar conexión DB
     if app.db != nil {
         if err := app.db.Close(); err != nil {
             return fmt.Errorf("error cerrando DB: %w", err)
         }
     }
-    
+
     return nil
 }
 
 func main() {
     // Crear recursos
     db, _ := sql.Open("postgres", "...")
-    
+
     app := &App{
         server: &http.Server{Addr: ":8080"},
         db:     db,
     }
-    
+
     // Manejar shutdown
     quit := make(chan os.Signal, 1)
     signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-    
+
     go func() {
         <-quit
         ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
         defer cancel()
-        
+
         if err := app.Shutdown(ctx); err != nil {
             log.Fatalf("Error en shutdown: %v", err)
         }
     }()
-    
+
     app.server.ListenAndServe()
 }
 ```
@@ -1505,33 +1507,33 @@ func (cd *ConnectionDrainer) Middleware(next http.HandlerFunc) http.HandlerFunc 
         cd.mu.Lock()
         cd.activeRequests++
         cd.mu.Unlock()
-        
+
         defer func() {
             cd.mu.Lock()
             cd.activeRequests--
             cd.mu.Unlock()
         }()
-        
+
         next(w, r)
     }
 }
 
 func (cd *ConnectionDrainer) Wait(timeout time.Duration) error {
     deadline := time.Now().Add(timeout)
-    
+
     for {
         cd.mu.Lock()
         active := cd.activeRequests
         cd.mu.Unlock()
-        
+
         if active == 0 {
             return nil
         }
-        
+
         if time.Now().After(deadline) {
             return fmt.Errorf("timeout esperando %d requests", active)
         }
-        
+
         time.Sleep(100 * time.Millisecond)
     }
 }
@@ -1555,18 +1557,18 @@ import (
 func TestHealthCheck(t *testing.T) {
     // Crear un request
     req := httptest.NewRequest("GET", "/health", nil)
-    
+
     // Crear un recorder para capturar respuesta
     w := httptest.NewRecorder()
-    
+
     // Ejecutar handler
     healthHandler(w, req)
-    
+
     // Verificar status code
     if w.Code != http.StatusOK {
         t.Errorf("Expected status 200, got %d", w.Code)
     }
-    
+
     // Verificar body
     if body := w.Body.String(); body != "OK" {
         t.Errorf("Expected 'OK', got '%s'", body)
@@ -1576,18 +1578,18 @@ func TestHealthCheck(t *testing.T) {
 func TestGetUsuario(t *testing.T) {
     req := httptest.NewRequest("GET", "/usuarios?id=123", nil)
     w := httptest.NewRecorder()
-    
+
     usuarioHandler(w, req)
-    
+
     // Verificar JSON response
     if w.Header().Get("Content-Type") != "application/json" {
         t.Fatal("Content-Type no es JSON")
     }
-    
+
     // Parsear respuesta
     var usuario Usuario
     json.NewDecoder(w.Body).Decode(&usuario)
-    
+
     if usuario.ID != 123 {
         t.Errorf("Expected ID 123, got %d", usuario.ID)
     }
@@ -1601,13 +1603,13 @@ func TestAPIIntegration(t *testing.T) {
     // Crear servidor de prueba
     server := httptest.NewServer(http.HandlerFunc(apiHandler))
     defer server.Close()
-    
+
     // Hacer request al servidor
     resp, err := http.Get(server.URL + "/usuarios")
     if err != nil {
         t.Fatal(err)
     }
-    
+
     // Verificar respuesta
     if resp.StatusCode != http.StatusOK {
         t.Errorf("Expected 200, got %d", resp.StatusCode)
@@ -1656,14 +1658,14 @@ func TestUserHandler(t *testing.T) {
             "1": {ID: "1", Name: "Juan"},
         },
     }
-    
+
     handler := makeUserHandler(mockDB)
-    
+
     req := httptest.NewRequest("GET", "/?id=1", nil)
     w := httptest.NewRecorder()
-    
+
     handler(w, req)
-    
+
     if w.Code != http.StatusOK {
         t.Fatal("Expected 200")
     }
@@ -1678,24 +1680,24 @@ func TestAuthMiddleware(t *testing.T) {
     protected := authMiddleware(func(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)
     })
-    
+
     // Test sin token
     req := httptest.NewRequest("GET", "/", nil)
     w := httptest.NewRecorder()
-    
+
     protected(w, req)
-    
+
     if w.Code != http.StatusUnauthorized {
         t.Error("Esperaba 401 sin token")
     }
-    
+
     // Test con token válido
     req = httptest.NewRequest("GET", "/", nil)
     req.Header.Set("Authorization", "Bearer valid-token")
     w = httptest.NewRecorder()
-    
+
     protected(w, req)
-    
+
     if w.Code != http.StatusOK {
         t.Error("Esperaba 200 con token válido")
     }
@@ -1745,13 +1747,13 @@ mux.HandleFunc("/v2/usuarios", usuariosHandlerV2)
 func versionMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         accept := r.Header.Get("Accept")
-        
+
         if strings.Contains(accept, "version=2") {
             // Usar v2
         } else {
             // Usar v1
         }
-        
+
         next(w, r)
     }
 }
@@ -1776,22 +1778,22 @@ func usuariosConPaginacion(w http.ResponseWriter, r *http.Request) {
     // Parámetros
     page := 1
     pageSize := 10
-    
+
     if p := r.URL.Query().Get("page"); p != "" {
         page, _ = strconv.Atoi(p)
     }
     if ps := r.URL.Query().Get("page_size"); ps != "" {
         pageSize, _ = strconv.Atoi(ps)
     }
-    
+
     // Validar
     if pageSize > 100 {
         pageSize = 100 // Máximo
     }
-    
+
     // Consultar BD
     usuarios, total, _ := buscarUsuariosConPaginacion(page, pageSize)
-    
+
     response := PaginatedResponse{
         Data:       usuarios,
         Page:       page,
@@ -1799,7 +1801,7 @@ func usuariosConPaginacion(w http.ResponseWriter, r *http.Request) {
         Total:      total,
         TotalPages: (total + pageSize - 1) / pageSize,
     }
-    
+
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(response)
 }
@@ -1813,14 +1815,14 @@ import "log/slog"
 func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         inicio := time.Now()
-        
+
         // Interceptar status code
         wrapped := &responseInterceptor{ResponseWriter: w}
-        
+
         next(wrapped, r)
-        
+
         duracion := time.Since(inicio)
-        
+
         // Log estructurado
         slog.Info("HTTP request",
             "metodo", r.Method,
@@ -1860,16 +1862,16 @@ func usuariosHandler(w http.ResponseWriter, r *http.Request) {
 server := &http.Server{
     Addr:              ":8080",
     Handler:           mux,
-    
+
     // Timeout para leer request completo
     ReadTimeout:       10 * time.Second,
-    
+
     // Timeout para escribir response completa
     WriteTimeout:      10 * time.Second,
-    
+
     // Timeout para idle connection
     IdleTimeout:       120 * time.Second,
-    
+
     // Máximo de headers
     MaxHeaderBytes:    1 << 20, // 1MB
 }
@@ -1883,7 +1885,7 @@ server.ListenAndServe()
 type CircuitBreaker struct {
     maxFailures int
     timeout     time.Duration
-    
+
     failures int
     lastFail time.Time
     state    string // "closed", "open", "half-open"
@@ -1897,19 +1899,19 @@ func (cb *CircuitBreaker) Call(fn func() error) error {
             return errors.New("circuito abierto")
         }
     }
-    
+
     err := fn()
-    
+
     if err != nil {
         cb.failures++
         cb.lastFail = time.Now()
-        
+
         if cb.failures >= cb.maxFailures {
             cb.state = "open"
         }
         return err
     }
-    
+
     cb.failures = 0
     cb.state = "closed"
     return nil
@@ -2184,6 +2186,7 @@ r = r.WithContext(ctx)
 ## Referencias Internas del Capítulo
 
 Este capítulo construye sobre:
+
 - **Capítulo 8**: Interfaces y composición (http.Handler, middleware como composición)
 - **Capítulo 9**: Channels y concurrencia (goroutines por request, context cancellation)
 - **Capítulo 12**: Métodos y tipos (estructuras como handlers)

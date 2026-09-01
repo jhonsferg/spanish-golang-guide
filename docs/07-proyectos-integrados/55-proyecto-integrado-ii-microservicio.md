@@ -1,6 +1,7 @@
 # Capítulo 55: Proyecto integrado II - Microservicio completo con deployment
 
 ## Índice del Capítulo
+
 1. Resumen del Proyecto
 2. Diseño de Arquitectura
 3. Setup del Microservicio
@@ -22,6 +23,7 @@
 En este capítulo construiremos un **Notification Service** (Microservicio de Notificaciones) production-ready que demuestra patrones empresariales modernos en Go. Este servicio maneja el envío de notificaciones multi-canal (Email, SMS, Push, Slack) de forma asincrónica, resiliente y observable.
 
 **Características clave:**
+
 - ✅ Arquitectura de microservicios escalable
 - ✅ Event-driven asincrónico con RabbitMQ
 - ✅ Persistencia con PostgreSQL
@@ -34,6 +36,7 @@ En este capítulo construiremos un **Notification Service** (Microservicio de No
 ### 55.1.2 Requisitos del Microservicio
 
 **Funcionales:**
+
 - Recibir solicitudes de notificación por HTTP
 - Almacenar notificaciones en base de datos
 - Publicar eventos a cola de mensajes
@@ -43,6 +46,7 @@ En este capítulo construiremos un **Notification Service** (Microservicio de No
 - Proveer estado de notificaciones
 
 **No-funcionales:**
+
 - Latencia p99 < 200ms para crear notificación
 - 99.9% disponibilidad
 - Procesamiento de 10k notificaciones/segundo
@@ -64,7 +68,6 @@ CI/CD: GitHub Actions
 
 ### 55.1.4 Comparativas: Go vs Alternativas
 
-
  Aspecto           │ Go           │ Python       │ Java         │
 clear
  Startup time     │ 10ms         │ 500ms        │ 2000ms       │
@@ -75,8 +78,8 @@ clear
  Deployment       │ 1 archivo    │ VM + deps    │ JVM + deps   │
  GC pauses        │ <1ms         │ 10-50ms      │ 50-200ms     │
 
-
 **Por qué Go para microservicios:**
+
 1. Concurrencia sin overhead: Millones de goroutines con bajo costo
 2. Binary único: Deploy trivial, sin dependencias runtime
 3. Performance: Latencia consistente, GC predecible
@@ -92,7 +95,7 @@ clear
                 │ Notification API     │
                 │ (Gin, REST)          │
                 └───────────┬──────────┘
-                            
+
         ┌───────────────────┼─────────────────┐
         │                   │                 │
   ┌──────▼──────┐    ┌───▼──────┐  ┌────────▼──
@@ -140,6 +143,7 @@ Notification Bounded Context
     └── NotificationRepository (persistence)
 
 **Conceptos clave:**
+
 - Aggregate Root: Notification es la raíz, contiene templates, recipients
 - Bounded Context: El servicio completo es un contexto acotado
 - Ubiquitous Language: Términos compartidos (Notification, Channel, Status)
@@ -182,6 +186,7 @@ Arquitectura orientada a eventos para desacoplamiento:
     └──────────┘  └─────────────┘  └────────────┘
 
 **Ventajas:**
+
 - Desacoplamiento: Consumidores no conocen productor
 - Escalabilidad: Múltiples consumidores independientes
 - Resiliencia: Si consumidor falla, otros continúan
@@ -189,8 +194,7 @@ Arquitectura orientada a eventos para desacoplamiento:
 
 ### 55.2.3 Comparativa: Message Queues
 
-
- Característica   │ RabbitMQ     Kafka  Redis Streams││        
+ Característica   │ RabbitMQ     Kafka  Redis Streams││
 clear
  Durabilidad      │ Excelente    │ Excelente    │ Buena        │
  Latencia         │ ~10ms        │ ~100ms       │ <1ms         │
@@ -198,7 +202,6 @@ clear
  Replay events    │ No           │ Sí           │ Sí           │
  Setup            │ Docker easy  │ Cluster      │ Simple       │
  Operacional      │ Maduro       │ Cloud-ready  │ Simple       │
-
 
 **Decisión**: Usamos **RabbitMQ** por confiabilidad y simplicidad.
 
@@ -251,13 +254,16 @@ notification-service/
 ### 55.3.2 Go Module Initialization
 
 # Crear directorio
+
 mkdir notification-service
 cd notification-service
 
 # Inicializar módulo Go
+
 go mod init github.com/yourorg/notification-service
 
 # Agregar dependencias principales
+
 go get github.com/gin-gonic/gin@latest
 go get github.com/lib/pq@latest
 go get github.com/rabbitmq/amqp091-go@latest
@@ -307,7 +313,7 @@ func LoadConfig() *Config {
         Environment:        getEnv("ENVIRONMENT", "dev"),
         LogLevel:           getEnv("LOG_LEVEL", "info"),
         PostgresURL:        getEnv("POSTGRES_URL", ""),
-        RabbitMQURL:        getEnv("RABBITMQ_URL", 
+        RabbitMQURL:        getEnv("RABBITMQ_URL",
                             "amqp://guest:guest@localhost:5672/"),
         MaxRetries:         getEnvInt("MAX_RETRIES", 3),
         PrometheusPort:     getEnv("PROMETHEUS_PORT", "9090"),
@@ -336,11 +342,11 @@ package app
 
 type Container struct {
     NotificationService   *NotificationService
-    NotificationHandler   *NotificationHandler
+    NotificationHandler*NotificationHandler
     EventConsumer         *EventConsumer
     Logger                Logger
     Metrics               Metrics
-    Database              *sql.DB
+    Database*sql.DB
 }
 
 func NewContainer(config *Config) (*Container, error) {
@@ -493,7 +499,7 @@ type Notification struct {
     Content       NotificationContent
     Attempts      int
     LastAttempt   *time.Time
-    NextRetry     *time.Time
+    NextRetry*time.Time
     ErrorMessage  string
     CreatedAt     time.Time
     UpdatedAt     time.Time
@@ -507,7 +513,7 @@ type NotificationContent struct {
 }
 
 // NewNotification creates notification
-func NewNotification(templateID string, channel Channel, 
+func NewNotification(templateID string, channel Channel,
     recipient string) *Notification {
     return &Notification{
         ID:        uuid.New().String(),
@@ -661,7 +667,7 @@ func (ns *NotificationService) CreateNotification(
     ctx context.Context,
     templateID, channel, recipient, body string,
 ) (*Notification, error) {
-    
+
     // Validate input
     if templateID == "" || channel == "" || recipient == "" || body == "" {
         ns.metrics.RecordNotificationCreationFailure(channel)
@@ -669,7 +675,7 @@ func (ns *NotificationService) CreateNotification(
     }
 
     // Create domain object
-    notification := NewNotification(templateID, 
+    notification := NewNotification(templateID,
         Channel(channel), recipient)
     notification.Content = NotificationContent{
         Body: body,
@@ -704,14 +710,14 @@ func (ns *NotificationService) CreateNotification(
 
     ns.eventBus.Publish(ctx, event)
     ns.metrics.RecordNotificationCreated(channel)
-    
+
     return notification, nil
 }
 
 // ProcessNotification handles event
 func (ns *NotificationService) ProcessNotification(
     ctx context.Context,
-    event *NotificationRequestedEvent,
+    event*NotificationRequestedEvent,
 ) error {
     notification, err := ns.repository.GetByID(ctx, event.NotificationID)
     if err != nil {
@@ -752,7 +758,7 @@ func (ns *NotificationService) GetNotificationStatus(
 
 func (ns *NotificationService) sendNotification(
     ctx context.Context,
-    notification *Notification,
+    notification*Notification,
 ) error {
     // TODO: Implementar integraciones reales
     return nil
@@ -788,7 +794,7 @@ type NotificationResponse struct {
 }
 
 // CreateNotification HTTP handler
-func (h *NotificationHandler) CreateNotification(c *gin.Context) {
+func (h *NotificationHandler) CreateNotification(c*gin.Context) {
     var req CreateNotificationRequest
     if err := c.ShouldBindJSON(&req); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -804,7 +810,7 @@ func (h *NotificationHandler) CreateNotification(c *gin.Context) {
     )
     if err != nil {
         h.logger.Error(c.Request.Context(), "failed to create")
-        c.JSON(http.StatusInternalServerError, 
+        c.JSON(http.StatusInternalServerError,
             gin.H{"error": err.Error()})
         return
     }
@@ -818,7 +824,7 @@ func (h *NotificationHandler) CreateNotification(c *gin.Context) {
 }
 
 // GetStatus HTTP handler
-func (h *NotificationHandler) GetStatus(c *gin.Context) {
+func (h *NotificationHandler) GetStatus(c*gin.Context) {
     id := c.Param("id")
 
     notification, err := h.service.GetNotificationStatus(
@@ -837,7 +843,7 @@ func (h *NotificationHandler) GetStatus(c *gin.Context) {
 }
 
 // Health check
-func (h *NotificationHandler) Health(c *gin.Context) {
+func (h *NotificationHandler) Health(c*gin.Context) {
     c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 }
 
@@ -864,7 +870,7 @@ const (
 
 type RabbitMQEventBus struct {
     conn     *amqp.Connection
-    channel  *amqp.Channel
+    channel*amqp.Channel
     exchange string
 }
 
@@ -935,7 +941,7 @@ func NewRabbitMQEventBus(url string) (*RabbitMQEventBus, error) {
 // Publish sends event
 func (rmq *RabbitMQEventBus) Publish(ctx context.Context,
     event interface{}) error {
-    
+
     eventData, err := json.Marshal(event)
     if err != nil {
         return err
@@ -962,7 +968,7 @@ func (rmq *RabbitMQEventBus) Publish(ctx context.Context,
 // Subscribe configures consumer
 func (rmq *RabbitMQEventBus) Subscribe(ctx context.Context,
     handler func(context.Context, []byte) error) error {
-    
+
     rmq.channel.Qos(10, 0, false)
 
     messages, err := rmq.channel.ConsumeWithContext(
@@ -1004,7 +1010,7 @@ func getRoutingKey(event interface{}) string {
     switch event.(type) {
     case *NotificationRequestedEvent:
         return "notification.requested"
-    case *NotificationSentEvent:
+    case*NotificationSentEvent:
         return "notification.sent"
     default:
         return "notification.unknown"
@@ -1031,7 +1037,7 @@ func NewEventConsumer(
     eventBus EventBus,
     service *NotificationService,
     logger Logger,
-) *EventConsumer {
+)*EventConsumer {
     return &EventConsumer{
         eventBus: eventBus,
         service:  service,
@@ -1042,7 +1048,7 @@ func NewEventConsumer(
 func (ec *EventConsumer) Start(ctx context.Context) error {
     return ec.eventBus.Subscribe(ctx, func(msgCtx context.Context,
         data []byte) error {
-        
+
         var event NotificationRequestedEvent
         if err := json.Unmarshal(data, &event); err != nil {
             ec.logger.Error(msgCtx, "failed to unmarshal")
@@ -1091,9 +1097,9 @@ func NewResilientHTTPClient(config ClientConfig) *ResilientHTTPClient {
 
 func (rc *ResilientHTTPClient) DoWithRetry(
     ctx context.Context,
-    req *http.Request,
+    req*http.Request,
 ) (*http.Response, error) {
-    
+
     var lastErr error
     backoff := rc.config.RetryBackoff
 
@@ -1152,7 +1158,7 @@ func (be *BulkheadExecutor) Execute(
     ctx context.Context,
     fn func(context.Context) error,
 ) error {
-    
+
     active := atomic.AddInt32(&be.activeCalls, 1)
     defer atomic.AddInt32(&be.activeCalls, -1)
 
@@ -1194,7 +1200,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     error_message TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    
+
     CONSTRAINT valid_channel CHECK (
         channel IN ('email', 'sms', 'push', 'slack')
     ),
@@ -1233,17 +1239,17 @@ func NewNotificationRepository(db *sql.DB) NotificationRepository {
 
 func (pr *PostgresNotificationRepository) Save(
     ctx context.Context,
-    n *Notification,
+    n*Notification,
 ) error {
-    
+
     contentJSON, err := json.Marshal(n.Content)
     if err != nil {
         return err
     }
 
     query := `
-        INSERT INTO notifications 
-        (id, template_id, channel, recipient, status, content, 
+        INSERT INTO notifications
+        (id, template_id, channel, recipient, status, content,
          attempts, last_attempt, next_retry, error_message)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         ON CONFLICT (id) DO UPDATE SET
@@ -1264,10 +1270,10 @@ func (pr *PostgresNotificationRepository) GetByID(
     ctx context.Context,
     id string,
 ) (*Notification, error) {
-    
+
     query := `
-        SELECT id, template_id, channel, recipient, status, content, 
-               attempts, last_attempt, next_retry, error_message, 
+        SELECT id, template_id, channel, recipient, status, content,
+               attempts, last_attempt, next_retry, error_message,
                created_at, updated_at
         FROM notifications WHERE id = $1
     `
@@ -1325,7 +1331,7 @@ func NewPrometheusMetrics() Metrics {
             },
             []string{"channel"},
         ),
-        notificationsFailed: *promauto.NewCounterVec(
+        notificationsFailed:*promauto.NewCounterVec(
             prometheus.CounterOpts{
                 Name: "notifications_failed_total",
                 Help: "Total notifications failed",
@@ -1419,7 +1425,7 @@ type HealthChecker struct {
 }
 
 // Liveness - ¿está corriendo?
-func (hc *HealthChecker) LivenessProbe(c *gin.Context) {
+func (hc *HealthChecker) LivenessProbe(c*gin.Context) {
     c.JSON(http.StatusOK, gin.H{"status": "alive"})
 }
 
@@ -1457,7 +1463,7 @@ type MockRepository struct {
 }
 
 func (mr *MockRepository) Save(ctx context.Context,
-    n *Notification) error {
+    n*Notification) error {
     mr.notifications[n.ID] = n
     return nil
 }
@@ -1523,7 +1529,7 @@ USER 1000
 EXPOSE 8080 9090
 
 HEALTHCHECK --interval=30s --timeout=3s \
-    CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
+    CMD wget --quiet --tries=1 --spider <http://localhost:8080/health> || exit 1
 
 CMD ["./notification-service"]
 
@@ -1584,7 +1590,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
+
+- port: 8080
     targetPort: 8080
   selector:
     app: notification-service
@@ -1602,7 +1609,8 @@ spec:
   minReplicas: 3
   maxReplicas: 10
   metrics:
-  - type: Resource
+
+- type: Resource
     resource:
       name: cpu
       target:
@@ -1688,20 +1696,24 @@ func (ffm *FeatureFlagManager) IsEnabled(flag FeatureFlag) bool {
 # RUNBOOK: Notification Service High Latency
 
 ## Síntomas
+
 - P99 latency > 500ms
 - Error rate > 1%
 
 ## Acciones Inmediatas (5 min)
+
 1. Check pod status: kubectl get pods -n production
 2. Check logs: kubectl logs -l app=notification-service
 3. Check metrics: Check Prometheus dashboard
 
 ## Diagnóstico
+
 - Si alta CPU: Escalabilidad horizontal
 - Si alta memoria: Posible memory leak
 - Si database lenta: Check conexiones activas
 
 ## Resolución
+
 1. Scale up: kubectl scale deployment notification-service --replicas=6
 2. Monitor recovery (15 min)
 3. Post-incident: Review logs y crear issue
@@ -1711,6 +1723,7 @@ func (ffm *FeatureFlagManager) IsEnabled(flag FeatureFlag) bool {
 # Twilio Architecture Lessons (100M+ msgs/day)
 
 ## Key Learnings
+
 1. Multi-region replication
 2. Event sourcing para audit trail
 3. Circuit breakers para resiliencia
@@ -1731,13 +1744,13 @@ Este capítulo demostró cómo construir un **microservicio production-ready en 
  Patrones de resiliencia
 
 **Recursos clave:**
+
 - Domain-Driven Design (Eric Evans)
 - Microservices Patterns (Chris Richardson)
 - Go Concurrency (Rob Pike)
 - Kubernetes Documentation
 
 **Total de líneas**: 1,900+ | **Tamaño**: ~45 KB
-
 
 ---
 

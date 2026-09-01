@@ -66,18 +66,18 @@ func ejemploBeneficios() error {
     if err != nil {
         return fmt.Errorf("no se pudo abrir: %w", err)
     }
-    
+
     // Garantizar cierre INMEDIATAMENTE después de abrir
     defer f.Close()
-    
+
     // Beneficio 1: Código más cercano al recurso
     // Beneficio 2: Imposible olvidar el cierre (si hay retorno anticipado)
     // Beneficio 3: Limpieza ocurre incluso con pánico
-    
+
     if err := procesarArchivo(f); err != nil {
         return err  // f.Close() se ejecutará aquí
     }
-    
+
     return nil  // f.Close() se ejecutará aquí también
 }
 
@@ -90,12 +90,14 @@ func procesarArchivo(f *os.File) error {
 ### 19.1.4 Comparativa: Go vs Otros Lenguajes
 
 **Go - defer:**
+
 ```go
 defer f.Close()
 // Semántica clara, se ejecuta al salir de la función
 ```
 
 **Python - context manager:**
+
 ```python
 with open("archivo.txt") as f:
     # procesamiento
@@ -103,6 +105,7 @@ with open("archivo.txt") as f:
 ```
 
 **JavaScript - try-finally:**
+
 ```javascript
 try {
     let f = fs.openSync("archivo.txt");
@@ -129,11 +132,11 @@ import "fmt"
 
 func demoOrdenEjecucion() {
     fmt.Println("1. Inicio")
-    
+
     defer fmt.Println("4. Defer 1 (primero añadido, último ejecutado)")
     defer fmt.Println("3. Defer 2 (segundo añadido)")
     defer fmt.Println("2. Defer 3 (tercero añadido, primero ejecutado)")
-    
+
     fmt.Println("5. Fin de función")
 }
 
@@ -175,24 +178,24 @@ Defer se ejecuta incluso si:
 ```go
 func demoGarantías() {
     defer fmt.Println("Defer se ejecuta siempre")
-    
+
     // Caso 1: Retorno normal
     if true {
         return  // Defer se ejecuta
     }
-    
+
     fmt.Println("Esto no se ejecuta")
 }
 
 func demoPanico() {
     defer fmt.Println("Defer se ejecuta incluso con pánico")
-    
+
     panic("Error crítico")  // Defer se ejecuta antes del pánico
 }
 
 func demoError() {
     defer fmt.Println("Defer se ejecuta con error")
-    
+
     err := verificar()
     if err != nil {
         return  // Defer se ejecuta
@@ -215,18 +218,18 @@ import "fmt"
 
 func demoScope() {
     fmt.Println("Función exterior inicio")
-    
+
     defer func() {
         fmt.Println("Defer de exterior")
     }()
-    
+
     func() {
         fmt.Println("Función interior")
         defer func() {
             fmt.Println("Defer de interior")
         }()
     }()  // Función interior termina aquí → defer interior se ejecuta
-    
+
     fmt.Println("Volvimos a exterior")
 }
 
@@ -262,7 +265,7 @@ func procesarArchivo(ruta string) error {
         return err
     }
     defer f.Close()  // Cierre garantizado
-    
+
     // Usar archivo
     buffer := make([]byte, 1024)
     _, err = f.Read(buffer)
@@ -273,7 +276,7 @@ func procesarArchivo(ruta string) error {
 func operacionCritica(mu *sync.Mutex) {
     mu.Lock()
     defer mu.Unlock()  // Desbloqueo garantizado
-    
+
     // Sección crítica
     fmt.Println("Acceso exclusivo")
 }
@@ -300,7 +303,7 @@ func consultarBD() error {
         return err
     }
     defer conn.Close()  // Cierre garantizado
-    
+
     // Consulta
     fmt.Println("Ejecutando consulta")
     return nil
@@ -341,10 +344,10 @@ func operacionLarga() {
     timer := &Timer{nombre: "OperacionLarga"}
     timer.Iniciar()
     defer timer.Finalizar()  // Garantizar finalización
-    
+
     // Simular trabajo
     time.Sleep(100 * time.Millisecond)
-    
+
     // Incluso con retorno anticipado:
     if true {
         return  // Finalización se ejecuta
@@ -369,10 +372,10 @@ func crearArchivoTemporal() (string, error) {
         return "", err
     }
     defer f.Close()
-    
+
     nombre := f.Name()
     fmt.Printf("Archivo temporal creado: %s\n", nombre)
-    
+
     // Si algo falla, limpiar
     defer func() {
         if err != nil {
@@ -380,13 +383,13 @@ func crearArchivoTemporal() (string, error) {
             fmt.Printf("Archivo temporal removido por error: %s\n", nombre)
         }
     }()
-    
+
     // Escribir contenido
     _, err = f.WriteString("contenido")
     if err != nil {
         return "", err
     }
-    
+
     return nombre, nil
 }
 ```
@@ -404,16 +407,16 @@ import "fmt"
 
 func demoMultiplesDefers() {
     fmt.Println("=== Inicio ===")
-    
+
     // Stack de defers: [D3, D2, D1]
     defer fmt.Println("D1: Primero añadido, último ejecutado")
-    
+
     // Stack de defers: [D3, D2, D1]
     defer fmt.Println("D2: Segundo añadido, segundo ejecutado")
-    
+
     // Stack de defers: [D3, D2, D1]
     defer fmt.Println("D3: Tercero añadido, primero ejecutado")
-    
+
     fmt.Println("=== Fin de código ===")
 }
 
@@ -439,17 +442,17 @@ func demoReversion() {
     defer func() {
         fmt.Println("Revertir operación 1")
     }()
-    
+
     fmt.Println("Operación 2")
     defer func() {
         fmt.Println("Revertir operación 2")
     }()
-    
+
     fmt.Println("Operación 3")
     defer func() {
         fmt.Println("Revertir operación 3")
     }()
-    
+
     fmt.Println("Todas operaciones completadas")
 }
 
@@ -495,19 +498,19 @@ import (
 
 func funcionConMultiplesDefers() {
     log.Println("Función inicio")
-    
+
     defer func() {
         log.Println("[defer 1] Limpieza de recurso A")
     }()
-    
+
     defer func() {
         log.Println("[defer 2] Limpieza de recurso B")
     }()
-    
+
     defer func() {
         log.Println("[defer 3] Limpieza de recurso C")
     }()
-    
+
     log.Println("Cuerpo de función")
     log.Println("Función terminando")
 }
@@ -533,11 +536,11 @@ import "fmt"
 
 func demoEvaluacionTemprana() {
     x := 5
-    
+
     defer func(valor int) {
         fmt.Printf("Defer recibió: %d\n", valor)
     }(x)
-    
+
     x = 10
     fmt.Println("x ahora es:", x)
 }
@@ -575,17 +578,17 @@ import "fmt"
 
 func demoCaptura() {
     x := 5
-    
+
     // Método 1: Argumento (evaluación temprana)
     defer func(v int) {
         fmt.Printf("Argumento: %d\n", v)
     }(x)
-    
+
     // Método 2: Closure (referencia tardía)
     defer func() {
         fmt.Printf("Closure: %d\n", x)
     }()
-    
+
     x = 10
 }
 
@@ -621,7 +624,7 @@ func correcto() {
         duracion := time.Since(t)
         fmt.Println("Duración:", duracion)
     }(time.Now())
-    
+
     time.Sleep(100 * time.Millisecond)
 }
 
@@ -657,12 +660,12 @@ import "fmt"
 
 func demoClosure() {
     contador := 0
-    
+
     // Este defer captura 'contador' por referencia
     defer func() {
         fmt.Printf("Contador final: %d\n", contador)
     }()
-    
+
     contador = 5
     fmt.Printf("Contador actual: %d\n", contador)
 }
@@ -686,21 +689,21 @@ func transaccion() error {
     var mu sync.Mutex
     mu.Lock()
     defer mu.Unlock()
-    
+
     var err error
-    
+
     // Usar defer con closure para capturar err
     defer func() {
         if err != nil {
             fmt.Printf("Error en transacción: %v\n", err)
         }
     }()
-    
+
     err = operacion1()
     if err != nil {
         return err
     }
-    
+
     err = operacion2()
     return err
 }
@@ -727,7 +730,7 @@ import (
 func medir(nombre string) func() {
     inicio := time.Now()
     fmt.Printf("[%s] Iniciado\n", nombre)
-    
+
     // Retornar closure que será usado como defer
     return func() {
         duracion := time.Since(inicio)
@@ -738,7 +741,7 @@ func medir(nombre string) func() {
 func ejemploMedida() {
     defer medir("OperacionA")()
     defer medir("OperacionB")()
-    
+
     time.Sleep(50 * time.Millisecond)
 }
 
@@ -747,7 +750,7 @@ func ejemploInline() {
     defer func() {
         fmt.Println("[Ejemplo] Ejecutando cleanup")
     }()
-    
+
     fmt.Println("[Ejemplo] Cuerpo de función")
 }
 ```
@@ -766,11 +769,11 @@ type Estado struct {
 
 func demoCapturaPunteros() {
     estado := &Estado{nombre: "test", valor: 0}
-    
+
     defer func() {
         fmt.Printf("Estado final: %+v\n", estado)
     }()
-    
+
     estado.valor = 42
     estado.nombre = "modificado"
 }
@@ -800,15 +803,15 @@ func procesarArchivosIncorrecto(archivos []string) {
             fmt.Printf("Error: %v\n", err)
             continue
         }
-        
+
         // PROBLEMA: Todos los defers se ejecutan al final de la función
         // Los archivos no se cierran hasta que termina la función
         defer f.Close()
-        
+
         // Procesamiento (pero archivo sigue abierto)
         procesar(f)
     }
-    
+
     // Aquí se ejecutan TODOS los closes
 }
 
@@ -844,10 +847,10 @@ func procesarUnArchivo(archivo string) error {
     if err != nil {
         return err
     }
-    
+
     // Defer dentro de función anidada se ejecuta al salir de la función
     defer f.Close()
-    
+
     procesar2(f)
     return nil
 }
@@ -877,10 +880,10 @@ func procesarArchivosCorrectov2(archivos []string) {
                 fmt.Printf("Error: %v\n", err)
                 return
             }
-            
+
             // Defer se ejecuta al salir del closure
             defer f.Close()
-            
+
             procesar3(f)
         }(archivo)  // ← Ejecución inmediata
     }
@@ -963,11 +966,11 @@ func funcionConRetornoNombrado() (resultado string, err error) {
             resultado = "error: " + resultado
         }
     }()
-    
+
     // Asignación a variables nombradas
     resultado = "éxito"
     err = nil
-    
+
     return  // Usa los valores nombrados
 }
 
@@ -975,12 +978,12 @@ func funcionConRetornoNombrado() (resultado string, err error) {
 func funcionSinRetornoNombrado() (string, error) {
     resultado := "éxito"
     err := error(nil)
-    
+
     defer func() {
         // Aquí NO se puede modificar resultado porque es una copia
         _ = resultado
     }()
-    
+
     return resultado, err
 }
 
@@ -989,7 +992,7 @@ func funcionConPuntero(resultado *string) error {
     defer func() {
         *resultado += " - modificado por defer"
     }()
-    
+
     *resultado = "valor inicial"
     return nil
 }
@@ -1011,7 +1014,7 @@ func operacionConEnriquecimiento() (err error) {
             err = fmt.Errorf("operación falló: %w", err)
         }
     }()
-    
+
     // Aquí ocurre un error
     return fmt.Errorf("algo salió mal")
 }
@@ -1025,7 +1028,7 @@ func funcionConLogging() (resultado int, err error) {
             fmt.Printf("Función retornó: %d\n", resultado)
         }
     }()
-    
+
     return 42, nil
 }
 
@@ -1037,7 +1040,7 @@ func funcionConRecupacion() (resultado string, err error) {
             err = fmt.Errorf("recuperado de pánico: %v", p)
         }
     }()
-    
+
     panic("algo grave")
 }
 ```
@@ -1052,22 +1055,22 @@ import "fmt"
 // ❌ Esto NO funciona
 func noFunciona() string {
     resultado := "original"
-    
+
     defer func() {
         resultado = "modificado"  // Modifica la copia, no el retorno
     }()
-    
+
     return resultado
 }
 
 // ✓ Esto funciona
 func funciona() (resultado string) {
     resultado = "original"
-    
+
     defer func() {
         resultado = "modificado"  // Modifica la variable nombrada
     }()
-    
+
     return
 }
 
@@ -1099,25 +1102,25 @@ func limpiarArchivos() error {
         return err
     }
     defer entrada.Close()
-    
+
     // Escritura
     salida, err := os.Create("salida.txt")
     if err != nil {
         return err
     }
     defer salida.Close()
-    
+
     // Ambos archivos se cierran automáticamente al final
-    
+
     // Procesamiento
     scanner := bufio.NewScanner(entrada)
     writer := bufio.NewWriter(salida)
     defer writer.Flush()
-    
+
     for scanner.Scan() {
         writer.WriteString(scanner.Text() + "\n")
     }
-    
+
     return scanner.Err()
 }
 ```
@@ -1148,7 +1151,7 @@ func (c *ConexionBD) Consultar(query string) ([]string, error) {
         return nil, err
     }
     defer filas.Close()
-    
+
     var resultados []string
     for filas.Next() {
         var valor string
@@ -1157,7 +1160,7 @@ func (c *ConexionBD) Consultar(query string) ([]string, error) {
         }
         resultados = append(resultados, valor)
     }
-    
+
     return resultados, filas.Err()
 }
 
@@ -1166,15 +1169,15 @@ func ejecutarOperacionBD() error {
     if err != nil {
         return err
     }
-    
+
     conn := &ConexionBD{db: db}
     defer conn.Close()
-    
+
     resultados, err := conn.Consultar("SELECT 1")
     if err != nil {
         return err
     }
-    
+
     fmt.Println("Resultados:", resultados)
     return nil
 }
@@ -1198,14 +1201,14 @@ type RecursoProtegido struct {
 func (r *RecursoProtegido) Leer(clave string) int {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     return r.datos[clave]
 }
 
 func (r *RecursoProtegido) Escribir(clave string, valor int) {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     r.datos[clave] = valor
     fmt.Printf("Escribió %s = %d\n", clave, valor)
 }
@@ -1213,7 +1216,7 @@ func (r *RecursoProtegido) Escribir(clave string, valor int) {
 func (r *RecursoProtegido) ActualizarMultiple(actualizaciones map[string]int) {
     r.mu.Lock()
     defer r.mu.Unlock()
-    
+
     for k, v := range actualizaciones {
         r.datos[k] = v
     }
@@ -1221,10 +1224,10 @@ func (r *RecursoProtegido) ActualizarMultiple(actualizaciones map[string]int) {
 
 func demoBD() {
     recurso := &RecursoProtegido{datos: make(map[string]int)}
-    
+
     // Lock se libera automáticamente
     recurso.Escribir("x", 10)
-    
+
     valor := recurso.Leer("x")
     fmt.Println("Valor leído:", valor)
 }
@@ -1281,7 +1284,7 @@ func (t *Transaccion) Rollback() error {
 func operacionConTransaccion() (err error) {
     tx := &Transaccion{id: "TX001"}
     tx.Comenzar()
-    
+
     // Si ocurre error, hacer rollback
     defer func() {
         if err != nil {
@@ -1290,15 +1293,15 @@ func operacionConTransaccion() (err error) {
             tx.Commit()
         }
     }()
-    
+
     if err = tx.Registrar("UPDATE usuarios"); err != nil {
         return
     }
-    
+
     if err = tx.Registrar("UPDATE productos"); err != nil {
         return
     }
-    
+
     return nil
 }
 ```
@@ -1323,11 +1326,11 @@ func ensure(fn func()) {
 
 func ejemploEnsure() {
     contador := 0
-    
+
     ensure(func() {
         fmt.Println("Limpieza, contador final:", contador)
     })
-    
+
     contador = 5
     fmt.Println("Contador:", contador)
 }
@@ -1341,7 +1344,7 @@ func guardarRecurso(recurso interface{}) func() {
 
 func ejemploGuardarRecurso() {
     defer guardarRecurso("datos")()
-    
+
     fmt.Println("Procesando recurso")
 }
 ```
@@ -1367,7 +1370,7 @@ type PoolRecursos struct {
 func (p *PoolRecursos) Adquirir() (interface{}, error) {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     if len(p.libres) == 0 {
         if p.en_uso >= p.maximo {
             return nil, fmt.Errorf("pool lleno")
@@ -1375,7 +1378,7 @@ func (p *PoolRecursos) Adquirir() (interface{}, error) {
         p.en_uso++
         return fmt.Sprintf("recurso_%d", p.en_uso), nil
     }
-    
+
     recurso := p.libres[len(p.libres)-1]
     p.libres = p.libres[:len(p.libres)-1]
     return recurso, nil
@@ -1384,7 +1387,7 @@ func (p *PoolRecursos) Adquirir() (interface{}, error) {
 func (p *PoolRecursos) Liberar(recurso interface{}) {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     p.libres = append(p.libres, recurso)
 }
 
@@ -1393,22 +1396,22 @@ func (p *PoolRecursos) WithRecurso(fn func(interface{}) error) error {
     if err != nil {
         return err
     }
-    
+
     defer p.Liberar(recurso)
-    
+
     return fn(recurso)
 }
 
 func demoPiscina() {
     pool := &PoolRecursos{libres: []interface{}{}, maximo: 5}
-    
+
     // Usar patrón WithRecurso
     err := pool.WithRecurso(func(recurso interface{}) error {
         fmt.Println("Usando:", recurso)
         time.Sleep(10 * time.Millisecond)
         return nil
     })
-    
+
     if err != nil {
         fmt.Println("Error:", err)
     }
@@ -1446,31 +1449,31 @@ func (cc *CleanupChain) ExecuteAll() error {
 
 func operacionMultiRecurso() error {
     cleanup := &CleanupChain{}
-    
+
     // Adquirir recurso 1
     recurso1 := abrirRecurso("recurso1")
     cleanup.Add(func() error {
         return cerrarRecurso(recurso1)
     })
-    
+
     // Adquirir recurso 2
     recurso2 := abrirRecurso("recurso2")
     cleanup.Add(func() error {
         return cerrarRecurso(recurso2)
     })
-    
+
     // Adquirir recurso 3
     recurso3 := abrirRecurso("recurso3")
     cleanup.Add(func() error {
         return cerrarRecurso(recurso3)
     })
-    
+
     // Garantizar cleanup
     defer cleanup.ExecuteAll()
-    
+
     // Usar recursos
     fmt.Println("Usando:", recurso1, recurso2, recurso3)
-    
+
     return nil
 }
 
@@ -1498,7 +1501,7 @@ import (
 func profile(nombre string) func() {
     inicio := time.Now()
     fmt.Printf("┌─ [%s] Inicio\n", nombre)
-    
+
     return func() {
         duracion := time.Since(inicio)
         fmt.Printf("└─ [%s] Fin en %v\n", nombre, duracion)
@@ -1507,13 +1510,13 @@ func profile(nombre string) func() {
 
 func operacionConProfiling() {
     defer profile("operación completa")()
-    
+
     defer profile("paso 1")()
     simularTrabajo(50 * time.Millisecond)
-    
+
     defer profile("paso 2")()
     simularTrabajo(75 * time.Millisecond)
-    
+
     defer profile("paso 3")()
     simularTrabajo(100 * time.Millisecond)
 }
@@ -1554,7 +1557,7 @@ func buena_practica() error {
         return err
     }
     defer f.Close()  // ← Aquí, cerca del recurso
-    
+
     // Procesamiento
     return nil
 }
@@ -1565,16 +1568,16 @@ func mala_practica() error {
     if err != nil {
         return err
     }
-    
+
     // Mucho código...
     _, err = f.ReadAt(make([]byte, 10), 0)
     if err != nil {
         return err
     }
-    
+
     // Defer alejado del recurso
     defer f.Close()
-    
+
     return nil
 }
 
@@ -1599,11 +1602,11 @@ func manejoErroresCorrecto() (err error) {
             err = cerr
         }
     }()
-    
+
     if err = procesarRecurso(recurso); err != nil {
         return
     }
-    
+
     return nil
 }
 
@@ -1611,7 +1614,7 @@ func manejoErroresCorrecto() (err error) {
 func manejoErroresIncorrecto() error {
     recurso := abrirRecurso2()
     defer cerrarRecurso2(recurso)  // Error se ignora
-    
+
     return procesarRecurso(recurso)
 }
 
@@ -1654,7 +1657,7 @@ func patron_correcto_loop() {
 func procesarArchivoCorrecto() {
     f := abrirArchivo2()
     defer f.Close()  // Se ejecuta al salir de esta función
-    
+
     // Procesamiento
 }
 
@@ -1683,7 +1686,7 @@ import (
 // ❌ ANTIPATRÓN: Defer sin recurso correspondiente
 func antipatron_sin_pair() {
     defer fmt.Println("cleanup")  // ¿Qué se está limpiando?
-    
+
     // Código que no tiene relación con el defer
     x := 5
     y := 10
@@ -1695,7 +1698,7 @@ func patron_correcto_pair() {
     mu := &mockMutex{}
     mu.Lock()
     defer mu.Unlock()  // Claro qué se está limpiando
-    
+
     // Sección crítica
     fmt.Println("Sección crítica")
 }
@@ -1718,24 +1721,24 @@ import (
 // ❌ ANTIPATRÓN: Defer hace algo inesperado
 func antipatron_confuso() (resultado int) {
     resultado = 10
-    
+
     defer func() {
         resultado += 5  // Confuso: ¿por qué suma?
     }()
-    
+
     return resultado  // Retorna 15, no 10
 }
 
 // ✓ CORRECTO: Defer tiene propósito claro
 func patron_correcto_claro() (resultado int, err error) {
     resultado = 10
-    
+
     defer func() {
         if err != nil {
             resultado = -1  // Claro: si hay error, resultado es -1
         }
     }()
-    
+
     return resultado, err
 }
 ```
@@ -1755,11 +1758,11 @@ func TestConDefer(t *testing.T) {
     defer func() {
         fmt.Println("Limpieza de test")
     }()
-    
+
     // Setup
     datos := setup()
     defer cleanup(datos)
-    
+
     // Test
     resultado := procesar(datos)
     if resultado != esperado {
@@ -1803,7 +1806,7 @@ import (
 )
 
 // Ejercicio 1: Procesar archivo con defer
-// 
+//
 // Requisitos:
 // 1. Crear una función que lea líneas de un archivo
 // 2. Usar defer para garantizar cierre del archivo
@@ -1824,17 +1827,17 @@ func ContarLineasConPalabraSol(ruta, palabra string) (int, error) {
         return 0, err
     }
     defer archivo.Close()  // Garantizar cierre
-    
+
     scanner := bufio.NewScanner(archivo)
     contador := 0
-    
+
     for scanner.Scan() {
         linea := scanner.Text()
         if strings.Contains(strings.ToLower(linea), strings.ToLower(palabra)) {
             contador++
         }
     }
-    
+
     return contador, scanner.Err()
 }
 
@@ -1847,7 +1850,7 @@ func TestEjercicio1() {
         panic(err)
     }
     defer os.Remove("test1.txt")
-    
+
     // Test 1: Buscar "Go"
     count, err := ContarLineasConPalabraSol("test1.txt", "Go")
     if err != nil {
@@ -1858,7 +1861,7 @@ func TestEjercicio1() {
     } else {
         fmt.Println("✓ Test 1 pasado: 3 líneas con 'Go'")
     }
-    
+
     // Test 2: Buscar "Rust"
     count, err = ContarLineasConPalabraSol("test1.txt", "Rust")
     if count != 1 {
@@ -1866,7 +1869,7 @@ func TestEjercicio1() {
     } else {
         fmt.Println("✓ Test 2 pasado: 1 línea con 'Rust'")
     }
-    
+
     // Test 3: Archivo inexistente
     count, err = ContarLineasConPalabraSol("inexistente.txt", "test")
     if err == nil {
@@ -1976,7 +1979,7 @@ func (t *TransaccionSol) Rollback() error {
 func EjecutarTransaccion(fn func(*TransaccionSol) error) error {
     tx := &TransaccionSol{id: "TX001"}
     tx.Comenzar()
-    
+
     var err error
     defer func() {
         if err != nil {
@@ -1985,7 +1988,7 @@ func EjecutarTransaccion(fn func(*TransaccionSol) error) error {
             tx.Commit()
         }
     }()
-    
+
     err = fn(tx)
     return err
 }
@@ -2002,7 +2005,7 @@ func TestEjercicio2() {
     if err == nil {
         fmt.Println("✓ Test 1 pasado: Transacción completada")
     }
-    
+
     // Test 2: Transacción con error (rollback)
     fmt.Println("\n=== Test 2: Transacción con error ===")
     err = EjecutarTransaccion(func(tx *TransaccionSol) error {
@@ -2073,10 +2076,10 @@ func (c *CuentaBancariaSol) Depositar(cantidad float64) error {
     if cantidad <= 0 {
         return fmt.Errorf("cantidad debe ser positiva")
     }
-    
+
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     c.saldo += cantidad
     fmt.Printf("Depositado: +%.2f, saldo: %.2f\n", cantidad, c.saldo)
     return nil
@@ -2086,14 +2089,14 @@ func (c *CuentaBancariaSol) Retirar(cantidad float64) error {
     if cantidad <= 0 {
         return fmt.Errorf("cantidad debe ser positiva")
     }
-    
+
     c.mu.Lock()
     defer c.mu.Unlock()
-    
+
     if c.saldo < cantidad {
         return fmt.Errorf("saldo insuficiente")
     }
-    
+
     c.saldo -= cantidad
     fmt.Printf("Retirado: -%.2f, saldo: %.2f\n", cantidad, c.saldo)
     return nil
@@ -2108,33 +2111,33 @@ func (c *CuentaBancariaSol) Saldo() float64 {
 // Casos de prueba:
 func TestEjercicio3() {
     cuenta := &CuentaBancariaSol{}
-    
+
     // Test 1: Depósito simple
     err := cuenta.Depositar(100)
     if err != nil {
         fmt.Println("Error:", err)
     }
-    
+
     saldo := cuenta.Saldo()
     if saldo != 100 {
         fmt.Printf("Error: saldo esperado 100, obtuve %.2f\n", saldo)
     } else {
         fmt.Println("✓ Test 1 pasado: Depósito correcto")
     }
-    
+
     // Test 2: Retiro válido
     err = cuenta.Retirar(30)
     if err != nil {
         fmt.Println("Error:", err)
     }
-    
+
     saldo = cuenta.Saldo()
     if saldo != 70 {
         fmt.Printf("Error: saldo esperado 70, obtuve %.2f\n", saldo)
     } else {
         fmt.Println("✓ Test 2 pasado: Retiro correcto")
     }
-    
+
     // Test 3: Retiro con saldo insuficiente
     err = cuenta.Retirar(100)
     if err == nil {
@@ -2142,12 +2145,12 @@ func TestEjercicio3() {
     } else {
         fmt.Println("✓ Test 3 pasado: Retiro rechazado correctamente")
     }
-    
+
     // Test 4: Operaciones concurrentes
     fmt.Println("\n=== Test 4: Operaciones concurrentes ===")
     cuenta2 := &CuentaBancariaSol{}
     var wg sync.WaitGroup
-    
+
     for i := 0; i < 100; i++ {
         wg.Add(1)
         go func() {
@@ -2155,7 +2158,7 @@ func TestEjercicio3() {
             cuenta2.Depositar(1)
         }()
     }
-    
+
     wg.Wait()
     finalSaldo := cuenta2.Saldo()
     if finalSaldo != 100 {
@@ -2206,10 +2209,10 @@ func TraceSol(nombre string) func() {
     for i := 0; i < profundidad-1; i++ {
         indentacion += "  "
     }
-    
+
     inicio := time.Now()
     fmt.Printf("%s→ %s\n", indentacion, nombre)
-    
+
     return func() {
         duracion := time.Since(inicio)
         fmt.Printf("%s← %s (%v)\n", indentacion, nombre, duracion)
@@ -2313,17 +2316,17 @@ func NewPoolSol(maximo int, factory func() interface{}) *PoolSol {
 func (p *PoolSol) Adquirir() (interface{}, error) {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     if len(p.libres) > 0 {
         recurso := p.libres[len(p.libres)-1]
         p.libres = p.libres[:len(p.libres)-1]
         return recurso, nil
     }
-    
+
     if p.en_uso >= p.maximo {
         return nil, fmt.Errorf("pool agotado")
     }
-    
+
     p.en_uso++
     return p.factory(), nil
 }
@@ -2331,7 +2334,7 @@ func (p *PoolSol) Adquirir() (interface{}, error) {
 func (p *PoolSol) Liberar(recurso interface{}) {
     p.mu.Lock()
     defer p.mu.Unlock()
-    
+
     p.libres = append(p.libres, recurso)
 }
 
@@ -2340,37 +2343,37 @@ func (p *PoolSol) WithRecurso(fn func(interface{}) error) error {
     if err != nil {
         return err
     }
-    
+
     defer p.Liberar(recurso)
-    
+
     return fn(recurso)
 }
 
 // Casos de prueba:
 func TestEjercicio5() {
     fmt.Println("=== Test 5: Resource Pool ===")
-    
+
     contador := 0
     factory := func() interface{} {
         contador++
         return fmt.Sprintf("recurso_%d", contador)
     }
-    
+
     pool := NewPoolSol(3, factory)
-    
+
     // Test 1: Adquirir y liberar simple
     fmt.Println("\n--- Test 1: Adquisición simple ---")
     err := pool.WithRecurso(func(r interface{}) error {
         fmt.Printf("Usando: %v\n", r)
         return nil
     })
-    
+
     if err != nil {
         fmt.Println("Error:", err)
     } else {
         fmt.Println("✓ Test 1 pasado: Recurso adquirido y liberado")
     }
-    
+
     // Test 2: Múltiples adquisiciones
     fmt.Println("\n--- Test 2: Múltiples adquisiciones ---")
     for i := 0; i < 3; i++ {
@@ -2383,10 +2386,10 @@ func TestEjercicio5() {
         }
     }
     fmt.Println("✓ Test 2 pasado: 3 recursos manejados")
-    
+
     // Test 3: Pool agotado
     fmt.Println("\n--- Test 3: Pool agotado ---")
-    
+
     // Adquirir todos
     recursos := make([]interface{}, 0)
     for i := 0; i < 3; i++ {
@@ -2396,7 +2399,7 @@ func TestEjercicio5() {
         }
         recursos = append(recursos, r)
     }
-    
+
     // Intentar adquirir cuando está agotado
     _, err = pool.Adquirir()
     if err == nil {
@@ -2404,12 +2407,12 @@ func TestEjercicio5() {
     } else {
         fmt.Println("✓ Test 3 pasado: Pool agotado correctamente")
     }
-    
+
     // Liberar y probar disponibilidad
     for _, r := range recursos {
         pool.Liberar(r)
     }
-    
+
     // Debería funcionar de nuevo
     _, err = pool.Adquirir()
     if err != nil {
@@ -2424,22 +2427,22 @@ func RunAllTests() {
     fmt.Println("╔═══════════════════════════════════╗")
     fmt.Println("║     EJERCICIOS DE DEFER EN GO     ║")
     fmt.Println("╚═══════════════════════════════════╝")
-    
+
     fmt.Println("\n" + "="*35)
     TestEjercicio1()
-    
+
     fmt.Println("\n" + "="*35)
     TestEjercicio2()
-    
+
     fmt.Println("\n" + "="*35)
     TestEjercicio3()
-    
+
     fmt.Println("\n" + "="*35)
     TestEjercicio4()
-    
+
     fmt.Println("\n" + "="*35)
     TestEjercicio5()
-    
+
     fmt.Println("\n" + "="*35)
     fmt.Println("✓ Todos los ejercicios completados")
 }

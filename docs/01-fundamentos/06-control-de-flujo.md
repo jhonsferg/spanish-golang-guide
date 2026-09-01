@@ -491,10 +491,10 @@ for {
     fmt.Println("2. Opción B")
     fmt.Println("3. Salir")
     fmt.Print("Elige: ")
-    
+
     var opcion int
     fmt.Scanln(&opcion)
-    
+
     switch opcion {
     case 1:
         fmt.Println("Elegiste A")
@@ -765,10 +765,10 @@ import "os"
 func procesarArchivo(nombre string) {
     archivo, _ := os.Open(nombre)
     defer archivo.Close()      // Se ejecuta al final, incluso si hay error
-    
+
     // Procesar archivo
     // ...
-    
+
     // archivo.Close() se ejecuta automáticamente aquí
 }
 ```
@@ -779,10 +779,10 @@ func procesarArchivo(nombre string) {
 func consultarBD() {
     db, _ := sql.Open("driver", "source")
     defer db.Close()           // Se ejecuta al final
-    
+
     rows, _ := db.Query("SELECT ...")
     defer rows.Close()         // Se ejecuta al final
-    
+
     // Usar rows
 }
 ```
@@ -798,7 +798,7 @@ var contador int
 func incrementar() {
     mu.Lock()
     defer mu.Unlock()          // Se ejecuta al final, incluso si hay panic
-    
+
     contador++
 }
 ```
@@ -808,14 +808,14 @@ func incrementar() {
 ```go
 func ejecutar() {
     defer fmt.Println("Defer sin argumentos")
-    
+
     // defer evalúa argumentos INMEDIATAMENTE
     x := 10
     defer fmt.Println("Valor de x:", x)  // Evalúa x aquí (10)
-    
+
     x = 20
     fmt.Println("x dentro:", x)          // Imprime 20
-    
+
     // Al salir:
     // Imprime "x dentro: 20"
     // Imprime "Valor de x: 10" (porque fue evaluado en defer)
@@ -984,11 +984,11 @@ for i := 0; i < len(lista); i++ {
 func procesar() error {
     conexion := conectar()
     defer conexion.Cerrar()      // Siempre se ejecuta
-    
+
     if err := validar(); err != nil {
         return err              // Aún ejecuta defer
     }
-    
+
     procesar()
     return nil                  // Ejecuta defer al retornar
 }
@@ -1001,6 +1001,7 @@ func procesar() error {
 ### Ejercicio 1: Calificador de Notas
 
 Crea programa que:
+
 1. Pida 5 calificaciones
 2. Use switch para determinar letra (A, B, C, D, F)
 3. Muestre promedio
@@ -1010,6 +1011,7 @@ Crea programa que:
 ### Ejercicio 2: Tabla de Multiplicar
 
 Crea programa que:
+
 1. Pida número
 2. Imprima tabla de multiplicar (1-10)
 3. Destaque múltiplos de 5 (usa continue)
@@ -1019,6 +1021,7 @@ Crea programa que:
 ### Ejercicio 3: Búsqueda en Matriz
 
 Crea programa que:
+
 1. Cree matriz 3x3
 2. Pida número a buscar
 3. Use bucles anidados con label
@@ -1028,6 +1031,7 @@ Crea programa que:
 ### Ejercicio 4: Validador Interactivo
 
 Crea programa que:
+
 1. Menú infinito (for infinito)
 2. Pida opción:
    - 1: Validar edad
@@ -1039,6 +1043,7 @@ Crea programa que:
 ### Ejercicio 5: Contador con Restricciones
 
 Crea programa que:
+
 1. Cuente del 1 al 100
 2. Salta números divisibles por 3 (continue)
 3. Detiene en primer número > 50 divisible por 7 (break)
@@ -1050,7 +1055,6 @@ Crea programa que:
 **Fin del Capítulo 6**
 
 ---
-
 
 ---
 

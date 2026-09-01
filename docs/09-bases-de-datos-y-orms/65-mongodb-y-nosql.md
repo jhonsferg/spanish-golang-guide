@@ -7,6 +7,7 @@
 NoSQL (Not Only SQL) representa un cambio paradigmático en el almacenamiento de datos. A diferencia de las bases de datos relacionales que organizan información en tablas con esquemas rígidos, NoSQL ofrece modelos más flexibles y distribuidos.
 
 **Características de NoSQL:**
+
 - Esquemas flexibles (schemaless)
 - Escalabilidad horizontal
 - Replicación automática
@@ -69,6 +70,7 @@ NoSQL (Not Only SQL) representa un cambio paradigmático en el almacenamiento de
 ### 65.1.4 Cuándo Usar MongoDB
 
 **✅ Casos ideales:**
+
 - Aplicaciones web modernas (contenido, perfiles)
 - IoT y datos en tiempo real
 - Análisis de Big Data
@@ -77,6 +79,7 @@ NoSQL (Not Only SQL) representa un cambio paradigmático en el almacenamiento de
 - Startups con crecimiento impredecible
 
 **❌ Casos NO ideales:**
+
 - Transacciones financieras complejas
 - Datos altamente relacionados
 - Reportes con joins complicados
@@ -85,6 +88,7 @@ NoSQL (Not Only SQL) representa un cambio paradigmático en el almacenamiento de
 ### 65.1.5 Otras Bases de Datos NoSQL Relevantes
 
 #### DynamoDB (AWS)
+
 ```go
 // Totalmente manejada por AWS
 // Facturación por throughput (reads/writes)
@@ -101,6 +105,7 @@ type DynamoProduct struct {
 ```
 
 #### Firestore (Google Cloud)
+
 ```go
 // Tiempo real, sincronización automática
 // Excelente para aplicaciones móviles
@@ -114,6 +119,7 @@ type FirestoreUser struct {
 ```
 
 #### Cassandra
+
 ```go
 // Orientada a columnas (no documentos)
 // Altamente distribuida, sin punto único de fallo
@@ -178,6 +184,7 @@ Un documento MongoDB es esencialmente un JSON-like object:
 ```
 
 **Ventajas de esta estructura:**
+
 - Datos relacionados colocados juntos (embedding)
 - Sin necesidad de joins complejos
 - Flexible para evolucionar esquema
@@ -201,6 +208,7 @@ Timestamp │ Machine └─ Counter
 ```
 
 **Propiedades:**
+
 - Único globally
 - Ordenable cronológicamente
 - Generado por el cliente (distribuido)
@@ -218,11 +226,11 @@ func ExampleObjectID() {
     // Generar nuevo ObjectID
     id := primitive.NewObjectID()
     fmt.Println("ID:", id.Hex())
-    
+
     // Obtener timestamp
     timestamp := id.Timestamp()
     fmt.Println("Creado:", timestamp)
-    
+
     // Parsear string a ObjectID
     parsedID, _ := primitive.ObjectIDFromHexString("507f1f77bcf86cd799439011")
     fmt.Println("Parseado:", parsedID)
@@ -336,6 +344,7 @@ MongoDB utiliza una arquitectura cliente-servidor con replicación integrada:
 ```
 
 **Beneficios:**
+
 - Alta disponibilidad (failover automático)
 - Escalabilidad de lectura (réplicas secundarias)
 - Durabilidad (datos en múltiples servidores)
@@ -369,6 +378,7 @@ Para datos masivos, MongoDB distribuye colecciones entre múltiples servidores:
 ```
 
 **Tipos de Shard Key:**
+
 - **Rango:** Datos contiguos en mismo shard (riesgo hot spot)
 - **Hash:** Distribución uniforme (ideal)
 - **Geoespacial:** Basado en ubicación
@@ -388,6 +398,7 @@ go get go.mongodb.org/mongo-driver@v1.12.1
 ```
 
 **Dependencias principales:**
+
 ```go
 import (
     "go.mongodb.org/mongo-driver/mongo"              // Cliente
@@ -436,26 +447,26 @@ func ConnectToMongoDB() (*mongo.Client, error) {
     // Crear contexto con timeout
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
-    
+
     // Configurar opciones del cliente
     opts := options.Client().
         ApplyURI("mongodb://localhost:27017").
         SetMaxPoolSize(100).
         SetMinPoolSize(10).
         SetMaxConnIdleTime(5 * time.Minute)
-    
+
     // Conectar
     client, err := mongo.Connect(ctx, opts)
     if err != nil {
         return nil, err
     }
-    
+
     // Verificar conexión
     err = client.Ping(ctx, nil)
     if err != nil {
         return nil, err
     }
-    
+
     return client, nil
 }
 
@@ -543,7 +554,7 @@ func NewDatabase(uri string) (*Database, error) {
     if err != nil {
         return nil, err
     }
-    
+
     return &Database{
         Client: client,
         DB:     client.Database("miapp"),
@@ -568,6 +579,7 @@ func (db *Database) Disconnect(ctx context.Context) error {
 ### 65.4.1 Insert Operations
 
 #### InsertOne
+
 ```go
 package main
 
@@ -586,12 +598,12 @@ type User struct {
 
 func (db *Database) InsertUser(ctx context.Context, user User) (string, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     result, err := collection.InsertOne(ctx, user)
     if err != nil {
         return "", err
     }
-    
+
     // Obtener el ID generado
     id := result.InsertedID.(primitive.ObjectID)
     return id.Hex(), nil
@@ -600,46 +612,47 @@ func (db *Database) InsertUser(ctx context.Context, user User) (string, error) {
 // Uso
 func ExampleInsertOne(db *Database) {
     ctx := context.Background()
-    
+
     usuario := User{
         Name:  "Ana García",
         Email: "ana@example.com",
         Age:   28,
     }
-    
+
     id, err := db.InsertUser(ctx, usuario)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     fmt.Printf("Usuario insertado con ID: %s\n", id)
 }
 ```
 
 #### InsertMany
+
 ```go
 func (db *Database) InsertUsers(ctx context.Context, users []User) ([]string, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     // Convertir a []interface{} (requerido por InsertMany)
     docs := make([]interface{}, len(users))
     for i, user := range users {
         docs[i] = user
     }
-    
+
     // Insertar con opciones
     opts := options.InsertMany().SetOrdered(false)  // No ordenado = más rápido
     result, err := collection.InsertMany(ctx, docs, opts)
     if err != nil {
         return nil, err
     }
-    
+
     // Extraer IDs
     ids := make([]string, len(result.InsertedIDs))
     for i, id := range result.InsertedIDs {
         ids[i] = id.(primitive.ObjectID).Hex()
     }
-    
+
     return ids, nil
 }
 
@@ -650,17 +663,18 @@ func ExampleInsertMany(db *Database) {
         {Name: "María", Email: "maria@example.com", Age: 29},
         {Name: "Juan", Email: "juan@example.com", Age: 31},
     }
-    
+
     ids, err := db.InsertUsers(context.Background(), usuarios)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     fmt.Printf("Insertados %d usuarios: %v\n", len(ids), ids)
 }
 ```
 
 **Manejo de errores en InsertMany:**
+
 ```go
 // insertMany no falla si algunos documentos fallan (con SetOrdered(false))
 result, err := collection.InsertMany(ctx, docs, options.InsertMany().SetOrdered(false))
@@ -678,12 +692,13 @@ if err != nil {
 ### 65.4.2 Read Operations
 
 #### FindOne
+
 ```go
 func (db *Database) FindUserByID(ctx context.Context, id string) (*User, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     objID, _ := primitive.ObjectIDFromHexString(id)
-    
+
     var user User
     err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&user)
     if err != nil {
@@ -692,46 +707,47 @@ func (db *Database) FindUserByID(ctx context.Context, id string) (*User, error) 
         }
         return nil, err
     }
-    
+
     return &user, nil
 }
 
 func (db *Database) FindUserByEmail(ctx context.Context, email string) (*User, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     var user User
     err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
     if err != nil {
         return nil, err
     }
-    
+
     return &user, nil
 }
 ```
 
 #### Find (múltiples documentos)
+
 ```go
 func (db *Database) FindUsersOlderThan(ctx context.Context, age int) ([]User, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     filter := bson.M{"age": bson.M{"$gt": age}}
-    
+
     // Opciones: ordenamiento, límite, skip
     opts := options.Find().
         SetSort(bson.M{"age": -1}).  // -1 descendente, 1 ascendente
         SetLimit(100)
-    
+
     cursor, err := collection.Find(ctx, filter, opts)
     if err != nil {
         return nil, err
     }
     defer cursor.Close(ctx)
-    
+
     var users []User
     if err = cursor.All(ctx, &users); err != nil {
         return nil, err
     }
-    
+
     return users, nil
 }
 
@@ -743,9 +759,9 @@ func (db *Database) FindUsersIterating(ctx context.Context, filter bson.M) ([]Us
         return nil, err
     }
     defer cursor.Close(ctx)
-    
+
     var users []User
-    
+
     // Iterar resultado
     for cursor.Next(ctx) {
         var user User
@@ -754,7 +770,7 @@ func (db *Database) FindUsersIterating(ctx context.Context, filter bson.M) ([]Us
         }
         users = append(users, user)
     }
-    
+
     return users, cursor.Err()
 }
 ```
@@ -762,10 +778,11 @@ func (db *Database) FindUsersIterating(ctx context.Context, filter bson.M) ([]Us
 ### 65.4.3 Update Operations
 
 #### UpdateOne
+
 ```go
 func (db *Database) UpdateUserAge(ctx context.Context, email string, newAge int) error {
     collection := db.DB.Collection("usuarios")
-    
+
     filter := bson.M{"email": email}
     update := bson.M{
         "$set": bson.M{
@@ -773,37 +790,38 @@ func (db *Database) UpdateUserAge(ctx context.Context, email string, newAge int)
             "updated_at": time.Now(),
         },
     }
-    
+
     result, err := collection.UpdateOne(ctx, filter, update)
     if err != nil {
         return err
     }
-    
+
     if result.MatchedCount == 0 {
         return errors.New("usuario no encontrado")
     }
-    
+
     fmt.Printf("Modificados: %d documentos\n", result.ModifiedCount)
     return nil
 }
 ```
 
 #### UpdateMany
+
 ```go
 func (db *Database) UpdateUsersStatus(ctx context.Context, ageThreshold int, status string) error {
     collection := db.DB.Collection("usuarios")
-    
+
     filter := bson.M{"age": bson.M{"$gte": ageThreshold}}
     update := bson.M{
         "$set": bson.M{"status": status},
         "$inc": bson.M{"update_count": 1},  // Incrementar contador
     }
-    
+
     result, err := collection.UpdateMany(ctx, filter, update)
     if err != nil {
         return err
     }
-    
+
     fmt.Printf("Documentos coincidentes: %d\n", result.MatchedCount)
     fmt.Printf("Documentos modificados: %d\n", result.ModifiedCount)
     return nil
@@ -826,12 +844,13 @@ func (db *Database) UpdateUsersStatus(ctx context.Context, ageThreshold int, sta
 | `$min`/`$max` | Solo si es menor/mayor |
 
 #### Replace (Reemplazo completo)
+
 ```go
 func (db *Database) ReplaceUser(ctx context.Context, id string, newUser User) error {
     collection := db.DB.Collection("usuarios")
-    
+
     objID, _ := primitive.ObjectIDFromHexString(id)
-    
+
     // ReplaceOne reemplaza TODO el documento (excepto _id)
     result, err := collection.ReplaceOne(
         ctx,
@@ -841,11 +860,11 @@ func (db *Database) ReplaceUser(ctx context.Context, id string, newUser User) er
     if err != nil {
         return err
     }
-    
+
     if result.MatchedCount == 0 {
         return errors.New("usuario no encontrado")
     }
-    
+
     return nil
 }
 ```
@@ -853,42 +872,44 @@ func (db *Database) ReplaceUser(ctx context.Context, id string, newUser User) er
 ### 65.4.4 Delete Operations
 
 #### DeleteOne
+
 ```go
 func (db *Database) DeleteUserByID(ctx context.Context, id string) error {
     collection := db.DB.Collection("usuarios")
-    
+
     objID, _ := primitive.ObjectIDFromHexString(id)
-    
+
     result, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
     if err != nil {
         return err
     }
-    
+
     if result.DeletedCount == 0 {
         return errors.New("usuario no encontrado")
     }
-    
+
     return nil
 }
 ```
 
 #### DeleteMany
+
 ```go
 func (db *Database) DeleteInactiveUsers(ctx context.Context, daysInactive int) (int64, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     // Usuarios sin actualizar hace más de X días
     threshold := time.Now().AddDate(0, 0, -daysInactive)
-    
+
     filter := bson.M{
         "last_login": bson.M{"$lt": threshold},
     }
-    
+
     result, err := collection.DeleteMany(ctx, filter)
     if err != nil {
         return 0, err
     }
-    
+
     return result.DeletedCount, nil
 }
 ```
@@ -898,26 +919,26 @@ func (db *Database) DeleteInactiveUsers(ctx context.Context, daysInactive int) (
 ```go
 func (db *Database) UpsertUser(ctx context.Context, user User) error {
     collection := db.DB.Collection("usuarios")
-    
+
     opts := options.Update().SetUpsert(true)
-    
+
     filter := bson.M{"email": user.Email}
     update := bson.M{
         "$set": user,
         "$setOnInsert": bson.M{"created_at": time.Now()},
     }
-    
+
     result, err := collection.UpdateOne(ctx, filter, update, opts)
     if err != nil {
         return err
     }
-    
+
     if result.UpsertedID != nil {
         fmt.Println("Nuevo usuario creado")
     } else {
         fmt.Println("Usuario actualizado")
     }
-    
+
     return nil
 }
 ```
@@ -1002,7 +1023,7 @@ filter = bson.M{
 }
 
 // $text: búsqueda de texto con índice (más eficiente)
-// Requiere índice de texto: collection.Indexes().CreateOne(ctx, 
+// Requiere índice de texto: collection.Indexes().CreateOne(ctx,
 //   mongo.IndexModel{Keys: bson.D{{Key: "name", Value: "text"}}})
 filter = bson.M{
     "$text": bson.M{"$search": "mongodb tutorial"},
@@ -1096,17 +1117,17 @@ opts = options.Find().
 // Combinado: paginación eficiente
 func (db *Database) GetUsersPaginated(ctx context.Context, page, pageSize int64) ([]User, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     skip := (page - 1) * pageSize
-    
+
     opts := options.Find().
         SetSkip(skip).
         SetLimit(pageSize).
         SetSort(bson.M{"created_at": -1})
-    
+
     cursor, _ := collection.Find(ctx, bson.M{}, opts)
     defer cursor.Close(ctx)
-    
+
     var users []User
     cursor.All(ctx, &users)
     return users, nil
@@ -1152,7 +1173,7 @@ Resultado final
 ```go
 func (db *Database) AggregateExample(ctx context.Context) []bson.M {
     collection := db.DB.Collection("usuarios")
-    
+
     // Pipeline de agregación
     pipeline := mongo.Pipeline{
         // Etapa 1: Filtrar usuarios activos mayores de 25 años
@@ -1162,7 +1183,7 @@ func (db *Database) AggregateExample(ctx context.Context) []bson.M {
                 {Key: "age", Value: bson.D{{Key: "$gt", Value: 25}}},
             }},
         },
-        
+
         // Etapa 2: Proyectar solo campos necesarios
         bson.D{
             {Key: "$project", Value: bson.D{
@@ -1180,10 +1201,10 @@ func (db *Database) AggregateExample(ctx context.Context) []bson.M {
             }},
         },
     }
-    
+
     cursor, _ := collection.Aggregate(ctx, pipeline)
     defer cursor.Close(ctx)
-    
+
     var results []bson.M
     cursor.All(ctx, &results)
     return results
@@ -1195,7 +1216,7 @@ func (db *Database) AggregateExample(ctx context.Context) []bson.M {
 ```go
 func (db *Database) GroupByDepartment(ctx context.Context) []bson.M {
     collection := db.DB.Collection("empleados")
-    
+
     pipeline := mongo.Pipeline{
         bson.D{
             {Key: "$group", Value: bson.D{
@@ -1223,7 +1244,7 @@ func (db *Database) GroupByDepartment(ctx context.Context) []bson.M {
             }},
         },
     }
-    
+
     cursor, _ := collection.Aggregate(ctx, pipeline)
     var results []bson.M
     cursor.All(ctx, &results)
@@ -1261,7 +1282,7 @@ func (db *Database) GroupByDepartment(ctx context.Context) []bson.M {
 ```go
 func (db *Database) JoinUsersWithOrders(ctx context.Context) []bson.M {
     collection := db.DB.Collection("usuarios")
-    
+
     // Simular JOIN: usuarios LEFT OUTER JOIN ordenes
     pipeline := mongo.Pipeline{
         bson.D{
@@ -1282,7 +1303,7 @@ func (db *Database) JoinUsersWithOrders(ctx context.Context) []bson.M {
             }},
         },
     }
-    
+
     cursor, _ := collection.Aggregate(ctx, pipeline)
     var results []bson.M
     cursor.All(ctx, &results)
@@ -1310,13 +1331,13 @@ func (db *Database) JoinUsersWithOrders(ctx context.Context) []bson.M {
 
 func (db *Database) UnwindExample(ctx context.Context) {
     collection := db.DB.Collection("ordenes")
-    
+
     // Antes: { _id: 1, items: [A, B, C] }
-    // Después: 
+    // Después:
     //   { _id: 1, items: A }
     //   { _id: 1, items: B }
     //   { _id: 1, items: C }
-    
+
     pipeline := mongo.Pipeline{
         bson.D{
             {Key: "$unwind", Value: "$items"},
@@ -1330,7 +1351,7 @@ func (db *Database) UnwindExample(ctx context.Context) {
             }},
         },
     }
-    
+
     cursor, _ := collection.Aggregate(ctx, pipeline)
     var results []bson.M
     cursor.All(ctx, &results)
@@ -1343,7 +1364,7 @@ func (db *Database) UnwindExample(ctx context.Context) {
 ```go
 func (db *Database) FacetedSearch(ctx context.Context) bson.M {
     collection := db.DB.Collection("productos")
-    
+
     pipeline := mongo.Pipeline{
         bson.D{
             {Key: "$match", Value: bson.D{
@@ -1372,7 +1393,7 @@ func (db *Database) FacetedSearch(ctx context.Context) bson.M {
             }},
         },
     }
-    
+
     cursor, _ := collection.Aggregate(ctx, pipeline)
     var result bson.M
     cursor.Next(ctx)
@@ -1390,17 +1411,17 @@ func (db *Database) FacetedSearch(ctx context.Context) bson.M {
 ```go
 func (db *Database) CreateIndexes(ctx context.Context) error {
     collection := db.DB.Collection("usuarios")
-    
+
     indexModel := mongo.IndexModel{
         Keys: bson.D{{Key: "email", Value: 1}},
         Options: options.Index().SetUnique(true),  // Único
     }
-    
+
     indexName, err := collection.Indexes().CreateOne(ctx, indexModel)
     if err != nil {
         return err
     }
-    
+
     fmt.Println("Índice creado:", indexName)
     return nil
 }
@@ -1408,7 +1429,7 @@ func (db *Database) CreateIndexes(ctx context.Context) error {
 // Múltiples índices
 func (db *Database) CreateMultipleIndexes(ctx context.Context) error {
     collection := db.DB.Collection("ordenes")
-    
+
     indexModels := []mongo.IndexModel{
         {
             Keys: bson.D{{Key: "user_id", Value: 1}},  // Índice simple
@@ -1423,13 +1444,13 @@ func (db *Database) CreateMultipleIndexes(ctx context.Context) error {
             Keys: bson.D{{Key: "email", Value: "text"}},  // Índice de texto
         },
     }
-    
+
     opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
     names, err := collection.Indexes().CreateMany(ctx, indexModels, opts)
     if err != nil {
         return err
     }
-    
+
     for _, name := range names {
         fmt.Println("Creado:", name)
     }
@@ -1456,12 +1477,12 @@ func (db *Database) CreateMultipleIndexes(ctx context.Context) error {
 
 func (db *Database) CreateTTLIndex(ctx context.Context) error {
     collection := db.DB.Collection("sesiones")
-    
+
     indexModel := mongo.IndexModel{
         Keys: bson.D{{Key: "created_at", Value: 1}},
         Options: options.Index().SetExpireAfterSeconds(3600),  // 1 hora
     }
-    
+
     _, err := collection.Indexes().CreateOne(ctx, indexModel)
     return err
 }
@@ -1482,9 +1503,9 @@ type Session struct {
 ```go
 func (db *Database) ExplainQuery(ctx context.Context) {
     collection := db.DB.Collection("usuarios")
-    
+
     filter := bson.M{"age": bson.M{"$gt": 25}}
-    
+
     // Obtener plan de ejecución
     var explainResult bson.M
     err := collection.Database().RunCommand(ctx, bson.M{
@@ -1493,22 +1514,23 @@ func (db *Database) ExplainQuery(ctx context.Context) {
             "filter": filter,
         },
     }).Decode(&explainResult)
-    
+
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Analizar resultado
     stats := explainResult["executionStats"].(bson.M)
     fmt.Printf("Documentos examinados: %v\n", stats["totalDocsExamined"])
     fmt.Printf("Documentos retornados: %v\n", stats["nReturned"])
-    fmt.Printf("Eficiencia: %.2f%%\n", 
-        float64(stats["nReturned"].(int32)) / 
+    fmt.Printf("Eficiencia: %.2f%%\n",
+        float64(stats["nReturned"].(int32)) /
         float64(stats["totalDocsExamined"].(int32)) * 100)
 }
 ```
 
 **Interpretación:**
+
 - `nReturned` / `totalDocsExamined` ≈ 1.0 = Índice eficiente
 - `stage` = "COLLECTION_SCAN" = No usa índice ⚠️
 - `stage` = "IXSCAN" = Usa índice ✅
@@ -1603,17 +1625,17 @@ func TransferFunds(client *mongo.Client, fromID, toID string, amount float64) er
         return err
     }
     defer session.EndSession(context.Background())
-    
+
     // Ejecutar transacción
     return mongo.WithSession(context.Background(), session, func(sessionCtx mongo.SessionContext) error {
         // Iniciar transacción
         if err = session.StartTransaction(); err != nil {
             return err
         }
-        
+
         ctx := context.Background()
         accountsCol := client.Database("banco").Collection("cuentas")
-        
+
         // Operación 1: Restar dinero de cuenta origen
         _, err = accountsCol.UpdateOne(sessionCtx, bson.M{"_id": fromID}, bson.M{
             "$inc": bson.M{"saldo": -amount},
@@ -1622,7 +1644,7 @@ func TransferFunds(client *mongo.Client, fromID, toID string, amount float64) er
             session.AbortTransaction(ctx)
             return err
         }
-        
+
         // Operación 2: Agregar dinero a cuenta destino
         _, err = accountsCol.UpdateOne(sessionCtx, bson.M{"_id": toID}, bson.M{
             "$inc": bson.M{"saldo": amount},
@@ -1631,7 +1653,7 @@ func TransferFunds(client *mongo.Client, fromID, toID string, amount float64) er
             session.AbortTransaction(ctx)
             return err
         }
-        
+
         // Registrar transacción en log
         transactionsCol := client.Database("banco").Collection("transacciones")
         _, err = transactionsCol.InsertOne(sessionCtx, bson.M{
@@ -1644,7 +1666,7 @@ func TransferFunds(client *mongo.Client, fromID, toID string, amount float64) er
             session.AbortTransaction(ctx)
             return err
         }
-        
+
         // Confirmar transacción
         return session.CommitTransaction(ctx)
     })
@@ -1670,36 +1692,36 @@ func TransactionWithRetry(client *mongo.Client, operation func(mongo.SessionCont
         if err != nil {
             return err
         }
-        
+
         err = mongo.WithSession(context.Background(), session, func(ctx mongo.SessionContext) error {
             session.StartTransaction()
-            
+
             // Ejecutar operación
             if err := operation(ctx); err != nil {
                 session.AbortTransaction(context.Background())
                 return err
             }
-            
+
             // Intentar commit (puede fallar con transient error)
             return session.CommitTransaction(context.Background())
         })
-        
+
         session.EndSession(context.Background())
-        
+
         if err == nil {
             return nil  // Éxito
         }
-        
+
         // Revisar si es error transitorio
         if mongo.IsNetworkError(err) || mongo.IsServerSelectionError(err) {
             log.Printf("Error transitorio, reintentando... (%d/3)", attempt+1)
             time.Sleep(time.Second * time.Duration(attempt+1))
             continue
         }
-        
+
         return err  // Error no transitorio
     }
-    
+
     return errors.New("transacción falló después de 3 intentos")
 }
 ```
@@ -1719,14 +1741,14 @@ MongoDB proporciona garantías ACID en transacciones:
 // Ejemplo: Guarantee de consistencia
 func BookFlight(db *mongo.Database, session mongo.Session) error {
     ctx := context.Background()
-    
+
     if err := session.StartTransaction(); err != nil {
         return err
     }
-    
+
     flightsCol := db.Collection("vuelos")
     bookingsCol := db.Collection("reservas")
-    
+
     // Verificar disponibilidad
     var flight bson.M
     err := flightsCol.FindOne(ctx, bson.M{"_id": "FL123"}).Decode(&flight)
@@ -1734,23 +1756,23 @@ func BookFlight(db *mongo.Database, session mongo.Session) error {
         session.AbortTransaction(ctx)
         return errors.New("vuelo no encontrado")
     }
-    
+
     available := flight["available_seats"].(int32)
     if available <= 0 {
         session.AbortTransaction(ctx)
         return errors.New("sin asientos disponibles")
     }
-    
+
     // Decrementar asientos y crear reserva (ambos o ninguno)
-    flightsCol.UpdateOne(ctx, bson.M{"_id": "FL123"}, 
+    flightsCol.UpdateOne(ctx, bson.M{"_id": "FL123"},
         bson.M{"$inc": bson.M{"available_seats": -1}})
-    
+
     bookingsCol.InsertOne(ctx, bson.M{
         "user_id": "user123",
         "flight": "FL123",
         "status": "confirmed",
     })
-    
+
     return session.CommitTransaction(ctx)
 }
 ```
@@ -1772,7 +1794,7 @@ import (
 
 func BulkOperationsExample(db *mongo.Database, ctx context.Context) error {
     collection := db.Collection("usuarios")
-    
+
     // Crear modelos de operaciones
     models := []mongo.WriteModel{
         // Insertar
@@ -1780,12 +1802,12 @@ func BulkOperationsExample(db *mongo.Database, ctx context.Context) error {
             "name": "Alice",
             "email": "alice@example.com",
         }),
-        
+
         // Actualizar
         mongo.NewUpdateOneModel().
             SetFilter(bson.M{"email": "bob@example.com"}).
             SetUpdate(bson.M{"$set": bson.M{"status": "active"}}),
-        
+
         // Reemplazar
         mongo.NewReplaceOneModel().
             SetFilter(bson.M{"_id": "charlie"}).
@@ -1794,22 +1816,22 @@ func BulkOperationsExample(db *mongo.Database, ctx context.Context) error {
                 "email": "charlie@example.com",
             }).
             SetUpsert(true),
-        
+
         // Eliminar
         mongo.NewDeleteOneModel().
             SetFilter(bson.M{"status": "inactive"}),
     }
-    
+
     opts := options.BulkWrite().SetOrdered(false)  // No ordenado = paralelo
     result, err := collection.BulkWrite(ctx, models, opts)
     if err != nil {
         return err
     }
-    
+
     fmt.Printf("Insertados: %d\n", result.InsertedCount)
     fmt.Printf("Modificados: %d\n", result.ModifiedCount)
     fmt.Printf("Eliminados: %d\n", result.DeletedCount)
-    
+
     return nil
 }
 ```
@@ -1819,27 +1841,27 @@ func BulkOperationsExample(db *mongo.Database, ctx context.Context) error {
 ```go
 func BatchProcessing(db *mongo.Database, ctx context.Context) error {
     collection := db.Collection("eventos")
-    
+
     // Procesar millones de documentos eficientemente
     const batchSize = 1000
-    
+
     filter := bson.M{"processed": false}
     opts := options.Find().SetBatchSize(batchSize)
-    
+
     cursor, err := collection.Find(ctx, filter, opts)
     if err != nil {
         return err
     }
     defer cursor.Close(ctx)
-    
+
     var batch []bson.M
-    
+
     for cursor.Next(ctx) {
         var doc bson.M
         cursor.Decode(&doc)
-        
+
         batch = append(batch, doc)
-        
+
         // Procesar cuando alcanza tamaño del lote
         if len(batch) >= batchSize {
             if err := processBatch(db, ctx, batch); err != nil {
@@ -1848,29 +1870,29 @@ func BatchProcessing(db *mongo.Database, ctx context.Context) error {
             batch = batch[:0]  // Limpiar
         }
     }
-    
+
     // Procesar último lote
     if len(batch) > 0 {
         return processBatch(db, ctx, batch)
     }
-    
+
     return nil
 }
 
 func processBatch(db *mongo.Database, ctx context.Context, batch []bson.M) error {
     collection := db.Collection("eventos")
-    
+
     // Actualizar todos los documentos en lote
     ids := make([]interface{}, len(batch))
     for i, doc := range batch {
         ids[i] = doc["_id"]
     }
-    
+
     _, err := collection.UpdateMany(ctx,
         bson.M{"_id": bson.M{"$in": ids}},
         bson.M{"$set": bson.M{"processed": true, "processed_at": time.Now()}},
     )
-    
+
     return err
 }
 ```
@@ -1894,7 +1916,7 @@ func OptimizedConnections(uri string) (*mongo.Client, error) {
         SetRetryReads(true).
         // Compresión (reduce uso de red)
         SetCompressors([]string{"snappy", "zstd"})
-    
+
     return mongo.Connect(context.Background(), opts)
 }
 
@@ -1918,23 +1940,23 @@ func (pm *PoolMonitor) Event(evt *event.PoolEvent) {
 ```go
 func MemoryEfficientQuery(db *mongo.Database, ctx context.Context) error {
     collection := db.Collection("productos")
-    
+
     // ❌ Ineficiente: Cargar todo en memoria
     cursor, _ := collection.Find(ctx, bson.M{})
     defer cursor.Close(ctx)
     var allProducts []bson.M
     cursor.All(ctx, &allProducts)  // Todo en RAM
-    
+
     // ✅ Eficiente: Iterar
     cursor, _ := collection.Find(ctx, bson.M{})
     defer cursor.Close(ctx)
-    
+
     for cursor.Next(ctx) {
         var product bson.M
         cursor.Decode(&product)
         // Procesar sin acumular
     }
-    
+
     return nil
 }
 
@@ -1997,7 +2019,7 @@ func CreateCollectionWithValidation(db *mongo.Database, ctx context.Context) err
             },
         },
     }
-    
+
     opts := options.CreateCollection().SetValidator(validator)
     return db.CreateCollection(ctx, "usuarios", opts)
 }
@@ -2005,14 +2027,14 @@ func CreateCollectionWithValidation(db *mongo.Database, ctx context.Context) err
 // Validación automática en inserciones
 func TestValidation(db *mongo.Database, ctx context.Context) {
     collection := db.Collection("usuarios")
-    
+
     // ✅ Válido
     collection.InsertOne(ctx, bson.M{
         "name": "Juan",
         "email": "juan@example.com",
         "age": 28,
     })
-    
+
     // ❌ Inválido: falta campo required
     _, err := collection.InsertOne(ctx, bson.M{
         "name": "María",
@@ -2020,7 +2042,7 @@ func TestValidation(db *mongo.Database, ctx context.Context) {
         // falta email
     })
     // Error: Documento no cumple esquema
-    
+
     // ❌ Inválido: age fuera de rango
     _, err = collection.InsertOne(ctx, bson.M{
         "name": "Carlos",
@@ -2055,20 +2077,20 @@ func (u *User) Validate() error {
     if u.Name == "" {
         return errors.New("nombre es requerido")
     }
-    
+
     if len(u.Name) < 2 || len(u.Name) > 100 {
         return errors.New("nombre debe tener 2-100 caracteres")
     }
-    
+
     emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
     if !emailRegex.MatchString(u.Email) {
         return errors.New("email inválido")
     }
-    
+
     if u.Age < 0 || u.Age > 150 {
         return errors.New("edad debe estar entre 0 y 150")
     }
-    
+
     return nil
 }
 
@@ -2078,9 +2100,9 @@ func (db *Database) InsertUserWithValidation(ctx context.Context, user User) err
     if err := user.Validate(); err != nil {
         return err
     }
-    
+
     user.Created = time.Now()
-    
+
     collection := db.DB.Collection("usuarios")
     _, err := collection.InsertOne(ctx, user)
     return err
@@ -2092,14 +2114,14 @@ func (db *Database) InsertUserWithValidation(ctx context.Context, user User) err
 ```go
 func (db *Database) CreateUniqueIndexOnEmail(ctx context.Context) error {
     collection := db.DB.Collection("usuarios")
-    
+
     indexModel := mongo.IndexModel{
         Keys: bson.D{{Key: "email", Value: 1}},
         Options: options.Index().
             SetUnique(true).
             SetSparse(true),  // Permite múltiples null
     }
-    
+
     _, err := collection.Indexes().CreateOne(ctx, indexModel)
     return err
 }
@@ -2107,10 +2129,10 @@ func (db *Database) CreateUniqueIndexOnEmail(ctx context.Context) error {
 // Manejo de violación de unicidad
 func (db *Database) InsertUserWithUniqueCheck(ctx context.Context, user User) (string, error) {
     collection := db.DB.Collection("usuarios")
-    
+
     user.Created = time.Now()
     result, err := collection.InsertOne(ctx, user)
-    
+
     if err != nil {
         // Verificar si es error de duplicado
         writeErr, ok := err.(mongo.WriteError)
@@ -2119,7 +2141,7 @@ func (db *Database) InsertUserWithUniqueCheck(ctx context.Context, user User) (s
         }
         return "", err
     }
-    
+
     return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 ```
@@ -2143,27 +2165,27 @@ func HandleMongoError(err error) string {
     if err == nil {
         return "Sin error"
     }
-    
+
     // Error de conexión
     if mongo.IsNetworkError(err) {
         return "Error de red: intente nuevamente"
     }
-    
+
     // Error de selección de servidor
     if mongo.IsServerSelectionError(err) {
         return "Servidor MongoDB no disponible"
     }
-    
+
     // No encontrado
     if err == mongo.ErrNoDocuments {
         return "Documento no encontrado"
     }
-    
+
     // Timeout
     if errors.Is(err, context.DeadlineExceeded) {
         return "Timeout en operación"
     }
-    
+
     // Error de escritura
     writeErr, ok := err.(mongo.WriteError)
     if ok {
@@ -2172,44 +2194,44 @@ func HandleMongoError(err error) string {
         }
         return fmt.Sprintf("Error de escritura: %s", writeErr.Message)
     }
-    
+
     // Bulk write error
     bulkErr, ok := err.(mongo.BulkWriteError)
     if ok {
         fmt.Printf("Errores en bulk: %v\n", bulkErr.WriteErrors)
         return "Algunos documentos fallaron"
     }
-    
+
     return err.Error()
 }
 
 // Retry con backoff exponencial
 func RetryOperation(operation func() error, maxRetries int) error {
     var lastErr error
-    
+
     for attempt := 0; attempt < maxRetries; attempt++ {
         err := operation()
         if err == nil {
             return nil
         }
-        
+
         lastErr = err
-        
+
         // Solo reintentar errores transitorios
         if !isTransientError(err) {
             return err
         }
-        
+
         // Backoff exponencial
         backoff := time.Duration(math.Pow(2, float64(attempt))) * time.Second
         time.Sleep(backoff)
     }
-    
+
     return lastErr
 }
 
 func isTransientError(err error) bool {
-    return mongo.IsNetworkError(err) || 
+    return mongo.IsNetworkError(err) ||
            mongo.IsServerSelectionError(err) ||
            errors.Is(err, context.DeadlineExceeded)
 }
@@ -2237,19 +2259,19 @@ func (m *DatabaseMonitor) SetupMonitoring(client *mongo.Client) {
             m.Logger.Debugf("Comando iniciado: %s (ns: %s)", evt.CommandName, evt.Namespace)
         },
         Succeeded: func(_ context.Context, evt *event.CommandSucceededEvent) {
-            m.Logger.Debugf("Comando exitoso: %s (duración: %dns)", 
+            m.Logger.Debugf("Comando exitoso: %s (duración: %dns)",
                 evt.CommandName, evt.DurationNanos)
         },
         Failed: func(_ context.Context, evt *event.CommandFailedEvent) {
-            m.Logger.Warnf("Comando fallido: %s (razón: %s)", 
+            m.Logger.Warnf("Comando fallido: %s (razón: %s)",
                 evt.CommandName, evt.Failure)
         },
     }
-    
+
     opts := options.Client().
         ApplyURI("mongodb://localhost:27017").
         SetMonitor(cmdMonitor)
-    
+
     // Monitoring pool
     poolMonitor := &event.PoolMonitor{
         Event: func(evt *event.PoolEvent) {
@@ -2269,17 +2291,17 @@ func (m *DatabaseMonitor) SetupMonitoring(client *mongo.Client) {
 func (db *Database) HealthCheck(ctx context.Context) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
     defer cancel()
-    
+
     if err := db.Client.Ping(ctx, nil); err != nil {
         return err
     }
-    
+
     // Verificar colecciones críticas
     collections, err := db.DB.ListCollectionNames(ctx, bson.M{})
     if err != nil {
         return err
     }
-    
+
     expectedCollections := []string{"usuarios", "ordenes", "productos"}
     for _, expected := range expectedCollections {
         found := false
@@ -2293,7 +2315,7 @@ func (db *Database) HealthCheck(ctx context.Context) error {
             return fmt.Errorf("colección faltante: %s", expected)
         }
     }
-    
+
     return nil
 }
 ```
@@ -2337,18 +2359,18 @@ func MigrateUserData(sqlDB *sql.DB, mongodb *mongo.Database, ctx context.Context
         return err
     }
     defer rows.Close()
-    
+
     collection := mongodb.Collection("usuarios")
     var docs []interface{}
-    
+
     for rows.Next() {
         var id int
         var name, email string
-        
+
         if err := rows.Scan(&id, &name, &email); err != nil {
             return err
         }
-        
+
         doc := bson.M{
             "sql_id": id,  // Guardar ID original por si acaso
             "name":   name,
@@ -2356,7 +2378,7 @@ func MigrateUserData(sqlDB *sql.DB, mongodb *mongo.Database, ctx context.Context
         }
         docs = append(docs, doc)
     }
-    
+
     // Insertar en MongoDB
     _, err = collection.InsertMany(ctx, docs)
     return err
@@ -2409,12 +2431,12 @@ type OrderItem struct {
 // Queries optimizadas
 func (db *Database) GetProductsByCategory(ctx context.Context, category string) ([]Product, error) {
     collection := db.DB.Collection("productos")
-    
+
     // Crear índice si no existe
     collection.Indexes().CreateOne(ctx, mongo.IndexModel{
         Keys: bson.D{{Key: "category", Value: 1}},
     })
-    
+
     cursor, err := collection.Find(ctx, bson.M{
         "category": category,
         "stock":    bson.M{"$gt": 0},
@@ -2422,7 +2444,7 @@ func (db *Database) GetProductsByCategory(ctx context.Context, category string) 
     if err != nil {
         return nil, err
     }
-    
+
     var products []Product
     cursor.All(ctx, &products)
     return products, nil
@@ -2431,7 +2453,7 @@ func (db *Database) GetProductsByCategory(ctx context.Context, category string) 
 // Análisis: Productos más vendidos
 func (db *Database) TopSellingProducts(ctx context.Context, limit int) ([]bson.M, error) {
     collection := db.DB.Collection("ordenes")
-    
+
     pipeline := mongo.Pipeline{
         bson.D{{Key: "$unwind", Value: "$items"}},
         bson.D{
@@ -2444,12 +2466,12 @@ func (db *Database) TopSellingProducts(ctx context.Context, limit int) ([]bson.M
         bson.D{{Key: "$sort", Value: bson.D{{Key: "total_vendido", Value: -1}}}},
         bson.D{{Key: "$limit", Value: int64(limit)}},
     }
-    
+
     cursor, err := collection.Aggregate(ctx, pipeline)
     if err != nil {
         return nil, err
     }
-    
+
     var results []bson.M
     cursor.All(ctx, &results)
     return results, nil
@@ -2466,7 +2488,7 @@ func BackupDatabase(dbName string, outputPath string) error {
         "--out", outputPath,
         "--uri", "mongodb://localhost:27017",
     )
-    
+
     return cmd.Run()
 }
 
@@ -2477,7 +2499,7 @@ func RestoreDatabase(inputPath string, dbName string) error {
         "--db", dbName,
         inputPath,
     )
-    
+
     return cmd.Run()
 }
 
@@ -2490,7 +2512,7 @@ func ExportToJSON(dbName, collName, outputFile string) error {
         "--out", outputFile,
         "--pretty",
     )
-    
+
     return cmd.Run()
 }
 
@@ -2503,7 +2525,7 @@ func ImportFromJSON(dbName, collName, inputFile string) error {
         "--file", inputFile,
         "--jsonArray",  // Si es array de objetos
     )
-    
+
     return cmd.Run()
 }
 ```
@@ -2534,40 +2556,40 @@ type User struct {
 }
 
 func Exercise1() {
-    client, _ := mongo.Connect(context.Background(), 
+    client, _ := mongo.Connect(context.Background(),
         options.Client().ApplyURI("mongodb://localhost:27017"))
     defer client.Disconnect(context.Background())
-    
+
     collection := client.Database("ejercicios").Collection("usuarios")
-    
+
     // 1. Insertar usuarios
     users := []interface{}{
         User{Name: "Ana", Email: "ana@example.com", Age: 28},
         User{Name: "Bob", Email: "bob@example.com", Age: 32},
         User{Name: "Carlos", Email: "carlos@example.com", Age: 25},
     }
-    
+
     result, _ := collection.InsertMany(context.Background(), users)
     fmt.Printf("Insertados: %v\n", result.InsertedIDs)
-    
+
     // 2. Buscar todos
     cursor, _ := collection.Find(context.Background(), bson.M{})
     var allUsers []User
     cursor.All(context.Background(), &allUsers)
     fmt.Printf("Total usuarios: %d\n", len(allUsers))
-    
+
     // 3. Buscar por email
     var user User
-    collection.FindOne(context.Background(), 
+    collection.FindOne(context.Background(),
         bson.M{"email": "ana@example.com"}).Decode(&user)
     fmt.Printf("Encontrado: %s (edad: %d)\n", user.Name, user.Age)
-    
+
     // 4. Actualizar edad
     collection.UpdateOne(context.Background(),
         bson.M{"email": "bob@example.com"},
         bson.M{"$set": bson.M{"age": 33}})
     fmt.Println("Bob actualizado a edad 33")
-    
+
     // 5. Eliminar usuario
     collection.DeleteOne(context.Background(),
         bson.M{"email": "carlos@example.com"})
@@ -2582,7 +2604,7 @@ func Exercise2() {
     client, _ := mongo.Connect(context.Background(),
         options.Client().ApplyURI("mongodb://localhost:27017"))
     collection := client.Database("ejercicios").Collection("productos")
-    
+
     // Crear documentos
     collection.InsertMany(context.Background(), []interface{}{
         bson.M{"nombre": "Laptop", "precio": 999, "stock": 5, "categoria": "IT"},
@@ -2591,7 +2613,7 @@ func Exercise2() {
         bson.M{"nombre": "Teclado", "precio": 89, "stock": 20, "categoria": "IT"},
         bson.M{"nombre": "Silla", "precio": 249, "stock": 8, "categoria": "Oficina"},
     })
-    
+
     // Queries
     fmt.Println("1. Productos con precio entre 50 y 300:")
     cursor, _ := collection.Find(context.Background(), bson.M{
@@ -2602,7 +2624,7 @@ func Exercise2() {
     for _, p := range productos {
         fmt.Printf("  - %s: $%v\n", p["nombre"], p["precio"])
     }
-    
+
     fmt.Println("\n2. Productos con stock bajo (< 15):")
     cursor, _ = collection.Find(context.Background(), bson.M{
         "stock": bson.M{"$lt": 15},
@@ -2611,10 +2633,10 @@ func Exercise2() {
     for _, p := range productos {
         fmt.Printf("  - %s: %d unidades\n", p["nombre"], p["stock"])
     }
-    
+
     fmt.Println("\n3. Productos de IT ordenados por precio (descendente):")
     opts := options.Find().SetSort(bson.M{"precio": -1})
-    cursor, _ = collection.Find(context.Background(), 
+    cursor, _ = collection.Find(context.Background(),
         bson.M{"categoria": "IT"}, opts)
     cursor.All(context.Background(), &productos)
     for _, p := range productos {
@@ -2630,7 +2652,7 @@ func Exercise3() {
     client, _ := mongo.Connect(context.Background(),
         options.Client().ApplyURI("mongodb://localhost:27017"))
     collection := client.Database("ejercicios").Collection("ventas")
-    
+
     // Datos de ejemplo
     collection.InsertMany(context.Background(), []interface{}{
         bson.M{"producto": "A", "cantidad": 10, "precio": 50, "mes": "enero"},
@@ -2639,7 +2661,7 @@ func Exercise3() {
         bson.M{"producto": "C", "cantidad": 20, "precio": 25, "mes": "febrero"},
         bson.M{"producto": "B", "cantidad": 8, "precio": 100, "mes": "marzo"},
     })
-    
+
     // Agregación: Ventas totales por producto
     pipeline := mongo.Pipeline{
         bson.D{{Key: "$group", Value: bson.D{
@@ -2653,11 +2675,11 @@ func Exercise3() {
         }}},
         bson.D{{Key: "$sort", Value: bson.D{{Key: "ingresos", Value: -1}}}},
     }
-    
+
     cursor, _ := collection.Aggregate(context.Background(), pipeline)
     var resultados []bson.M
     cursor.All(context.Background(), &resultados)
-    
+
     fmt.Println("Ventas por producto:")
     for _, r := range resultados {
         fmt.Printf("%s: %d unidades, $%.2f en ingresos\n",
@@ -2673,31 +2695,31 @@ func Exercise4() {
     client, _ := mongo.Connect(context.Background(),
         options.Client().ApplyURI("mongodb://localhost:27017"))
     db := client.Database("ejercicios")
-    
+
     // Crear colecciones
     db.Collection("cuentas").InsertMany(context.Background(), []interface{}{
         bson.M{"_id": "cuenta1", "saldo": 1000},
         bson.M{"_id": "cuenta2", "saldo": 500},
     })
-    
+
     // Transacción: transferencia
     session, _ := client.StartSession()
     defer session.EndSession(context.Background())
-    
+
     err := mongo.WithSession(context.Background(), session, func(ctx mongo.SessionContext) error {
         session.StartTransaction()
-        
+
         cuentas := db.Collection("cuentas")
-        
+
         // Restar de cuenta1
-        _, err := cuentas.UpdateOne(ctx, 
+        _, err := cuentas.UpdateOne(ctx,
             bson.M{"_id": "cuenta1"},
             bson.M{"$inc": bson.M{"saldo": -200}})
         if err != nil {
             session.AbortTransaction(ctx)
             return err
         }
-        
+
         // Sumar a cuenta2
         _, err = cuentas.UpdateOne(ctx,
             bson.M{"_id": "cuenta2"},
@@ -2706,22 +2728,22 @@ func Exercise4() {
             session.AbortTransaction(ctx)
             return err
         }
-        
+
         return session.CommitTransaction(ctx)
     })
-    
+
     if err != nil {
         fmt.Printf("Error en transacción: %v\n", err)
     } else {
         fmt.Println("Transferencia exitosa")
-        
+
         // Verificar saldos
         var cuenta1, cuenta2 bson.M
-        db.Collection("cuentas").FindOne(context.Background(), 
+        db.Collection("cuentas").FindOne(context.Background(),
             bson.M{"_id": "cuenta1"}).Decode(&cuenta1)
         db.Collection("cuentas").FindOne(context.Background(),
             bson.M{"_id": "cuenta2"}).Decode(&cuenta2)
-        
+
         fmt.Printf("Cuenta 1: $%v\n", cuenta1["saldo"])
         fmt.Printf("Cuenta 2: $%v\n", cuenta2["saldo"])
     }
@@ -2765,14 +2787,14 @@ func Exercise5() {
     client, _ := mongo.Connect(context.Background(),
         options.Client().ApplyURI("mongodb://localhost:27017"))
     blog := &BlogDB{db: client.Database("blog")}
-    
+
     // Crear índices
     blog.db.Collection("posts").Indexes().CreateMany(context.Background(), []mongo.IndexModel{
         {Keys: bson.D{{Key: "title", Value: "text"}}},
         {Keys: bson.D{{Key: "tags", Value: 1}}},
         {Keys: bson.D{{Key: "created_at", Value: -1}}},
     })
-    
+
     // Insertar posts
     posts := []interface{}{
         BlogPost{
@@ -2795,10 +2817,10 @@ func Exercise5() {
             CreatedAt: time.Now().AddDate(0, 0, -2),
         },
     }
-    
+
     result, _ := blog.db.Collection("posts").InsertMany(context.Background(), posts)
     fmt.Printf("Posts insertados: %d\n", len(result.InsertedIDs))
-    
+
     // Buscar posts por tag
     fmt.Println("\nPosts con tag 'mongodb':")
     cursor, _ := blog.db.Collection("posts").Find(context.Background(),
@@ -2808,7 +2830,7 @@ func Exercise5() {
     for _, p := range foundPosts {
         fmt.Printf("- %s por %s (%d views)\n", p.Title, p.Author, p.Views)
     }
-    
+
     // Posts más populares
     fmt.Println("\nPosts ordenados por popularidad:")
     opts := options.Find().SetSort(bson.M{"views": -1})
@@ -2817,7 +2839,7 @@ func Exercise5() {
     for _, p := range foundPosts {
         fmt.Printf("- %s (%d views)\n", p.Title, p.Views)
     }
-    
+
     // Agregar comentario
     fmt.Println("\nAñadiendo comentario...")
     blog.db.Collection("posts").UpdateOne(context.Background(),
@@ -2828,7 +2850,7 @@ func Exercise5() {
             Rating: 4,
             Created: time.Now(),
         }}})
-    
+
     // Estadísticas
     fmt.Println("\nEstadísticas:")
     pipeline := mongo.Pipeline{
@@ -2841,7 +2863,7 @@ func Exercise5() {
             }},
         }}},
     }
-    
+
     cursor, _ = blog.db.Collection("posts").Aggregate(context.Background(), pipeline)
     var stats []bson.M
     cursor.All(context.Background(), &stats)

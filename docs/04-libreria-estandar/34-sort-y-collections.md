@@ -18,10 +18,10 @@ El corazón del ordenamiento en Go es la interface `sort.Interface`. Para que cu
 type Interface interface {
     // Len devuelve la cantidad de elementos
     Len() int
-    
+
     // Less devuelve true si el elemento en i es menor que en j
     Less(i, j int) bool
-    
+
     // Swap intercambia los elementos en i y j
     Swap(i, j int)
 }
@@ -61,9 +61,9 @@ func main() {
         {Nombre: "Bob", Edad: 25},
         {Nombre: "Charlie", Edad: 35},
     }
-    
+
     sort.Sort(personas)
-    
+
     for _, p := range personas {
         fmt.Printf("%s: %d años\n", p.Nombre, p.Edad)
     }
@@ -106,10 +106,10 @@ func benchmarkOrdenamiento(n int) {
     for i := 0; i < n; i++ {
         datos[i] = rand.Intn(1000)
     }
-    
+
     // Mejor caso: O(n)
     sort.Ints(datos) // Ya está parcialmente ordenado
-    
+
     // Peor caso: O(n log n) con fallback a heapsort
     // Go previene el caso patológico de O(n²)
 }
@@ -181,17 +181,17 @@ import (
 
 func main() {
     numeros := []int{64, 34, 25, 12, 22, 11, 90}
-    
+
     // Ordenamiento ascendente
     sort.Ints(numeros)
     fmt.Println("Ascendente:", numeros)
     // Output: Ascendente: [11 12 22 25 34 64 90]
-    
+
     // Ordenamiento descendente usando Reverse
     sort.Sort(sort.Reverse(sort.IntSlice(numeros)))
     fmt.Println("Descendente:", numeros)
     // Output: Descendente: [90 64 34 25 22 12 11]
-    
+
     // Búsqueda en slice ordenado
     idx := sort.SearchInts(numeros, 25)
     if idx < len(numeros) && numeros[idx] == 25 {
@@ -205,11 +205,11 @@ func main() {
 ```go
 func main() {
     flotantes := []float64{3.14, 2.71, 1.41, 1.73, 2.23}
-    
+
     sort.Float64s(flotantes)
     fmt.Println("Flotantes ordenados:", flotantes)
     // Output: Flotantes ordenados: [1.41 1.73 2.23 2.71 3.14]
-    
+
     // Búsqueda binaria en flotantes
     idx := sort.SearchFloat64s(flotantes, 2.0)
     fmt.Printf("Posición para insertar 2.0: %d\n", idx)
@@ -222,16 +222,16 @@ func main() {
 ```go
 func main() {
     palabras := []string{"zebra", "apple", "banana", "cherry", "date"}
-    
+
     // Ordenamiento alfabético
     sort.Strings(palabras)
     fmt.Println("Alfabético:", palabras)
     // Output: Alfabético: [apple banana cherry date zebra]
-    
+
     // Verificar si está ordenado
     esOrdenado := sort.StringsAreSorted(palabras)
     fmt.Println("¿Está ordenado?:", esOrdenado)
-    
+
     // Búsqueda binaria en strings
     idx := sort.SearchStrings(palabras, "cherry")
     if idx < len(palabras) && palabras[idx] == "cherry" {
@@ -247,12 +247,12 @@ func main() {
     numeros := []int{1, 2, 3, 4, 5}
     flotantes := []float64{1.1, 1.2, 1.3}
     palabras := []string{"a", "b", "c"}
-    
+
     // Funciones de verificación
     fmt.Println("Ints ordenados:", sort.IntsAreSorted(numeros))
     fmt.Println("Float64s ordenados:", sort.Float64sAreSorted(flotantes))
     fmt.Println("Strings ordenados:", sort.StringsAreSorted(palabras))
-    
+
     // Verificación genérica
     fmt.Println("Genérica:", sort.IsSorted(sort.IntSlice(numeros)))
 }
@@ -326,14 +326,14 @@ func main() {
         {3, "Charlie", 55000, 3},
         {4, "Diana", 52000, 6},
     }
-    
+
     // Ordenar por salario
     sort.Sort(PorSalario(empleados))
     fmt.Println("Por salario:")
     for _, e := range empleados {
         fmt.Printf("  %s: $%.2f\n", e.Nombre, e.Salario)
     }
-    
+
     // Ordenar por antigüedad
     sort.Sort(PorAntigüedad(empleados))
     fmt.Println("\nPor antigüedad (descendente):")
@@ -353,9 +353,9 @@ func main() {
         {3, "Charlie", 55000, 3},
         {4, "Diana", 52000, 6},
     }
-    
+
     // Múltiples ordenamientos sin crear tipos especiales
-    
+
     // 1. Por salario descendente
     sort.Slice(empleados, func(i, j int) bool {
         return empleados[i].Salario > empleados[j].Salario
@@ -364,7 +364,7 @@ func main() {
     for _, e := range empleados {
         fmt.Printf("  %s: $%.2f\n", e.Nombre, e.Salario)
     }
-    
+
     // 2. Por nombre (alfabético)
     sort.Slice(empleados, func(i, j int) bool {
         return empleados[i].Nombre < empleados[j].Nombre
@@ -373,7 +373,7 @@ func main() {
     for _, e := range empleados {
         fmt.Printf("  %s\n", e.Nombre)
     }
-    
+
     // 3. Por años de antigüedad, luego por salario (multi-criterio)
     sort.Slice(empleados, func(i, j int) bool {
         if empleados[i].Años != empleados[j].Años {
@@ -400,24 +400,24 @@ func main() {
         Cantidad  int
         Prioridad int
     }
-    
+
     items := []Item{
         {"Pan", 2, 1},
         {"Leche", 1, 1},
         {"Queso", 3, 2},
         {"Huevos", 12, 1},
     }
-    
+
     // sort.Slice NO es estable
     sort.Slice(items, func(i, j int) bool {
         return items[i].Prioridad < items[j].Prioridad
     })
-    
+
     fmt.Println("Con sort.Slice (NO estable):")
     for _, item := range items {
         fmt.Printf("  %s (prioridad %d)\n", item.Nombre, item.Prioridad)
     }
-    
+
     // Reiniciar
     items = []Item{
         {"Pan", 2, 1},
@@ -425,12 +425,12 @@ func main() {
         {"Queso", 3, 2},
         {"Huevos", 12, 1},
     }
-    
+
     // sort.SliceStable SÍ es estable
     sort.SliceStable(items, func(i, j int) bool {
         return items[i].Prioridad < items[j].Prioridad
     })
-    
+
     fmt.Println("\nCon sort.SliceStable (ESTABLE):")
     for _, item := range items {
         fmt.Printf("  %s (prioridad %d)\n", item.Nombre, item.Prioridad)
@@ -456,24 +456,24 @@ import (
 
 func main() {
     numeros := []int{2, 4, 6, 8, 10, 12, 14, 16, 18, 20}
-    
+
     // Buscar número que existe
     idx := sort.SearchInts(numeros, 12)
     fmt.Printf("Índice de 12: %d\n", idx)
     if idx < len(numeros) && numeros[idx] == 12 {
         fmt.Println("¡Encontrado!")
     }
-    
+
     // Buscar número que NO existe
     idx = sort.SearchInts(numeros, 11)
     fmt.Printf("Índice para insertar 11: %d\n", idx)
     // SearchInts devuelve la posición donde el elemento debería ir
-    
+
     // Búsqueda en strings
     palabras := []string{"apple", "banana", "cherry", "date", "elderberry"}
     idx = sort.SearchStrings(palabras, "cherry")
     fmt.Printf("Índice de 'cherry': %d\n", idx)
-    
+
     // Búsqueda en flotantes
     valores := []float64{1.1, 2.2, 3.3, 4.4, 5.5}
     idx = sort.SearchFloat64s(valores, 3.3)
@@ -493,20 +493,20 @@ func main() {
         {3, "Charlie", 55000, 7},
         {4, "Diana", 60000, 9},
     }
-    
+
     // Buscar por salario
     buscarSalario := 50000.0
     idx := sort.Search(len(empleados), func(i int) bool {
         return empleados[i].Salario >= buscarSalario
     })
-    
+
     if idx < len(empleados) && empleados[idx].Salario == buscarSalario {
         fmt.Printf("Encontrado empleado con salario $%.2f: %s\n",
             buscarSalario, empleados[idx].Nombre)
     } else {
         fmt.Printf("Posición para insertar: %d\n", idx)
     }
-    
+
     // Búsqueda por rango de edades
     // Encontrar primer empleado con ID >= 3
     idx = sort.Search(len(empleados), func(i int) bool {
@@ -543,14 +543,14 @@ func main() {
     for i := 0; i < len(datos); i++ {
         datos[i] = i * 2 // [0, 2, 4, 6, ...]
     }
-    
+
     // Búsqueda de un elemento que no existe
     buscar := 1999999
-    
+
     // Forma 1: Búsqueda binaria (eficiente)
     idx := sort.SearchInts(datos, buscar)
     // ~20 comparaciones
-    
+
     // Forma 2: Búsqueda lineal (ineficiente)
     encontrado := false
     for i := 0; i < len(datos); i++ {
@@ -582,20 +582,20 @@ import (
 func main() {
     // Números en orden descendente
     numeros := []int{3, 1, 4, 1, 5, 9, 2, 6}
-    
+
     // Opción 1: Ordenar ascendente, luego invertir
     sort.Ints(numeros)
     fmt.Println("Ascendente:", numeros)
-    
+
     // Opción 2: Usar sort.Reverse directamente
     sort.Sort(sort.Reverse(sort.IntSlice(numeros)))
     fmt.Println("Descendente:", numeros)
-    
+
     // Lo mismo funciona con strings
     palabras := []string{"zebra", "apple", "banana", "cherry"}
     sort.Sort(sort.Reverse(sort.StringSlice(palabras)))
     fmt.Println("Strings invertidos:", palabras)
-    
+
     // Y con flotantes
     valores := []float64{3.14, 2.71, 1.41, 1.73}
     sort.Sort(sort.Reverse(sort.Float64Slice(valores)))
@@ -613,25 +613,25 @@ func main() {
         {3, "Charlie", 55000, 3},
         {4, "Diana", 52000, 6},
     }
-    
+
     // Crear tipo para ordenamiento invertido
     type PorSalarioDesc []Empleado
-    
+
     func (p PorSalarioDesc) Len() int {
         return len(p)
     }
-    
+
     func (p PorSalarioDesc) Less(i, j int) bool {
         // Invertir la lógica: j < i
         return p[j].Salario < p[i].Salario
     }
-    
+
     func (p PorSalarioDesc) Swap(i, j int) {
         p[i], p[j] = p[j], p[i]
     }
-    
+
     sort.Sort(PorSalarioDesc(empleados))
-    
+
     fmt.Println("Empleados por mayor salario:")
     for _, e := range empleados {
         fmt.Printf("  %s: $%.2f\n", e.Nombre, e.Salario)
@@ -648,7 +648,7 @@ func main() {
         {2, "Bob", 45000, 8},
         {3, "Charlie", 55000, 3},
     }
-    
+
     // Ordenar por salario (ascendente)
     sort.Slice(empleados, func(i, j int) bool {
         return empleados[i].Salario < empleados[j].Salario
@@ -657,7 +657,7 @@ func main() {
     for _, e := range empleados {
         fmt.Printf("  %s: $%.2f\n", e.Nombre, e.Salario)
     }
-    
+
     // Ordenar por salario (descendente)
     sort.Slice(empleados, func(i, j int) bool {
         return empleados[i].Salario > empleados[j].Salario  // Invertir condición
@@ -694,6 +694,7 @@ Max-Heap (cada padre ≥ sus hijos):
 ```
 
 Go implementa heaps como arrays donde:
+
 - Padre de índice i: (i-1)/2
 - Hijo izquierdo de i: 2*i+1
 - Hijo derecho de i: 2*i+2
@@ -738,15 +739,15 @@ func (h *MinHeapInt) Pop() interface{} {
 func main() {
     h := &MinHeapInt{3, 2, 1, 7, 8}
     heap.Init(h)
-    
+
     fmt.Println("Heap inicial:", *h)
-    
+
     // Insertar elementos
     heap.Push(h, 4)
     heap.Push(h, 0)
-    
+
     fmt.Println("Después de insertar 4 y 0:", *h)
-    
+
     // Extraer en orden (menor primero)
     fmt.Println("\nExtrayendo elementos en orden:")
     for h.Len() > 0 {
@@ -789,12 +790,12 @@ func (h *MaxHeapInt) Pop() interface{} {
 func main() {
     h := &MaxHeapInt{3, 2, 1, 7, 8}
     heap.Init(h)
-    
+
     fmt.Println("Max-Heap:", *h)
-    
+
     heap.Push(h, 10)
     fmt.Println("Después de insertar 10:", *h)
-    
+
     // Extraer en orden (mayor primero)
     fmt.Println("Extrayendo (mayor primero):")
     for h.Len() > 0 {
@@ -853,15 +854,15 @@ func (c *ColaTareas) Pop() interface{} {
 func main() {
     cola := &ColaTareas{}
     heap.Init(cola)
-    
+
     // Agregar tareas
     tareas := []string{"Código", "Tests", "Documentación", "Deploy"}
     prioridades := []int{2, 3, 1, 4}
-    
+
     for i, desc := range tareas {
         heap.Push(cola, &Tarea{desc, prioridades[i], 0})
     }
-    
+
     fmt.Println("Procesando tareas por prioridad:")
     for cola.Len() > 0 {
         tarea := heap.Pop(cola).(*Tarea)
@@ -876,25 +877,25 @@ func main() {
 func main() {
     h := &MinHeapInt{5, 3, 7, 1, 9, 2}
     heap.Init(h)
-    
+
     // 1. Init: Construye el heap (O(n))
     fmt.Println("Heap:", *h)
-    
+
     // 2. Push: Agrega elemento y restaura propiedad (O(log n))
     heap.Push(h, 0)
     fmt.Println("Después Push(0):", *h)
-    
+
     // 3. Pop: Extrae mínimo y restaura propiedad (O(log n))
     min := heap.Pop(h)
     fmt.Println("Pop devolvió:", min)
     fmt.Println("Heap actualizado:", *h)
-    
+
     // 4. Remove: Elimina elemento en índice i (O(log n))
     if h.Len() > 0 {
         heap.Remove(h, 0)
         fmt.Println("Después Remove(0):", *h)
     }
-    
+
     // 5. Fix: Restaura propiedad después de cambiar elemento (O(log n))
     (*h)[0] = 100
     heap.Fix(h, 0)
@@ -932,7 +933,7 @@ func main() {
         {4, "Monitor", 299.99, 15, "Electrónica"},
         {5, "Webcam", 85.00, 30, "Accesorios"},
     }
-    
+
     // Ordenar por categoría, luego por precio (descendente)
     sort.Slice(productos, func(i, j int) bool {
         if productos[i].Categoría != productos[j].Categoría {
@@ -940,12 +941,12 @@ func main() {
         }
         return productos[i].Precio > productos[j].Precio
     })
-    
+
     fmt.Println("Ordenado por categoría y precio:")
     for _, p := range productos {
         fmt.Printf("  [%s] %s: $%.2f\n", p.Categoría, p.Nombre, p.Precio)
     }
-    
+
     // Ordenar por disponibilidad (stock bajo primero), luego por nombre
     sort.Slice(productos, func(i, j int) bool {
         if productos[i].Stock != productos[j].Stock {
@@ -953,7 +954,7 @@ func main() {
         }
         return productos[i].Nombre < productos[j].Nombre
     })
-    
+
     fmt.Println("\nOdenado por stock bajo, luego por nombre:")
     for _, p := range productos {
         fmt.Printf("  %s (Stock: %d)\n", p.Nombre, p.Stock)
@@ -980,27 +981,27 @@ func main() {
         {4, "Diana", 45, "2021-12-01", true},
         {5, "Eve", 28, "2023-01-20", false},
     }
-    
+
     // Ordenamiento por prioridad de negocio:
     // 1. Premium primero
     // 2. Entre los mismos, más nuevos primero (mejor retención reciente)
     // 3. Si empate, por edad (usuarios más jóvenes tienden a gastar más)
-    
+
     sort.Slice(usuarios, func(i, j int) bool {
         // Criterio 1: Premium
         if usuarios[i].Premium != usuarios[j].Premium {
             return usuarios[i].Premium // true > false
         }
-        
+
         // Criterio 2: Fecha registro (más nuevos primero)
         if usuarios[i].FechaRegistro != usuarios[j].FechaRegistro {
             return usuarios[i].FechaRegistro > usuarios[j].FechaRegistro
         }
-        
+
         // Criterio 3: Edad (más jóvenes primero)
         return usuarios[i].Edad < usuarios[j].Edad
     })
-    
+
     fmt.Println("Usuarios ordenados por estrategia de negocio:")
     for _, u := range usuarios {
         premium := "Regular"
@@ -1040,7 +1041,7 @@ func main() {
         {2, "Mouse", 25.50, 100, "Accesorios"},
         {3, "Teclado", 75.00, 50, "Accesorios"},
     }
-    
+
     for _, criterio := range []string{"nombre", "precio-asc", "stock"} {
         sort.Slice(productos, crearComparador(criterio))
         fmt.Printf("Ordenado por %s:\n", criterio)
@@ -1138,14 +1139,14 @@ func generarAleatorios(n int) []int {
 func main() {
     // Comparación práctica de rendimiento
     fmt.Println("Comparación de rendimiento:")
-    
+
     for _, n := range []int{1000, 10000, 100000} {
         datos := generarAleatorios(n)
-        
+
         inicio := time.Now()
         sort.Ints(datos)
         duracion := time.Since(inicio)
-        
+
         fmt.Printf("Ordenar %d elementos: %v\n", n, duracion)
     }
 }
@@ -1157,7 +1158,7 @@ func main() {
 func main() {
     // Datos aleatorios
     aleatoria := generarAleatorios(100000)
-    
+
     // Datos parcialmente ordenados
     parcial := make([]int, 100000)
     for i := 0; i < 100000; i++ {
@@ -1167,7 +1168,7 @@ func main() {
             parcial[i] = i
         }
     }
-    
+
     // Datos casi ordenados
     sorted := make([]int, 100000)
     for i := 0; i < 100000; i++ {
@@ -1177,23 +1178,23 @@ func main() {
     for i := 0; i < 5; i++ {
         sorted[rand.Intn(100000)] = rand.Intn(1000000)
     }
-    
+
     // Benchmark
     tiempo := func(nombre string, datos []int) {
         copia := make([]int, len(datos))
         copy(copia, datos)
-        
+
         inicio := time.Now()
         sort.Ints(copia)
         duracion := time.Since(inicio)
-        
+
         fmt.Printf("%s: %v\n", nombre, duracion)
     }
-    
+
     tiempo("Aleatorio", aleatoria)
     tiempo("Parcial", parcial)
     tiempo("Casi ordenado", sorted)
-    
+
     // Resultado: casi ordenado es ~100x más rápido
 }
 ```
@@ -1206,7 +1207,7 @@ func main() {
         Valor int
         Orden int // Posición original
     }
-    
+
     datos := []Registro{
         {1, 0},
         {3, 1},
@@ -1214,17 +1215,17 @@ func main() {
         {2, 3},
         {1, 4},
     }
-    
+
     // sort.Slice NO es estable
     sort.Slice(datos, func(i, j int) bool {
         return datos[i].Valor < datos[j].Valor
     })
-    
+
     fmt.Println("sort.Slice (NO estable):")
     for _, r := range datos {
         fmt.Printf("  Valor: %d, Orden original: %d\n", r.Valor, r.Orden)
     }
-    
+
     // Reiniciar
     datos = []Registro{
         {1, 0},
@@ -1233,12 +1234,12 @@ func main() {
         {2, 3},
         {1, 4},
     }
-    
+
     // sort.SliceStable SÍ es estable
     sort.SliceStable(datos, func(i, j int) bool {
         return datos[i].Valor < datos[j].Valor
     })
-    
+
     fmt.Println("\nsort.SliceStable (ESTABLE):")
     for _, r := range datos {
         fmt.Printf("  Valor: %d, Orden original: %d\n", r.Valor, r.Orden)
@@ -1263,19 +1264,19 @@ import (
 func main() {
     // Crear un ring de 5 elementos
     r := ring.New(5)
-    
+
     // Llenar con valores
     for i := 1; i <= 5; i++ {
         r.Value = i * 10
         r = r.Next()
     }
-    
+
     // Iterar a través del ring
     fmt.Println("Valores en el ring:")
     r.Do(func(v interface{}) {
         fmt.Printf("  %d\n", v.(int))
     })
-    
+
     // Ring es circular - puedes seguir avanzando indefinidamente
     fmt.Println("\nAvanzar 7 pasos (envuelve):")
     for i := 0; i < 7; i++ {
@@ -1292,48 +1293,48 @@ func main() {
     // Crear ring con letras
     r := ring.New(4)
     vals := []string{"A", "B", "C", "D"}
-    
+
     p := r
     for _, v := range vals {
         p.Value = v
         p = p.Next()
     }
-    
+
     fmt.Println("Ring original:")
     r.Do(func(v interface{}) {
         fmt.Print(v.(string) + " ")
     })
     fmt.Println()
-    
+
     // Linkear dos rings
     r2 := ring.New(2)
     r2.Value = "X"
     r2.Next().Value = "Y"
-    
+
     fmt.Println("Ring 2 antes de linkear:")
     r2.Do(func(v interface{}) {
         fmt.Print(v.(string) + " ")
     })
     fmt.Println()
-    
+
     // Link: conecta this.Next() con s
     r.Link(r2)
-    
+
     fmt.Println("Después de linkear (size = 6):")
     r.Do(func(v interface{}) {
         fmt.Print(v.(string) + " ")
     })
     fmt.Println()
-    
+
     // Unlink: extrae n elementos del ring
     r3 := r.Unlink(2)
-    
+
     fmt.Println("Ring después de Unlink(2):")
     r.Do(func(v interface{}) {
         fmt.Print(v.(string) + " ")
     })
     fmt.Println()
-    
+
     fmt.Println("Ring extraído (r3):")
     r3.Do(func(v interface{}) {
         fmt.Print(v.(string) + " ")
@@ -1353,7 +1354,7 @@ func main() {
         buffer.Value = fmt.Sprintf("Buffer[%d]", i)
         buffer = buffer.Next()
     }
-    
+
     fmt.Println("Distribución round-robin de tareas:")
     for tarea := 1; tarea <= 7; tarea++ {
         fmt.Printf("  Tarea %d -> %s\n", tarea, buffer.Value.(string))
@@ -1374,13 +1375,13 @@ func main() {
         {"Imagine", "John Lennon"},
         {"Stairway to Heaven", "Led Zeppelin"},
     }
-    
+
     p := playlist
     for _, cancion := range canciones {
         p.Value = cancion
         p = p.Next()
     }
-    
+
     fmt.Println("Reproducción en bucle (5 canciones):")
     for i := 0; i < 5; i++ {
         cancion := playlist.Value.(Canción)
@@ -1407,46 +1408,46 @@ import (
 func main() {
     // Crear lista
     l := list.New()
-    
+
     // Agregar elementos
     e1 := l.PushBack("A")  // Devuelve *list.Element
     e2 := l.PushBack("B")
     e3 := l.PushBack("C")
-    
+
     fmt.Println("Lista después de PushBack (A, B, C):")
     for e := l.Front(); e != nil; e = e.Next() {
         fmt.Print(e.Value.(string) + " ")
     }
     fmt.Println()
-    
+
     // Agregar al frente
     l.PushFront("Z")
-    
+
     fmt.Println("Después de PushFront(Z):")
     for e := l.Front(); e != nil; e = e.Next() {
         fmt.Print(e.Value.(string) + " ")
     }
     fmt.Println()
-    
+
     // Insertar en posición específica
     l.InsertAfter("B1", e1)   // Después de "A"
     l.InsertBefore("B2", e2)  // Antes de "B"
-    
+
     fmt.Println("Después de inserciones:")
     for e := l.Front(); e != nil; e = e.Next() {
         fmt.Print(e.Value.(string) + " ")
     }
     fmt.Println()
-    
+
     // Eliminar elementos
     l.Remove(e3)  // Eliminar "C"
-    
+
     fmt.Println("Después de Remove(C):")
     for e := l.Front(); e != nil; e = e.Next() {
         fmt.Print(e.Value.(string) + " ")
     }
     fmt.Println()
-    
+
     // Moverse hacia atrás
     fmt.Println("\nIteración hacia atrás:")
     for e := l.Back(); e != nil; e = e.Prev() {
@@ -1461,15 +1462,15 @@ func main() {
 ```go
 func main() {
     l := list.New()
-    
+
     // Agregar múltiples elementos
     for i := 1; i <= 5; i++ {
         l.PushBack(i)
     }
-    
+
     // Longitud
     fmt.Printf("Longitud: %d\n", l.Len())
-    
+
     // Buscar elemento
     var encontrado *list.Element
     for e := l.Front(); e != nil; e = e.Next() {
@@ -1478,11 +1479,11 @@ func main() {
             break
         }
     }
-    
+
     if encontrado != nil {
         fmt.Printf("Encontrado: %d\n", encontrado.Value.(int))
     }
-    
+
     // Mover elemento
     if encontrado != nil {
         l.MoveToFront(encontrado)
@@ -1491,7 +1492,7 @@ func main() {
             fmt.Print(e.Value.(int), " ")
         }
         fmt.Println()
-        
+
         l.MoveToBack(encontrado)
         fmt.Print("Después de MoveToBack(3): ")
         for e := l.Front(); e != nil; e = e.Next() {
@@ -1499,7 +1500,7 @@ func main() {
         }
         fmt.Println()
     }
-    
+
     // Vaciar lista
     l.Init()
     fmt.Printf("Longitud después de Init(): %d\n", l.Len())
@@ -1546,12 +1547,12 @@ func (lru *LRUCache) Put(clave string, valor interface{}) {
         lru.ListaReciente.MoveToFront(elem)
         return
     }
-    
+
     // Nuevo elemento
     entrada := Entrada{clave, valor}
     elem := lru.ListaReciente.PushFront(entrada)
     lru.Cache[clave] = elem
-    
+
     // Si excede capacidad, eliminar el menos recientemente usado
     if lru.ListaReciente.Len() > lru.Capacidad {
         elem := lru.ListaReciente.Back()
@@ -1562,15 +1563,15 @@ func (lru *LRUCache) Put(clave string, valor interface{}) {
 
 func main() {
     cache := NewLRUCache(3)
-    
+
     cache.Put("a", 1)
     cache.Put("b", 2)
     cache.Put("c", 3)
-    
+
     fmt.Println("Get('b'):", cache.Get("b"))
-    
+
     cache.Put("d", 4)  // Elimina "a" (menos recientemente usado)
-    
+
     fmt.Println("Get('a'):", cache.Get("a"))  // nil (fue eliminado)
     fmt.Println("Get('c'):", cache.Get("c"))  // 3
 }
@@ -1610,11 +1611,11 @@ func (c *Cola) Size() int {
 
 func main() {
     cola := NewCola()
-    
+
     cola.Enqueue("Cliente 1")
     cola.Enqueue("Cliente 2")
     cola.Enqueue("Cliente 3")
-    
+
     fmt.Println("Procesando cola:")
     for !cola.IsEmpty() {
         cliente := cola.Dequeue()
@@ -1697,11 +1698,11 @@ func SeleccionarEstructura(caso string) string {
 // ❌ ANTIPATRÓN 1: Comparador incorrecto
 func main() {
     datos := []int{3, 1, 4, 1, 5, 9}
-    
+
     // Incorrecto: El comparador debe satisfacer:
     // 1. Irreflexividad: Less(i, i) debe ser false
     // 2. Transitividad: Si Less(i, j) y Less(j, k) entonces Less(i, k)
-    
+
     // ❌ Esto causará comportamiento indefinido
     sort.Slice(datos, func(i, j int) bool {
         return datos[i] <= datos[j]  // Violó irreflexividad
@@ -1711,7 +1712,7 @@ func main() {
 // ✓ CORRECTO
 func main() {
     datos := []int{3, 1, 4, 1, 5, 9}
-    
+
     // ✓ Correcto: Cumple propiedades de orden total
     sort.Slice(datos, func(i, j int) bool {
         return datos[i] < datos[j]  // Irreflexivo
@@ -1757,7 +1758,7 @@ func main() {
 // ❌ ANTIPATRÓN 3: Modificar slice durante iteración
 func main() {
     datos := []int{1, 2, 3, 4, 5}
-    
+
     // ❌ Peligroso: modificar slice mientras se itera
     for i := 0; i < len(datos); i++ {
         if datos[i] == 3 {
@@ -1769,7 +1770,7 @@ func main() {
 // ✓ CORRECTO: usar variable temporal
 func main() {
     datos := []int{1, 2, 3, 4, 5}
-    
+
     // ✓ Mejor: construir nuevo slice
     var resultado []int
     for _, v := range datos {

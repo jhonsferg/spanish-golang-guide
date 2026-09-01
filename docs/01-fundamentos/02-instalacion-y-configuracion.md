@@ -27,6 +27,7 @@ Antes de instalar Go, es crucial entender DÓNDE viene y QUÉ ha cambiado. Go no
 Go fue anunciado públicamente en 2009, pero no fue una "1.0" formal hasta 2012. Los años 2009-2011 fueron experimentales.
 
 **Características de Go pre-1.0:**
+
 ```
  Goroutines: primitivas
  Channels: versión temprana
@@ -65,6 +66,7 @@ HITO CRÍTICO: Go1 Compatibility Promise
 ```
 
 **Características de Go 1.0:**
+
 ```
  GC completo y funcional
  defer, panic, recover estables
@@ -80,6 +82,7 @@ HITO CRÍTICO: Go1 Compatibility Promise
 Desarrolladores podían CONFIAR en Go. Si escribías código en 1.0, no se rompería en 1.5.
 
 **Go 1.1 - Go 1.3 (2013-2014):**
+
 ```
  Mejoras de GC (pausas más cortas)
  Optimizaciones del compilador
@@ -113,6 +116,7 @@ DECISIÓN CRUCIAL: Compilador reescrito en Go
 Si Go es lo suficientemente bueno para tus apps, debería ser lo suficientemente bueno para Go mismo. Auto-bootstrapping.
 
 **Go 1.5-1.11 (2015-2018):**
+
 ```
  Go 1.5: Compilador escrito en Go
  Go 1.6: HTTP/2 en stdlib
@@ -213,6 +217,7 @@ func Retornar[T any](x T) T {
 Go no quiso generics complejos como Java/C++. Esperó hasta poder implementarlos SIMPLEMENTE.
 
 **Go 1.19-1.22 (2022-2024):**
+
 ```
  Go 1.19: Mejoras de performance
  Go 1.20: Mejores errores wrapping
@@ -234,6 +239,7 @@ Estado actual:
 ```
 
 **Ciclo de soporte:**
+
 ```
 Go 1.22 (Feb 2024) - Soporte hasta: Feb 2026+
 Go 1.21 (Aug 2023) - Soporte hasta: Aug 2025+
@@ -287,6 +293,7 @@ Go SDK (típicamente /usr/local/go en Unix, C:\Go en Windows)
 **¿Qué es el runtime?**
 
 El runtime es el corazón de Go. Es código compiled que:
+
 - Maneja memoria (allocation, garbage collection)
 - Implementa el scheduler de goroutines
 - Controla channels
@@ -397,6 +404,7 @@ go env          Ver variables de entorno
 #### Opción 1: Homebrew (RECOMENDADO)
 
 **Ventajas:**
+
 - Más fácil
 - Actualización automática
 - Gestión de múltiples versiones
@@ -592,12 +600,12 @@ $HOME/go/
  bin/           (ejecutables compilados)
  pkg/           (paquetes compilados)
  src/
- github.com/    
+ github.com/  
     │   ├── usuario1/
     │   │   ├── proyecto1/
     │   │   │   └── main.go
     │   │   └── proyecto2/
-       └── main.go    │   
+       └── main.go    │  
     │   └── usuario2/
     │       └── proyecto3/
     │           └── main.go
@@ -867,6 +875,7 @@ go run main.go arg1 arg2
 ```
 
 **Casos de uso:**
+
 - Prototipado rápido
 - Testing durante desarrollo
 - Scripts de Go
@@ -1072,7 +1081,7 @@ EOF
                                       │
  "Cuando compiles en este workspace:│
   - gateway, service1, service2     │
-  - Usan las VERSIONES de LOCALES   
+  - Usan las VERSIONES de LOCALES  
     shared (no las de remote)       │
   - Cambios en shared son inmediatos│
 
@@ -1094,6 +1103,7 @@ func main() {
 ```
 
 **El workspace automáticamente:**
+
 - Busca shared/ localmente
 - No descarga de GitHub
 - Usa código local
@@ -1468,4 +1478,3 @@ go build -a ./...  # -a = rebuild all
 **Fin del Capítulo 2**
 
 ---
-

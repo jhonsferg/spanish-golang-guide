@@ -118,6 +118,7 @@ var nombre string = "Juan"
 ```
 
 **Desglose:**
+
 ```
 var      └─ Palabra clave "declare variable"
 nombre   └─ Nombre de la variable
@@ -141,6 +142,7 @@ nombre := "Juan"
 ```
 
 **Reglas:**
+
 - `:=` solo funciona DENTRO de funciones
 - `:=` es mucho más conciso que `var`
 - Recomendado en 99% de casos
@@ -186,12 +188,12 @@ var global string = "Soy global"  // Scope: TODO el package
 
 func main() {
     var local string = "Soy local"     // Scope: dentro de main
-    
+
     if true {
         var muyLocal string = "Scope: dentro del if"
         fmt.Println(muyLocal)
     }
-    
+
     // fmt.Println(muyLocal)  // ❌ ERROR: muyLocal no existe aquí
 }
 
@@ -1049,6 +1051,7 @@ var (
 ### Ejercicio 1: Convertir Unidades
 
 Crea programa que:
+
 1. Pida distancia en metros
 2. Convierta y muestre en: km, cm, mm
 3. Use constantes para factores de conversión
@@ -1056,6 +1059,7 @@ Crea programa que:
 ### Ejercicio 2: Procesador de Texto
 
 Crea programa que:
+
 1. Pida un texto
 2. Muestre: longitud, mayúsculas, minúsculas, invertido
 3. Maneja Unicode (emojis, caracteres especiales)
@@ -1063,6 +1067,7 @@ Crea programa que:
 ### Ejercicio 3: Conversor de Bases Numéricas
 
 Crea programa que:
+
 1. Pida número decimal
 2. Convierta a: binario, octal, hexadecimal
 3. Usa fmt.Printf con diferentes verbos (%d, %b, %o, %x)
@@ -1070,6 +1075,7 @@ Crea programa que:
 ### Ejercicio 4: Validador de Tipos
 
 Crea programa que:
+
 1. Pida una cadena
 2. Intente convertir a int, float, bool
 3. Muestre qué conversión funcionó
@@ -1080,7 +1086,6 @@ Crea programa que:
 **Fin del Capítulo 4**
 
 ---
-
 
 ---
 

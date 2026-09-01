@@ -22,6 +22,7 @@ Solicitud HTTP (timeout: 30s)
 ```
 
 **Problemas sin Job Queues:**
+
 - Timeouts de cliente
 - Fallos de conexión = pérdida de trabajo
 - Recursos HTTP consumidos innecesariamente
@@ -64,6 +65,7 @@ Solicitud HTTP (timeout: 30s)
 ### 53.1.3 Patrones de Arquitectura: Producer-Consumer
 
 **Producer-Consumer Pattern:**
+
 ```go
 // Producer (Web Handler)
 func handleSendEmail(w http.ResponseWriter, r *http.Request) {
@@ -72,10 +74,10 @@ func handleSendEmail(w http.ResponseWriter, r *http.Request) {
         Subject: r.FormValue("subject"),
         Body:    r.FormValue("body"),
     }
-    
+
     // Enqueue (no espera resultado)
     queue.Enqueue(job)
-    
+
     // Retorna inmediatamente
     w.WriteHeader(http.StatusAccepted)
 }
@@ -168,6 +170,7 @@ type EmailJob struct {
 **Dos enfoques:**
 
 **1. Multiple Queues (recomendado)**
+
 ```
 Redis Queues:
 ├─ queue:high     → [critical_alerts, urgent_emails]
@@ -180,6 +183,7 @@ Workers (round-robin):
 ```
 
 **2. Single Queue con Prioridad (ZSET)**
+
 ```
 Redis Sorted Set:
 queue:jobs = {
@@ -215,7 +219,7 @@ import (
     "encoding/json"
     "fmt"
     "time"
-    
+
     "github.com/redis/go-redis/v9"
 )
 
@@ -248,7 +252,7 @@ func (q *SimpleQueue) Enqueue(ctx context.Context, jobType string, payload inter
     if err != nil {
         return fmt.Errorf("error marshaling payload: %w", err)
     }
-    
+
     job := JobData{
         ID:        fmt.Sprintf("job_%d", time.Now().UnixNano()),
         Type:      jobType,
@@ -257,9 +261,9 @@ func (q *SimpleQueue) Enqueue(ctx context.Context, jobType string, payload inter
         MaxRetry:  3,
         CreatedAt: time.Now(),
     }
-    
+
     jobJSON, _ := json.Marshal(job)
-    
+
     // LPUSH: agregar al inicio (FIFO desde RPOP)
     err = q.client.LPush(ctx, q.key, jobJSON).Err()
     return err
@@ -275,12 +279,12 @@ func (q *SimpleQueue) Dequeue(ctx context.Context, timeout time.Duration) (*JobD
         }
         return nil, err
     }
-    
+
     var job JobData
     if err := json.Unmarshal([]byte(result[1]), &job); err != nil {
         return nil, err
     }
-    
+
     return &job, nil
 }
 
@@ -295,7 +299,7 @@ func (q *SimpleQueue) Worker(ctx context.Context, handler Handler) {
             return
         default:
         }
-        
+
         job, err := q.Dequeue(ctx, 5*time.Second)
         if err != nil {
             fmt.Printf("Error dequeue: %v\n", err)
@@ -304,11 +308,11 @@ func (q *SimpleQueue) Worker(ctx context.Context, handler Handler) {
         if job == nil {
             continue // timeout
         }
-        
+
         // Ejecuta handler
         if err := handler(ctx, job); err != nil {
             fmt.Printf("Job %s failed: %v\n", job.ID, err)
-            
+
             // Reintento
             if job.Retries < job.MaxRetry {
                 job.Retries++
@@ -326,7 +330,7 @@ func (q *SimpleQueue) Worker(ctx context.Context, handler Handler) {
 func ExampleSimpleQueue() {
     queue := NewSimpleQueue("localhost:6379", "jobs")
     ctx := context.Background()
-    
+
     // Producer
     go func() {
         for i := 0; i < 10; i++ {
@@ -336,14 +340,14 @@ func ExampleSimpleQueue() {
             time.Sleep(100 * time.Millisecond)
         }
     }()
-    
+
     // Consumer handler
     handler := func(ctx context.Context, job *JobData) error {
         fmt.Printf("Processing job %s (type: %s)\n", job.ID, job.Type)
         time.Sleep(100 * time.Millisecond) // Simula trabajo
         return nil
     }
-    
+
     // Worker
     queue.Worker(ctx, handler)
 }
@@ -372,23 +376,23 @@ func (q *DelayedQueue) EnqueueDelayed(
         Payload:   json.RawMessage(data),
         CreatedAt: time.Now(),
     }
-    
+
     jobJSON, _ := json.Marshal(job)
-    
+
     // ZADD: score = timestamp cuando ejecutar
     executeAt := time.Now().Unix() + delaySeconds
     err := q.client.ZAdd(ctx, q.key+":scheduled", redis.Z{
         Score:  float64(executeAt),
         Member: jobJSON,
     }).Err()
-    
+
     return err
 }
 
 // PollScheduledJobs transfiere jobs programados a la cola normal
 func (q *DelayedQueue) PollScheduledJobs(ctx context.Context) error {
     now := time.Now().Unix()
-    
+
     // ZRANGE: jobs con score <= now
     jobs, err := q.client.ZRangeByScore(
         ctx,
@@ -399,13 +403,13 @@ func (q *DelayedQueue) PollScheduledJobs(ctx context.Context) error {
     if err != nil {
         return err
     }
-    
+
     for _, jobJSON := range jobs {
         // Mueve a cola normal
         q.client.LPush(ctx, q.key, jobJSON)
         q.client.ZRem(ctx, q.key+":scheduled", jobJSON)
     }
-    
+
     return nil
 }
 ```
@@ -430,23 +434,23 @@ func (j *JobWithRetry) Execute(
     if err == nil {
         return nil
     }
-    
+
     // Retry logic
     if j.Data.Retries < j.MaxRetries {
         j.Data.Retries++
-        
+
         // Exponential backoff
         backoff := time.Duration(math.Pow(2, float64(j.Data.Retries))) * time.Second
-        
+
         // Encola con delay
         queue.client.LPush(ctx, queue.key+":retry", map[string]interface{}{
             "job":    j.Data,
             "retry_at": time.Now().Add(backoff),
         })
-        
+
         return fmt.Errorf("retry %d/%d queued: %w", j.Data.Retries, j.MaxRetries, err)
     }
-    
+
     // Max retries exhausted -> DLQ
     dlqEntry := map[string]interface{}{
         "job":       j.Data,
@@ -455,7 +459,7 @@ func (j *JobWithRetry) Execute(
     }
     dlqJSON, _ := json.Marshal(dlqEntry)
     queue.client.LPush(ctx, j.DLQKey, dlqJSON)
-    
+
     return fmt.Errorf("moved to DLQ after %d retries: %w", j.MaxRetries, err)
 }
 ```
@@ -471,6 +475,7 @@ go get github.com/hibiken/asynq
 ```
 
 **Componentes principales:**
+
 - `Client`: Encola tasks
 - `Server`: Procesa tasks
 - `Scheduler`: Ejecuta tasks periódicamente
@@ -485,7 +490,7 @@ import (
     "context"
     "encoding/json"
     "fmt"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -561,15 +566,15 @@ func HandleSendEmail(ctx context.Context, t *asynq.Task) error {
     if err := json.Unmarshal(t.Payload(), &payload); err != nil {
         return fmt.Errorf("json.Unmarshal failed: %v", err)
     }
-    
+
     fmt.Printf("Sending email to %s\n", payload.To)
-    
+
     // Simula envío de email
     // En producción: usar SMTP, SendGrid, etc.
     if err := sendEmailViaSMTP(payload); err != nil {
         return fmt.Errorf("failed to send email: %w", err)
     }
-    
+
     fmt.Printf("Email sent successfully to %s\n", payload.To)
     return nil
 }
@@ -580,27 +585,27 @@ func HandleProcessImage(ctx context.Context, t *asynq.Task) error {
     if err := json.Unmarshal(t.Payload(), &payload); err != nil {
         return fmt.Errorf("json.Unmarshal failed: %v", err)
     }
-    
-    fmt.Printf("Processing image %d with operations: %v\n", 
+
+    fmt.Printf("Processing image %d with operations: %v\n",
         payload.ImageID, payload.Operations)
-    
+
     // Descarga imagen de S3
     image, err := downloadFromS3(payload.S3Bucket, payload.S3Key)
     if err != nil {
         return fmt.Errorf("failed to download image: %w", err)
     }
-    
+
     // Aplica operaciones (resize, filter, watermark, etc.)
     for _, op := range payload.Operations {
         fmt.Printf("Applying operation: %s\n", op)
         image = applyOperation(image, op)
     }
-    
+
     // Sube resultado a S3
     if err := uploadToS3(payload.S3Bucket, payload.S3Key+".processed", image); err != nil {
         return fmt.Errorf("failed to upload processed image: %w", err)
     }
-    
+
     return nil
 }
 
@@ -610,13 +615,13 @@ func HandleGenerateReport(ctx context.Context, t *asynq.Task) error {
     if err := json.Unmarshal(t.Payload(), &payload); err != nil {
         return fmt.Errorf("json.Unmarshal failed: %v", err)
     }
-    
+
     fmt.Printf("Generating %s report from %s to %s\n",
         payload.Format, payload.StartDate, payload.EndDate)
-    
+
     // Extrae datos (simulado)
     data := extractReportData(payload.StartDate, payload.EndDate)
-    
+
     // Formatea según tipo
     var content []byte
     switch payload.Format {
@@ -629,12 +634,12 @@ func HandleGenerateReport(ctx context.Context, t *asynq.Task) error {
     default:
         return fmt.Errorf("unknown format: %s", payload.Format)
     }
-    
+
     // Almacena reporte
     if err := storeReport(payload.ReportID, payload.Format, content); err != nil {
         return fmt.Errorf("failed to store report: %w", err)
     }
-    
+
     return nil
 }
 
@@ -687,7 +692,7 @@ package main
 
 import (
     "fmt"
-    
+
     "github.com/hibiken/asynq"
     "myapp/tasks"
 )
@@ -699,7 +704,7 @@ func main() {
     redisClientOpt := asynq.RedisClientOpt{
         Addr: "localhost:6379",
     }
-    
+
     // ============================================
     // SERVER SETUP (Workers)
     // ============================================
@@ -714,13 +719,13 @@ func main() {
             },
         },
     )
-    
+
     // Registra handlers
     mux := asynq.NewServeMux()
     mux.HandleFunc(tasks.TypeSendEmail, tasks.HandleSendEmail)
     mux.HandleFunc(tasks.TypeProcessImage, tasks.HandleProcessImage)
     mux.HandleFunc(tasks.TypeGenerateReport, tasks.HandleGenerateReport)
-    
+
     if err := srv.Start(mux); err != nil {
         fmt.Printf("error starting server: %v\n", err)
     }
@@ -736,7 +741,7 @@ import (
     "context"
     "fmt"
     "time"
-    
+
     "github.com/hibiken/asynq"
     "myapp/tasks"
 )
@@ -747,9 +752,9 @@ func exampleEnqueueTasks() {
         Addr: "localhost:6379",
     })
     defer client.Close()
-    
+
     ctx := context.Background()
-    
+
     // ============================================
     // ENQUEUE EMAIL TASK
     // ============================================
@@ -759,18 +764,18 @@ func exampleEnqueueTasks() {
         Subject: "Welcome!",
         Body:    "Thanks for signing up!",
     })
-    
+
     info, err := client.Enqueue(emailTask)
     if err != nil {
         fmt.Printf("error enqueuing email task: %v\n", err)
         return
     }
     fmt.Printf("Email task enqueued: id=%s queue=%s\n", info.ID, info.Queue)
-    
+
     // ============================================
     // ENQUEUE WITH OPTIONS
     // ============================================
-    
+
     // Priority: tareas críticas
     criticalTask, _ := tasks.NewSendEmailTask(&tasks.EmailPayload{
         UserID:  2,
@@ -785,11 +790,11 @@ func exampleEnqueueTasks() {
         asynq.MaxRetry(5),              // Reintentos
     )
     fmt.Printf("Critical task queued: %s\n", info.ID)
-    
+
     // ============================================
     // DELAYED TASK (scheduled)
     // ============================================
-    
+
     scheduledTask, _ := tasks.NewSendEmailTask(&tasks.EmailPayload{
         UserID:  3,
         To:      "later@example.com",
@@ -801,11 +806,11 @@ func exampleEnqueueTasks() {
         asynq.ProcessIn(5*time.Minute), // Ejecutar en 5 min
     )
     fmt.Printf("Scheduled task: %s\n", info.ID)
-    
+
     // ============================================
     // TASK WITH TIMEOUT
     // ============================================
-    
+
     reportTask, _ := tasks.NewGenerateReportTask(&tasks.GenerateReportPayload{
         ReportID:  1,
         StartDate: "2024-01-01",
@@ -839,30 +844,30 @@ func setupScheduler() {
         Addr: "localhost:6379",
     })
     defer client.Close()
-    
+
     scheduler := asynq.NewScheduler(asynq.RedisClientOpt{
         Addr: "localhost:6379",
     }, nil)
-    
+
     // ============================================
     // PERIODIC TASKS
     // ============================================
-    
+
     // Ejecuta cada hora
     scheduler.Register("@hourly", &asynq.Task{
         Type: "hourly_cleanup",
     })
-    
+
     // Ejecuta diariamente a las 2 AM
     scheduler.Register("0 2 * * *", &asynq.Task{
         Type: "daily_report_generation",
     })
-    
+
     // Ejecuta cada 30 minutos
     scheduler.Register("*/30 * * * *", &asynq.Task{
         Type: "sync_external_data",
     })
-    
+
     // Iniciar scheduler en goroutine
     go func() {
         if err := scheduler.Start(); err != nil {
@@ -874,7 +879,7 @@ func setupScheduler() {
 // Custom scheduler con más control
 func advancedScheduling(client *asynq.Client) {
     ctx := context.Background()
-    
+
     // Encola tarea en momento específico
     for i := 0; i < 100; i++ {
         task, _ := tasks.NewSendEmailTask(&tasks.EmailPayload{
@@ -883,7 +888,7 @@ func advancedScheduling(client *asynq.Client) {
             Subject: "Daily Summary",
             Body:    "Here's your daily summary...",
         })
-        
+
         // Encola para mañana a las 9 AM
         tomorrow9AM := time.Now().AddDate(0, 0, 1).Round(24 * time.Hour).Add(9 * time.Hour)
         client.Enqueue(task, asynq.ProcessAt(tomorrow9AM))
@@ -904,29 +909,29 @@ import (
 // Task groups para procesamiento en paralelo
 func taskGroupExample(client *asynq.Client) {
     ctx := context.Background()
-    
+
     // Crear grupo de tareas
     group := asynq.NewGroup(
         asynq.RedisClientOpt{Addr: "localhost:6379"},
         &asynq.GroupConfig{},
     )
-    
+
     // Agrupa múltiples tareas relacionadas
     for i := 0; i < 100; i++ {
         task := &asynq.Task{
             Type: "process_item",
             Payload: []byte(fmt.Sprintf(`{"id":%d}`, i)),
         }
-        
+
         group.Add(ctx, task)
     }
-    
+
     // Ejecuta todas las tareas en el grupo
     gid, err := group.Start(ctx)
     if err != nil {
         panic(err)
     }
-    
+
     // Espera a que todas se completen
     results := group.Results(ctx, gid)
     for result := range results {
@@ -947,7 +952,7 @@ package main
 import (
     "fmt"
     "time"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -959,11 +964,11 @@ func loggingMiddleware(next asynq.Handler) asynq.Handler {
             t.Type(),
             t.ResultWriter().String(),
         )
-        
+
         start := time.Now()
         err := next.ProcessTask(ctx, t)
         duration := time.Since(start)
-        
+
         if err != nil {
             fmt.Printf("[%s] Task failed in %v: %v\n",
                 time.Now().Format(time.RFC3339),
@@ -976,7 +981,7 @@ func loggingMiddleware(next asynq.Handler) asynq.Handler {
                 duration,
             )
         }
-        
+
         return err
     })
 }
@@ -987,10 +992,10 @@ func metricsMiddleware(next asynq.Handler) asynq.Handler {
         start := time.Now()
         err := next.ProcessTask(ctx, t)
         duration := time.Since(start)
-        
+
         // Aquí registramos en Prometheus/Datadog
         recordTaskMetric(t.Type(), duration, err)
-        
+
         return err
     })
 }
@@ -1001,13 +1006,13 @@ func circuitBreakerMiddleware(next asynq.Handler) asynq.Handler {
         if isCircuitBreakerOpen(t.Type()) {
             return fmt.Errorf("circuit breaker open for task type %s", t.Type())
         }
-        
+
         err := next.ProcessTask(ctx, t)
-        
+
         if err != nil {
             recordFailure(t.Type())
         }
-        
+
         return err
     })
 }
@@ -1028,15 +1033,15 @@ func setupServerWithMiddlewares() {
         asynq.RedisClientOpt{Addr: "localhost:6379"},
         asynq.Config{Concurrency: 10},
     )
-    
+
     mux := asynq.NewServeMux()
-    
+
     // Aplica middlewares globales
     mux.Use(loggingMiddleware)
     mux.Use(metricsMiddleware)
     mux.Use(circuitBreakerMiddleware)
     mux.Use(timeoutMiddleware(5 * time.Minute))
-    
+
     // Registra handlers
     mux.HandleFunc("task_type", taskHandler)
 }
@@ -1055,7 +1060,7 @@ package main
 
 import (
     "fmt"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -1066,19 +1071,19 @@ func setupServerHooks() {
             Concurrency: 10,
         },
     )
-    
+
     // Hook: Server started
     srv.HandleStart(func(ctx context.Context) {
         fmt.Println("Worker server starting...")
         // Inicializar conexiones de BD, etc.
     })
-    
+
     // Hook: Server shutdown
     srv.HandleStop(func(ctx context.Context) {
         fmt.Println("Worker server shutting down...")
         // Cleanup de recursos
     })
-    
+
     // Hook: Task processed
     srv.HandleProcess(func(ctx context.Context, task *asynq.Task, err error) {
         if err == nil {
@@ -1101,6 +1106,7 @@ asynqmon --redis-addr=localhost:6379
 ```
 
 **Features del dashboard:**
+
 - Visualización de queues y tasks
 - Monitoreo de workers activos
 - Histórico de tasks fallidas
@@ -1128,6 +1134,7 @@ go get github.com/go-echarts/go-task
 ```
 
 **Características:**
+
 - Más simple que Asynq
 - Idóneo para aplicaciones pequeñas
 
@@ -1142,12 +1149,12 @@ import (
 
 func main() {
     queue := q.New("redis://localhost:6379")
-    
+
     // Enqueue
     queue.Push("send_email", map[string]interface{}{
         "to": "user@example.com",
     })
-    
+
     // Consumer
     queue.Consume("send_email", func(ctx context.Context, args map[string]interface{}) error {
         email := args["to"].(string)
@@ -1163,6 +1170,7 @@ go get github.com/RichardKnox/machinery/v1
 ```
 
 **Characteristics:**
+
 - Inspirado en Celery
 - Soporta signatures complejas
 
@@ -1172,11 +1180,11 @@ import machinery "github.com/RichardKnox/machinery/v1"
 func main() {
     broker := "redis://localhost:6379"
     server := machinery.NewServer(broker, 1)
-    
+
     server.RegisterTask("send_email", func(email string) error {
         return sendEmail(email)
     })
-    
+
     worker := server.NewWorker("worker1", 5)
     worker.Start()
 }
@@ -1190,6 +1198,7 @@ func main() {
 ```
 
 **Ventajas:**
+
 - Multi-lenguaje (Go, Ruby, Python, Node.js)
 - Monitoring web integrado
 - Mejor para microservicios
@@ -1209,7 +1218,7 @@ func main() {
    ✓ Rápido
    ❌ Pueden perderse tasks
    Uso: Analytics, logging no crítico
-   
+
    Flujo:
    Client → Queue → Remove → Worker
            (puede fallar aquí)
@@ -1218,7 +1227,7 @@ func main() {
    ✓ Confiable
    ⚠ Duplicados posibles
    Uso: Mayoría de casos
-   
+
    Flujo:
    Client → Queue → Worker → Ejecuta
                      (si falla, reintenta)
@@ -1243,26 +1252,26 @@ func HandleIncrementCounter(ctx context.Context, t *asynq.Task) error {
         Amount    int    `json:"amount"`
     }
     json.Unmarshal(t.Payload(), &payload)
-    
+
     // ✅ Usa SET en lugar de INCR (idempotent)
     // Si se ejecuta dos veces: valor final es el mismo
-    
+
     // Obtén estado actual
     current := getCounter(payload.CounterID)
-    
+
     // Calcula valor con idempotency token
     token := generateToken(t.ResultWriter().String())
-    
+
     if hasProcessed(token) {
         return nil // Ya procesado, skip
     }
-    
+
     // SET (no INCR) al valor esperado
     expected := current + payload.Amount
     if !compareAndSet(payload.CounterID, current, expected) {
         return fmt.Errorf("concurrent modification")
     }
-    
+
     recordProcessed(token)
     return nil
 }
@@ -1277,7 +1286,7 @@ type ProcessedJob struct {
 func idempotentEmailSend(ctx context.Context, t *asynq.Task, tx *sql.Tx) error {
     var payload tasks.EmailPayload
     json.Unmarshal(t.Payload(), &payload)
-    
+
     // Check: ¿Ya procesado?
     var job ProcessedJob
     err := tx.QueryRowContext(
@@ -1285,7 +1294,7 @@ func idempotentEmailSend(ctx context.Context, t *asynq.Task, tx *sql.Tx) error {
         "SELECT job_id FROM processed_jobs WHERE job_id = ?",
         t.ResultWriter().String(),
     ).Scan(&job.JobID)
-    
+
     if err == nil {
         // Ya procesado
         return nil
@@ -1293,12 +1302,12 @@ func idempotentEmailSend(ctx context.Context, t *asynq.Task, tx *sql.Tx) error {
     if err != sql.ErrNoRows {
         return err
     }
-    
+
     // Procesa
     if err := sendEmail(payload); err != nil {
         return err
     }
-    
+
     // Registra como procesado (transactionally)
     _, err = tx.ExecContext(
         ctx,
@@ -1332,30 +1341,30 @@ func deduplicateJobEnqueue(
     // Genera hash del payload
     hash := md5.Sum(task.Payload())
     hashStr := hex.EncodeToString(hash[:])
-    
+
     // Clave de deduplication en Redis
     dedupeKey := fmt.Sprintf("dedupe:task:%s", hashStr)
-    
+
     // Check: ¿Ya existe similar?
     exists, err := redisClient.Exists(ctx, dedupeKey).Result()
     if err != nil {
         return err
     }
-    
+
     if exists > 0 {
         fmt.Printf("Duplicate task skipped: %s\n", hashStr)
         return nil
     }
-    
+
     // Encola y marca como processed
     _, err = client.Enqueue(task)
     if err != nil {
         return err
     }
-    
+
     // Marca para evitar duplicates
     redisClient.SetEX(ctx, dedupeKey, "1", deduplicateFor)
-    
+
     return nil
 }
 ```
@@ -1387,7 +1396,7 @@ func (t *Transaction) CreateUserAndEnqueueWelcomeEmail(
         return err
     }
     defer tx.Rollback()
-    
+
     // 1. Crea usuario
     result, err := tx.ExecContext(
         ctx,
@@ -1398,14 +1407,14 @@ func (t *Transaction) CreateUserAndEnqueueWelcomeEmail(
     if err != nil {
         return err
     }
-    
+
     userID, _ := result.LastInsertId()
-    
+
     // 2. Commit transacción DB
     if err := tx.Commit(); err != nil {
         return err
     }
-    
+
     // 3. SOLO si commit fue exitoso: encola email
     //    (si esto falla, al menos el usuario existe)
     task, _ := tasks.NewSendEmailTask(&tasks.EmailPayload{
@@ -1415,7 +1424,7 @@ func (t *Transaction) CreateUserAndEnqueueWelcomeEmail(
         Body:    "Welcome to our service!",
     })
     _, err = t.Cli.Enqueue(task)
-    
+
     return err
 }
 
@@ -1443,7 +1452,7 @@ func (t *Transaction) CreateUserWithOutbox(
     email string,
 ) error {
     tx, _ := t.DB.BeginTx(ctx, nil)
-    
+
     // 1. Crea usuario
     result, _ := tx.ExecContext(
         ctx,
@@ -1451,7 +1460,7 @@ func (t *Transaction) CreateUserWithOutbox(
         email,
     )
     userID, _ := result.LastInsertId()
-    
+
     // 2. Inserta en outbox (SAME transaction)
     payload, _ := json.Marshal(tasks.EmailPayload{
         UserID: int(userID),
@@ -1463,7 +1472,7 @@ func (t *Transaction) CreateUserWithOutbox(
         "user.welcome_email",
         string(payload),
     )
-    
+
     // 3. Commit ALL
     return tx.Commit()
 }
@@ -1476,18 +1485,18 @@ func processOutbox(ctx context.Context, cli *asynq.Client) {
             ctx,
             "SELECT id, event_type, payload FROM outbox WHERE processed = false",
         )
-        
+
         for rows.Next() {
             var event OutboxEvent
             rows.Scan(&event.ID, &event.EventType, &event.Payload)
-            
+
             // Encola tarea
             task := &asynq.Task{
                 Type:    event.EventType,
                 Payload: []byte(event.Payload),
             }
             cli.Enqueue(task)
-            
+
             // Marca como procesado
             db.ExecContext(
                 ctx,
@@ -1543,9 +1552,9 @@ func setupMultiQueueScaling() {
     // ============================================
     // SCENARIO: 3 tipos de colas con diferentes cargas
     // ============================================
-    
+
     redisOpt := asynq.RedisClientOpt{Addr: "localhost:6379"}
-    
+
     // ============================================
     // SERVER 1: Maneja colas críticas (Máximo throughput)
     // ============================================
@@ -1556,7 +1565,7 @@ func setupMultiQueueScaling() {
         },
     })
     fmt.Println("Server 1: Processing critical queue (100 workers)")
-    
+
     // ============================================
     // SERVER 2: Balanceado (Default + Low)
     // ============================================
@@ -1568,7 +1577,7 @@ func setupMultiQueueScaling() {
         },
     })
     fmt.Println("Server 2: Balanced processing (50 workers)")
-    
+
     // ============================================
     // SERVER 3: Procesamiento nocturno (jobs largos)
     // ============================================
@@ -1580,7 +1589,7 @@ func setupMultiQueueScaling() {
         },
     })
     fmt.Println("Server 3: Batch jobs (20 workers)")
-    
+
     go srv1.Start(nil)
     go srv2.Start(nil)
     go srv3.Start(nil)
@@ -1622,14 +1631,14 @@ type LeastLoadedSelector struct {
 func (l *LeastLoadedSelector) Select() string {
     minTasks := math.MaxInt
     var selectedWorker string
-    
+
     for worker, taskCount := range l.workers {
         if taskCount < minTasks {
             minTasks = taskCount
             selectedWorker = worker
         }
     }
-    
+
     return selectedWorker
 }
 
@@ -1646,10 +1655,10 @@ func (a *AffinitySelector) Select(taskType string) string {
     if !ok {
         workers = a.taskTypeToWorker["default"]
     }
-    
+
     idx := a.roundRobin[taskType]
     a.roundRobin[taskType]++
-    
+
     return workers[idx%len(workers)]
 }
 
@@ -1664,7 +1673,7 @@ func setupAffinityRouting() {
         },
         roundRobin: make(map[string]int),
     }
-    
+
     fmt.Println("Email tasks ->", selector.Select("send_email"))
     fmt.Println("Image tasks ->", selector.Select("process_image"))
 }
@@ -1679,7 +1688,7 @@ import (
     "context"
     "fmt"
     "time"
-    
+
     "github.com/redis/go-redis/v9"
 )
 
@@ -1710,7 +1719,7 @@ func (b *BackpressureController) CanEnqueue(ctx context.Context) (bool, error) {
     if err != nil {
         return false, err
     }
-    
+
     return depth < b.maxQueueDepth, nil
 }
 
@@ -1721,21 +1730,21 @@ func (b *BackpressureController) EnqueueWithBackpressure(
     maxWait time.Duration,
 ) error {
     deadline := time.Now().Add(maxWait)
-    
+
     for {
         if time.Now().After(deadline) {
             return fmt.Errorf("backpressure timeout")
         }
-        
+
         can, err := b.CanEnqueue(ctx)
         if err != nil {
             return err
         }
-        
+
         if can {
             return b.client.LPush(ctx, b.queueKey, taskJSON).Err()
         }
-        
+
         // Queue llena, espera y reintenta
         time.Sleep(100 * time.Millisecond)
     }
@@ -1745,7 +1754,7 @@ func (b *BackpressureController) EnqueueWithBackpressure(
 func (b *BackpressureController) MonitorBackpressure(ctx context.Context) {
     ticker := time.NewTicker(b.checkInterval)
     defer ticker.Stop()
-    
+
     for {
         select {
         case <-ctx.Done():
@@ -1753,19 +1762,19 @@ func (b *BackpressureController) MonitorBackpressure(ctx context.Context) {
         case <-ticker.C:
             depth, _ := b.client.LLen(ctx, b.queueKey).Result()
             percentage := (depth * 100) / b.maxQueueDepth
-            
+
             if percentage > 80 {
                 fmt.Printf("⚠️  Backpressure: %d%% (%d/%d tasks)\n",
                     percentage, depth, b.maxQueueDepth)
-                
+
                 // Trigger: increase workers
                 scaleUpWorkers()
             }
-            
+
             if percentage < 20 {
                 fmt.Printf("✅ Backpressure normal: %d%% (%d/%d tasks)\n",
                     percentage, depth, b.maxQueueDepth)
-                
+
                 // Trigger: decrease workers
                 scaleDownWorkers()
             }
@@ -1804,21 +1813,21 @@ type AutoScaler struct {
 
 func (as *AutoScaler) DecideScaling(queueDepth, maxDepth int64) int {
     percentage := float64(queueDepth) * 100 / float64(maxDepth)
-    
+
     if percentage > as.scaleUpThreshold && as.currentWorkers < as.maxWorkers {
         as.currentWorkers++
         fmt.Printf("📈 Scale UP: %d → %d workers\n",
             as.currentWorkers-1, as.currentWorkers)
         return as.currentWorkers
     }
-    
+
     if percentage < as.scaleDownThreshold && as.currentWorkers > as.minWorkers {
         as.currentWorkers--
         fmt.Printf("📉 Scale DOWN: %d → %d workers\n",
             as.currentWorkers+1, as.currentWorkers)
         return as.currentWorkers
     }
-    
+
     return as.currentWorkers
 }
 
@@ -1849,7 +1858,7 @@ import (
     "context"
     "fmt"
     "time"
-    
+
     "github.com/prometheus/client_golang/prometheus"
     "github.com/prometheus/client_golang/prometheus.promauto"
 )
@@ -1863,7 +1872,7 @@ var (
         },
         []string{"task_type", "status"},
     )
-    
+
     // Duración de tasks
     taskDuration = promauto.NewHistogramVec(
         prometheus.HistogramOpts{
@@ -1873,7 +1882,7 @@ var (
         },
         []string{"task_type"},
     )
-    
+
     // Profundidad de queue
     queueDepth = promauto.NewGaugeVec(
         prometheus.GaugeOpts{
@@ -1882,7 +1891,7 @@ var (
         },
         []string{"queue"},
     )
-    
+
     // Active workers
     activeWorkers = promauto.NewGaugeVec(
         prometheus.GaugeOpts{
@@ -1891,7 +1900,7 @@ var (
         },
         []string{},
     )
-    
+
     // Reintentos
     taskRetries = promauto.NewCounterVec(
         prometheus.CounterOpts{
@@ -1900,7 +1909,7 @@ var (
         },
         []string{"task_type"},
     )
-    
+
     // Dead-letter queue
     dlqSize = promauto.NewGaugeVec(
         prometheus.GaugeOpts{
@@ -1915,22 +1924,22 @@ var (
 func MetricsMiddleware(next func(context.Context, interface{}) error) func(context.Context, interface{}) error {
     return func(ctx context.Context, task interface{}) error {
         start := time.Now()
-        
+
         // Simula task type (en producción, obtén del context)
         taskType := "unknown_task"
-        
+
         err := next(ctx, task)
         duration := time.Since(start).Seconds()
-        
+
         status := "success"
         if err != nil {
             status = "failed"
         }
-        
+
         // Registra métricas
         tasksProcessed.WithLabelValues(taskType, status).Inc()
         taskDuration.WithLabelValues(taskType).Observe(duration)
-        
+
         return err
     }
 }
@@ -1942,12 +1951,12 @@ type AsynqCollector struct {
 
 func (c *AsynqCollector) Collect(ch chan<- prometheus.Metric) {
     stats, _ := c.inspector.Stats(context.Background())
-    
+
     // Queue depth
     for queue, qstat := range stats.Queues {
         queueDepth.WithLabelValues(queue).Set(float64(qstat.Size))
     }
-    
+
     // Active workers
     activeWorkers.WithLabelValues().Set(float64(len(stats.Workers)))
 }
@@ -1967,7 +1976,7 @@ import (
     "encoding/json"
     "fmt"
     "time"
-    
+
     "go.uber.org/zap"
     "go.uber.org/zap/zapcore"
 )
@@ -1978,7 +1987,7 @@ func init() {
     cfg := zap.NewProductionConfig()
     cfg.OutputPaths = []string{"stdout"}
     cfg.ErrorOutputPaths = []string{"stderr"}
-    
+
     baseLogger, _ := cfg.Build()
     logger = baseLogger.Sugar()
 }
@@ -1997,7 +2006,7 @@ func NewJobLogger(jobID, jobType string) *JobLogger {
         "job_type", jobType,
         "timestamp", time.Now(),
     )
-    
+
     return &JobLogger{
         jobID:     jobID,
         jobType:   jobType,
@@ -2008,7 +2017,7 @@ func NewJobLogger(jobID, jobType string) *JobLogger {
 func (jl *JobLogger) LogProgress(stage string, details map[string]interface{}) {
     elapsed := time.Since(jl.startTime).Seconds()
     details["elapsed_seconds"] = elapsed
-    
+
     logger.Infow(
         fmt.Sprintf("Job stage: %s", stage),
         "job_id", jl.jobID,
@@ -2023,13 +2032,13 @@ func (jl *JobLogger) LogError(err error, context map[string]interface{}) {
     context["job_type"] = jl.jobType
     context["error"] = err.Error()
     context["duration_seconds"] = time.Since(jl.startTime).Seconds()
-    
+
     logger.Errorw("Job failed", context)
 }
 
 func (jl *JobLogger) LogSuccess(result map[string]interface{}) {
     result["duration_seconds"] = time.Since(jl.startTime).Seconds()
-    
+
     logger.Infow(
         "Job completed",
         "job_id", jl.jobID,
@@ -2041,23 +2050,23 @@ func (jl *JobLogger) LogSuccess(result map[string]interface{}) {
 // Ejemplo de uso
 func HandleEmailTaskWithLogging(ctx context.Context, task interface{}) error {
     jobLogger := NewJobLogger("job_123", "send_email")
-    
+
     jobLogger.LogProgress("initializing", map[string]interface{}{
         "queue": "default",
     })
-    
+
     if err := sendEmail(); err != nil {
         jobLogger.LogError(err, map[string]interface{}{
             "retry_count": 2,
         })
         return err
     }
-    
+
     jobLogger.LogSuccess(map[string]interface{}{
         "recipients": 1,
         "status": "sent",
     })
-    
+
     return nil
 }
 ```
@@ -2091,14 +2100,14 @@ func (wh *WorkerHealth) Heartbeat() {
 func (wh *WorkerHealth) IsHealthy(timeout time.Duration) bool {
     wh.mu.RLock()
     defer wh.mu.RUnlock()
-    
+
     return time.Since(wh.lastHeartbeat) < timeout
 }
 
 func (wh *WorkerHealth) GetStatus() map[string]interface{} {
     wh.mu.RLock()
     defer wh.mu.RUnlock()
-    
+
     return map[string]interface{}{
         "worker_id":        wh.workerID,
         "is_healthy":       wh.IsHealthy(30 * time.Second),
@@ -2115,14 +2124,14 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
         "workers": []map[string]interface{}{},
         "timestamp": time.Now(),
     }
-    
+
     for _, worker := range getActiveWorkers() {
         status["workers"] = append(
             status["workers"].([]map[string]interface{}),
             worker.GetStatus(),
         )
     }
-    
+
     json.NewEncoder(w).Encode(status)
 }
 ```
@@ -2188,34 +2197,34 @@ func (rp *RetryPolicy) CalculateDelay(attemptNumber int) time.Duration {
     if attemptNumber < 0 || attemptNumber > rp.MaxRetries {
         return 0
     }
-    
+
     // Exponential: 2^attempt
     exponentialDelay := time.Duration(
         math.Pow(rp.BackoffMultiplier, float64(attemptNumber)),
     ) * rp.InitialBackoff
-    
+
     // Cap at MaxBackoff
     if exponentialDelay > rp.MaxBackoff {
         exponentialDelay = rp.MaxBackoff
     }
-    
+
     // Add jitter: ±10%
     jitter := time.Duration(
         float64(exponentialDelay) * rp.JitterFraction,
     )
-    
+
     return exponentialDelay + jitter
 }
 
 // Ejemplo: Retry progression
 func ExampleRetryBackoff() {
     policy := DefaultRetryPolicy()
-    
+
     for attempt := 0; attempt <= policy.MaxRetries; attempt++ {
         delay := policy.CalculateDelay(attempt)
         fmt.Printf("Attempt %d: retry after %v\n", attempt, delay)
     }
-    
+
     // Output:
     // Attempt 0: retry after 1.1s
     // Attempt 1: retry after 2.05s
@@ -2236,7 +2245,7 @@ import (
     "encoding/json"
     "fmt"
     "time"
-    
+
     "github.com/hibiken/asynq"
     "github.com/redis/go-redis/v9"
 )
@@ -2272,7 +2281,7 @@ func (dm *DLQManager) ListDLQ(ctx context.Context) ([]DLQEntry, error) {
     if err != nil {
         return nil, err
     }
-    
+
     var entries []DLQEntry
     for _, result := range results {
         var entry DLQEntry
@@ -2281,7 +2290,7 @@ func (dm *DLQManager) ListDLQ(ctx context.Context) ([]DLQEntry, error) {
         }
         entries = append(entries, entry)
     }
-    
+
     return entries, nil
 }
 
@@ -2289,7 +2298,7 @@ func (dm *DLQManager) ListDLQ(ctx context.Context) ([]DLQEntry, error) {
 func (dm *DLQManager) ReprocessDLQEntry(ctx context.Context, jobID string) error {
     // Encuentra el job en DLQ
     results, _ := dm.client.LRange(ctx, dm.dlqKey, 0, -1).Result()
-    
+
     var entry DLQEntry
     for _, result := range results {
         var e DLQEntry
@@ -2299,21 +2308,21 @@ func (dm *DLQManager) ReprocessDLQEntry(ctx context.Context, jobID string) error
             break
         }
     }
-    
+
     // Re-encola
     task := &asynq.Task{
         Type:    entry.TaskType,
         Payload: entry.Payload,
     }
-    
+
     _, err := dm.cli.Enqueue(task, asynq.MaxRetry(3))
     if err != nil {
         return err
     }
-    
+
     // Elimina de DLQ
     dm.client.LRem(ctx, dm.dlqKey, 1, fmt.Sprintf("%q", jobID))
-    
+
     return nil
 }
 
@@ -2325,12 +2334,12 @@ func (dm *DLQManager) ClearDLQ(ctx context.Context) error {
 // GetDLQStats retorna estadísticas del DLQ
 func (dm *DLQManager) GetDLQStats(ctx context.Context) map[string]interface{} {
     entries, _ := dm.ListDLQ(ctx)
-    
+
     taskTypeCounts := make(map[string]int)
     for _, entry := range entries {
         taskTypeCounts[entry.TaskType]++
     }
-    
+
     return map[string]interface{}{
         "total_failed": len(entries),
         "by_task_type": taskTypeCounts,
@@ -2406,14 +2415,14 @@ func (ea *ErrorAnalyzer) getTrend() map[string]interface{} {
 
 func (ea *ErrorAnalyzer) checkAlerts() []string {
     alerts := []string{}
-    
+
     for errorType, stats := range ea.errors {
         if stats.Count > 100 {
-            alerts = append(alerts, 
+            alerts = append(alerts,
                 fmt.Sprintf("🚨 High error rate: %s (%d errors)", errorType, stats.Count))
         }
     }
-    
+
     return alerts
 }
 ```
@@ -2425,6 +2434,7 @@ func (ea *ErrorAnalyzer) checkAlerts() []string {
 ### 53.11.1 Job Design Patterns
 
 **❌ Antipattern: Jobs que comparten estado**
+
 ```go
 // ❌ MAL: Shared mutable state
 var counter = 0
@@ -2436,12 +2446,13 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **✅ Best Practice: Stateless jobs**
+
 ```go
 // ✅ BIEN: Cada job es independiente
 func jobHandler(ctx context.Context, task *asynq.Task) error {
     var payload JobPayload
     json.Unmarshal(task.Payload(), &payload)
-    
+
     // Usa solo datos en payload
     result := processData(payload)
     return storeResult(result)
@@ -2449,6 +2460,7 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **❌ Antipattern: No hay timeout**
+
 ```go
 // ❌ MAL: Job sin timeout
 func jobHandler(ctx context.Context, task *asynq.Task) error {
@@ -2459,6 +2471,7 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **✅ Best Practice: Context con timeout**
+
 ```go
 // ✅ BIEN: Respeta deadline
 func jobHandler(ctx context.Context, task *asynq.Task) error {
@@ -2467,13 +2480,14 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
         return ctx.Err()  // Contexto cancelado/timeout
     default:
     }
-    
+
     result := doSomethingWithContext(ctx)
     return result
 }
 ```
 
 **❌ Antipattern: No hay reintentos**
+
 ```go
 // ❌ MAL: Fallos sin recuperación
 func jobHandler(ctx context.Context, task *asynq.Task) error {
@@ -2483,11 +2497,12 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **✅ Best Practice: Manejo estructurado de errores**
+
 ```go
 // ✅ BIEN: Errores categorizados
 func jobHandler(ctx context.Context, task *asynq.Task) error {
     result, err := callExternalAPI()
-    
+
     switch err.(type) {
     case *ErrTemporary:
         // Reintentable
@@ -2502,6 +2517,7 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **❌ Antipattern: Jobs sin idempotency**
+
 ```go
 // ❌ MAL: Duplicados posibles
 func jobHandler(ctx context.Context, task *asynq.Task) error {
@@ -2513,21 +2529,22 @@ func jobHandler(ctx context.Context, task *asynq.Task) error {
 ```
 
 **✅ Best Practice: Operaciones idempotentes**
+
 ```go
 // ✅ BIEN: Usa idempotency keys
 func jobHandler(ctx context.Context, task *asynq.Task) error {
     idempotencyKey := task.ResultWriter().String()
-    
+
     // Check: ¿Ya procesado?
     if db.Exists("processed_key", idempotencyKey) {
         return nil
     }
-    
+
     // Process
     if err := processTransaction(amount); err != nil {
         return err
     }
-    
+
     // Mark processed
     db.Set("processed_key", idempotencyKey, "1")
     return nil
@@ -2543,7 +2560,7 @@ import (
     "context"
     "encoding/json"
     "testing"
-    
+
     "github.com/hibiken/asynq"
     "github.com/stretchr/testify/assert"
 )
@@ -2576,16 +2593,16 @@ func TestHandleSendEmail(t *testing.T) {
             wantErr: true,
         },
     }
-    
+
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             tt.setupMock()
-            
+
             data, _ := json.Marshal(tt.payload)
             task := asynq.NewTask(TypeSendEmail, data)
-            
+
             err := HandleSendEmail(context.Background(), task)
-            
+
             if tt.wantErr {
                 assert.Error(t, err)
             } else {
@@ -2601,12 +2618,12 @@ func TestSendEmailIntegration(t *testing.T) {
     if testing.Short() {
         t.Skip("skipping integration test")
     }
-    
+
     client := asynq.NewClient(asynq.RedisClientOpt{
         Addr: "localhost:6379",
     })
     defer client.Close()
-    
+
     // Encola tarea
     task, _ := NewSendEmailTask(&EmailPayload{
         To: "test@example.com",
@@ -2625,7 +2642,7 @@ package dataflow
 import (
     "context"
     "database/sql"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -2643,7 +2660,7 @@ func CreateUserWithWelcomeEmail(
         return err
     }
     defer tx.Rollback()
-    
+
     // 1. Crea usuario
     var userID int64
     err = tx.QueryRowContext(
@@ -2654,19 +2671,19 @@ func CreateUserWithWelcomeEmail(
     if err != nil {
         return err
     }
-    
+
     // 2. Commit BD
     if err := tx.Commit(); err != nil {
         return err
     }
-    
+
     // 3. SOLO después de commit: encola email
     task, _ := NewSendEmailTask(&EmailPayload{
         UserID: int(userID),
         To:     email,
     })
     _, err = cli.Enqueue(task)
-    
+
     return err
 }
 ```
@@ -2681,7 +2698,7 @@ import (
     "encoding/json"
     "fmt"
     "net/smtp"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -2706,14 +2723,14 @@ func (es *EmailService) SendEmailAsync(
     to, subject, body string,
 ) (string, error) {
     task, _ := es.createEmailTask(to, subject, body)
-    
+
     info, err := es.client.Enqueue(
         task,
         asynq.Queue("email"),
         asynq.MaxRetry(5),
         asynq.Timeout(30 * 1),
     )
-    
+
     return info.ID, err
 }
 
@@ -2724,23 +2741,23 @@ func (es *EmailService) HandleSendEmail(ctx context.Context, t *asynq.Task) erro
         Subject string `json:"subject"`
         Body    string `json:"body"`
     }
-    
+
     if err := json.Unmarshal(t.Payload(), &payload); err != nil {
         return err
     }
-    
+
     // Validación
     if !isValidEmail(payload.To) {
         return fmt.Errorf("invalid email: %s", payload.To)
     }
-    
+
     // Envía email
     return es.sendSMTPEmail(payload.To, payload.Subject, payload.Body)
 }
 
 func (es *EmailService) sendSMTPEmail(to, subject, body string) error {
     msg := fmt.Sprintf("To: %s\r\nSubject: %s\r\n\r\n%s", to, subject, body)
-    
+
     return smtp.SendMail(
         es.smtpAddr,
         nil,
@@ -2775,7 +2792,7 @@ import (
     "context"
     "encoding/json"
     "fmt"
-    
+
     "github.com/hibiken/asynq"
 )
 
@@ -2798,17 +2815,17 @@ func (rg *ReportGenerator) GenerateReport(
         "end_date":   endDate,
         "format":     format,
     }
-    
+
     data, _ := json.Marshal(payload)
     task := asynq.NewTask("generate_report", data)
-    
+
     info, err := rg.client.Enqueue(
         task,
         asynq.Queue("reports"),
         asynq.Timeout(30 * 1),  // Max 30 min
         asynq.ProcessIn(1 * 1), // Enqueue inmediatamente
     )
-    
+
     return info.ID, err
 }
 
@@ -2819,30 +2836,30 @@ func (rg *ReportGenerator) HandleGenerateReport(ctx context.Context, t *asynq.Ta
         EndDate   string `json:"end_date"`
         Format    string `json:"format"`
     }
-    
+
     json.Unmarshal(t.Payload(), &payload)
-    
+
     // 1. Extract data
     data, err := rg.extractData(payload.UserID, payload.StartDate, payload.EndDate)
     if err != nil {
         return err
     }
-    
+
     // 2. Format report
     content, err := rg.formatReport(data, payload.Format)
     if err != nil {
         return err
     }
-    
+
     // 3. Store
     fileID, err := rg.storage.Store(context.Background(), content)
     if err != nil {
         return err
     }
-    
+
     // 4. Notify user
     rg.notifier.Notify(payload.UserID, fmt.Sprintf("Report ready: %s", fileID))
-    
+
     return nil
 }
 
@@ -3009,6 +3026,7 @@ Los Job Queues son esenciales para arquitecturas modernas escalables. Go, con fr
 ---
 
 **Referencias:**
+
 - [Asynq GitHub](https://github.com/hibiken/asynq)
 - [Redis Patterns](https://redis.io/docs/patterns/)
 - [Go Concurrency Best Practices](https://go.dev/blog/pipelines)

@@ -1,6 +1,7 @@
 # Capítulo 61: GORM - Deep dive del ORM
 
 ## Tabla de Contenidos
+
 1. [Introducción a GORM](#61-introducción-a-gorm)
 2. [Setup y Configuración](#62-setup-y-configuración)
 3. [Models y Structs](#63-models-y-structs)
@@ -22,12 +23,14 @@
 GORM (Go Object Relational Mapping) es el ORM más popular en el ecosistema Go. Desarrollado por Jinzhu Zhang, se ha convertido en el estándar de facto para aplicaciones Go que requieren abstracción de bases de datos.
 
 **Hitos históricos:**
+
 - **2013**: Primer commit de GORM
 - **2019**: v1 release con soporte PostgreSQL, MySQL, SQLite
 - **2021**: v2 release con arquitectura rediseñada
 - **2024**: Soporte completo para Go 1.21+ con generics
 
 **Adopción en la industria:**
+
 ```
 Startups: 85% utilizan GORM
 Empresas medianas: 70% lo consideran
@@ -37,6 +40,7 @@ Grandes corporaciones: 45% en producción
 ### 6.1.2 - Cuándo Usar ORM vs Raw SQL
 
 **Usar GORM cuando:**
+
 - ✅ Desarrollo rápido de CRUD
 - ✅ Múltiples bases de datos (portabilidad)
 - ✅ Relaciones complejas
@@ -45,6 +49,7 @@ Grandes corporaciones: 45% en producción
 - ✅ Equipo prefiere abstracción
 
 **Usar Raw SQL cuando:**
+
 - ✅ Queries extremadamente complejas
 - ✅ Performance crítica (benchmarks precisos)
 - ✅ Reports complejos con múltiples joins
@@ -53,6 +58,7 @@ Grandes corporaciones: 45% en producción
 - ✅ Batch processing masivo
 
 **Híbrido (Recomendado):**
+
 ```
 - GORM para CRUD y relaciones normales
 - Raw SQL para queries especializadas
@@ -76,6 +82,7 @@ Grandes corporaciones: 45% en producción
 ```
 
 **GORM vs sqlc:**
+
 ```go
 // GORM: Flexible, fácil, pero menos type-safe
 var users []User
@@ -86,6 +93,7 @@ users, err := q.GetAdultUsers(ctx, 18)
 ```
 
 **GORM vs Ent:**
+
 ```go
 // GORM: Schema definida en struct
 type User struct {
@@ -104,6 +112,7 @@ type User struct {
 ### 6.1.4 - Ecosistema GORM
 
 **Plugins oficiales:**
+
 ```
 - Scopes: Reutilizar queries complejas
 - Hints: Control fino del planner SQL
@@ -113,6 +122,7 @@ type User struct {
 ```
 
 **Extensiones comunitarias:**
+
 ```
 - gorm/datatypes: Tipos avanzados
 - gorm/mysql: Features específicos
@@ -145,6 +155,7 @@ go get -u gorm.io/driver/sqlserver
 ```
 
 **go.mod mínimo:**
+
 ```
 module myapp
 go 1.21
@@ -158,6 +169,7 @@ require (
 ### 6.2.2 - Conexión PostgreSQL
 
 **Conexión básica:**
+
 ```go
 package main
 
@@ -170,18 +182,19 @@ import (
 func main() {
     dsn := "host=localhost user=postgres password=secret " +
            "dbname=myapp port=5432 sslmode=disable"
-    
+
     db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         panic("Failed to connect to database")
     }
-    
+
     // db está listo para usar
     fmt.Println("Conectado a PostgreSQL")
 }
 ```
 
 **Conexión con variables de entorno:**
+
 ```go
 package config
 
@@ -201,17 +214,18 @@ func InitDB() (*gorm.DB, error) {
         os.Getenv("DB_NAME"),
         os.Getenv("DB_PORT"),
     )
-    
+
     db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         return nil, err
     }
-    
+
     return db, nil
 }
 ```
 
 **Archivo .env:**
+
 ```
 DB_HOST=localhost
 DB_USER=postgres
@@ -227,17 +241,18 @@ import "gorm.io/driver/mysql"
 
 func initMySQL() (*gorm.DB, error) {
     dsn := "user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-    
+
     db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
     if err != nil {
         return nil, err
     }
-    
+
     return db, nil
 }
 ```
 
 **Características MySQL específicas:**
+
 ```go
 db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -256,14 +271,14 @@ import "gorm.io/driver/sqlite"
 func initSQLite() (*gorm.DB, error) {
     // En memoria (perfecto para testing)
     db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-    
+
     // O a archivo
     // db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-    
+
     if err != nil {
         return nil, err
     }
-    
+
     return db, nil
 }
 ```
@@ -271,6 +286,7 @@ func initSQLite() (*gorm.DB, error) {
 ### 6.2.5 - Connection Pooling
 
 **Configuración de pool:**
+
 ```go
 package config
 
@@ -284,29 +300,30 @@ import (
 func InitDB() (*gorm.DB, error) {
     dsn := "host=localhost user=postgres password=secret " +
            "dbname=myapp port=5432 sslmode=disable"
-    
+
     db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         return nil, err
     }
-    
+
     // Obtener la conexión SQL subyacente
     sqlDB, err := db.DB()
     if err != nil {
         return nil, err
     }
-    
+
     // Configurar pool
     sqlDB.SetMaxIdleConns(10)        // Conexiones inactivas máximas
     sqlDB.SetMaxOpenConns(100)       // Conexiones abiertas máximas
     sqlDB.SetConnMaxLifetime(time.Hour) // Vida útil máxima
     sqlDB.SetConnMaxIdleTime(10 * time.Minute) // Inactivo máximo
-    
+
     return db, nil
 }
 ```
 
 **Parámetros recomendados por escala:**
+
 ```
 Desarrollo:
 - MaxIdleConns: 5-10
@@ -324,6 +341,7 @@ Producción (alto tráfico):
 ### 6.2.6 - Logging Configuration
 
 **Sin logging:**
+
 ```go
 db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{
     Logger: logger.Default.LogMode(logger.Silent),
@@ -331,6 +349,7 @@ db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{
 ```
 
 **Logging detallado:**
+
 ```go
 import (
     "gorm.io/gorm/logger"
@@ -348,16 +367,17 @@ func InitDB() (*gorm.DB, error) {
             Colorful:      true,           // SQL coloreado
         },
     )
-    
+
     db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{
         Logger: newLogger,
     })
-    
+
     return db, nil
 }
 ```
 
 **Logger personalizado:**
+
 ```go
 type CustomLogger struct{}
 
@@ -377,7 +397,7 @@ func (l *CustomLogger) Error(ctx context.Context, msg string, data ...interface{
     fmt.Printf("[ERROR] %s %v\n", msg, data)
 }
 
-func (l *CustomLogger) Trace(ctx context.Context, begin time.Time, 
+func (l *CustomLogger) Trace(ctx context.Context, begin time.Time,
     fc func() (string, int64), err error) {
     // Custom tracing
 }
@@ -386,6 +406,7 @@ func (l *CustomLogger) Trace(ctx context.Context, begin time.Time,
 ### 6.2.7 - Migration Setup
 
 **Estructura recomendada:**
+
 ```
 project/
 ├── main.go
@@ -401,6 +422,7 @@ project/
 ```
 
 **migrations/migrate.go:**
+
 ```go
 package migrations
 
@@ -416,13 +438,13 @@ func Run(db *gorm.DB) error {
         MigratePosts,
         MigrateComments,
     }
-    
+
     for _, migration := range migrations {
         if err := migration(db); err != nil {
             return fmt.Errorf("migration failed: %w", err)
         }
     }
-    
+
     return nil
 }
 
@@ -469,41 +491,42 @@ func (User) TableName() string {
 ### 6.3.2 - Struct Tags Completos
 
 **Tags básicos:**
+
 ```go
 type User struct {
     // primaryKey: Indica clave primaria
     ID uint `gorm:"primaryKey"`
-    
+
     // column: Nombre de columna personalizado
     Email string `gorm:"column:user_email"`
-    
+
     // type: Tipo de dato SQL específico
     Status string `gorm:"column:status;type:VARCHAR(50)"`
-    
+
     // size: Tamaño máximo
     Bio string `gorm:"size:1000"`
-    
+
     // not null: Constraint NOT NULL
     Name string `gorm:"not null"`
-    
+
     // unique: Constraint UNIQUE
     Username string `gorm:"unique"`
-    
+
     // uniqueIndex: Índice UNIQUE
     Phone string `gorm:"uniqueIndex:idx_phone"`
-    
+
     // index: Índice simple
     Department string `gorm:"index"`
-    
+
     // default: Valor por defecto
     Role string `gorm:"default:'user'"`
-    
+
     // autoIncrement: AUTO_INCREMENT
     SerialNumber uint `gorm:"autoIncrement"`
-    
+
     // precision: Para decimales
     Balance float64 `gorm:"type:decimal(10,2)"`
-    
+
     // many2many: Relación many-to-many
     // Roles []Role `gorm:"many2many:user_roles;"`
 }
@@ -515,28 +538,28 @@ type User struct {
 type Product struct {
     // autoIncrementIncrement: Incremento personalizado
     ID uint `gorm:"autoIncrement:100"`
-    
+
     // serializer: Serialización custom
     Metadata map[string]interface{} `gorm:"serializer:json"`
-    
+
     // scan: Permitir valores NULL
     Description *string `gorm:"type:text"`
-    
+
     // comment: Comentario en BD
     Price float64 `gorm:"type:decimal(10,2);comment:Precio en USD"`
-    
+
     // check: Constraint CHECK
     Age int `gorm:"check:age > 0"`
-    
+
     // foreignKey: Llave foránea personalizada
     UserID uint `gorm:"foreignKey:UserID"`
-    
+
     // references: Referencia personalizada
     User *User `gorm:"foreignKey:UserID;references:ID"`
-    
+
     // constraint: DELETE CASCADE
     // User User `gorm:"constraint:OnDelete:CASCADE"`
-    
+
     // embedded: Incrustar struct
     // Timestamps: Timestamps
 }
@@ -560,44 +583,44 @@ type SupportedTypes struct {
     SmallInt  int16
     Integer   int32
     BigInt    int64
-    
+
     // Números flotantes
     Float32   float32
     Float64   float64
     Decimal   decimal.Decimal // Exactitud
-    
+
     // Strings
     Char      [10]byte
     Varchar   string
     Text      string
-    
+
     // Booleanos
     Bool      bool
-    
+
     // Fechas y horas
     Date      time.Time
     DateTime  time.Time
     Timestamp time.Time
-    
+
     // JSON
     JSONData  datatypes.JSONType
     JSONB     datatypes.JSONType `gorm:"type:jsonb"`
-    
+
     // Arrays (PostgreSQL)
     IntArray  pq.Int64Array `gorm:"type:integer[]"`
     StrArray  pq.StringArray
-    
+
     // Binario
     Data      []byte
-    
+
     // UUID
     UUID      uuid.UUID `gorm:"type:uuid;primaryKey"`
-    
+
     // Nullable
     OptString sql.NullString
     OptInt    sql.NullInt64
     OptTime   sql.NullTime
-    
+
     // Pointer (permite NULL)
     PtrStr    *string
     PtrInt    *int
@@ -608,6 +631,7 @@ type SupportedTypes struct {
 ### 6.3.5 - Primary Keys
 
 **Auto-incremento:**
+
 ```go
 type User struct {
     ID uint `gorm:"primaryKey;autoIncrement"`
@@ -616,6 +640,7 @@ type User struct {
 ```
 
 **UUID:**
+
 ```go
 import "github.com/google/uuid"
 
@@ -626,6 +651,7 @@ type User struct {
 ```
 
 **Composite Primary Key:**
+
 ```go
 type OrderItem struct {
     OrderID uint `gorm:"primaryKey"`
@@ -636,6 +662,7 @@ type OrderItem struct {
 ```
 
 **Key personalizada:**
+
 ```go
 type Account struct {
     AccountNumber string `gorm:"primaryKey;type:VARCHAR(20)"`
@@ -646,6 +673,7 @@ type Account struct {
 ### 6.3.6 - Timestamps Automáticos
 
 **Incorporado automáticamente:**
+
 ```go
 type User struct {
     ID        uint
@@ -656,6 +684,7 @@ type User struct {
 ```
 
 **Timestamps personalizados:**
+
 ```go
 type User struct {
     ID        uint
@@ -667,6 +696,7 @@ type User struct {
 ```
 
 **Desactivar timestamps:**
+
 ```go
 type User struct {
     ID    uint
@@ -677,6 +707,7 @@ type User struct {
 ### 6.3.7 - Associations Introducción
 
 **Has One:**
+
 ```go
 type User struct {
     ID       uint
@@ -691,6 +722,7 @@ type Profile struct {
 ```
 
 **Has Many:**
+
 ```go
 type User struct {
     ID    uint
@@ -706,6 +738,7 @@ type Post struct {
 ```
 
 **Belongs To:**
+
 ```go
 type Post struct {
     ID     uint
@@ -716,6 +749,7 @@ type Post struct {
 ```
 
 **Many to Many:**
+
 ```go
 type User struct {
     ID    uint
@@ -736,6 +770,7 @@ type Role struct {
 ### 6.4.1 - Create (Insert)
 
 **Insert simple:**
+
 ```go
 func createUser(db *gorm.DB) {
     user := User{
@@ -743,23 +778,25 @@ func createUser(db *gorm.DB) {
         Name:  "John Doe",
         Age:   30,
     }
-    
+
     result := db.Create(&user)
     if result.Error != nil {
         log.Fatal(result.Error)
     }
-    
+
     fmt.Printf("User ID: %d\n", user.ID) // ID asignado automáticamente
 }
 ```
 
 **Insert con valores específicos:**
+
 ```go
 user := User{Email: "jane@example.com"}
 db.Model(&User{}).Create(&user)
 ```
 
 **Batch insert:**
+
 ```go
 users := []User{
     {Email: "user1@example.com", Name: "User 1"},
@@ -771,17 +808,20 @@ db.Create(&users)
 ```
 
 **Insert ignorando campos:**
+
 ```go
 db.Omit("Age", "Role").Create(&user)
 ```
 
 **Insert con valores por defecto:**
+
 ```go
 user := User{Email: "test@example.com"}
 db.Create(&user)  // Active = true por defecto
 ```
 
 **Validación antes de crear:**
+
 ```go
 func (u *User) BeforeSave(tx *gorm.DB) error {
     if u.Email == "" {
@@ -799,6 +839,7 @@ db.Create(&user)  // Llama BeforeSave automáticamente
 ### 6.4.2 - Read/Find
 
 **Find por ID:**
+
 ```go
 var user User
 db.First(&user, 1)  // ID = 1
@@ -811,12 +852,14 @@ if errors.Is(db.Error, gorm.ErrRecordNotFound) {
 ```
 
 **Find todos:**
+
 ```go
 var users []User
 db.Find(&users)
 ```
 
 **Find con condiciones:**
+
 ```go
 var users []User
 db.Where("age > ?", 18).Find(&users)
@@ -826,6 +869,7 @@ db.Where("age > ? AND status = ?", 18, "active").Find(&users)
 ```
 
 **Find con operadores:**
+
 ```go
 // Igualdad
 db.Where("email = ?", "john@example.com").Find(&users)
@@ -850,6 +894,7 @@ db.Where("deleted_at IS NOT NULL").Find(&users)
 ```
 
 **Find con Maps:**
+
 ```go
 var results []map[string]interface{}
 db.Model(&User{}).Select("id", "email", "name").Find(&results)
@@ -858,11 +903,13 @@ db.Model(&User{}).Select("id", "email", "name").Find(&results)
 ### 6.4.3 - Update
 
 **Update simple:**
+
 ```go
 db.Model(&User{}).Where("id = ?", 1).Update("email", "new@example.com")
 ```
 
 **Update múltiples campos:**
+
 ```go
 db.Model(&User{}).Where("id = ?", 1).Updates(User{
     Email: "new@example.com",
@@ -877,17 +924,20 @@ db.Model(&User{}).Where("id = ?", 1).Updates(map[string]interface{}{
 ```
 
 **Update todos:**
+
 ```go
 db.Model(&User{}).Update("status", "inactive")
 ```
 
 **Update con estructura:**
+
 ```go
 user := User{ID: 1, Email: "new@example.com"}
 db.Model(&user).Updates(&user)
 ```
 
 **Update selectivos:**
+
 ```go
 db.Model(&User{}).Where("id = ?", 1).Select("email", "age").Updates(User{
     Email: "new@example.com",
@@ -896,6 +946,7 @@ db.Model(&User{}).Where("id = ?", 1).Select("email", "age").Updates(User{
 ```
 
 **Update con expresiones SQL:**
+
 ```go
 db.Model(&User{}).Update("age", gorm.Expr("age + ?", 1))
 db.Model(&Order{}).Update("total", gorm.Expr("price * quantity"))
@@ -904,26 +955,31 @@ db.Model(&Order{}).Update("total", gorm.Expr("price * quantity"))
 ### 6.4.4 - Delete
 
 **Delete simple:**
+
 ```go
 db.Delete(&User{}, 1)  // ID = 1
 ```
 
 **Delete con condición:**
+
 ```go
 db.Where("email = ?", "old@example.com").Delete(&User{})
 ```
 
 **Hard delete (permanente):**
+
 ```go
 db.Unscoped().Delete(&User{}, 1)
 ```
 
 **Delete todos:**
+
 ```go
 db.Delete(&User{})  // Borra todos los registros
 ```
 
 **Soft delete (por defecto con DeletedAt):**
+
 ```go
 type User struct {
     ID        uint
@@ -936,11 +992,13 @@ db.Delete(&user)  // Marca como eliminado
 ```
 
 **Recuperar soft deleted:**
+
 ```go
 db.Unscoped().Where("id = ?", 1).Find(&user)
 ```
 
 **Purgar soft deleted:**
+
 ```go
 db.Unscoped().Delete(&User{})  // Borra permanentemente
 ```
@@ -948,6 +1006,7 @@ db.Unscoped().Delete(&User{})  // Borra permanentemente
 ### 6.4.5 - Batch Operations
 
 **Create batch:**
+
 ```go
 users := []User{
     {Email: "user1@example.com"},
@@ -957,17 +1016,20 @@ result := db.CreateInBatches(users, 100)  // 100 por lote
 ```
 
 **Update batch:**
+
 ```go
 db.Model(&User{}).Where("status = ?", "pending").
     Update("status", "active")
 ```
 
 **Delete batch:**
+
 ```go
 db.Where("age > ?", 70).Delete(&User{})
 ```
 
 **Batch processing:**
+
 ```go
 var users []User
 batchSize := 100
@@ -987,6 +1049,7 @@ db.FindInBatches(batchSize, func(tx *gorm.DB, batch int) error {
 ### 6.5.1 - Where Clauses Complejas
 
 **AND/OR:**
+
 ```go
 // AND (por defecto)
 db.Where("age > ?", 18).Where("status = ?", "active").Find(&users)
@@ -999,6 +1062,7 @@ db.Where("(age > ? AND status = ?) OR role = ?", 18, "active", "admin").Find(&us
 ```
 
 **IN con slices:**
+
 ```go
 statuses := []string{"active", "pending"}
 db.Where("status IN ?", statuses).Find(&users)
@@ -1008,22 +1072,26 @@ db.Where("age IN ?", ages).Find(&users)
 ```
 
 **NOT IN:**
+
 ```go
 db.Where("status NOT IN ?", []string{"banned", "deleted"}).Find(&users)
 ```
 
 **LIKE:**
+
 ```go
 db.Where("email LIKE ?", "%@gmail.com").Find(&users)
 db.Where("name LIKE ?", "%john%").Find(&users)
 ```
 
 **NOT LIKE:**
+
 ```go
 db.Where("email NOT LIKE ?", "%@spam.com").Find(&users)
 ```
 
 **Condiciones dinámicas:**
+
 ```go
 query := db.Model(&User{})
 
@@ -1045,6 +1113,7 @@ query.Find(&users)
 ### 6.5.2 - Conditions Builder
 
 **Reutilizar conditions:**
+
 ```go
 isActive := db.Where("deleted_at IS NULL").Where("status = ?", "active")
 
@@ -1056,6 +1125,7 @@ isActive.Model(&User{}).Count(&activeCount)
 ```
 
 **Conditions complejas:**
+
 ```go
 cond := db.Where("age > ?", 18).
     Where("status IN ?", []string{"active", "pending"}).
@@ -1065,6 +1135,7 @@ cond.Find(&users)
 ```
 
 **Condicionales builder pattern:**
+
 ```go
 type UserFilter struct {
     MinAge   int
@@ -1096,29 +1167,34 @@ db.Scopes(filter.Apply).Find(&users)
 ### 6.5.3 - Select Específicos
 
 **Seleccionar columnas específicas:**
+
 ```go
 var users []User
 db.Select("id", "email", "name").Find(&users)
 ```
 
 **Select dinámico:**
+
 ```go
 columns := []string{"id", "email", "name"}
 db.Select(columns).Find(&users)
 ```
 
 **Excluir columnas:**
+
 ```go
 db.Omit("password", "api_key").Find(&users)
 ```
 
 **Select con alias:**
+
 ```go
 var results []map[string]interface{}
 db.Model(&User{}).Select("id as user_id", "email as user_email").Find(&results)
 ```
 
 **Select con expresiones:**
+
 ```go
 db.Model(&User{}).Select("id", "email", "age + 1 as age_next_year").Find(&users)
 ```
@@ -1126,6 +1202,7 @@ db.Model(&User{}).Select("id", "email", "age + 1 as age_next_year").Find(&users)
 ### 6.5.4 - Ordering & Pagination
 
 **Ordenar:**
+
 ```go
 // Ascendente
 db.Order("age ASC").Find(&users)
@@ -1145,6 +1222,7 @@ db.Order(clause.OrderByColumn{
 ```
 
 **Pagination:**
+
 ```go
 // Offset/Limit
 page := 2
@@ -1159,6 +1237,7 @@ db.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&users)
 ```
 
 **Pagination helper:**
+
 ```go
 func Paginate(page, pageSize int) func(*gorm.DB) *gorm.DB {
     return func(db *gorm.DB) *gorm.DB {
@@ -1168,7 +1247,7 @@ func Paginate(page, pageSize int) func(*gorm.DB) *gorm.DB {
         if pageSize <= 0 {
             pageSize = 10
         }
-        
+
         offset := (page - 1) * pageSize
         return db.Offset(offset).Limit(pageSize)
     }
@@ -1181,6 +1260,7 @@ db.Scopes(Paginate(1, 20)).Order("created_at DESC").Find(&users)
 ### 6.5.5 - Distinct & Group By
 
 **Distinct:**
+
 ```go
 var statuses []string
 db.Model(&User{}).Distinct("status").Pluck("status", &statuses)
@@ -1188,6 +1268,7 @@ db.Model(&User{}).Distinct("status").Pluck("status", &statuses)
 ```
 
 **Group By:**
+
 ```go
 var results []map[string]interface{}
 db.Model(&User{}).
@@ -1197,6 +1278,7 @@ db.Model(&User{}).
 ```
 
 **Group By con Having:**
+
 ```go
 db.Model(&User{}).
     Select("status", "COUNT(*) as count").
@@ -1206,6 +1288,7 @@ db.Model(&User{}).
 ```
 
 **Agregaciones:**
+
 ```go
 var count int64
 db.Model(&User{}).Count(&count)
@@ -1221,6 +1304,7 @@ db.Model(&User{}).Select("MAX(age)").Row().Scan(&max)
 ```
 
 **Pluck:**
+
 ```go
 var emails []string
 db.Model(&User{}).Pluck("email", &emails)
@@ -1266,6 +1350,7 @@ db.Model(&user).Association("Profile").Delete()
 ```
 
 **Configuración personalizada:**
+
 ```go
 type User struct {
     ID      uint
@@ -1356,6 +1441,7 @@ db.Model(&post).Update("user_id", 2)
 ### 6.6.4 - Many to Many
 
 **Con tabla join automática:**
+
 ```go
 type User struct {
     ID    uint
@@ -1395,6 +1481,7 @@ db.Model(&user).Association("Roles").Delete(&Role{Name: "admin"})
 ```
 
 **Con tabla join personalizada:**
+
 ```go
 type User struct {
     ID    uint
@@ -1424,6 +1511,7 @@ db.Where("user_id = ?", 1).Find(&userRoles)
 ### 6.5.5 - Preloading & Eager Loading
 
 **Preload simple:**
+
 ```go
 var user User
 db.Preload("Posts").First(&user, 1)
@@ -1431,6 +1519,7 @@ db.Preload("Posts").First(&user, 1)
 ```
 
 **Preload múltiple:**
+
 ```go
 db.Preload("Posts").
    Preload("Profile").
@@ -1439,17 +1528,20 @@ db.Preload("Posts").
 ```
 
 **Preload nested:**
+
 ```go
 db.Preload("Posts.Comments").First(&user, 1)
 ```
 
 **Preload con condiciones:**
+
 ```go
 db.Preload("Posts", "status = ?", "published").
    First(&user, 1)
 ```
 
 **Preload con orden:**
+
 ```go
 db.Preload("Posts", func(db *gorm.DB) *gorm.DB {
     return db.Order("created_at DESC").Limit(10)
@@ -1457,6 +1549,7 @@ db.Preload("Posts", func(db *gorm.DB) *gorm.DB {
 ```
 
 **Preload con select:**
+
 ```go
 db.Preload("Posts", func(db *gorm.DB) *gorm.DB {
     return db.Select("id", "title", "user_id")
@@ -1464,6 +1557,7 @@ db.Preload("Posts", func(db *gorm.DB) *gorm.DB {
 ```
 
 **Select con Associations:**
+
 ```go
 db.Select("id", "email").
    Preload("Posts", func(db *gorm.DB) *gorm.DB {
@@ -1492,17 +1586,17 @@ db.Model(&user).Association("Posts").Find(&posts)
 ```go
 err := db.Transaction(func(tx *gorm.DB) error {
     // Todas las operaciones dentro de esta función son una transacción
-    
+
     user := User{Email: "john@example.com", Age: 30}
     if err := tx.Create(&user).Error; err != nil {
         return err  // Rollback automático
     }
-    
+
     post := Post{Title: "My Post", UserID: user.ID}
     if err := tx.Create(&post).Error; err != nil {
         return err  // Rollback automático
     }
-    
+
     return nil  // Commit automático
 })
 
@@ -1512,6 +1606,7 @@ if err != nil {
 ```
 
 **Transacción manual:**
+
 ```go
 tx := db.BeginTx(context.Background(), &sql.TxOptions{
     Isolation: sql.LevelReadCommitted,
@@ -1535,11 +1630,11 @@ tx.Commit()
 ```go
 err := db.Transaction(func(tx *gorm.DB) error {
     // Transacción externa
-    
+
     if err := tx.Create(&user).Error; err != nil {
         return err
     }
-    
+
     // Transacción anidada
     err := tx.Transaction(func(nestedTx *gorm.DB) error {
         if err := nestedTx.Create(&post).Error; err != nil {
@@ -1547,11 +1642,11 @@ err := db.Transaction(func(tx *gorm.DB) error {
         }
         return nil
     })
-    
+
     if err != nil {
         return err  // Rollback toda la transacción
     }
-    
+
     return nil
 })
 ```
@@ -1571,7 +1666,7 @@ tx.Create(&post)
 if err := tx.Create(&comment).Error; err != nil {
     // Rollback al savepoint
     tx.RollbackTo("sp1")
-    
+
     // Post aún existe, comment no fue creado
 }
 
@@ -1579,6 +1674,7 @@ tx.Commit()
 ```
 
 **Savepoint avanzado:**
+
 ```go
 func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
     return db.Transaction(func(tx *gorm.DB) error {
@@ -1588,19 +1684,19 @@ func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
             Update("balance", gorm.Expr("balance - ?", amount)).Error; err != nil {
             return err
         }
-        
+
         // Savepoint antes de acreditar
         txSp := tx.SavePoint("sp_credit")
-        
+
         // Acreditar a cuenta destino
         if err := tx.Model(&Account{}).
             Where("id = ?", toID).
             Update("balance", gorm.Expr("balance + ?", amount)).Error; err != nil {
-            
+
             txSp.RollbackTo("sp_credit")
             return err
         }
-        
+
         return nil
     })
 }
@@ -1609,6 +1705,7 @@ func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
 ### 6.7.4 - Row-Level Locking
 
 **SELECT FOR UPDATE:**
+
 ```go
 var user User
 db.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -1617,6 +1714,7 @@ db.Clauses(clause.Locking{Strength: "UPDATE"}).
 ```
 
 **SELECT FOR UPDATE NOWAIT:**
+
 ```go
 db.Clauses(clause.Locking{
     Strength: "UPDATE",
@@ -1625,22 +1723,24 @@ db.Clauses(clause.Locking{
 ```
 
 **SELECT FOR SHARE:**
+
 ```go
 db.Clauses(clause.Locking{Strength: "SHARE"}).
     First(&user, 1)
 ```
 
 **Locking en transacciones:**
+
 ```go
 err := db.Transaction(func(tx *gorm.DB) error {
     var user User
-    
+
     // Lock la fila
     if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
         First(&user, 1).Error; err != nil {
         return err
     }
-    
+
     // Modificar con seguridad
     user.Balance -= 100
     return tx.Save(&user).Error
@@ -1694,20 +1794,22 @@ DELETE:
 ### 6.8.2 - Before/After Hooks
 
 **BeforeSave (Create & Update):**
+
 ```go
 func (u *User) BeforeSave(tx *gorm.DB) error {
     if u.Email == "" {
         return errors.New("email requerido")
     }
-    
+
     // Normalizar email
     u.Email = strings.ToLower(strings.TrimSpace(u.Email))
-    
+
     return nil
 }
 ```
 
 **BeforeCreate:**
+
 ```go
 func (u *User) BeforeCreate(tx *gorm.DB) error {
     // Hash password
@@ -1717,25 +1819,27 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
         return err
     }
     u.Password = string(hashedPassword)
-    
+
     return nil
 }
 ```
 
 **AfterCreate:**
+
 ```go
 func (u *User) AfterCreate(tx *gorm.DB) error {
     // Log creación
     log.Printf("User %d created: %s\n", u.ID, u.Email)
-    
+
     // Enviar email
     // SendWelcomeEmail(u.Email)
-    
+
     return nil
 }
 ```
 
 **BeforeUpdate:**
+
 ```go
 func (u *User) BeforeUpdate(tx *gorm.DB) error {
     // Validar cambios
@@ -1749,6 +1853,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 ```
 
 **AfterUpdate:**
+
 ```go
 func (u *User) AfterUpdate(tx *gorm.DB) error {
     // Log cambios
@@ -1760,21 +1865,23 @@ func (u *User) AfterUpdate(tx *gorm.DB) error {
 ```
 
 **BeforeDelete:**
+
 ```go
 func (u *User) BeforeDelete(tx *gorm.DB) error {
     // Validar antes de borrar
     var postCount int64
     tx.Model(&Post{}).Where("user_id = ?", u.ID).Count(&postCount)
-    
+
     if postCount > 0 {
         return errors.New("usuario tiene posts, no se puede borrar")
     }
-    
+
     return nil
 }
 ```
 
 **AfterDelete:**
+
 ```go
 func (u *User) AfterDelete(tx *gorm.DB) error {
     // Limpiar datos asociados
@@ -1783,6 +1890,7 @@ func (u *User) AfterDelete(tx *gorm.DB) error {
 ```
 
 **BeforeFind:**
+
 ```go
 func (u *User) BeforeFind(tx *gorm.DB) error {
     // Aplicar automáticamente filtros
@@ -1794,6 +1902,7 @@ func (u *User) BeforeFind(tx *gorm.DB) error {
 ```
 
 **AfterFind:**
+
 ```go
 func (u *User) AfterFind(tx *gorm.DB) error {
     // Desencriptar datos sensibles
@@ -1805,6 +1914,7 @@ func (u *User) AfterFind(tx *gorm.DB) error {
 ### 6.8.3 - Hook Execution Order
 
 **Orden de ejecución (Create):**
+
 ```
 1. BeforeSave
 2. BeforeCreate
@@ -1814,6 +1924,7 @@ func (u *User) AfterFind(tx *gorm.DB) error {
 ```
 
 **Orden en transacciones:**
+
 ```go
 db.Transaction(func(tx *gorm.DB) error {
     // Hooks ejecutados dentro de la transacción
@@ -1836,17 +1947,17 @@ func (u *User) BeforeSave(tx *gorm.DB) error {
     if !isValidEmail(u.Email) {
         return errors.New("email inválido")
     }
-    
+
     // Validar edad
     if u.Age < 18 || u.Age > 120 {
         return errors.New("edad fuera de rango")
     }
-    
+
     // Validar password longitud
     if len(u.Password) < 6 {
         return errors.New("password muy corto")
     }
-    
+
     return nil
 }
 
@@ -1871,33 +1982,33 @@ type Audit struct {
 
 func (u *User) AfterCreate(tx *gorm.DB) error {
     changes, _ := json.Marshal(u)
-    
+
     audit := Audit{
         Action:    "CREATE",
         TableName: "users",
         RecordID:  u.ID,
         Changes:   string(changes),
     }
-    
+
     return tx.Create(&audit).Error
 }
 
 func (u *User) AfterUpdate(tx *gorm.DB) error {
     changeMap := make(map[string]interface{})
-    
+
     for _, field := range tx.Statement.ChangedFields() {
         changeMap[field] = tx.Statement.Changes[field]
     }
-    
+
     changes, _ := json.Marshal(changeMap)
-    
+
     audit := Audit{
         Action:    "UPDATE",
         TableName: "users",
         RecordID:  u.ID,
         Changes:   string(changes),
     }
-    
+
     return tx.Create(&audit).Error
 }
 ```
@@ -1909,6 +2020,7 @@ func (u *User) AfterUpdate(tx *gorm.DB) error {
 ### 6.9.1 - AutoMigrate
 
 **Uso básico:**
+
 ```go
 type User struct {
     ID    uint
@@ -1920,6 +2032,7 @@ db.AutoMigrate(&User{})
 ```
 
 **AutoMigrate múltiples modelos:**
+
 ```go
 db.AutoMigrate(
     &User{},
@@ -1930,6 +2043,7 @@ db.AutoMigrate(
 ```
 
 **AutoMigrate con opciones:**
+
 ```go
 type User struct {
     ID    uint
@@ -1949,6 +2063,7 @@ db.Migrator().AlterColumn("email", "VARCHAR(255) NOT NULL")
 ### 6.9.2 - CreateTable, DropTable
 
 **CreateTable:**
+
 ```go
 type User struct {
     ID        uint      `gorm:"primaryKey"`
@@ -1969,6 +2084,7 @@ db.Migrator().CreateTable(&User{})
 ```
 
 **DropTable:**
+
 ```go
 db.Migrator().DropTable(&User{})
 
@@ -1980,6 +2096,7 @@ db.Migrator().DropTableIfExists(&User{})
 ```
 
 **HasTable:**
+
 ```go
 if db.Migrator().HasTable(&User{}) {
     fmt.Println("Tabla users existe")
@@ -1993,6 +2110,7 @@ if db.Migrator().HasTable("users") {
 ### 6.9.3 - AlterTable Operations
 
 **AddColumn:**
+
 ```go
 type User struct {
     ID    uint
@@ -2007,12 +2125,14 @@ db.Migrator().AddColumn(&User{}, "phone", "VARCHAR(20)")
 ```
 
 **DropColumn:**
+
 ```go
 db.Migrator().DropColumn(&User{}, "phone")
 db.Migrator().DropColumn(&User{}, "phone", "email")  // Múltiples
 ```
 
 **AlterColumn:**
+
 ```go
 // Cambiar tipo de columna
 db.Migrator().AlterColumn(&User{}, "email", "VARCHAR(255)")
@@ -2025,11 +2145,13 @@ db.Migrator().AlterColumn(&User{}, "status", "VARCHAR(20) DEFAULT 'active'")
 ```
 
 **RenameColumn:**
+
 ```go
 db.Migrator().RenameColumn(&User{}, "old_name", "new_name")
 ```
 
 **HasColumn:**
+
 ```go
 if db.Migrator().HasColumn(&User{}, "phone") {
     fmt.Println("Columna phone existe")
@@ -2039,6 +2161,7 @@ if db.Migrator().HasColumn(&User{}, "phone") {
 ### 6.9.4 - Indexes & Constraints
 
 **CreateIndex:**
+
 ```go
 type User struct {
     ID    uint
@@ -2061,12 +2184,14 @@ db.Migrator().CreateIndex(&User{}, &clause.Index{
 ```
 
 **DropIndex:**
+
 ```go
 db.Migrator().DropIndex(&User{}, "email")
 db.Migrator().DropIndex(&User{}, "idx_email_status")
 ```
 
 **HasIndex:**
+
 ```go
 if db.Migrator().HasIndex(&User{}, "email") {
     fmt.Println("Índice email existe")
@@ -2074,6 +2199,7 @@ if db.Migrator().HasIndex(&User{}, "email") {
 ```
 
 **AddConstraint:**
+
 ```go
 // Constraint CHECK
 db.Migrator().CreateConstraint(&User{}, "age")
@@ -2090,6 +2216,7 @@ db.Migrator().CreateConstraint(&Post{}, "fk_user")
 ### 6.9.5 - Foreign Keys
 
 **AutoMigrate con FK:**
+
 ```go
 type User struct {
     ID    uint
@@ -2108,6 +2235,7 @@ db.AutoMigrate(&User{}, &Post{})
 ```
 
 **FK personalizada:**
+
 ```go
 type Post struct {
     ID     uint
@@ -2118,6 +2246,7 @@ type Post struct {
 ```
 
 **FK con acciones:**
+
 ```go
 type Post struct {
     ID     uint
@@ -2128,6 +2257,7 @@ type Post struct {
 ```
 
 **Opciones:**
+
 ```
 OnDelete:
   - CASCADE: Borrar posts si se borra usuario
@@ -2147,6 +2277,7 @@ OnUpdate:
 ### 6.10.1 - Soft Delete
 
 **Implementación básica:**
+
 ```go
 type User struct {
     ID        uint
@@ -2169,6 +2300,7 @@ db.Unscoped().Where("deleted_at IS NOT NULL").Find(&users)
 ```
 
 **Restaurar soft deleted:**
+
 ```go
 db.Model(&User{}).Where("id = ?", 1).Update("deleted_at", nil)
 
@@ -2177,6 +2309,7 @@ db.Model(&user).Update("deleted_at", nil)
 ```
 
 **Purgar soft deleted:**
+
 ```go
 // Borrar permanentemente
 db.Unscoped().Delete(&user)
@@ -2257,6 +2390,7 @@ db.Create(&user)
 ```
 
 **JSON custom type:**
+
 ```go
 type Metadata map[string]interface{}
 
@@ -2281,6 +2415,7 @@ type User struct {
 ### 6.10.4 - JSON Fields
 
 **JSONB en PostgreSQL:**
+
 ```go
 import "gorm.io/datatypes"
 
@@ -2299,6 +2434,7 @@ db.Create(&user)
 ```
 
 **JSON queries:**
+
 ```go
 // PostgreSQL JSON operators
 db.Where("profile->>'city' = ?", "NYC").Find(&users)
@@ -2308,6 +2444,7 @@ db.Where("JSON_EXTRACT(profile, '$.city') = ?", "NYC").Find(&users)
 ```
 
 **Marshaling JSON:**
+
 ```go
 type UserProfile struct {
     Age   int    `json:"age"`
@@ -2341,6 +2478,7 @@ fmt.Printf("City: %s\n", user.Profile.City)
 ### 6.10.5 - Full-Text Search
 
 **PostgreSQL FTS:**
+
 ```go
 type Document struct {
     ID    uint
@@ -2370,6 +2508,7 @@ db.Where("vector @@ plainto_tsquery('english', ?)", "golang").Find(&results)
 ```
 
 **MySQL FULLTEXT:**
+
 ```go
 type Article struct {
     ID    uint
@@ -2384,6 +2523,7 @@ db.Where("MATCH(title, body) AGAINST(? IN BOOLEAN MODE)", "+golang -rust").
 ```
 
 **SQLite MATCH:**
+
 ```go
 // MATCH no es ideal en SQLite, usar LIKE
 var articles []Article
@@ -2398,6 +2538,7 @@ db.Where("title LIKE ? OR body LIKE ?", "%golang%", "%golang%").
 ### 6.11.1 - Query Optimization
 
 **Anti-pattern: N+1 Problem**
+
 ```go
 // ❌ MALO: N+1 queries
 var users []User
@@ -2410,6 +2551,7 @@ for _, user := range users {
 ```
 
 **Solución con Preload:**
+
 ```go
 // ✅ BUENO: Preload (2 queries total)
 var users []User
@@ -2421,12 +2563,13 @@ for _, user := range users {
 ```
 
 **Solución con Joins:**
+
 ```go
 // ✅ ALTERNATIVA: Join (1 query)
 var results []struct {
     UserEmail string
     PostTitle string
-}{} 
+}{}
 db.Model(&User{}).
     Select("users.email as user_email", "posts.title as post_title").
     Joins("LEFT JOIN posts ON users.id = posts.user_id").
@@ -2436,6 +2579,7 @@ db.Model(&User{}).
 ### 6.11.2 - Batch Processing
 
 **Batch insert:**
+
 ```go
 // ❌ LENTO: Inserts individuales
 for i := 0; i < 10000; i++ {
@@ -2451,6 +2595,7 @@ db.CreateInBatches(users, 500)  // 500 registros por batch
 ```
 
 **Batch update:**
+
 ```go
 // ❌ LENTO
 for _, id := range userIDs {
@@ -2462,6 +2607,7 @@ db.Model(&User{}).Where("id IN ?", userIDs).Update("status", "inactive")
 ```
 
 **Batch delete:**
+
 ```go
 // ❌ LENTO
 for _, id := range userIDs {
@@ -2475,31 +2621,33 @@ db.Where("id IN ?", userIDs).Delete(&User{})
 ### 6.11.3 - Indexes Strategy
 
 **Índices esenciales:**
+
 ```go
 type User struct {
     // Primary key (automático)
     ID uint `gorm:"primaryKey"`
-    
+
     // Búsquedas frecuentes
     Email string `gorm:"uniqueIndex"`
     Status string `gorm:"index"`
-    
+
     // Foreign keys
     DepartmentID uint `gorm:"index"`
-    
+
     // Timestamps para queries de rango
     CreatedAt time.Time `gorm:"index"`
 }
 ```
 
 **Índices compuestos:**
+
 ```go
 type Order struct {
     ID        uint
     UserID    uint
     Status    string
     CreatedAt time.Time
-    
+
     // Índice para queries como (user_id, status)
     // `gorm:"index:idx_user_status,priority:1"`  // UserID
 }
@@ -2513,6 +2661,7 @@ type OrderIdx struct {
 ```
 
 **Evitar índices innecesarios:**
+
 ```go
 // ❌ Demasiados índices
 type User struct {
@@ -2551,7 +2700,7 @@ db.Model(&User{}).Where("status = ?", "active").
 var users []struct {
     ID    uint
     Email string
-}{} 
+}{}
 db.Model(&User{}).Select("id", "email").Find(&users)
 ```
 
@@ -2561,15 +2710,15 @@ db.Model(&User{}).Select("id", "email").Find(&users)
 func initOptimizedDB() (*gorm.DB, error) {
     dsn := "host=localhost user=postgres password=secret dbname=myapp port=5432 sslmode=disable"
     db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    
+
     sqlDB, _ := db.DB()
-    
+
     // Configuración para alto rendimiento
     sqlDB.SetMaxIdleConns(25)      // Mantener conexiones disponibles
     sqlDB.SetMaxOpenConns(50)      // Límite máximo
     sqlDB.SetConnMaxLifetime(5 * time.Minute)
     sqlDB.SetConnMaxIdleTime(2 * time.Minute)
-    
+
     return db, nil
 }
 ```
@@ -2618,7 +2767,7 @@ func Paginate(page, pageSize int) func(*gorm.DB) *gorm.DB {
         if pageSize <= 0 {
             pageSize = 10
         }
-        
+
         offset := (page - 1) * pageSize
         return db.Offset(offset).Limit(pageSize)
     }
@@ -2627,15 +2776,15 @@ func Paginate(page, pageSize int) func(*gorm.DB) *gorm.DB {
 func GetUsers(db *gorm.DB, page, pageSize int) (PaginationResult, error) {
     var users []User
     var total int64
-    
+
     // Contar registros totales
     db.Model(&User{}).Count(&total)
-    
+
     // Obtener página
     if err := db.Scopes(Paginate(page, pageSize)).Find(&users).Error; err != nil {
         return PaginationResult{}, err
     }
-    
+
     return PaginationResult{
         Total:    total,
         Page:     page,
@@ -2648,25 +2797,27 @@ func GetUsers(db *gorm.DB, page, pageSize int) (PaginationResult, error) {
 ### 6.11.8 - Production Patterns
 
 **Health Check:**
+
 ```go
 func HealthCheck(db *gorm.DB) error {
     sqlDB, err := db.DB()
     if err != nil {
         return err
     }
-    
+
     return sqlDB.Ping()
 }
 ```
 
 **Graceful Shutdown:**
+
 ```go
 func shutdown(db *gorm.DB) error {
     sqlDB, err := db.DB()
     if err != nil {
         return err
     }
-    
+
     return sqlDB.Close()
 }
 
@@ -2675,10 +2826,11 @@ defer shutdown(db)
 ```
 
 **Retry Logic:**
+
 ```go
 func WithRetry(fn func() error, maxRetries int) error {
     var lastErr error
-    
+
     for i := 0; i < maxRetries; i++ {
         if err := fn(); err == nil {
             return nil
@@ -2687,7 +2839,7 @@ func WithRetry(fn func() error, maxRetries int) error {
             time.Sleep(time.Duration(math.Pow(2, float64(i))) * time.Second)
         }
     }
-    
+
     return lastErr
 }
 
@@ -2698,6 +2850,7 @@ err := WithRetry(func() error {
 ```
 
 **Context Timeout:**
+
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 defer cancel()
@@ -2709,6 +2862,7 @@ db.WithContext(ctx).Find(&users)
 ### 6.11.9 - Troubleshooting
 
 **Enable Query Logging:**
+
 ```go
 import "gorm.io/gorm/logger"
 
@@ -2721,6 +2875,7 @@ db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{
 ```
 
 **Analyze Query Plan:**
+
 ```go
 // PostgreSQL
 var plan []map[string]interface{}
@@ -2734,6 +2889,7 @@ db.Raw("EXPLAIN SELECT * FROM users WHERE age > ?", 18).
 ```
 
 **Check Indexes:**
+
 ```go
 // PostgreSQL
 var indexes []map[string]interface{}
@@ -2752,6 +2908,7 @@ db.Raw("SHOW INDEX FROM users").Scan(&indexes)
 ### Ejercicio 1: Simple CRUD (Todos)
 
 **Modelo:**
+
 ```go
 package models
 
@@ -2768,6 +2925,7 @@ type Todo struct {
 ```
 
 **Operaciones requeridas:**
+
 ```go
 // 1. Create: Agregar nuevo todo
 // 2. Read: Obtener todos, por ID, pendientes, completados
@@ -2781,6 +2939,7 @@ type Todo struct {
 ```
 
 **Solución:**
+
 ```go
 package main
 
@@ -2803,25 +2962,25 @@ type Todo struct {
 func main() {
     db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
     db.AutoMigrate(&Todo{})
-    
+
     // CREATE
     todo1 := Todo{Title: "Learn GORM", Completed: false}
     db.Create(&todo1)
     fmt.Printf("Created: %+v\n", todo1)
-    
+
     // READ
     var todos []Todo
     db.Find(&todos)
     for _, t := range todos {
         fmt.Printf("Todo: %s (Completed: %v)\n", t.Title, t.Completed)
     }
-    
+
     // UPDATE
     db.Model(&todo1).Update("completed", true)
-    
+
     // DELETE
     db.Delete(&todo1)
-    
+
     // Verify deleted
     db.Find(&todos)
     fmt.Printf("After delete: %d todos\n", len(todos))
@@ -2831,6 +2990,7 @@ func main() {
 ### Ejercicio 2: Relationships (Blog + Posts + Comments)
 
 **Modelos:**
+
 ```go
 type User struct {
     ID    uint
@@ -2855,6 +3015,7 @@ type Comment struct {
 ```
 
 **Requerimientos:**
+
 ```
 1. Crear usuario con múltiples posts
 2. Crear posts con comentarios
@@ -2865,11 +3026,12 @@ type Comment struct {
 ```
 
 **Solución:**
+
 ```go
 func main() {
     db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
     db.AutoMigrate(&User{}, &Post{}, &Comment{})
-    
+
     // Create user with posts
     user := User{
         Email: "john@example.com",
@@ -2889,11 +3051,11 @@ func main() {
         },
     }
     db.Create(&user)
-    
+
     // Read with preload
     var loadedUser User
     db.Preload("Posts.Comments").First(&loadedUser, user.ID)
-    
+
     fmt.Printf("User: %s\n", loadedUser.Email)
     for _, post := range loadedUser.Posts {
         fmt.Printf("  Post: %s (%d comments)\n", post.Title, len(post.Comments))
@@ -2904,6 +3066,7 @@ func main() {
 ### Ejercicio 3: Transactions & Hooks
 
 **Requerimientos:**
+
 ```
 1. Transfer money between accounts (transaction)
 2. Log all changes (hooks)
@@ -2913,6 +3076,7 @@ func main() {
 ```
 
 **Solución:**
+
 ```go
 type Account struct {
     ID      uint
@@ -2930,24 +3094,24 @@ func (a *Account) BeforeUpdate(tx *gorm.DB) error {
 func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
     return db.Transaction(func(tx *gorm.DB) error {
         var from, to Account
-        
+
         tx.First(&from, fromID)
         if from.Balance < amount {
             return errors.New("insufficient funds")
         }
-        
+
         tx.First(&to, toID)
-        
+
         from.Balance -= amount
         to.Balance += amount
-        
+
         if err := tx.Save(&from).Error; err != nil {
             return err
         }
         if err := tx.Save(&to).Error; err != nil {
             return err
         }
-        
+
         return nil
     })
 }
@@ -2956,6 +3120,7 @@ func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
 ### Ejercicio 4: Migrations & Schema
 
 **Requerimientos:**
+
 ```
 1. Create tabla users con índices
 2. Add columna phone a users
@@ -2965,6 +3130,7 @@ func transferMoney(db *gorm.DB, fromID, toID uint, amount float64) error {
 ```
 
 **Solución:**
+
 ```go
 type User struct {
     ID       uint   `gorm:"primaryKey"`
@@ -2983,10 +3149,10 @@ type Post struct {
 
 func main() {
     db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-    
+
     // Auto migrate
     db.AutoMigrate(&User{}, &Post{})
-    
+
     // Verify
     fmt.Println(db.Migrator().HasTable(&User{}))
     fmt.Println(db.Migrator().HasColumn(&User{}, "phone"))
@@ -2997,6 +3163,7 @@ func main() {
 ### Ejercicio 5: Complete Production App
 
 **Requerimientos:**
+
 ```
 1. API CRUD completo
 2. Pagination
@@ -3009,6 +3176,7 @@ func main() {
 ```
 
 **Solución (Estructura):**
+
 ```
 project/
 ├── main.go
@@ -3027,6 +3195,7 @@ project/
 ```
 
 **main.go:**
+
 ```go
 package main
 
@@ -3045,17 +3214,17 @@ func main() {
     if err != nil {
         panic(err)
     }
-    
+
     // Run migrations
     if err := RunMigrations(db); err != nil {
         panic(err)
     }
-    
+
     // Setup routes
     http.HandleFunc("/users", ListUsers)
     http.HandleFunc("/users/:id", GetUser)
     http.HandleFunc("/users/create", CreateUser)
-    
+
     fmt.Println("Server running on :8080")
     http.ListenAndServe(":8080", nil)
 }
@@ -3063,16 +3232,16 @@ func main() {
 func ListUsers(w http.ResponseWriter, r *http.Request) {
     page := r.URL.Query().Get("page")
     email := r.URL.Query().Get("email")
-    
+
     var users []User
     query := db
-    
+
     if email != "" {
         query = query.Where("email LIKE ?", "%"+email+"%")
     }
-    
+
     query.Offset((toInt(page)-1)*10).Limit(10).Find(&users)
-    
+
     // Return JSON
 }
 ```
@@ -3223,6 +3392,7 @@ db.Where("age > ?", 18).
 ### N+1 Problem
 
 **❌ ANTI-PATTERN:**
+
 ```go
 var users []User
 db.Find(&users)  // Query 1
@@ -3235,6 +3405,7 @@ for _, user := range users {
 ```
 
 **✅ BEST PRACTICE:**
+
 ```go
 var users []User
 db.Preload("Posts").Find(&users)  // Query 1 (users) + Query 2 (all posts)
@@ -3244,6 +3415,7 @@ db.Preload("Posts").Find(&users)  // Query 1 (users) + Query 2 (all posts)
 ### Loading All Columns
 
 **❌ ANTI-PATTERN:**
+
 ```go
 var users []User
 db.Find(&users)  // SELECT * FROM users
@@ -3251,12 +3423,13 @@ db.Find(&users)  // SELECT * FROM users
 ```
 
 **✅ BEST PRACTICE:**
+
 ```go
 var users []struct {
     ID    uint
     Email string
     Name  string
-}{} 
+}{}
 db.Model(&User{}).Select("id", "email", "name").Find(&users)
 // SELECT id, email, name FROM users
 ```
@@ -3264,6 +3437,7 @@ db.Model(&User{}).Select("id", "email", "name").Find(&users)
 ### Missing Indexes
 
 **❌ ANTI-PATTERN:**
+
 ```go
 type User struct {
     ID    uint
@@ -3276,6 +3450,7 @@ db.Where("email = ?", email).First(&user)  // Full table scan
 ```
 
 **✅ BEST PRACTICE:**
+
 ```go
 type User struct {
     ID    uint
@@ -3289,6 +3464,7 @@ type User struct {
 ### No Pagination
 
 **❌ ANTI-PATTERN:**
+
 ```go
 var users []User
 db.Find(&users)  // SELECT * FROM users
@@ -3296,6 +3472,7 @@ db.Find(&users)  // SELECT * FROM users
 ```
 
 **✅ BEST PRACTICE:**
+
 ```go
 var users []User
 page := 1
@@ -3307,6 +3484,7 @@ db.Offset((page-1)*pageSize).Limit(pageSize).Find(&users)
 ### No Transactions
 
 **❌ ANTI-PATTERN:**
+
 ```go
 // Transfer money
 from.Balance -= 100
@@ -3318,18 +3496,19 @@ db.Save(&to)
 ```
 
 **✅ BEST PRACTICE:**
+
 ```go
 db.Transaction(func(tx *gorm.DB) error {
     from.Balance -= 100
     if err := tx.Save(&from).Error; err != nil {
         return err  // Rollback automático
     }
-    
+
     to.Balance += 100
     if err := tx.Save(&to).Error; err != nil {
         return err  // Rollback automático
     }
-    
+
     return nil  // Commit
 })
 ```
@@ -3345,7 +3524,7 @@ db.Transaction(func(tx *gorm.DB) error {
 sql := `
     SELECT u.id, u.email, u.name, u.created_at
     FROM users u
-    WHERE u.deleted_at IS NULL 
+    WHERE u.deleted_at IS NULL
     AND u.status = 'active'
     AND u.created_at > NOW() - INTERVAL '30 days'
     ORDER BY u.created_at DESC
@@ -3371,10 +3550,12 @@ err := db.
 ## RECURSOS ADICIONALES
 
 ### Documentación oficial
-- GitHub: https://github.com/go-gorm/gorm
-- Docs: https://gorm.io/docs/
+
+- GitHub: <https://github.com/go-gorm/gorm>
+- Docs: <https://gorm.io/docs/>
 
 ### Plugins útiles
+
 ```bash
 go get -u gorm.io/datatypes
 go get -u gorm.io/hints
@@ -3382,6 +3563,7 @@ go get -u gorm.io/clause_builder
 ```
 
 ### Testing con GORM
+
 ```go
 import (
     "testing"
@@ -3392,14 +3574,14 @@ import (
 func TestUserCreate(t *testing.T) {
     db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
     db.AutoMigrate(&User{})
-    
+
     user := User{Email: "test@example.com"}
     result := db.Create(&user)
-    
+
     if result.Error != nil {
         t.Fatalf("failed to create user: %v", result.Error)
     }
-    
+
     if user.ID == 0 {
         t.Fatal("user ID should not be 0")
     }
@@ -3432,7 +3614,6 @@ Data warehouse                   → Raw SQL
 Real-time analytics              → Raw SQL
 Proyecto pequeño                 → SQLite + GORM
 ```
-
 
 ---
 

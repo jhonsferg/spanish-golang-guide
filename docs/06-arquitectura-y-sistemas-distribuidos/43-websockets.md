@@ -507,7 +507,7 @@ type Message struct {
 func handleJSONWS(conn *websocket.Conn) {
     for {
         var msg Message
-        
+
         // Leer y deserializar JSON
         err := conn.ReadJSON(&msg)
         if err != nil {
@@ -875,7 +875,7 @@ func sendLargeMessage(conn *websocket.Conn, data []byte) error {
     const fragmentSize = 1024 * 64 // 64 KB
 
     // Primer fragmento
-    if err := conn.WriteMessage(websocket.TextMessage, 
+    if err := conn.WriteMessage(websocket.TextMessage,
         data[:fragmentSize]); err != nil {
         return err
     }
@@ -1018,7 +1018,7 @@ func (h *Hub) Run() {
             h.mu.Lock()
             h.clients[client] = true
             h.mu.Unlock()
-            fmt.Printf("Cliente registrado: %s (%d total)\n", 
+            fmt.Printf("Cliente registrado: %s (%d total)\n",
                 client.ID, len(h.clients))
 
         case client := <-h.unregister:
@@ -1139,7 +1139,7 @@ type HubWithRooms struct {
     clients map[*Client]bool
     rooms   map[string]map[*Client]bool
     mu      sync.RWMutex
-    
+
     broadcast chan *DirectedMessage
     register  chan *Client
     unregister chan *Client
@@ -1255,7 +1255,7 @@ func handleWSErrors(conn *websocket.Conn) {
 
 func handleReadError(err error) {
     // Cierre normal
-    if websocket.IsCloseError(err, 
+    if websocket.IsCloseError(err,
         websocket.CloseNormalClosure,
         websocket.CloseGoingAway,
         websocket.CloseAbnormalClosure) {
@@ -2317,6 +2317,7 @@ cd ejercicio-1-echo-server
 ```
 
 **Requisitos:**
+
 - Servidor HTTP que implementa WebSocket en `/ws`
 - Leer mensajes del cliente
 - Devolver exactamente lo mismo (echo)
@@ -2423,6 +2424,7 @@ cd ejercicio-2-chat-basico
 ```
 
 **Requisitos:**
+
 - Servidor con Hub que gestiona múltiples clientes
 - Cada cliente envía un mensaje
 - El servidor lo difunde a todos los demás
@@ -2643,6 +2645,7 @@ cd ejercicio-3-hub-suscriptores
 ```
 
 **Requisitos:**
+
 - Implementar múltiples "canales" o "rooms"
 - Los clientes se suscriben a canales específicos
 - Mensajes se difunden solo a suscriptores del canal
@@ -2731,6 +2734,7 @@ cd ejercicio-4-streaming-datos
 ```
 
 **Requisitos:**
+
 - Servidor que emite datos periódicamente
 - Clientes se suscriben a streams específicos
 - Mostrar datos en gráfico (usando Chart.js)
@@ -2799,6 +2803,7 @@ docker-compose up
 ```
 
 **Requisitos:**
+
 - Múltiples instancias del servidor WebSocket
 - Usar Redis para sincronizar mensajes entre servidores
 - Load balancer (nginx) dirigiendo a diferentes servidores

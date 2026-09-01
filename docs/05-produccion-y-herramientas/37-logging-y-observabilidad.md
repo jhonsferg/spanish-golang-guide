@@ -42,6 +42,7 @@ La observabilidad moderna descansa sobre tres pilares interconectados:
 ### 37.1.2 Evolución del Logging en Go
 
 **Generación 1: El paquete `log` estándar (Go 1.0+)**
+
 ```go
 // Simple, pero limitado
 log.Println("User created:", userID)
@@ -49,6 +50,7 @@ log.Fatal("Critical error occurred")
 ```
 
 **Generación 2: Librerías externas (Logrus, Zap, etc.)**
+
 ```go
 // Structured logging, pero requería dependencias externas
 logger.WithFields(logrus.Fields{
@@ -58,6 +60,7 @@ logger.WithFields(logrus.Fields{
 ```
 
 **Generación 3: `slog` en Go 1.21+**
+
 ```go
 // Structured logging en la stdlib
 logger.InfoContext(ctx, "User created",
@@ -69,12 +72,14 @@ logger.InfoContext(ctx, "User created",
 ### 37.1.3 Antipatrones Comunes
 
 ❌ **Logging sin contexto**
+
 ```go
 // Malo: No sabes a qué request pertenece
 logger.Info("Database query executed")
 ```
 
 ✅ **Logging con contexto**
+
 ```go
 // Bueno: Contexto claro
 logger.InfoContext(ctx, "Database query executed",
@@ -84,12 +89,14 @@ logger.InfoContext(ctx, "Database query executed",
 ```
 
 ❌ **Loguear datos sensibles**
+
 ```go
 // Malo: Expone credenciales
 logger.Info("Login attempt", slog.String("password", pwd))
 ```
 
 ✅ **Loguear información relevante**
+
 ```go
 // Bueno: Información segura
 logger.InfoContext(ctx, "Login attempt",
@@ -359,7 +366,7 @@ func (h *CustomHandler) WithGroup(name string) slog.Handler {
 
 func main() {
     baseHandler := slog.NewJSONHandler(os.Stdout, nil)
-    
+
     // Filtro: solo WARNING y ERROR en producción
     customHandler := &CustomHandler{
         handler: baseHandler,
@@ -367,7 +374,7 @@ func main() {
             return level >= slog.LevelWarn
         },
     }
-    
+
     logger := slog.New(customHandler)
     logger.Info("No se registra")
     logger.Warn("Esto SÍ se registra")
@@ -410,7 +417,7 @@ func main() {
     // Con contexto
     ctx := context.Background()
     ctx = context.WithValue(ctx, "request_id", "REQ-789")
-    
+
     logger.InfoContext(ctx, "Request procesado",
         slog.String("path", "/api/users"),
         slog.String("method", "POST"),
@@ -493,6 +500,7 @@ func processPayment(ctx context.Context) error {
 ### 37.4.3 Antipatrones de Niveles
 
 ❌ **Loguear todo en INFO**
+
 ```go
 // Malo: Ruido excesivo
 logger.Info("Variable x =", x)
@@ -501,6 +509,7 @@ logger.Info("Query ejecutado")
 ```
 
 ✅ **Usar niveles apropiados**
+
 ```go
 // Bueno: Información clara
 logger.Debug("Variable x =", x)         // Solo en debug
@@ -683,7 +692,7 @@ func main() {
         textHandler,
         jsonHandler,
     }}
-    
+
     logger := slog.New(multi)
     logger.Info("Este mensaje va a ambos archivos")
 
@@ -813,7 +822,7 @@ func (cl *ContextLogger) WithAttrs(attrs ...slog.Attr) *ContextLogger {
 
 func main() {
     baseLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-    
+
     // Logger con atributos base
     logger := &ContextLogger{
         logger: baseLogger,
@@ -868,7 +877,7 @@ func handleRequest(ctx context.Context, logger *slog.Logger, requestID string) {
     logger.InfoContext(ctx, "Request iniciado")
 
     var wg sync.WaitGroup
-    
+
     // Procesar en paralelo, pero manteniendo contexto
     for i := 1; i <= 3; i++ {
         wg.Add(1)
@@ -884,7 +893,7 @@ func handleRequest(ctx context.Context, logger *slog.Logger, requestID string) {
 
 func processTask(ctx context.Context, logger *slog.Logger, taskNum int) {
     requestID := ctx.Value(requestIDKey).(string)
-    
+
     logger.InfoContext(ctx, "Tarea iniciada",
         slog.Int("task", taskNum),
         slog.String("request_id", requestID),
@@ -913,6 +922,7 @@ func main() {
 ### 37.7.1 Problema: Logging Explosivo
 
 En aplicaciones de alto volumen, loguear todo causa:
+
 - Degradación de performance
 - Desbordamiento de almacenamiento
 - Logs no indexables
@@ -965,7 +975,7 @@ func (sh *SamplingHandler) WithGroup(name string) slog.Handler {
 
 func main() {
     jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
-    
+
     // Solo 10% de logs INFO/DEBUG
     samplingHandler := &SamplingHandler{
         handler:    jsonHandler,
@@ -1058,7 +1068,7 @@ func min(a, b float64) float64 {
 
 func main() {
     jsonHandler := slog.NewJSONHandler(os.Stdout, nil)
-    
+
     // Máximo 1000 logs por segundo
     limitedHandler := NewRateLimitingHandler(jsonHandler, 1000)
     logger := slog.New(limitedHandler)
@@ -2002,7 +2012,7 @@ func NewAppLogger(serviceName, version string) *AppLogger {
     handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
         Level: slog.LevelDebug,
     })
-    
+
     return &AppLogger{
         logger: slog.New(handler),
         attrs: []slog.Attr{
@@ -2017,7 +2027,7 @@ func (al *AppLogger) Info(ctx context.Context, msg string, attrs ...slog.Attr) {
     al.mu.RLock()
     allAttrs := append(al.attrs, attrs...)
     al.mu.RUnlock()
-    
+
     al.logger.InfoContext(ctx, msg, allAttrs...)
 }
 
@@ -2026,7 +2036,7 @@ func (al *AppLogger) Error(ctx context.Context, msg string, attrs ...slog.Attr) 
     al.mu.RLock()
     allAttrs := append(al.attrs, attrs...)
     al.mu.RUnlock()
-    
+
     al.logger.ErrorContext(ctx, msg, allAttrs...)
 }
 
@@ -2035,7 +2045,7 @@ func (al *AppLogger) WithAttrs(attrs ...slog.Attr) *AppLogger {
     al.mu.RLock()
     newAttrs := append(al.attrs, attrs...)
     al.mu.RUnlock()
-    
+
     return &AppLogger{
         logger: al.logger,
         attrs:  newAttrs,
@@ -2157,7 +2167,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         requestID := uuid.New().String()
         ctx := context.WithValue(r.Context(), requestIDKey, requestID)
-        
+
         logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
         logger.InfoContext(ctx, "Request received",
             slog.String("method", r.Method),
@@ -2171,7 +2181,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 // LogWithRequestID registra un mensaje con request ID automático
 func LogWithRequestID(logger *slog.Logger, ctx context.Context, msg string, attrs ...slog.Attr) {
     requestID := ctx.Value(requestIDKey).(string)
-    
+
     allAttrs := append([]slog.Attr{
         slog.String("request_id", requestID),
     }, attrs...)
@@ -2182,15 +2192,15 @@ func LogWithRequestID(logger *slog.Logger, ctx context.Context, msg string, attr
 // ExerciseThree simula tracking
 func ExerciseThree() {
     logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-    
+
     // Simular request
     ctx := context.Background()
     ctx = context.WithValue(ctx, requestIDKey, fmt.Sprintf("REQ-%s", uuid.New().String()))
-    
+
     LogWithRequestID(logger, ctx, "Accessing database",
         slog.String("table", "users"),
     )
-    
+
     LogWithRequestID(logger, ctx, "Query completed",
         slog.Int("rows", 42),
     )
@@ -2245,7 +2255,7 @@ func (so *SafeOperation) Execute(ctx context.Context, name string, fn func() err
 func ExerciseFour() {
     logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
     ctx := context.Background()
-    
+
     safeOp := &SafeOperation{logger: logger}
 
     // Operación normal
@@ -2375,6 +2385,7 @@ func ExerciseFive() {
 La observabilidad no es un bolsillo de la arquitectura de software: **es fundamental**. Go, con su filosofía de sencillez y su ecosistema robusto, proporciona herramientas de primer nivel para instrumentar aplicaciones.
 
 **Recordar:**
+
 - 📊 **Logs** para contexto y debugging
 - 📈 **Métricas** para tendencias y alertas
 - 🔗 **Trazas** para causalidad y correlación
