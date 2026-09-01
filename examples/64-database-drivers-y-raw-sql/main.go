@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 64: SQL crudo de bajo nivel — configuración del
+// Ejemplo del Capítulo 64: SQL crudo de bajo nivel - configuración del
 // connection pool, prepared statements reutilizados, y transacciones
 // con rollback automático ante error.
 package main
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// Prepared statement: se compila una vez y se reutiliza en cada
-	// llamada — más rápido que Exec() repetido con el mismo SQL.
+	// llamada - más rápido que Exec() repetido con el mismo SQL.
 	insertar, err := db.Prepare("INSERT INTO cuentas (id, titular, saldo) VALUES (?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
@@ -58,7 +58,7 @@ func main() {
 	}
 
 	// Transferencia como transacción: o se aplican AMBOS cambios, o
-	// ninguno — nunca un estado intermedio inconsistente.
+	// ninguno - nunca un estado intermedio inconsistente.
 	if err := transferir(context.Background(), db, 1, 2, 150); err != nil {
 		log.Fatal(err)
 	}
