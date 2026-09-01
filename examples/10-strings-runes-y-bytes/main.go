@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("len() en bytes:", len(texto))
 	fmt.Println("RuneCountInString:", utf8.RuneCountInString(texto))
 
-	// Iterar con range da (índice en bytes, rune) — NO (índice, byte).
+	// Iterar con range da (índice en bytes, rune) - NO (índice, byte).
 	fmt.Println("--- iterando con range (runas) ---")
 	for i, r := range texto {
 		fmt.Printf("byte %d: %q (%d bytes)\n", i, r, utf8.RuneLen(r))
