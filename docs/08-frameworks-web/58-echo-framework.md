@@ -3606,3 +3606,15 @@ Es la elección ideal para:
 - GitHub: https://github.com/labstack/echo
 - Community: Discord, GitHub Discussions
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/58-echo-framework/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/58-echo-framework):
+
+```bash
+cd examples/58-echo-framework
+go run .
+```
