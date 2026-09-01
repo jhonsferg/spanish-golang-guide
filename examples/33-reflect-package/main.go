@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 33: introspección básica con reflect — cómo
+// Ejemplo del Capítulo 33: introspección básica con reflect - cómo
 // bibliotecas como encoding/json inspeccionan structs en runtime.
 package main
 
