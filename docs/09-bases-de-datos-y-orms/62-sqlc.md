@@ -3470,3 +3470,15 @@ Para aplicaciones que necesitan:
 ---
 
 **Fin del Capítulo 62**
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/62-sqlc/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/62-sqlc):
+
+```bash
+cd examples/62-sqlc
+go run .
+```
