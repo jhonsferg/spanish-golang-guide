@@ -2421,3 +2421,15 @@ json.Unmarshal(data, &obj) // Correcto
 JSON es el formato estándar para APIs modernas en Go. Dominar `Marshal`/`Unmarshal`, tags y custom types permite crear sistemas robustos de serialización. Para proyectos grandes, considera usar librerías como `json-iterator` o `easyjson` para mejor performance.
 
 **Próximos pasos:** Integrar JSON en un servidor HTTP REST con el paquete `net/http`.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/29-json-y-encoding/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/29-json-y-encoding):
+
+```bash
+cd examples/29-json-y-encoding
+go run .
+```
