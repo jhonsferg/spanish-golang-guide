@@ -3422,3 +3422,15 @@ Este capítulo ha cubierto todo lo necesario para crear CLIs profesionales en Go
 **Última actualización:** Enero 2024  
 **Autor:** Guía exhaustiva de Go  
 **Nivel:** Intermedio → Avanzado
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/51-cli-tools/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/51-cli-tools):
+
+```bash
+cd examples/51-cli-tools
+go run .
+```
