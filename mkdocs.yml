@@ -67,6 +67,7 @@ nav:
       - 01-fundamentos/08-arreglos-y-slices.md
       - 01-fundamentos/09-maps.md
       - 01-fundamentos/10-strings-runes-y-bytes.md
+      - Mini-proyecto: 01-fundamentos/mini-proyecto.md
   - II. Tipos y composición:
       - 02-tipos-y-composicion/11-structs.md
       - 02-tipos-y-composicion/12-metodos.md
@@ -77,6 +78,7 @@ nav:
       - 02-tipos-y-composicion/17-manejo-de-errores.md
       - 02-tipos-y-composicion/18-panic-y-recover.md
       - 02-tipos-y-composicion/19-defer.md
+      - Mini-proyecto: 02-tipos-y-composicion/mini-proyecto.md
   - III. Concurrencia:
       - 03-concurrencia/20-paquetes.md
       - 03-concurrencia/21-goroutines.md
@@ -84,6 +86,7 @@ nav:
       - 03-concurrencia/23-select.md
       - 03-concurrencia/24-sync-package.md
       - 03-concurrencia/25-patrones-de-concurrencia.md
+      - Mini-proyecto: 03-concurrencia/mini-proyecto.md
   - IV. Librería estándar:
       - 04-libreria-estandar/26-io-package.md
       - 04-libreria-estandar/27-os-package.md
@@ -95,12 +98,14 @@ nav:
       - 04-libreria-estandar/33-reflect-package.md
       - 04-libreria-estandar/34-sort-y-collections.md
       - 04-libreria-estandar/35-hash-y-criptografia.md
+      - Mini-proyecto: 04-libreria-estandar/mini-proyecto.md
   - V. Producción y herramientas:
       - 05-produccion-y-herramientas/36-testing-package.md
       - 05-produccion-y-herramientas/37-logging-y-observabilidad.md
       - 05-produccion-y-herramientas/38-http-avanzado.md
       - 05-produccion-y-herramientas/39-database-y-sql.md
       - 05-produccion-y-herramientas/40-build-tools-y-performance.md
+      - Mini-proyecto: 05-produccion-y-herramientas/mini-proyecto.md
   - VI. Arquitectura y sistemas distribuidos:
       - 06-arquitectura-y-sistemas-distribuidos/41-microservicios.md
       - 06-arquitectura-y-sistemas-distribuidos/42-graphql.md
@@ -115,6 +120,7 @@ nav:
       - 06-arquitectura-y-sistemas-distribuidos/51-cli-tools.md
       - 06-arquitectura-y-sistemas-distribuidos/52-caching-system.md
       - 06-arquitectura-y-sistemas-distribuidos/53-job-queues.md
+      - Mini-proyecto: 06-arquitectura-y-sistemas-distribuidos/mini-proyecto.md
   - VII. Proyectos integrados:
       - 07-proyectos-integrados/54-proyecto-integrado-i-api-rest.md
       - 07-proyectos-integrados/55-proyecto-integrado-ii-microservicio.md
@@ -124,6 +130,7 @@ nav:
       - 08-frameworks-web/58-echo-framework.md
       - 08-frameworks-web/59-fiber-framework.md
       - 08-frameworks-web/60-chi-router.md
+      - Mini-proyecto: 08-frameworks-web/mini-proyecto.md
   - IX. Bases de datos y ORMs:
       - 09-bases-de-datos-y-orms/61-gorm-orm.md
       - 09-bases-de-datos-y-orms/62-sqlc.md
@@ -131,6 +138,7 @@ nav:
       - 09-bases-de-datos-y-orms/64-database-drivers-y-raw-sql.md
       - 09-bases-de-datos-y-orms/65-mongodb-y-nosql.md
       - 09-bases-de-datos-y-orms/66-caching-libraries.md
+      - Mini-proyecto: 09-bases-de-datos-y-orms/mini-proyecto.md
   - Versiones de Go:
       - 10-versiones-de-go/index.md
       - 10-versiones-de-go/go-1-18.md
