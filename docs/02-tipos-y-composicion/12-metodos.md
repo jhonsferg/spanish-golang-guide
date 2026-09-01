@@ -1454,3 +1454,15 @@ func main() {
 ---
 
 **Capítulo 12 completado.**
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/12-metodos/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/12-metodos):
+
+```bash
+cd examples/12-metodos
+go run .
+```
