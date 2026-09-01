@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 58: una API de notas con Echo — bind + validación
+// Ejemplo del Capítulo 58: una API de notas con Echo - bind + validación
 // manual, grupos de rutas y middleware estándar (Recover, request ID).
 package main
 
