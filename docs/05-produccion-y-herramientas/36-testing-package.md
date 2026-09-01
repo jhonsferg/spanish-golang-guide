@@ -1851,3 +1851,15 @@ El testing en Go es simple, efectivo y poderoso. Con el paquete `testing` integr
 ---
 
 **Próximo Capítulo**: Concurrencia y Goroutines - Aprovecha la velocidad de Go
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/36-testing-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/36-testing-package):
+
+```bash
+cd examples/36-testing-package
+go test -v -bench=. .
+```
