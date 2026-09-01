@@ -901,3 +901,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/05-operadores-y-expresiones/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/05-operadores-y-expresiones):
+
+```bash
+cd examples/05-operadores-y-expresiones
+go run .
+```
