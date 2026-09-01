@@ -2882,3 +2882,15 @@ func main() {
 ---
 
 **Próximos capítulos:** Deployment, Performance Tuning, Advanced Patterns
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/66-caching-libraries/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/66-caching-libraries):
+
+```bash
+cd examples/66-caching-libraries
+go run .
+```
