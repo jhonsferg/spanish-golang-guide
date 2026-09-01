@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 41: dos "microservicios" HTTP mínimos (catálogo y
-// pedidos) donde uno llama al otro — usando solo net/http, para
+// pedidos) donde uno llama al otro - usando solo net/http, para
 // enfocarse en el patrón de comunicación, no en un framework.
 package main
 
