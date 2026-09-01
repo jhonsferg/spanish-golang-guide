@@ -2270,3 +2270,15 @@ Go utiliza **RE2** (Google), que difiere de PCRE en algunas características:
 
 **© 2024 - Guía Exhaustiva de Go - Capítulo 28**
 *Última actualización: Enero 2024*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/28-strings-y-text/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/28-strings-y-text):
+
+```bash
+cd examples/28-strings-y-text
+go run .
+```
