@@ -2589,3 +2589,15 @@ Las **goroutines** son el corazón de la concurrencia en Go:
 ✓ Detectar goroutine leaks durante desarrollo
 
 Go hace que la programación concurrente sea elegante, segura y eficiente.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/21-goroutines/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/21-goroutines):
+
+```bash
+cd examples/21-goroutines
+go run .
+```
