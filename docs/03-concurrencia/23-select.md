@@ -2324,3 +2324,15 @@ El **select statement** es un mecanismo fundamental para concurrencia eficiente 
 **Fin del Capítulo 23**
 
 *Próximo: Capítulo 24 - Patrones Avanzados de Concurrencia*
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/23-select/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/23-select):
+
+```bash
+cd examples/23-select
+go run .
+```
