@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 24: primitivas de sync — Mutex para proteger
+// Ejemplo del Capítulo 24: primitivas de sync - Mutex para proteger
 // estado compartido, y Once para inicialización perezosa.
 package main
 
