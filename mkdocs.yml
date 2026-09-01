@@ -131,3 +131,19 @@ nav:
       - 09-bases-de-datos-y-orms/64-database-drivers-y-raw-sql.md
       - 09-bases-de-datos-y-orms/65-mongodb-y-nosql.md
       - 09-bases-de-datos-y-orms/66-caching-libraries.md
+  - Versiones de Go:
+      - 10-versiones-de-go/index.md
+      - 10-versiones-de-go/go-1-18.md
+      - 10-versiones-de-go/go-1-19.md
+      - 10-versiones-de-go/go-1-20.md
+      - 10-versiones-de-go/go-1-21.md
+      - 10-versiones-de-go/go-1-22.md
+      - 10-versiones-de-go/go-1-23.md
+      - 10-versiones-de-go/go-1-24.md
+      - 10-versiones-de-go/go-1-25.md
+      - 10-versiones-de-go/go-1-26.md
+      - 10-versiones-de-go/go-1-27.md
+  - Recursos:
+      - 11-recursos/buenas-practicas.md
+      - 11-recursos/glosario.md
+      - 11-recursos/recursos-adicionales.md
