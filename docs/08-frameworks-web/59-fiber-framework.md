@@ -3428,3 +3428,15 @@ Para proyectos que requieren máximo rendimiento con una API familiar, **Fiber e
 
 *Última actualización: 2024 | Fiber v2.50+*
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/59-fiber-framework/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/59-fiber-framework):
+
+```bash
+cd examples/59-fiber-framework
+go run .
+```
