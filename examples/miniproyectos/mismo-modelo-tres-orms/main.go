@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte IX (Bases de datos y ORMs): el MISMO modelo
 // (Producto: nombre + precio) creado y consultado con GORM, con el
-// estilo de sqlc y con el estilo de Ent — para comparar directamente
+// estilo de sqlc y con el estilo de Ent - para comparar directamente
 // cuánto código y qué forma toma cada enfoque resolviendo lo mismo.
 package main
 
