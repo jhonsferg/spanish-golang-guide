@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 18: panic/recover, y por qué son para errores
-// irrecuperables — no para control de flujo habitual (para eso están
+// irrecuperables - no para control de flujo habitual (para eso están
 // los errores como valores, ver Capítulo 17).
 package main
 
