@@ -2306,3 +2306,15 @@ La criptografía en Go es accesible pero requiere cuidado:
 - ✗ Nunca hardcodees secretos
 - ✗ Nunca uses MD5 para seguridad
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/35-hash-y-criptografia/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/35-hash-y-criptografia):
+
+```bash
+cd examples/35-hash-y-criptografia
+go run .
+```
