@@ -2570,3 +2570,15 @@ Recuerda:
 - https://grpc.io/
 - https://www.infoq.com/microservices/
 - Libro: "Building Microservices" by Sam Newman
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/41-microservicios/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/41-microservicios):
+
+```bash
+cd examples/41-microservicios
+go run .
+```
