@@ -1,5 +1,5 @@
-// Ejemplo del Capítulo 56: el mismo endpoint mínimo — GET /ping ->
-// {"mensaje":"pong"} — implementado con los cuatro frameworks que
+// Ejemplo del Capítulo 56: el mismo endpoint mínimo - GET /ping ->
+// {"mensaje":"pong"} - implementado con los cuatro frameworks que
 // cubre esta parte de la guía, para comparar su sintaxis lado a lado.
 // Ver los capítulos 57-60 para un ejemplo más completo de cada uno.
 package main
