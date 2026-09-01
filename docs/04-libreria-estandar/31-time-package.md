@@ -2297,3 +2297,15 @@ El package `time` de Go proporciona abstracciones potentes y seguras para trabaj
 
 Dominar el `time` package es esencial para construir aplicaciones Go robustas y eficientes.
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/31-time-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/31-time-package):
+
+```bash
+cd examples/31-time-package
+go run .
+```
