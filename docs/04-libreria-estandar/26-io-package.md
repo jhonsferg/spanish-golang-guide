@@ -2288,3 +2288,15 @@ El package `io` en Go proporciona abstracciones elegantes y eficientes para oper
 - **MultiReader/Writer**: componer múltiples fuentes/destinos
 
 El diseño de interfaces en Go permite escribir código genérico, testeable y eficiente que funciona con cualquier implementador sin cambios.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/26-io-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/26-io-package):
+
+```bash
+cd examples/26-io-package
+go run .
+```
