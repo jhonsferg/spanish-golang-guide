@@ -2047,3 +2047,15 @@ Go provee herramientas simples pero poderosas. La clave es entender cuándo usar
 6. **Ring** para casos específicos como buffers circulares
 
 ¡Practica con los ejercicios para dominar estos conceptos!
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/34-sort-y-collections/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/34-sort-y-collections):
+
+```bash
+cd examples/34-sort-y-collections
+go run .
+```
