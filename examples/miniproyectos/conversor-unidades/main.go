@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte I (Fundamentos): un conversor de unidades de
 // línea de comandos. Usa solo lo visto en los capítulos 1-10: variables,
-// constantes, funciones, control de flujo, maps y strings — sin structs
+// constantes, funciones, control de flujo, maps y strings - sin structs
 // ni interfaces todavía (eso llega en la Parte II).
 package main
 
