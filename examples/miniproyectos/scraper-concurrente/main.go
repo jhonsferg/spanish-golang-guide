@@ -1,6 +1,6 @@
 // Mini-proyecto de la Parte III (Concurrencia): un "scraper" concurrente
 // con límite de peticiones simultáneas (rate limiting vía semáforo con
-// channel) y agregación de resultados — el patrón real detrás de
+// channel) y agregación de resultados - el patrón real detrás de
 // cualquier crawler o cliente que golpea una API con cuidado de no
 // saturarla. Usa servidores HTTP locales para no depender de internet.
 package main
