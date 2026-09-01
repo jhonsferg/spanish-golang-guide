@@ -1947,3 +1947,15 @@ El paquete `sync` proporciona herramientas poderosas para sincronización de baj
 - https://golang.org/pkg/sync/
 - https://golang.org/doc/effective_go#concurrency
 - https://www.ardanlabs.com/blog/2015/01/race-detector.html
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/24-sync-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/24-sync-package):
+
+```bash
+cd examples/24-sync-package
+go run .
+```
