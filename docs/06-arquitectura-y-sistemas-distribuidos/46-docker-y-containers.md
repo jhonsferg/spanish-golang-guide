@@ -2562,3 +2562,15 @@ Los próximos capítulos exploraremos Kubernetes, que orquesta containers a esca
 - Go Docker: https://github.com/golang/go/wiki/Modules
 - Trivy Security Scanner: https://github.com/aquasecurity/trivy
 - Docker Compose Spec: https://github.com/compose-spec/compose-spec
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/46-docker-y-containers/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/46-docker-y-containers):
+
+```bash
+cd examples/46-docker-y-containers
+go run .
+```
