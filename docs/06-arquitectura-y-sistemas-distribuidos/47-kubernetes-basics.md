@@ -2028,3 +2028,15 @@ Kubernetes permite que Go escale desde una sola instancia a miles de réplicas d
 ✅ Namespaces para aislamiento  
 
 Dominar Kubernetes es esencial para desarrolladores Go en la era de la nube moderna.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/47-kubernetes-basics/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/47-kubernetes-basics):
+
+```bash
+cd examples/47-kubernetes-basics
+go run .
+```
