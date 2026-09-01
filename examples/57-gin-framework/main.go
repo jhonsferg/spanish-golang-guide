@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 57: una API de productos con Gin — binding y
+// Ejemplo del Capítulo 57: una API de productos con Gin - binding y
 // validación automática de JSON, grupos de rutas y middleware.
 package main
 
