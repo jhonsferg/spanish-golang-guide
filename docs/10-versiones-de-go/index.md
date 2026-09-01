@@ -7,7 +7,7 @@ el punto de inflexión de la era moderna de Go) hasta **Go 1.27**, la más
 reciente.
 
 Todo el contenido de esta sección proviene de las release notes oficiales en
-[go.dev/doc](https://go.dev/doc/devel/release), no de memoria — cada página
+[go.dev/doc](https://go.dev/doc/devel/release), no de memoria - cada página
 resume lo verificable en la nota oficial de esa versión.
 
 ## Tabla resumen
@@ -28,6 +28,6 @@ resume lo verificable en la nota oficial de esa versión.
 ## Cómo usar esta sección
 
 Si vienes de una versión antigua de Go, lee las páginas en orden desde tu
-versión actual hasta [Go 1.27](go-1-27.md) — cada una lista solo lo que
+versión actual hasta [Go 1.27](go-1-27.md) - cada una lista solo lo que
 cambió *en esa versión*, no un acumulado. Si solo te interesa qué hay de
 nuevo hoy, ve directo a [Go 1.27](go-1-27.md).
