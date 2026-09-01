@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 25: patrón worker pool — un número fijo de
+// Ejemplo del Capítulo 25: patrón worker pool - un número fijo de
 // goroutines consumiendo tareas de un channel compartido.
 package main
 
