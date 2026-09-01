@@ -1,9 +1,12 @@
 site_name: Guía de Go en Español
 site_description: Guía completa de Go (Golang) en español, de fundamentos a producción.
 site_author: jhonsferg
+site_url: https://jhonsferg.github.io/spanish-golang-guide/
 repo_name: jhonsferg/spanish-golang-guide
 repo_url: https://github.com/jhonsferg/spanish-golang-guide
 edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
 
 theme:
   name: material
@@ -39,7 +42,11 @@ markdown_extensions:
       permalink: true
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
@@ -50,6 +57,15 @@ markdown_extensions:
   - footnotes
   - attr_list
   - md_in_html
+
+plugins:
+  - search:
+      lang: es
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jhonsferg/spanish-golang-guide
 
 nav:
   - Inicio: index.md
