@@ -2851,3 +2851,15 @@ func main() {
 7. **Interfaces primero**: Diseñar con interfaces, usar reflection solo cuando sea necesario
 
 **Próximos pasos:** Integra reflection en proyectos reales para JSON APIs, ORMs simples, o frameworks de testing. ¡Pero usa con moderación!
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/33-reflect-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/33-reflect-package):
+
+```bash
+cd examples/33-reflect-package
+go run .
+```
