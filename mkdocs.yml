@@ -56,3 +56,78 @@ markdown_extensions:
 
 nav:
   - Inicio: index.md
+  - I. Fundamentos:
+      - 01-fundamentos/01-introduccion-a-go.md
+      - 01-fundamentos/02-instalacion-y-configuracion.md
+      - 01-fundamentos/03-primer-programa.md
+      - 01-fundamentos/04-variables-constantes-y-tipos-basicos.md
+      - 01-fundamentos/05-operadores-y-expresiones.md
+      - 01-fundamentos/06-control-de-flujo.md
+      - 01-fundamentos/07-funciones.md
+      - 01-fundamentos/08-arreglos-y-slices.md
+      - 01-fundamentos/09-maps.md
+      - 01-fundamentos/10-strings-runes-y-bytes.md
+  - II. Tipos y composición:
+      - 02-tipos-y-composicion/11-structs.md
+      - 02-tipos-y-composicion/12-metodos.md
+      - 02-tipos-y-composicion/13-interfaces.md
+      - 02-tipos-y-composicion/14-embedding-y-composicion.md
+      - 02-tipos-y-composicion/15-sistema-de-tipos.md
+      - 02-tipos-y-composicion/16-punteros.md
+      - 02-tipos-y-composicion/17-manejo-de-errores.md
+      - 02-tipos-y-composicion/18-panic-y-recover.md
+      - 02-tipos-y-composicion/19-defer.md
+  - III. Concurrencia:
+      - 03-concurrencia/20-paquetes.md
+      - 03-concurrencia/21-goroutines.md
+      - 03-concurrencia/22-channels.md
+      - 03-concurrencia/23-select.md
+      - 03-concurrencia/24-sync-package.md
+      - 03-concurrencia/25-patrones-de-concurrencia.md
+  - IV. Librería estándar:
+      - 04-libreria-estandar/26-io-package.md
+      - 04-libreria-estandar/27-os-package.md
+      - 04-libreria-estandar/28-strings-y-text.md
+      - 04-libreria-estandar/29-json-y-encoding.md
+      - 04-libreria-estandar/30-net-package.md
+      - 04-libreria-estandar/31-time-package.md
+      - 04-libreria-estandar/32-math-y-numeros-aleatorios.md
+      - 04-libreria-estandar/33-reflect-package.md
+      - 04-libreria-estandar/34-sort-y-collections.md
+      - 04-libreria-estandar/35-hash-y-criptografia.md
+  - V. Producción y herramientas:
+      - 05-produccion-y-herramientas/36-testing-package.md
+      - 05-produccion-y-herramientas/37-logging-y-observabilidad.md
+      - 05-produccion-y-herramientas/38-http-avanzado.md
+      - 05-produccion-y-herramientas/39-database-y-sql.md
+      - 05-produccion-y-herramientas/40-build-tools-y-performance.md
+  - VI. Arquitectura y sistemas distribuidos:
+      - 06-arquitectura-y-sistemas-distribuidos/41-microservicios.md
+      - 06-arquitectura-y-sistemas-distribuidos/42-graphql.md
+      - 06-arquitectura-y-sistemas-distribuidos/43-websockets.md
+      - 06-arquitectura-y-sistemas-distribuidos/44-design-patterns.md
+      - 06-arquitectura-y-sistemas-distribuidos/45-clean-architecture.md
+      - 06-arquitectura-y-sistemas-distribuidos/46-docker-y-containers.md
+      - 06-arquitectura-y-sistemas-distribuidos/47-kubernetes-basics.md
+      - 06-arquitectura-y-sistemas-distribuidos/48-configuration-management.md
+      - 06-arquitectura-y-sistemas-distribuidos/49-monitoring-y-metricas.md
+      - 06-arquitectura-y-sistemas-distribuidos/50-distributed-systems.md
+      - 06-arquitectura-y-sistemas-distribuidos/51-cli-tools.md
+      - 06-arquitectura-y-sistemas-distribuidos/52-caching-system.md
+      - 06-arquitectura-y-sistemas-distribuidos/53-job-queues.md
+  - VII. Proyectos integrados:
+      - 07-proyectos-integrados/54-proyecto-integrado-i-api-rest.md
+      - 07-proyectos-integrados/55-proyecto-integrado-ii-microservicio.md
+  - VIII. Frameworks web:
+      - 08-frameworks-web/56-http-frameworks-overview.md
+      - 08-frameworks-web/57-gin-framework.md
+      - 08-frameworks-web/58-echo-framework.md
+      - 08-frameworks-web/59-fiber-framework.md
+      - 08-frameworks-web/60-chi-router.md
+  - IX. Bases de datos y ORMs:
+      - 09-bases-de-datos-y-orms/61-gorm-orm.md
+      - 09-bases-de-datos-y-orms/62-sqlc.md
+      - 09-bases-de-datos-y-orms/63-ent-orm.md
+      - 09-bases-de-datos-y-orms/64-database-drivers-y-raw-sql.md
+      - 09-bases-de-datos-y-orms/65-mongodb-y-nosql.md
+      - 09-bases-de-datos-y-orms/66-caching-libraries.md
