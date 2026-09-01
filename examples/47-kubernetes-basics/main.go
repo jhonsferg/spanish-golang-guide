@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 47: los tres endpoints que Kubernetes espera de
-// un pod bien portado — liveness, readiness y startup probes — y una
+// un pod bien portado - liveness, readiness y startup probes - y una
 // bandera de "listo" que se activa después de una inicialización
 // simulada. Ver deployment.yaml en este directorio para el manifiesto
 // que los consume.
@@ -19,12 +19,12 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /livez", func(w http.ResponseWriter, r *http.Request) {
-		// Vivo mientras el proceso responda — si esto falla, Kubernetes
+		// Vivo mientras el proceso responda - si esto falla, Kubernetes
 		// reinicia el pod.
 		w.WriteHeader(http.StatusOK)
 	})
 	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
-		// Listo para recibir tráfico — si falla, Kubernetes deja de
+		// Listo para recibir tráfico - si falla, Kubernetes deja de
 		// enrutar requests a este pod sin reiniciarlo.
 		if listo.Load() {
 			w.WriteHeader(http.StatusOK)
