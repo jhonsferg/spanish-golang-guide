@@ -2,7 +2,7 @@
 
 La misma API (crear, listar, completar, borrar tareas) implementada
 **cuatro veces**, una por framework, para comparar directamente cómo
-resuelve cada uno el mismo problema — la mejor forma de decidir cuál
+resuelve cada uno el mismo problema - la mejor forma de decidir cuál
 usar en un proyecto real, más allá de benchmarks de "hola mundo".
 
 ## Qué comparar al leer el código
@@ -16,7 +16,7 @@ usar en un proyecto real, más allá de benchmarks de "hola mundo".
 | Testing sin puerto real | requiere `httptest`/listener | requiere `httptest`/listener | `app.Test(req)` incluido | requiere `httptest`/listener |
 
 La fila más importante es la última: **Fiber no es un `http.Handler`**
-porque corre sobre `fasthttp`, no sobre `net/http` — por eso
+porque corre sobre `fasthttp`, no sobre `net/http` - por eso
 `main.go` lo prueba distinto al resto (`app.Test()` en vez de un
 `net.Listener` + `http.Server`). Es la decisión de diseño que más
 implicaciones tiene si necesitas integrar con middleware o librerías del
