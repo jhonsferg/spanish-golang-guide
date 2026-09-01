@@ -2394,3 +2394,15 @@ Con estos principios, construirás sistemas que no solo funcionan, sino que se e
 - **Grafana**: https://grafana.com/docs
 - **Thanos**: https://thanos.io/
 - **Observability**: https://o11y.rocks/
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/49-monitoring-y-metricas/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/49-monitoring-y-metricas):
+
+```bash
+cd examples/49-monitoring-y-metricas
+go run .
+```
