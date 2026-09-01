@@ -1955,3 +1955,15 @@ Go no tiene "OOP" en sentido tradicional, pero logra polimorfismo real y elegant
 - [Standard Library: fmt package](https://pkg.go.dev/fmt)
 - [The Laws of Reflection](https://go.dev/blog/laws-of-reflection)
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/13-interfaces/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/13-interfaces):
+
+```bash
+cd examples/13-interfaces
+go run .
+```
