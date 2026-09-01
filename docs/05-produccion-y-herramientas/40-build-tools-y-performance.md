@@ -2344,3 +2344,15 @@ Go ofrece herramientas excepcionales para performance tunning. Con disciplina en
 - [Delve Debugger](https://github.com/go-delve/delve)
 - [Go Performance Book](https://golang.org/doc/diagnostics)
 - [benchstat tool](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat)
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/40-build-tools-y-performance/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/40-build-tools-y-performance):
+
+```bash
+cd examples/40-build-tools-y-performance
+go test -v -bench=. .
+```
