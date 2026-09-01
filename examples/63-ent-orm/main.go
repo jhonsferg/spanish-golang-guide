@@ -2,9 +2,9 @@
 // estilo de API fluida que `entc generate` produce automáticamente para
 // Ent a partir de un schema declarativo (ent/schema/persona.go en un
 // proyecto real). El código generado real de Ent es mucho más extenso
-// (miles de líneas por entidad); esto ilustra el PATRÓN —
+// (miles de líneas por entidad); esto ilustra el PATRÓN -
 // Client.Persona.Create().Set...().Save(ctx) y builders de consulta
-// encadenables — sin requerir el paso de generación de código.
+// encadenables - sin requerir el paso de generación de código.
 package main
 
 import (
