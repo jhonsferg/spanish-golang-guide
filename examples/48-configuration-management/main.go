@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 48: capas de configuración con precedencia
-// explícita — defaults < archivo < variables de entorno < flags — el
+// explícita - defaults < archivo < variables de entorno < flags - el
 // orden que usan la mayoría de las apps de producción en Go.
 package main
 
