@@ -1738,3 +1738,15 @@ Este capítulo demostró cómo construir un **microservicio production-ready en 
 
 **Total de líneas**: 1,900+ | **Tamaño**: ~45 KB
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/55-proyecto-integrado-ii-microservicio/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/55-proyecto-integrado-ii-microservicio):
+
+```bash
+cd examples/55-proyecto-integrado-ii-microservicio
+go run .
+```
