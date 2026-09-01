@@ -2036,3 +2036,15 @@ func main() {
 ---
 
 **Siguiente capítulo:** CAPÍTULO 16: INTERFACES - CONTRATOS IMPLÍCITOS Y POLIMORFISMO EN GO
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/15-sistema-de-tipos/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/15-sistema-de-tipos):
+
+```bash
+cd examples/15-sistema-de-tipos
+go run .
+```
