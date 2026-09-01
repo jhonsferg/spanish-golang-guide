@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 51: un CLI con subcomandos usando solo el
-// paquete estándar `flag` — el patrón detrás de herramientas como
+// paquete estándar `flag` - el patrón detrás de herramientas como
 // `go` o `git` antes de necesitar una librería como cobra.
 package main
 
