@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 50: consistent hashing — la técnica que usan
+// Ejemplo del Capítulo 50: consistent hashing - la técnica que usan
 // sistemas distribuidos (caches, bases de datos particionadas) para
 // repartir claves entre nodos sin remapear casi todo cuando un nodo
 // entra o sale.
@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// Quitar un nodo: solo las claves que apuntaban a ÉL se reasignan,
-	// no todas — esa es la ventaja frente a un hash % N ingenuo.
+	// no todas - esa es la ventaja frente a un hash % N ingenuo.
 	anillo.QuitarNodo("cache-2")
 
 	fmt.Println("--- después de quitar cache-2 ---")
