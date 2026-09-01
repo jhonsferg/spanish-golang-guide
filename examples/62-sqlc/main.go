@@ -1,5 +1,5 @@
 // Ejemplo del Capítulo 62: usar el código "generado por sqlc" (ver
-// sqlcgen/db.go) — funciones típadas por consulta, sin ORM, con el SQL
+// sqlcgen/db.go) - funciones típadas por consulta, sin ORM, con el SQL
 // crudo visible y versionado en query.sql.
 package main
 
