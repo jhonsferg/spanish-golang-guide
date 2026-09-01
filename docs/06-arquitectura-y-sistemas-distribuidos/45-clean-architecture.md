@@ -1985,3 +1985,15 @@ Clean Architecture en Go proporciona:
 
 Clean Architecture no es dogma, sino guidelines. Adapta a tu contexto, pero mantén los principios fundamentales.
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/45-clean-architecture/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/45-clean-architecture):
+
+```bash
+cd examples/45-clean-architecture
+go run .
+```
