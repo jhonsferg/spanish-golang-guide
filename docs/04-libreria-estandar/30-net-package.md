@@ -2709,3 +2709,15 @@ El `net` package de Go proporciona herramientas poderosas para la programación 
 Dominar estos conceptos es fundamental para construir aplicaciones distribuidas, APIs, microservicios y más.
 
 El siguiente capítulo explorará funcionalidad más avanzada como WebSockets, gRPC y protocolos personalizados construidos sobre estas bases.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/30-net-package/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/30-net-package):
+
+```bash
+cd examples/30-net-package
+go run .
+```
