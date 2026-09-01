@@ -1,4 +1,4 @@
-// Ejemplo del Capítulo 61: GORM con un driver SQLite puro-Go (sin cgo) —
+// Ejemplo del Capítulo 61: GORM con un driver SQLite puro-Go (sin cgo) -
 // modelos con asociaciones, AutoMigrate, Preload y soft delete, las
 // piezas que más se usan de este ORM en el día a día.
 package main
