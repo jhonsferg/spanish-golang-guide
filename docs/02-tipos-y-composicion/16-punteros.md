@@ -2376,3 +2376,15 @@ Go balances seguridad con flexibilidad mejor que C, pero requiere disciplina. Lo
 **Autor:** Guía Exhaustiva de Go en Español
 
 ---
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/16-punteros/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/16-punteros):
+
+```bash
+cd examples/16-punteros
+go run .
+```
