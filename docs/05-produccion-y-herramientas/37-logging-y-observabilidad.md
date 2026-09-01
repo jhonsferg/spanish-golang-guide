@@ -2381,3 +2381,15 @@ La observabilidad no es un bolsillo de la arquitectura de software: **es fundame
 - 🔀 **Contexto** para conectarlo todo
 
 Domina estos conceptos y tus aplicaciones serán transparentes, debuggeables y observables. En producción, eso es invaluable.
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/37-logging-y-observabilidad/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/37-logging-y-observabilidad):
+
+```bash
+cd examples/37-logging-y-observabilidad
+go run .
+```
