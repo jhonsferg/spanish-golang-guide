@@ -1081,3 +1081,15 @@ Crea programa que:
 
 ---
 
+
+---
+
+## Ejecuta este ejemplo
+
+Código fuente completo y verificado (`go build ./... && go vet ./...`) en
+[`examples/04-variables-constantes-y-tipos-basicos/`](https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/04-variables-constantes-y-tipos-basicos):
+
+```bash
+cd examples/04-variables-constantes-y-tipos-basicos
+go run .
+```
