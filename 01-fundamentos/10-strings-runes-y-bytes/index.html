@@ -1,0 +1,5690 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Guía completa de Go (Golang) en español, de fundamentos a producción.">
+      
+      
+        <meta name="author" content="jhonsferg">
+      
+      
+        <link rel="canonical" href="https://jhonsferg.github.io/spanish-golang-guide/01-fundamentos/10-strings-runes-y-bytes/">
+      
+      
+        <link rel="prev" href="../09-maps/">
+      
+      
+        <link rel="next" href="../mini-proyecto/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Capítulo 10: Strings, runes y bytes - Guía de Go en Español</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#capitulo-10-strings-runes-y-bytes" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../.." title="Guía de Go en Español" class="md-header__button md-logo" aria-label="Guía de Go en Español" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Guía de Go en Español
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Capítulo 10: Strings, runes y bytes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jhonsferg/spanish-golang-guide" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jhonsferg/spanish-golang-guide
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Guía de Go en Español" class="md-nav__button md-logo" aria-label="Guía de Go en Español" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Guía de Go en Español
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jhonsferg/spanish-golang-guide" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jhonsferg/spanish-golang-guide
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    I. Fundamentos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    I. Fundamentos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-introduccion-a-go/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 1: Introducción a Go - Filosofía, historia y diseño
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-instalacion-y-configuracion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 2: Instalación y configuración
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-primer-programa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 3: Tu primer programa - De Hello World a los conceptos fundamentales
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-variables-constantes-y-tipos-basicos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 4: Variables, constantes y tipos básicos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-operadores-y-expresiones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 5: Operadores y expresiones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-control-de-flujo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 6: Control de flujo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-funciones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 7: Funciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-arreglos-y-slices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 8: Arreglos y slices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-maps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 9: Maps - Colecciones clave-valor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 10: Strings, runes y bytes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 10: Strings, runes y bytes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#indice-del-capitulo-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Índice del Capítulo 10
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-las-tres-representaciones-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Las Tres Representaciones de Texto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Las Tres Representaciones de Texto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conceptos-fundamentales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conceptos Fundamentales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-visual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación Visual
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-strings-secuencias-inmutables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Strings - Secuencias Inmutables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 Strings - Secuencias Inmutables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un String?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#propiedades-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Propiedades de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#literals-de-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Literals de String
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-utf-8-encoding-el-estandar-de-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 UTF-8 Encoding - El Estándar de Go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 UTF-8 Encoding - El Estándar de Go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#por-que-utf-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Por Qué UTF-8?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codificacion-utf-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codificación UTF-8
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicacion-practica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implicación Práctica
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#104-runes-caracteres-unicode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Runes - Caracteres Unicode
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.4 Runes - Caracteres Unicode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-rune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un Rune?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conversion-string-runes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conversión String → Runes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterar-por-runes-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterar por Runes (Range)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#longitud-real-caracteres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Longitud Real (Caracteres)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#105-bytes-datos-binarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Bytes - Datos Binarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.5 Bytes - Datos Binarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un Byte?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice-de-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slice de Bytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modificar-bytes-no-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modificar Bytes (NO Strings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caso-real-procesar-datos-binarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caso Real: Procesar Datos Binarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#106-conversiones-entre-string-rune-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.6 Conversiones entre String, Rune, Byte
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.6 Conversiones entre String, Rune, Byte">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ []byte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-rune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ []rune
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#byte-vs-rune-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Byte vs Rune Conversión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-rendimiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación: Rendimiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#107-paquete-strings-operaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.7 Paquete strings - Operaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.7 Paquete strings - Operaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#busqueda-y-contiene" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Búsqueda y Contiene
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transformacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transformación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split-y-join" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Split y Join
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#has-prefixsuffix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Has Prefix/Suffix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#108-paquete-strconv-conversiones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.8 Paquete strconv - Conversiones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.8 Paquete strconv - Conversiones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-numeros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ Números
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ Bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manejo-de-errores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manejo de Errores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#109-expresiones-regulares" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.9 Expresiones Regulares
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.9 Expresiones Regulares">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introducción
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operaciones-comunes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operaciones Comunes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patrones-comunes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patrones Comunes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1010-buenas-practicas-con-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.10 Buenas Prácticas con Texto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.10 Buenas Prácticas con Texto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iterar-correctamente" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterar Correctamente
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contar-caracteres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contar Caracteres
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manipulacion-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manipulación de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validacion-de-entrada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validación de Entrada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalizacinnn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalizacinnn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-insensitive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case-Insensitive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice-de-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slice de String
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ejercicios-del-capitulo-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicios del Capítulo 10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ejercicios del Capítulo 10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-1-analizador-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 1: Analizador de Texto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-2-formateador-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 2: Formateador de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-3-validador-con-regex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 3: Validador con Regex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-4-codificadordecodificador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 4: Codificador/Decodificador
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-5-procesador-de-archivos-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 5: Procesador de Archivos de Texto
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ejecuta-este-ejemplo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejecuta este ejemplo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    II. Tipos y composición
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    II. Tipos y composición
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/11-structs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 11: Structs - Estructuras de datos personalizadas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/12-metodos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 12: Métodos - Funciones asociadas a tipos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/13-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 13: Interfaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/14-embedding-y-composicion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 14: Embedding y composición avanzada
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/15-sistema-de-tipos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 15: Sistema de tipos - Definiciones, aliases y assertions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/16-punteros/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 16: Punteros - Conceptos profundos y aritmética
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/17-manejo-de-errores/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 17: Manejo de errores
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/18-panic-y-recover/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 18: Panic y recover
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/19-defer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 19: Defer - Ejecución diferida y limpieza
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-tipos-y-composicion/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    III. Concurrencia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    III. Concurrencia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/20-paquetes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 20: Paquetes - Organización y reutilización de código
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/21-goroutines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 21: Goroutines - Concurrencia en Go
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/22-channels/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 22: Channels - Comunicación entre goroutines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/23-select/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 23: Select - Multiplexing de channels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/24-sync-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 24: Sync - Primitivas de sincronización
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/25-patrones-de-concurrencia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 25: Patrones de concurrencia
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-concurrencia/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IV. Librería estándar
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IV. Librería estándar
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/26-io-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 26: IO - Lectura y escritura de datos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/27-os-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 27: OS - Interacción con el sistema operativo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/28-strings-y-text/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 28: Strings y text - Manipulación de texto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/29-json-y-encoding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 29: JSON y encoding - Serialización de datos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/30-net-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 30: Net - Programación de red
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/31-time-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 31: Time - Manejo de tiempo y duraciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/32-math-y-numeros-aleatorios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 32: Math y números aleatorios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/33-reflect-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 33: Reflect - Introspección y metaprogramación
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/34-sort-y-collections/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 34: Sort y collections
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/35-hash-y-criptografia/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 35: Hash y criptografía
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-libreria-estandar/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    V. Producción y herramientas
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    V. Producción y herramientas
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/36-testing-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 36: Testing - Pruebas unitarias y benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/37-logging-y-observabilidad/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 37: Logging y observabilidad
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/38-http-avanzado/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 38: HTTP avanzado - Servidores web y APIs robustas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/39-database-y-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 39: Database y SQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/40-build-tools-y-performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 40: Build tools y performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-produccion-y-herramientas/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VI. Arquitectura y sistemas distribuidos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VI. Arquitectura y sistemas distribuidos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/41-microservicios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 41: Microservicios - Arquitectura distribuida
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/42-graphql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 42: GraphQL - APIs flexibles y eficientes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/43-websockets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 43: WebSockets - Comunicación en tiempo real
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/44-design-patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 44: Design patterns en Go
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/45-clean-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 45: Clean architecture - Diseño de sistemas escalables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/46-docker-y-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 46: Docker y containers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/47-kubernetes-basics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 47: Kubernetes básico - Orquestación de containers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/48-configuration-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 48: Configuration management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/49-monitoring-y-metricas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 49: Monitoring y métricas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/50-distributed-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 50: Distributed systems - Sistemas distribuidos a escala
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/51-cli-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 51: CLI tools - Herramientas de línea de comandos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/52-caching-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 52: Caching - Sistemas de caché en producción
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/53-job-queues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 53: Job queues - Colas de tareas asíncronas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-arquitectura-y-sistemas-distribuidos/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VII. Proyectos integrados
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VII. Proyectos integrados
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-proyectos-integrados/54-proyecto-integrado-i-api-rest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 54: Proyecto integrado I - API REST completa con base de datos y testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-proyectos-integrados/55-proyecto-integrado-ii-microservicio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 55: Proyecto integrado II - Microservicio completo con deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VIII. Frameworks web
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    VIII. Frameworks web
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/56-http-frameworks-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 56: HTTP frameworks - Comparativa de frameworks web
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/57-gin-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 57: Gin - Deep dive y producción
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/58-echo-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 58: Echo - Servidor web listo para producción
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/59-fiber-framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 59: Fiber - Velocidad e inspiración en Express.js
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/60-chi-router/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 60: Chi router - Ruteo ligero y componible
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-frameworks-web/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IX. Bases de datos y ORMs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IX. Bases de datos y ORMs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/61-gorm-orm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 61: GORM - Deep dive del ORM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/62-sqlc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 62: sqlc - SQL type-safe generado desde código
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/63-ent-orm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 63: Ent - Framework de entidades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/64-database-drivers-y-raw-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 64: Database drivers y SQL de bajo nivel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/65-mongodb-y-nosql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 65: MongoDB y NoSQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/66-caching-libraries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Capítulo 66: Caching - Librerías y soluciones
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../09-bases-de-datos-y-orms/mini-proyecto/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mini-proyecto
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../10-versiones-de-go/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versiones de Go
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_11" id="__nav_11_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Versiones de Go
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.18 (marzo 2022)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.19 (agosto 2022)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.20 (febrero 2023)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.21 (agosto 2023)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-22/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.22 (febrero 2024)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-23/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.23 (agosto 2024)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-24/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.24 (febrero 2025)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-25/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.25 (agosto 2025)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.26 (febrero 2026)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10-versiones-de-go/go-1-27/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go 1.27 (agosto 2026) - la versión actual
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recursos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Recursos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../11-recursos/buenas-practicas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Buenas prácticas - Cheatsheet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../11-recursos/glosario/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glosario
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../11-recursos/recursos-adicionales/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recursos adicionales
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#indice-del-capitulo-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Índice del Capítulo 10
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-las-tres-representaciones-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Las Tres Representaciones de Texto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Las Tres Representaciones de Texto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#conceptos-fundamentales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conceptos Fundamentales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-visual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación Visual
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-strings-secuencias-inmutables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Strings - Secuencias Inmutables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 Strings - Secuencias Inmutables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un String?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#propiedades-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Propiedades de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#literals-de-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Literals de String
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-utf-8-encoding-el-estandar-de-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 UTF-8 Encoding - El Estándar de Go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 UTF-8 Encoding - El Estándar de Go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#por-que-utf-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Por Qué UTF-8?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codificacion-utf-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codificación UTF-8
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicacion-practica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implicación Práctica
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#104-runes-caracteres-unicode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Runes - Caracteres Unicode
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.4 Runes - Caracteres Unicode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-rune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un Rune?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conversion-string-runes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conversión String → Runes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterar-por-runes-range" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterar por Runes (Range)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#longitud-real-caracteres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Longitud Real (Caracteres)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#105-bytes-datos-binarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Bytes - Datos Binarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.5 Bytes - Datos Binarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-un-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un Byte?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice-de-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slice de Bytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modificar-bytes-no-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modificar Bytes (NO Strings)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caso-real-procesar-datos-binarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caso Real: Procesar Datos Binarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#106-conversiones-entre-string-rune-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.6 Conversiones entre String, Rune, Byte
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.6 Conversiones entre String, Rune, Byte">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-byte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ []byte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-rune" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ []rune
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#byte-vs-rune-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Byte vs Rune Conversión
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion-rendimiento" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación: Rendimiento
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#107-paquete-strings-operaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.7 Paquete strings - Operaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.7 Paquete strings - Operaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#busqueda-y-contiene" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Búsqueda y Contiene
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transformacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transformación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split-y-join" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Split y Join
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparación
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#has-prefixsuffix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Has Prefix/Suffix
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#108-paquete-strconv-conversiones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.8 Paquete strconv - Conversiones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.8 Paquete strconv - Conversiones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-numeros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ Números
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-bool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String ↔ Bool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manejo-de-errores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manejo de Errores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#109-expresiones-regulares" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.9 Expresiones Regulares
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.9 Expresiones Regulares">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#introduccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introducción
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operaciones-comunes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operaciones Comunes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patrones-comunes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Patrones Comunes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1010-buenas-practicas-con-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.10 Buenas Prácticas con Texto
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.10 Buenas Prácticas con Texto">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iterar-correctamente" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterar Correctamente
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contar-caracteres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contar Caracteres
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manipulacion-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manipulación de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validacion-de-entrada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validación de Entrada
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalizacinnn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalizacinnn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-insensitive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case-Insensitive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice-de-string" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slice de String
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ejercicios-del-capitulo-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicios del Capítulo 10
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ejercicios del Capítulo 10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-1-analizador-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 1: Analizador de Texto
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-2-formateador-de-strings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 2: Formateador de Strings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-3-validador-con-regex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 3: Validador con Regex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-4-codificadordecodificador" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 4: Codificador/Decodificador
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejercicio-5-procesador-de-archivos-de-texto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejercicio 5: Procesador de Archivos de Texto
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ejecuta-este-ejemplo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejecuta este ejemplo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/jhonsferg/spanish-golang-guide/edit/main/docs/01-fundamentos/10-strings-runes-y-bytes.md" title="Editar esta página" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="capitulo-10-strings-runes-y-bytes">Capítulo 10: Strings, runes y bytes<a class="headerlink" href="#capitulo-10-strings-runes-y-bytes" title="Permanent link">&para;</a></h1>
+<h2 id="indice-del-capitulo-10">Índice del Capítulo 10<a class="headerlink" href="#indice-del-capitulo-10" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#101-las-tres-representaciones-de-texto">10.1 Las Tres Representaciones de Texto</a></li>
+<li><a href="#102-strings---secuencias-inmutables">10.2 Strings - Secuencias Inmutables</a></li>
+<li><a href="#103-utf-8-encoding---el-estándar-de-go">10.3 UTF-8 Encoding - El Estándar de Go</a></li>
+<li><a href="#104-runes---caracteres-unicode">10.4 Runes - Caracteres Unicode</a></li>
+<li><a href="#105-bytes---datos-binarios">10.5 Bytes - Datos Binarios</a></li>
+<li><a href="#106-conversiones-entre-string-rune-byte">10.6 Conversiones entre String, Rune, Byte</a></li>
+<li><a href="#107-paquete-strings---operaciones">10.7 Paquete strings - Operaciones</a></li>
+<li><a href="#108-paquete-strconv---conversiones">10.8 Paquete strconv - Conversiones</a></li>
+<li><a href="#109-expresiones-regulares">10.9 Expresiones Regulares</a></li>
+<li><a href="#1010-buenas-prácticas-con-texto">10.10 Buenas Prácticas con Texto</a></li>
+</ol>
+<hr />
+<h2 id="101-las-tres-representaciones-de-texto">10.1 Las Tres Representaciones de Texto<a class="headerlink" href="#101-las-tres-representaciones-de-texto" title="Permanent link">&para;</a></h2>
+<h3 id="conceptos-fundamentales">Conceptos Fundamentales<a class="headerlink" href="#conceptos-fundamentales" title="Permanent link">&para;</a></h3>
+<p>Go tiene <strong>tres formas diferentes</strong> de representar texto:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a> Tipo         │ Definición          │ Uso              │
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>clear
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a> string       │ Secuencia de BYTES  │ Texto (UTF-8)    │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> rune         │ Carácter UNICODE    │ Caracteres       │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> byte         │ Byte individual     │ Datos binarios   │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> []byte       │ Slice de bytes      │ Buffer binario   │
+</code></pre></div>
+<h3 id="comparacion-visual">Comparación Visual<a class="headerlink" href="#comparacion-visual" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Texto: "Hola 世"
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>String (internamente bytes en UTF-8):
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a> H    = 0x48     (1 byte)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> o    = 0x6F     (1 byte)
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a> l    = 0x6C     (1 byte)
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a> a    = 0x61     (1 byte)
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a> (space) = 0x20  (1 byte)
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a> 世   = 0xE4 0xB8 0x96  (3 bytes)
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>Total: 9 bytes
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>Runes (caracteres Unicode):
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a> 'H'   = U+0048
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a> 'o'   = U+006F
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a> 'l'   = U+006C
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a> 'a'   = U+0061
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a> ' '   = U+0020
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a> '世'  = U+4E16
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>Total: 6 runes
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>Bytes (individuales):
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>[0x48, 0x6F, 0x6C, 0x61, 0x20, 0xE4, 0xB8, 0x96]
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>Total: 9 bytes
+</code></pre></div>
+<hr />
+<h2 id="102-strings-secuencias-inmutables">10.2 Strings - Secuencias Inmutables<a class="headerlink" href="#102-strings-secuencias-inmutables" title="Permanent link">&para;</a></h2>
+<h3 id="que-es-un-string">¿Qué es un String?<a class="headerlink" href="#que-es-un-string" title="Permanent link">&para;</a></h3>
+<p>Un string es una <strong>secuencia inmutable de bytes</strong> encodificados en UTF-8:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span><span class="w">         </span><span class="c1">// 4 (BYTES, no caracteres)</span>
+</code></pre></div>
+<h3 id="propiedades-de-strings">Propiedades de Strings<a class="headerlink" href="#propiedades-de-strings" title="Permanent link">&para;</a></h3>
+<p><strong>Inmutabilidad:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'J'</span><span class="w">              </span><span class="c1">// ❌ ERROR: cannot assign to s[0]</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1">// Correcto: crear nuevo string</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nx">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Jola"</span><span class="w">              </span><span class="c1">// ✅ OK</span>
+</code></pre></div>
+<p><strong>Concatenación:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">s1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Mundo"</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nx">s3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">s2</span><span class="w">     </span><span class="c1">// "Hola Mundo"</span>
+</code></pre></div>
+<p><strong>Indexación (retorna byte):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w">       </span><span class="c1">// 72 (ASCII value de 'H')</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'H'</span><span class="p">)</span><span class="w">   </span><span class="c1">// false (72 ≠ 'H')</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kt">byte</span><span class="p">(</span><span class="sc">'H'</span><span class="p">))</span><span class="w">  </span><span class="c1">// true</span>
+</code></pre></div>
+<h3 id="literals-de-string">Literals de String<a class="headerlink" href="#literals-de-string" title="Permanent link">&para;</a></h3>
+<p><strong>String normal (interpretado):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola\nMundo"</span><span class="w">     </span><span class="c1">// \n se interpreta como newline</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1">// Output:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1">// Hola</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1">// Mundo</span>
+</code></pre></div>
+<p><strong>Raw string (literal):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">`Hola\nMundo`</span><span class="w">     </span><span class="c1">// \n es LITERAL, no newline</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1">// Output: Hola\nMundo</span>
+</code></pre></div>
+<p><strong>Caracteres especiales:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Línea 1\nLínea 2"</span><span class="w">      </span><span class="c1">// Newline</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Tabulación\tAquí"</span><span class="w">       </span><span class="c1">// Tab</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Comilla: \"Hola\""</span><span class="w">      </span><span class="c1">// Escape comillas</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Barra invertida: \\"</span><span class="w">    </span><span class="c1">// Escape barra</span>
+</code></pre></div>
+<h3 id="comparacion-de-strings">Comparación de Strings<a class="headerlink" href="#comparacion-de-strings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nx">s1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"apple"</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"apple"</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nx">s3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"banana"</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nx">s1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">s2</span><span class="w">                </span><span class="c1">// true</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nx">s1</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">s3</span><span class="w">                </span><span class="c1">// false</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nx">s1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">s3</span><span class="w">                 </span><span class="c1">// true (lexicográfico: a &lt; b)</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nx">s1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">s2</span><span class="w">                </span><span class="c1">// true</span>
+</code></pre></div>
+<hr />
+<h2 id="103-utf-8-encoding-el-estandar-de-go">10.3 UTF-8 Encoding - El Estándar de Go<a class="headerlink" href="#103-utf-8-encoding-el-estandar-de-go" title="Permanent link">&para;</a></h2>
+<h3 id="por-que-utf-8">¿Por Qué UTF-8?<a class="headerlink" href="#por-que-utf-8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>ASCII: Solo 127 caracteres (insuficiente para mundo)
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Latin-1: 256 caracteres (aún insuficiente)
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>UTF-16: 2-4 bytes por carácter (ineficiente para ASCII)
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>UTF-8 (GOLD STANDARD):
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a> Compatible con ASCII (ASCII = UTF-8 para 0-127)
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a> 1-4 bytes por carácter
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a> Autosincronizado (puedes buscar bytes válidos)
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a> Eficiente: caracteres comunes = 1-2 bytes
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a> Go usa UTF-8 por defecto
+</code></pre></div>
+<h3 id="codificacion-utf-8">Codificación UTF-8<a class="headerlink" href="#codificacion-utf-8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>U+0000 - U+007F (ASCII):
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    1 byte:   0xxxxxxx
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    Ejemplo: 'A' = 0x41
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>U+0080 - U+07FF:
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    2 bytes:  110xxxxx 10xxxxxx
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    Ejemplo: 'é' = 0xC3 0xA9
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>U+0800 - U+FFFF:
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    3 bytes:  1110xxxx 10xxxxxx 10xxxxxx
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    Ejemplo: '中' = 0xE4 0xB8 0xAD
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>U+10000 - U+10FFFF:
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    4 bytes:  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    Ejemplo: '😀' = 0xF0 0x9F 0x98 0x80
+</code></pre></div>
+<h3 id="implicacion-practica">Implicación Práctica<a class="headerlink" href="#implicacion-practica" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中"</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">                  </span><span class="c1">// 8 (bytes: H=1, o=1, l=1, a=1, sp=1, 中=3)</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="nb">len</span><span class="p">([]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span><span class="w">          </span><span class="c1">// 6 (caracteres: 5 ASCII + 1 chino)</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1">// ❌ Malo: iterar por índices</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%c\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span><span class="w">  </span><span class="c1">// Muestra bytes, no caracteres</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="p">}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="c1">// ✅ Bueno: iterar por runes</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%c\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span><span class="w">     </span><span class="c1">// Muestra caracteres correctos</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="104-runes-caracteres-unicode">10.4 Runes - Caracteres Unicode<a class="headerlink" href="#104-runes-caracteres-unicode" title="Permanent link">&para;</a></h2>
+<h3 id="que-es-un-rune">¿Qué es un Rune?<a class="headerlink" href="#que-es-un-rune" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">type</span><span class="w"> </span><span class="kt">rune</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">int32</span><span class="w">  </span><span class="c1">// Alias para int32</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1">// Rune representa un carácter Unicode</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="sc">'A'</span><span class="w">           </span><span class="c1">// Rune literal</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nx">r2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="sc">'中'</span><span class="w">         </span><span class="c1">// Rune Unicode</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nx">r3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="sc">'😀'</span><span class="w">         </span><span class="c1">// Rune Emoji</span>
+</code></pre></div>
+<h3 id="conversion-string-runes">Conversión String → Runes<a class="headerlink" href="#conversion-string-runes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中国"</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1">// Convertir a slice de runes</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nx">runes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">runes</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Índice %d: %c (U+%04X)\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="p">}</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="c1">// Output:</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="c1">// Índice 0: H (U+0048)</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="c1">// Índice 1: o (U+006F)</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="c1">// Índice 2: l (U+006C)</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="c1">// Índice 3: a (U+0061)</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="c1">// Índice 4:   (U+0020)</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="c1">// Índice 5: 中 (U+4E2D)</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="c1">// Índice 6: 国 (U+56FD)</span>
+</code></pre></div>
+<h3 id="iterar-por-runes-range">Iterar por Runes (Range)<a class="headerlink" href="#iterar-por-runes-range" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中"</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="c1">// range en string retorna (índice_byte, rune)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Byte %d: %c (tipo: %T)\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="p">}</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="c1">// Output:</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="c1">// Byte 0: H (tipo: int32)</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="c1">// Byte 1: o (tipo: int32)</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="c1">// Byte 2: l (tipo: int32)</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="c1">// Byte 3: a (tipo: int32)</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="c1">// Byte 4:   (tipo: int32)</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="c1">// Byte 5: 中 (tipo: int32)  ← Índice salta de 4 a 5 (aunque 中 es 3 bytes)</span>
+</code></pre></div>
+<h3 id="longitud-real-caracteres">Longitud Real (Caracteres)<a class="headerlink" href="#longitud-real-caracteres" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hello 世界😀"</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span><span class="w">                 </span><span class="c1">// 14 (bytes)</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">([]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)))</span><span class="w">         </span><span class="c1">// 8 (caracteres)</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">utf8</span><span class="p">.</span><span class="nx">RuneCountInString</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span><span class="w">  </span><span class="c1">// 8 (caracteres, más eficiente)</span>
+</code></pre></div>
+<hr />
+<h2 id="105-bytes-datos-binarios">10.5 Bytes - Datos Binarios<a class="headerlink" href="#105-bytes-datos-binarios" title="Permanent link">&para;</a></h2>
+<h3 id="que-es-un-byte">¿Qué es un Byte?<a class="headerlink" href="#que-es-un-byte" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kd">type</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">uint8</span><span class="w">  </span><span class="c1">// Alias para uint8</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1">// Byte individual</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">byte</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span><span class="w">       </span><span class="c1">// 65</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="w">      </span><span class="c1">// 65</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span><span class="w">  </span><span class="c1">// "A"</span>
+</code></pre></div>
+<h3 id="slice-de-bytes">Slice de Bytes<a class="headerlink" href="#slice-de-bytes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// Slice de bytes</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nx">datos</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">{</span><span class="mi">72</span><span class="p">,</span><span class="w"> </span><span class="mi">101</span><span class="p">,</span><span class="w"> </span><span class="mi">108</span><span class="p">,</span><span class="w"> </span><span class="mi">108</span><span class="p">,</span><span class="w"> </span><span class="mi">111</span><span class="p">}</span><span class="w">  </span><span class="c1">// "Hello"</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1">// Convertir a string</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">datos</span><span class="p">)</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">      </span><span class="c1">// Hello</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="c1">// Convertir string a bytes</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="nx">b2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">s2</span><span class="p">)</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">b2</span><span class="p">)</span><span class="w">     </span><span class="c1">// [72 111 108 97]</span>
+</code></pre></div>
+<h3 id="modificar-bytes-no-strings">Modificar Bytes (NO Strings)<a class="headerlink" href="#modificar-bytes-no-strings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// Strings son inmutables</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hello"</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'J'</span><span class="w">          </span><span class="c1">// ❌ ERROR</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// Bytes son mutables</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">)</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">'J'</span><span class="w">          </span><span class="c1">// ✅ OK</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span><span class="w">  </span><span class="c1">// Jello</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="c1">// Esto es común: convertir a bytes, modificar, convertir a string</span>
+</code></pre></div>
+<h3 id="caso-real-procesar-datos-binarios">Caso Real: Procesar Datos Binarios<a class="headerlink" href="#caso-real-procesar-datos-binarios" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">// Leer datos binarios de archivo</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nx">data</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">{</span><span class="mh">0x48</span><span class="p">,</span><span class="w"> </span><span class="mh">0x65</span><span class="p">,</span><span class="w"> </span><span class="mh">0x6C</span><span class="p">,</span><span class="w"> </span><span class="mh">0x6C</span><span class="p">,</span><span class="w"> </span><span class="mh">0x6F</span><span class="p">}</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1">// Procesar bytes</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0x41</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0x5A</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Byte %d es mayúscula: %c\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="106-conversiones-entre-string-rune-byte">10.6 Conversiones entre String, Rune, Byte<a class="headerlink" href="#106-conversiones-entre-string-rune-byte" title="Permanent link">&para;</a></h2>
+<h3 id="string-byte">String ↔ []byte<a class="headerlink" href="#string-byte" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1">// String → []byte</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola"</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">          </span><span class="c1">// [72 111 108 97]</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="c1">// []byte → String</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="w">         </span><span class="c1">// "Hola"</span>
+</code></pre></div>
+<h3 id="string-rune">String ↔ []rune<a class="headerlink" href="#string-rune" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// String → []rune</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中"</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">          </span><span class="c1">// ['H', 'o', 'l', 'a', ' ', '中']</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="c1">// []rune → String</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span><span class="w">         </span><span class="c1">// "Hola 中"</span>
+</code></pre></div>
+<h3 id="byte-vs-rune-conversion">Byte vs Rune Conversión<a class="headerlink" href="#byte-vs-rune-conversion" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1">// Byte → Rune (extender)</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">byte</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span><span class="w">           </span><span class="c1">// 65 (0x41)</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">rune</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="w">            </span><span class="c1">// 65 (U+0041 'A')</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="c1">// Rune → Byte (truncar si &gt; 255)</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="nx">r2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">rune</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span><span class="w">         </span><span class="c1">// U+00C8</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="nx">b2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">byte</span><span class="p">(</span><span class="nx">r2</span><span class="p">)</span><span class="w">          </span><span class="c1">// 200 (OK porque &lt; 256)</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="nx">r3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">rune</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span><span class="w">         </span><span class="c1">// U+012C</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="nx">b3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">byte</span><span class="p">(</span><span class="nx">r3</span><span class="p">)</span><span class="w">          </span><span class="c1">// 44 (truncado!)</span>
+</code></pre></div>
+<h3 id="comparacion-rendimiento">Comparación: Rendimiento<a class="headerlink" href="#comparacion-rendimiento" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>[]byte(s):   O(n) - copia datos
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>s[:]:        O(1) - no copia, vista
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>string(b):   O(n) - copia datos
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>b:           O(1) - ya está ahí
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>[]rune(s):   O(n) - decodifica UTF-8
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>s:           O(n) - acceder individual
+</code></pre></div>
+<hr />
+<h2 id="107-paquete-strings-operaciones">10.7 Paquete strings - Operaciones<a class="headerlink" href="#107-paquete-strings-operaciones" title="Permanent link">&para;</a></h2>
+<h3 id="busqueda-y-contiene">Búsqueda y Contiene<a class="headerlink" href="#busqueda-y-contiene" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"strings"</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola Mundo"</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Contains</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"Mundo"</span><span class="p">)</span><span class="w">        </span><span class="c1">// true</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">ContainsAny</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"abc"</span><span class="p">)</span><span class="w">       </span><span class="c1">// true (contiene 'a')</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Index</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"Mundo"</span><span class="p">)</span><span class="w">           </span><span class="c1">// 5</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">LastIndex</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"o"</span><span class="p">)</span><span class="w">           </span><span class="c1">// 8</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Count</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"o"</span><span class="p">)</span><span class="w">               </span><span class="c1">// 2</span>
+</code></pre></div>
+<h3 id="transformacion">Transformación<a class="headerlink" href="#transformacion" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">ToUpper</span><span class="p">(</span><span class="s">"hola"</span><span class="p">)</span><span class="w">             </span><span class="c1">// "HOLA"</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">ToLower</span><span class="p">(</span><span class="s">"HOLA"</span><span class="p">)</span><span class="w">             </span><span class="c1">// "hola"</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Title</span><span class="p">(</span><span class="s">"hola mundo"</span><span class="p">)</span><span class="w">         </span><span class="c1">// "Hola Mundo" (deprecated, usar cases)</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Trim</span><span class="p">(</span><span class="s">"  hola  "</span><span class="p">,</span><span class="w"> </span><span class="s">" "</span><span class="p">)</span><span class="w">       </span><span class="c1">// "hola"</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimPrefix</span><span class="p">(</span><span class="s">"prefijo_hola"</span><span class="p">,</span><span class="w"> </span><span class="s">"prefijo_"</span><span class="p">)</span><span class="w">  </span><span class="c1">// "hola"</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimSuffix</span><span class="p">(</span><span class="s">"hola_sufijo"</span><span class="p">,</span><span class="w"> </span><span class="s">"_sufijo"</span><span class="p">)</span><span class="w">    </span><span class="c1">// "hola"</span>
+</code></pre></div>
+<h3 id="split-y-join">Split y Join<a class="headerlink" href="#split-y-join" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1">// Dividir</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nx">partes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Split</span><span class="p">(</span><span class="s">"a,b,c"</span><span class="p">,</span><span class="w"> </span><span class="s">","</span><span class="p">)</span><span class="w">   </span><span class="c1">// ["a", "b", "c"]</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="c1">// Unir</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="nx">unidos</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span><span class="s">"a"</span><span class="p">,</span><span class="w"> </span><span class="s">"b"</span><span class="p">,</span><span class="w"> </span><span class="s">"c"</span><span class="p">},</span><span class="w"> </span><span class="s">","</span><span class="p">)</span><span class="w">  </span><span class="c1">// "a,b,c"</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="c1">// Split Fields (por espacios)</span>
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a><span class="nx">campos</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Fields</span><span class="p">(</span><span class="s">"hola  mundo  test"</span><span class="p">)</span><span class="w">  </span><span class="c1">// ["hola", "mundo", "test"]</span>
+</code></pre></div>
+<h3 id="replace">Replace<a class="headerlink" href="#replace" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"hola hola mundo"</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Replace</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"hola"</span><span class="p">,</span><span class="w"> </span><span class="s">"adiós"</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">      </span><span class="c1">// "adiós hola mundo" (1 reemplazo)</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Replace</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"hola"</span><span class="p">,</span><span class="w"> </span><span class="s">"adiós"</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w">     </span><span class="c1">// "adiós adiós mundo" (todos)</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">ReplaceAll</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="s">"hola"</span><span class="p">,</span><span class="w"> </span><span class="s">"adiós"</span><span class="p">)</span><span class="w">      </span><span class="c1">// "adiós adiós mundo"</span>
+</code></pre></div>
+<h3 id="comparacion">Comparación<a class="headerlink" href="#comparacion" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Compare</span><span class="p">(</span><span class="s">"abc"</span><span class="p">,</span><span class="w"> </span><span class="s">"abd"</span><span class="p">)</span><span class="w">       </span><span class="c1">// -1 (abc &lt; abd)</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Compare</span><span class="p">(</span><span class="s">"abc"</span><span class="p">,</span><span class="w"> </span><span class="s">"abc"</span><span class="p">)</span><span class="w">       </span><span class="c1">// 0 (iguales)</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">Compare</span><span class="p">(</span><span class="s">"abd"</span><span class="p">,</span><span class="w"> </span><span class="s">"abc"</span><span class="p">)</span><span class="w">       </span><span class="c1">// 1 (abd &gt; abc)</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">EqualFold</span><span class="p">(</span><span class="s">"HOLA"</span><span class="p">,</span><span class="w"> </span><span class="s">"hola"</span><span class="p">)</span><span class="w">   </span><span class="c1">// true (case-insensitive)</span>
+</code></pre></div>
+<h3 id="has-prefixsuffix">Has Prefix/Suffix<a class="headerlink" href="#has-prefixsuffix" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">HasPrefix</span><span class="p">(</span><span class="s">"archivo.txt"</span><span class="p">,</span><span class="w"> </span><span class="s">"archivo"</span><span class="p">)</span><span class="w">    </span><span class="c1">// true</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nx">strings</span><span class="p">.</span><span class="nx">HasSuffix</span><span class="p">(</span><span class="s">"archivo.txt"</span><span class="p">,</span><span class="w"> </span><span class="s">".txt"</span><span class="p">)</span><span class="w">       </span><span class="c1">// true</span>
+</code></pre></div>
+<hr />
+<h2 id="108-paquete-strconv-conversiones">10.8 Paquete strconv - Conversiones<a class="headerlink" href="#108-paquete-strconv-conversiones" title="Permanent link">&para;</a></h2>
+<h3 id="string-numeros">String ↔ Números<a class="headerlink" href="#string-numeros" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"strconv"</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="c1">// String → int</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">Atoi</span><span class="p">(</span><span class="s">"42"</span><span class="p">)</span><span class="w">              </span><span class="c1">// 42 (int)</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="nx">i64</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseInt</span><span class="p">(</span><span class="s">"42"</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">)</span><span class="w">    </span><span class="c1">// 42 (int64)</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="c1">// int → String</span>
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">Itoa</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span><span class="w">                   </span><span class="c1">// "42"</span>
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a><span class="nx">s64</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">FormatInt</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">        </span><span class="c1">// "42"</span>
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a><span class="c1">// String → float</span>
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseFloat</span><span class="p">(</span><span class="s">"3.14"</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">)</span><span class="w">  </span><span class="c1">// 3.14 (float64)</span>
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a>
+<a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a><span class="c1">// float → String</span>
+<a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">FormatFloat</span><span class="p">(</span><span class="mf">3.14</span><span class="p">,</span><span class="w"> </span><span class="sc">'f'</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">)</span><span class="w">  </span><span class="c1">// "3.14"</span>
+</code></pre></div>
+<h3 id="string-bool">String ↔ Bool<a class="headerlink" href="#string-bool" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseBool</span><span class="p">(</span><span class="s">"true"</span><span class="p">)</span><span class="w">       </span><span class="c1">// true</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nx">b2</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseBool</span><span class="p">(</span><span class="s">"1"</span><span class="p">)</span><span class="w">         </span><span class="c1">// true</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="nx">b3</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseBool</span><span class="p">(</span><span class="s">"false"</span><span class="p">)</span><span class="w">     </span><span class="c1">// false</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="nx">b4</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseBool</span><span class="p">(</span><span class="s">"0"</span><span class="p">)</span><span class="w">         </span><span class="c1">// false</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="c1">// Bool → String</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">FormatBool</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">           </span><span class="c1">// "true"</span>
+</code></pre></div>
+<h3 id="manejo-de-errores">Manejo de Errores<a class="headerlink" href="#manejo-de-errores" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strconv</span><span class="p">.</span><span class="nx">Atoi</span><span class="p">(</span><span class="s">"no es número"</span><span class="p">)</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Error:"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w">          </span><span class="c1">// Error: strconv.Atoi: parsing "...": invalid syntax</span>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="109-expresiones-regulares">10.9 Expresiones Regulares<a class="headerlink" href="#109-expresiones-regulares" title="Permanent link">&para;</a></h2>
+<h3 id="introduccion">Introducción<a class="headerlink" href="#introduccion" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"regexp"</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="c1">// Compilar patrón</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\d+`</span><span class="p">)</span><span class="w">     </span><span class="c1">// Números</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="c1">// Buscar</span>
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a><span class="k">if</span><span class="w"> </span><span class="nx">patron</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="s">"abc123def"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Contiene números"</span><span class="p">)</span>
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="operaciones-comunes">Operaciones Comunes<a class="headerlink" href="#operaciones-comunes" title="Permanent link">&para;</a></h3>
+<p><strong>MatchString - ¿Coincide el patrón?</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[a-z]+$`</span><span class="p">)</span><span class="w">  </span><span class="c1">// Solo letras minúsculas</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="nx">patron</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="s">"abc"</span><span class="p">)</span><span class="w">       </span><span class="c1">// true</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="nx">patron</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="s">"abc123"</span><span class="p">)</span><span class="w">    </span><span class="c1">// false</span>
+</code></pre></div>
+<p><strong>FindString - Primera coincidencia</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\d+`</span><span class="p">)</span><span class="w">     </span><span class="c1">// Números</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="nx">patron</span><span class="p">.</span><span class="nx">FindString</span><span class="p">(</span><span class="s">"abc123def456"</span><span class="p">)</span><span class="w">   </span><span class="c1">// "123"</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="nx">patron</span><span class="p">.</span><span class="nx">FindString</span><span class="p">(</span><span class="s">"abc"</span><span class="p">)</span><span class="w">            </span><span class="c1">// "" (no encontrado)</span>
+</code></pre></div>
+<p><strong>FindAllString - Todas las coincidencias</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\d+`</span><span class="p">)</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="nx">matches</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">patron</span><span class="p">.</span><span class="nx">FindAllString</span><span class="p">(</span><span class="s">"abc123def456"</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w">  </span><span class="c1">// ["123", "456"]</span>
+</code></pre></div>
+<p><strong>Replace - Reemplazar coincidencias</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\d+`</span><span class="p">)</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="nx">resultado</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">patron</span><span class="p">.</span><span class="nx">ReplaceAllString</span><span class="p">(</span><span class="s">"abc123def456"</span><span class="p">,</span><span class="w"> </span><span class="s">"X"</span><span class="p">)</span><span class="w">  </span><span class="c1">// "abcXdefX"</span>
+</code></pre></div>
+<h3 id="patrones-comunes">Patrones Comunes<a class="headerlink" href="#patrones-comunes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="c1">// Email simple</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`</span><span class="p">)</span>
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="c1">// URL</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`https?://[^\s]+`</span><span class="p">)</span>
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a>
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="c1">// Teléfono (formato 123-456-7890)</span>
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\d{3}-\d{3}-\d{4}`</span><span class="p">)</span>
+<a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a>
+<a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a><span class="c1">// Hexadecimal</span>
+<a id="__codelineno-39-11" name="__codelineno-39-11" href="#__codelineno-39-11"></a><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^#?[0-9a-fA-F]{6}$`</span><span class="p">)</span>
+<a id="__codelineno-39-12" name="__codelineno-39-12" href="#__codelineno-39-12"></a>
+<a id="__codelineno-39-13" name="__codelineno-39-13" href="#__codelineno-39-13"></a><span class="c1">// IPv4</span>
+<a id="__codelineno-39-14" name="__codelineno-39-14" href="#__codelineno-39-14"></a><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^(\d{1,3}\.){3}\d{1,3}$`</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="1010-buenas-practicas-con-texto">10.10 Buenas Prácticas con Texto<a class="headerlink" href="#1010-buenas-practicas-con-texto" title="Permanent link">&para;</a></h2>
+<h3 id="iterar-correctamente">Iterar Correctamente<a class="headerlink" href="#iterar-correctamente" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1">// ❌ Malo: itera por bytes</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中"</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span><span class="w">   </span><span class="c1">// Muestra bytes, confuso</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="p">}</span>
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="c1">// ✅ Bueno: itera por runes</span>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">r</span><span class="p">))</span><span class="w">  </span><span class="c1">// Muestra caracteres</span>
+<a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="contar-caracteres">Contar Caracteres<a class="headerlink" href="#contar-caracteres" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="c1">// ❌ Malo</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中"</span>
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="nx">count</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">         </span><span class="c1">// 8 (bytes, no caracteres)</span>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="c1">// ✅ Bueno</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a><span class="nx">count</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">([]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span><span class="w">  </span><span class="c1">// 6 (caracteres reales)</span>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a>
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a><span class="c1">// O más eficiente (Go 1.11+)</span>
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a><span class="kn">import</span><span class="w"> </span><span class="s">"unicode/utf8"</span>
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a><span class="nx">count</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">utf8</span><span class="p">.</span><span class="nx">RuneCountInString</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="w">  </span><span class="c1">// 6</span>
+</code></pre></div>
+<h3 id="manipulacion-de-strings">Manipulación de Strings<a class="headerlink" href="#manipulacion-de-strings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="c1">// Strings son inmutables, así que:</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hello"</span>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1">// ❌ Ineficiente: múltiples concatenaciones</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a><span class="w">    </span><span class="nx">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"X"</span><span class="w">         </span><span class="c1">// Crea nuevo string cada vez</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a><span class="p">}</span>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a>
+<a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a><span class="c1">// ✅ Eficiente: usar strings.Builder</span>
+<a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a><span class="kn">import</span><span class="w"> </span><span class="s">"strings"</span>
+<a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a>
+<a id="__codelineno-42-12" name="__codelineno-42-12" href="#__codelineno-42-12"></a><span class="kd">var</span><span class="w"> </span><span class="nx">sb</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Builder</span>
+<a id="__codelineno-42-13" name="__codelineno-42-13" href="#__codelineno-42-13"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-42-14" name="__codelineno-42-14" href="#__codelineno-42-14"></a><span class="w">    </span><span class="nx">sb</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="s">"X"</span><span class="p">)</span>
+<a id="__codelineno-42-15" name="__codelineno-42-15" href="#__codelineno-42-15"></a><span class="p">}</span>
+<a id="__codelineno-42-16" name="__codelineno-42-16" href="#__codelineno-42-16"></a><span class="nx">resultado</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sb</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="validacion-de-entrada">Validación de Entrada<a class="headerlink" href="#validacion-de-entrada" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"regexp"</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="kd">func</span><span class="w"> </span><span class="nx">esEmail</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="w">    </span><span class="nx">patron</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`</span><span class="p">)</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">patron</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="p">}</span>
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a>
+<a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a><span class="nx">esEmail</span><span class="p">(</span><span class="s">"usuario@example.com"</span><span class="p">)</span><span class="w">  </span><span class="c1">// true</span>
+<a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a><span class="nx">esEmail</span><span class="p">(</span><span class="s">"invalido@"</span><span class="p">)</span><span class="w">            </span><span class="c1">// false</span>
+</code></pre></div>
+<h3 id="normalizacinnn">Normalizacinnn<a class="headerlink" href="#normalizacinnn" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"strings"</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="kn">import</span><span class="w"> </span><span class="s">"unicode"</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+<a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="c1">// Minúsculas</span>
+<a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">ToLower</span><span class="p">(</span><span class="s">"HOLA"</span><span class="p">)</span><span class="w">    </span><span class="c1">// "hola"</span>
+<a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>
+<a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a><span class="c1">// Remover espacios</span>
+<a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimSpace</span><span class="p">(</span><span class="s">"  hola  "</span><span class="p">)</span><span class="w">  </span><span class="c1">// "hola"</span>
+<a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>
+<a id="__codelineno-44-10" name="__codelineno-44-10" href="#__codelineno-44-10"></a><span class="c1">// Remover caracteres especiales</span>
+<a id="__codelineno-44-11" name="__codelineno-44-11" href="#__codelineno-44-11"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Map</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="kt">rune</span><span class="p">)</span><span class="w"> </span><span class="kt">rune</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-44-12" name="__codelineno-44-12" href="#__codelineno-44-12"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">unicode</span><span class="p">.</span><span class="nx">IsLetter</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">unicode</span><span class="p">.</span><span class="nx">IsDigit</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-44-13" name="__codelineno-44-13" href="#__codelineno-44-13"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span>
+<a id="__codelineno-44-14" name="__codelineno-44-14" href="#__codelineno-44-14"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-44-15" name="__codelineno-44-15" href="#__codelineno-44-15"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">  </span><span class="c1">// Remover</span>
+<a id="__codelineno-44-16" name="__codelineno-44-16" href="#__codelineno-44-16"></a><span class="p">},</span><span class="w"> </span><span class="s">"Hol@-a"</span><span class="p">)</span><span class="w">  </span><span class="c1">// "Hola"</span>
+</code></pre></div>
+<h3 id="case-insensitive">Case-Insensitive<a class="headerlink" href="#case-insensitive" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">"strings"</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="nx">s1</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"HOLA"</span>
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"hola"</span>
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a><span class="k">if</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">EqualFold</span><span class="p">(</span><span class="nx">s1</span><span class="p">,</span><span class="w"> </span><span class="nx">s2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Iguales (ignorando mayúsculas)"</span><span class="p">)</span>
+<a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="slice-de-string">Slice de String<a class="headerlink" href="#slice-de-string" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola Mundo"</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="c1">// ❌ Peligroso si tiene UTF-8 no-ASCII</span>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="nx">sub</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="w">       </span><span class="c1">// "Hola" (OK porque son ASCII)</span>
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="c1">// Con caracteres multi-byte</span>
+<a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a><span class="nx">s2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"Hola 中国"</span>
+<a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a><span class="nx">sub2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span><span class="w">     </span><span class="c1">// Puede cortarse un carácter UTF-8</span>
+<a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>
+<a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a><span class="c1">// ✅ Mejor: convertir a runes</span>
+<a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a><span class="nx">runes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s2</span><span class="p">)</span>
+<a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a><span class="nx">sub3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">runes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span><span class="w">  </span><span class="c1">// "Hola" (correcto)</span>
+</code></pre></div>
+<hr />
+<h2 id="ejercicios-del-capitulo-10">Ejercicios del Capítulo 10<a class="headerlink" href="#ejercicios-del-capitulo-10" title="Permanent link">&para;</a></h2>
+<h3 id="ejercicio-1-analizador-de-texto">Ejercicio 1: Analizador de Texto<a class="headerlink" href="#ejercicio-1-analizador-de-texto" title="Permanent link">&para;</a></h3>
+<p>Crea programa que:</p>
+<ol>
+<li>Reciba texto</li>
+<li>Cuente palabras, caracteres (real), bytes</li>
+<li>Encuentre palabra más larga</li>
+<li>Calcule promedio de longitud de palabra</li>
+<li>Muestre histograma de frecuencia de caracteres</li>
+</ol>
+<h3 id="ejercicio-2-formateador-de-strings">Ejercicio 2: Formateador de Strings<a class="headerlink" href="#ejercicio-2-formateador-de-strings" title="Permanent link">&para;</a></h3>
+<p>Crea programa que:</p>
+<ol>
+<li>Implemente función <code>center(s string, width int) string</code></li>
+<li>Implemente <code>pad(s string, char rune, width int) string</code></li>
+<li>Implemente <code>repeat(s string, times int) string</code></li>
+<li>Implemente <code>reverse(s string) string</code></li>
+<li>Implemente <code>removeVowels(s string) string</code></li>
+</ol>
+<h3 id="ejercicio-3-validador-con-regex">Ejercicio 3: Validador con Regex<a class="headerlink" href="#ejercicio-3-validador-con-regex" title="Permanent link">&para;</a></h3>
+<p>Crea programa que valide:</p>
+<ol>
+<li>Email válido</li>
+<li>Teléfono formato 123-456-7890</li>
+<li>Contraseña: 8+ caracteres, al menos 1 mayúscula, 1 minúscula, 1 número</li>
+<li>URL vlida</li>
+<li>Código hexadecimal (#RRGGBB)</li>
+</ol>
+<h3 id="ejercicio-4-codificadordecodificador">Ejercicio 4: Codificador/Decodificador<a class="headerlink" href="#ejercicio-4-codificadordecodificador" title="Permanent link">&para;</a></h3>
+<p>Crea programa que:</p>
+<ol>
+<li>Implemente ROT13 (desplazar letras)</li>
+<li>Implemente cifrado de sustitución simple</li>
+<li>Implemente Base64 encoding/decoding</li>
+<li>Manaje caracteres especiales y espacios</li>
+<li>Valide entrada y salida</li>
+</ol>
+<h3 id="ejercicio-5-procesador-de-archivos-de-texto">Ejercicio 5: Procesador de Archivos de Texto<a class="headerlink" href="#ejercicio-5-procesador-de-archivos-de-texto" title="Permanent link">&para;</a></h3>
+<p>Crea programa que:</p>
+<ol>
+<li>Lea línea de archivo</li>
+<li>Cuente líneas, palabras, caracteres</li>
+<li>Encuentre línea más larga</li>
+<li>Reporte palabras únicas y su frecuencia</li>
+<li>Busque patrón regex en archivo</li>
+</ol>
+<hr />
+<p><strong>Fin del Capítulo 10</strong></p>
+<hr />
+<hr />
+<h2 id="ejecuta-este-ejemplo">Ejecuta este ejemplo<a class="headerlink" href="#ejecuta-este-ejemplo" title="Permanent link">&para;</a></h2>
+<p>Código fuente completo y verificado (<code>go build ./... &amp;&amp; go vet ./...</code>) en
+<a href="https://github.com/jhonsferg/spanish-golang-guide/tree/main/examples/10-strings-runes-y-bytes"><code>examples/10-strings-runes-y-bytes/</code></a>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="nb">cd</span><span class="w"> </span>examples/10-strings-runes-y-bytes
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>go<span class="w"> </span>run<span class="w"> </span>.
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/jhonsferg/spanish-golang-guide" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.top", "navigation.indexes", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
